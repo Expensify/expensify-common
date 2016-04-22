@@ -4,7 +4,9 @@
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "grunt package",
+    "package": "./package.sh"
   },
   "repository": {
     "type": "git",
