@@ -11,7 +11,7 @@ rm -rf dist
 mkdir dist
 
 echo Building...
-npm run package
+npm run build
 
 echo Committing build
 git add .
