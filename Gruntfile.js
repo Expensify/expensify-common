@@ -1,6 +1,7 @@
 const gruntTaskLoader = require('load-grunt-tasks');
 const eslintConfig = require('./grunt/configs/eslint');
-const babelConfig = require('./grunt/configs/babel');
+const uglifyConfig = require('./grunt/configs/uglify');
+const browserifyConfig = require('./grunt/configs/browserify');
 
 module.exports = function (grunt) {
     // Load all the grunt task plugin
@@ -9,7 +10,7 @@ module.exports = function (grunt) {
     // Specify our grunt config
     grunt.initConfig({
         eslint: eslintConfig,
-
-        babel: babelConfig
+        uglify: uglifyConfig,
+        browserify: browserifyConfig
     });
 };
