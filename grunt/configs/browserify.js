@@ -9,7 +9,7 @@ module.exports = {
             ]
         },
         files: {
-            './dist/index.js': ['./index.js']
+            './dist/index.<%= version %>.js': ['./index.js']
         }
     }
 };
