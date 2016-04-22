@@ -1,20 +1,23 @@
 {
-    "name": "js-libs",
-    "version": "0.0.0",
-    "description": "JavaScript libraries that are shared across different repos",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
-    },
-    "devDependencies": {
-        "eslint": "*",
-        "eslint-config-airbnb": "*",
-        "eslint-plugin-import": "*",
-        "eslint-plugin-jsx-a11y": "*",
-        "eslint-plugin-react": "*"
-    }
+  "name": "js-libs",
+  "version": "0.0.0",
+  "description": "JavaScript libraries that are shared across different repos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
+  },
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-config-airbnb": "*",
+    "eslint-plugin-import": "*",
+    "eslint-plugin-jsx-a11y": "*",
+    "eslint-plugin-react": "*",
+    "grunt": "*",
+    "grunt-eslint": "*",
+    "load-grunt-tasks": "*"
+  }
 }
