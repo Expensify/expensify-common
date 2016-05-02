@@ -1,6 +1,4 @@
 const eslintConfig = require('./configs/eslint');
-const uglifyConfig = require('./configs/uglify');
-const browserifyConfig = require('./configs/browserify');
 
 /**
  * This will load all of the configs in the `./configs` folder and add
@@ -11,9 +9,7 @@ const browserifyConfig = require('./configs/browserify');
  */
 module.exports = (grunt) => {
     grunt.initConfig({
-        eslint: eslintConfig,
-        uglify: uglifyConfig,
-        browserify: browserifyConfig
+        eslint: eslintConfig
     });
     return grunt;
 };
