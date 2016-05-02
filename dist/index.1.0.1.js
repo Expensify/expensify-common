@@ -20,9 +20,12 @@ var Str = exports.Str = _str2.default;
 var CONST = exports.CONST = _constants2.default;
 
 },{"./lib/constants":2,"./lib/str":3}],2:[function(require,module,exports){
-"use strict";
+'use strict';
 
 /* eslint-disable no-useless-escape */
+
+var emailBaseRegex = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
+
 module.exports = {
   REG_EXP: {
     /**
@@ -51,14 +54,14 @@ module.exports = {
      *
      * @type RegExp
      */
-    EMAIL_VALID: /^[\w\-\+\']+(?:\.[\w\-\+]+)*@(?:[\w\-]+\.)+[a-z]{2,}$/i,
+    EMAIL_VALID: new RegExp('^' + emailBaseRegex + '$', 'i'),
 
     /**
      * Regular expression to search for valid email addresses in a string
      *
      * @type RegExp
      */
-    EMAIL_SEARCH: /[\w\-\+\']+(?:\@[\w\-\+]+)?(?:\.[\w\-\+]+)*@(?:[\w\-]+\.)+[a-z]{2,}/i
+    EMAIL_SEARCH: new RegExp(emailBaseRegex, 'gi')
   }
 };
 
