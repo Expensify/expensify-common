@@ -4,7 +4,7 @@
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "grunt travis",
     "build": "grunt package",
     "package": "./package.sh"
   },
@@ -24,6 +24,7 @@
     "eslint-plugin-import": "*",
     "eslint-plugin-jsx-a11y": "*",
     "eslint-plugin-react": "*",
+    "glob": "*",
     "grunt": "*",
     "grunt-babel": "*",
     "grunt-browserify": "^5.0.0",
