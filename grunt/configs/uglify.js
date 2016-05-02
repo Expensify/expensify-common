@@ -5,7 +5,7 @@
 module.exports = {
     dist: {
         files: {
-            './dist/index.<%= version %>.min.js': ['./dist/index.<%= version %>.js']
+            './dist/index.min.js': ['./dist/index.js']
         }
     }
 };
