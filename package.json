@@ -3,6 +3,8 @@
   "version": "1.0.2",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "test": "grunt eslint",
     "build": "grunt eslint",
