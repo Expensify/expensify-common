@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -23,5 +23,8 @@
     "grunt": "*",
     "grunt-eslint": "*",
     "load-grunt-tasks": "*"
+  },
+  "browserify": {
+    "transform": [["babelify", { "presets": ["es2015", "react", "stage-0"] }]]
   }
 }
