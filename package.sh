@@ -8,10 +8,6 @@ read targetVersion
 
 sed -i -e 's/"version": "[0-9]*\.[0-9]*\.[0-9]*",/"version": "'$targetVersion'",/g' package.json
 
-echo Cleaning dist directory...
-rm -rf dist
-mkdir dist
-
 echo Building...
 npm run build
 
