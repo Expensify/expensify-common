@@ -3,7 +3,14 @@ This is a collection of JavaScript libraries which are used across multiple repo
 
 These libraries are provided as-is, and the repos which use them will need to do their own bundling, minifying, and uglifying.
 
-# Package a New Version
+# Installation
+
+1. Clone this repo to a directory of your choosing
+2. Run `npm install` to install all the dependencies
+3. Run `npm install grunt-cli -g` to install the Grunt CLI tool globally
+4. Send Florent a message on slack and thank him for getting these instructions added
+
+# Deploying a New Version
 
 ```
 npm run package
