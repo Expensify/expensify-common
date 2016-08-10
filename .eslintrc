@@ -14,10 +14,16 @@
         "consistent-return": 0,
         "consistent-this": [1, "self"],
         "func-names": 0,
+        "global-require": 0,
+        "import/no-unresolved": 0,
         // Enforce indentation of 4 spaces
         "indent": [2, 4],
+        "max-len": [1, {
+            "code": 120
+        }],
         "no-alert": 0,
         "object-curly-spacing": [2, "never"],
+        "prefer-template": 1,
         // Require space before function opening parenthesis
         "space-before-function-paren": [2, {
             "anonymous": "always",
@@ -41,6 +47,10 @@
         // Do not prevent missing React when using JSX
         "react/react-in-jsx-scope": 0,
         "react/jsx-indent-props": [2, 4],
+        "react/jsx-indent": [2, 4],
+        "react/prefer-es6-class": 1,
+        "react/prefer-stateless-function": 1,
+        "react/prop-types": 1,
 
         // Expensify legacy rules
         //
@@ -51,6 +61,7 @@
         //
         "new-cap": [1, {"newIsCap": true}],
         "no-param-reassign": 1,
+        "no-underscore-dangle": 1,
         "no-unused-vars": 1,
         "no-var": 1
     },
