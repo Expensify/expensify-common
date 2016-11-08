@@ -42,7 +42,7 @@
         //
         // React specific rules for ESLint.
         //
-        // Do not prevent multiple component definition per file
+        // Do not prevent multiple components definition per file
         "react/no-multi-comp": 0,
         // Do not prevent missing React when using JSX
         "react/react-in-jsx-scope": 0,
