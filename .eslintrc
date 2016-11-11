@@ -15,6 +15,8 @@
         "consistent-this": [1, "self"],
         "func-names": 0,
         "global-require": 0,
+        "import/no-dynamic-require": 0,
+        "import/no-extraneous-dependencies": 0,
         "import/no-unresolved": 0,
         // Enforce indentation of 4 spaces
         "indent": [2, 4],
@@ -22,6 +24,8 @@
             "code": 120
         }],
         "no-alert": 0,
+        "no-return-assign": 0,
+        "no-plusplus": 0,
         "object-curly-spacing": [2, "never"],
         "prefer-template": 1,
         // Require space before function opening parenthesis
@@ -51,6 +55,15 @@
         "react/prefer-es6-class": 1,
         "react/prefer-stateless-function": 1,
         "react/prop-types": 1,
+        // findDOMNode() will be an error, use refs instead
+        "react/no-find-dom-node": 1,
+        // This will only be a warning, to promote us to write better propTypes
+        "react/forbid-prop-types": 1,
+        // This is also a warning as its a best practice to not use strings, but its not being deprecated either
+        "react/no-string-refs": 1,
+
+        // Turn this off entirely because we like to click on things like <h3>s
+        "jsx-a11y/no-static-element-interactions": 0,
 
         // Expensify legacy rules
         //
@@ -60,10 +73,21 @@
         // back in to errors.
         //
         "new-cap": [1, {"newIsCap": true}],
+        "no-mixed-operators": [1, {
+            "groups": [
+                ['+', '-', '*', '/', '%', '**'],
+                ['&', '|', '^', '~', '<<', '>>', '>>>'],
+                ['==', '!=', '===', '!==', '>', '>=', '<', '<='],
+                ['&&', '||'],
+                ['in', 'instanceof']
+            ],
+            "allowSamePrecedence": false
+        }],
         "no-param-reassign": 1,
         "no-underscore-dangle": 1,
         "no-unused-vars": 1,
-        "no-var": 1
+        "no-var": 1,
+        "jsx-a11y/label-has-for": 1
     },
 
     "ecmaFeatures": {
