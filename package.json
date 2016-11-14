@@ -25,6 +25,20 @@
     "load-grunt-tasks": "*"
   },
   "browserify": {
-    "transform": [["babelify", { "presets": ["es2015", "react", "stage-0"] }]]
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015",
+            "react",
+            "stage-0"
+          ]
+        }
+      ]
+    ]
+  },
+  "dependencies": {
+    "classnames": "^2.2.5"
   }
 }
