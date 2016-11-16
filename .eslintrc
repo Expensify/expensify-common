@@ -50,6 +50,8 @@
         "react/no-multi-comp": 0,
         // Do not prevent missing React when using JSX
         "react/react-in-jsx-scope": 0,
+        // Allow .js files to use jsx
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
         "react/jsx-indent-props": [2, 4],
         "react/jsx-indent": [2, 4],
         "react/prefer-es6-class": 1,
