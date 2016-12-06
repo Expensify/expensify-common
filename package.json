@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
