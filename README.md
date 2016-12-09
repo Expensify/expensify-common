@@ -24,7 +24,9 @@ This will:
 Then you need to create a PR. Be sure to push the tags with your branch when you publish it. Example: `git push origin --tags`
 
 ## Versioning
-We use semantic versioning which you can read about at http://semver.org/.
+We use `<major>.<minor>.<patch>` versioning scheme.
+
+It might be a little tricky to know what the last version was. Instead of looking for the most recent tag in the repo, you should look for the most recent tag that was merged to `master`. This is because if there are multiple PRs open, you could be seeing a newer tag than the one last merged to `master`.
 
 # Development
 * Write all code as ES6.
