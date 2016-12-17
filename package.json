@@ -15,7 +15,6 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "devDependencies": {
-    "eslint": "3.9.1",
     "eslint-config-expensify": "*",
     "grunt": "*",
     "grunt-eslint": "*",
