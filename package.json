@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -15,11 +15,7 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "devDependencies": {
-    "eslint": "3.9.1",
-    "eslint-config-airbnb": "13.0.0",
-    "eslint-plugin-import": "2.1.0",
-    "eslint-plugin-jsx-a11y": "2.2.3",
-    "eslint-plugin-react": "6.6.0",
+    "eslint-config-expensify": "*",
     "grunt": "*",
     "grunt-eslint": "*",
     "load-grunt-tasks": "*"
