@@ -14,6 +14,3 @@ npm run build
 echo Committing build
 git add .
 git commit -m "build version $targetVersion"
-
-echo Tagging release...
-git tag -a "$targetVersion" -m "$targetVersion"

@@ -12,21 +12,14 @@ These libraries are provided as-is, and the repos which use them will need to do
 
 # Deploying a New Version
 
-```
-npm run package
-```
-
-This will:
-
-1. Increment the version in `package.json`
-1. Create a tag on the branch and commit the version change
-
-Then you need to create a PR. Be sure to push the tags with your branch when you publish it. Example: `git push origin --tags`
+1. Run `npm run package` to increment the version in `package.json`
+1. Create a PR for your branch
+2. Once the PR has been merged, get the commit SHA for the merge commit, and update the entry in `package.json` for web-expensify and web-secure to point to that hash
 
 ## Versioning
 We use `<major>.<minor>.<patch>` versioning scheme.
 
-It might be a little tricky to know what the last version was. Instead of looking for the most recent tag in the repo, you should look for the most recent tag that was merged to `master`. This is because if there are multiple PRs open, you could be seeing a newer tag than the one last merged to `master`.
+When choosing a version, keep other open PRs in mind and the order that they might get merged.
 
 # Development
 * Write all code as ES6.
@@ -35,3 +28,5 @@ It might be a little tricky to know what the last version was. Instead of lookin
 
 ## Testing your code while you are developing
 The best way to test your code while you are developing changes is to modify the source files in the `node_modules` directory of the project that includes this lib. When you are done, copy those changes to this repo and commit them.
+
+If you are the PR reviewer and want to test it out, you'll need to modify `package.json` in either web-expensify or web-secure to point to the last commit SHA in the PR.
