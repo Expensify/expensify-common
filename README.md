@@ -14,7 +14,7 @@ These libraries are provided as-is, and the repos which use them will need to do
 
 1. Run `npm run package` to increment the version in `package.json`
 1. Create a PR for your branch
-2. Once the PR has been merged, get the commit SHA for the merge commit from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for web-expensify and web-secure to point to that hash
+2. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for web-expensify and web-secure to point to that hash
 
 ## Versioning
 We use `<major>.<minor>.<patch>` versioning scheme.
