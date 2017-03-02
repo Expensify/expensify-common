@@ -1,6 +1,10 @@
 {
   "name": "js-libs",
+<<<<<<< HEAD
   "version": "1.7.17",
+=======
+  "version": "1.7.18",
+>>>>>>> master
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
