@@ -14,7 +14,7 @@ These libraries are provided as-is, and the repos which use them will need to do
 
 1. Run `npm run package` to increment the version in `package.json`
 1. Create a PR for your branch
-2. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for web-expensify and web-secure to point to that hash
+2. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for Web-Expensify and Web-Secure to point to that hash, and run `npm update js-libs`.
 
 ## Versioning
 We use `<major>.<minor>.<patch>` versioning scheme.
@@ -30,3 +30,5 @@ When choosing a version, keep other open PRs in mind and the order that they mig
 The best way to test your code while you are developing changes is to modify the source files in the `node_modules` directory of the project that includes this lib. When you are done, copy those changes to this repo and commit them.
 
 If you are the PR reviewer and want to test it out, you'll need to modify `package.json` in either web-expensify or web-secure to point to the last commit SHA in the PR.
+
+Once your JS-Libs PR is merged, you'll have to run `npm update js-libs` in Web-Expensify and Web-Secure to the new version to install (`npm i` won't pull the latest update)
