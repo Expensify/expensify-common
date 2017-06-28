@@ -31,4 +31,4 @@ The best way to test your code while you are developing changes is to modify the
 
 If you are the PR reviewer and want to test it out, you'll need to modify `package.json` in either web-expensify or web-secure to point to the last commit SHA in the PR.
 
-Once your JS-Libs PR is merged, you'll have to run `npm update js-libs` in Web-Expensify and Web-Secure to the new version to install (`npm i` won't pull the latest update)
+Once your JS-Libs PR is merged, you'll have to run `npm update js-libs` in Web-Expensify and Web-Secure to get the new version to install (`npm i` won't pull the latest update)
