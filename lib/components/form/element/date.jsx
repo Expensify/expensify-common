@@ -18,7 +18,7 @@ module.exports = class FormElementDate extends React.Component {
             onChange: PropTypes.func,
             maxDate: PropTypes.string,
             disabled: PropTypes.bool,
-            dateFormat: PropTypes.bool,
+            dateFormat: PropTypes.string,
 
             // This allows us to force update the form because the Datepicker
             // events don't fire properly for React to listen to them
