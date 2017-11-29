@@ -4,31 +4,37 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
-const propTypes = {
-    options: PropTypes.object,
-    id: PropTypes.string,
-    defaultValue: PropTypes.string,
-    value: PropTypes.string,
-    onChange: PropTypes.func,
-    maxDate: PropTypes.string,
-    disabled: PropTypes.bool,
-    dateFormat: PropTypes.bool,
-
-    // This allows us to force update the form because the Datepicker
-    // events don't fire properly for React to listen to them
-    forcedUpdate: PropTypes.func
-};
-
-const defaultProps = {
-    options: {},
-    onChange: () => {},
-    forcedUpdate: () => {},
-};
-
 /**
  * Form Element Date - Displays a jQuery UI datepicker
  */
-class FormElementDate extends React.Component {
+module.exports = class FormElementDate extends React.Component {
+
+    static get propTypes() {
+        return {
+            options: PropTypes.object,
+            id: PropTypes.string,
+            defaultValue: PropTypes.string,
+            value: PropTypes.string,
+            onChange: PropTypes.func,
+            maxDate: PropTypes.string,
+            disabled: PropTypes.bool,
+            dateFormat: PropTypes.bool,
+
+            // This allows us to force update the form because the Datepicker
+            // events don't fire properly for React to listen to them
+            forcedUpdate: PropTypes.func
+        }
+    };
+
+    static get defaultProps() {
+        return {
+            options: {},
+            onChange: () => {
+            },
+            forcedUpdate: () => {
+            },
+        }
+    };
 
     constructor(props) {
         super(props);
@@ -79,9 +85,4 @@ class FormElementDate extends React.Component {
             />
         );
     }
-}
-
-FormElementDate.propTypes = propTypes;
-FormElementDate.defaultProps = defaultProps;
-
-export default FormElementDate;
+};
