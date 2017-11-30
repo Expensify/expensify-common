@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "1.8.10",
+  "version": "1.8.11",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -17,7 +17,7 @@
   "devDependencies": {
     "eslint-config-expensify": "*",
     "grunt": "*",
-    "grunt-eslint": "19.0.0",
+    "grunt-eslint": "20.1.0",
     "load-grunt-tasks": "*"
   },
   "browserify": {
