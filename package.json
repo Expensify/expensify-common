@@ -17,7 +17,7 @@
   "devDependencies": {
     "eslint-config-expensify": "*",
     "grunt": "*",
-    "grunt-eslint": "19.0.0",
+    "grunt-eslint": "20.1.0",
     "load-grunt-tasks": "*"
   },
   "browserify": {
