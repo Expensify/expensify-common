@@ -72,6 +72,7 @@ module.exports =  window.CreateClass({
                 name={this.props.id}
                 className={this.props.className}
                 value={this.props.value}
+                placeholder={this.props.placeholder}
                 onChange={this.props.onChange}
                 type="text"
                 disabled={this.props.disabled}
