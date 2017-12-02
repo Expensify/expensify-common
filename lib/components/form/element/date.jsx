@@ -1,24 +1,22 @@
 /* globals React, ReactDOM */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
-
 /**
  * Form Element Date - Displays a jQuery UI datepicker
  */
-module.exports = class FormElementDate extends React.Component {
+module.exports =  window.CreateClass({
 
     static get propTypes() {
         return {
-            options: PropTypes.object,
-            id: PropTypes.string,
-            defaultValue: PropTypes.string,
-            value: PropTypes.string,
-            onChange: PropTypes.func,
-            maxDate: PropTypes.string,
-            disabled: PropTypes.bool,
-            dateFormat: PropTypes.string,
+            options: window.PropTypes.object,
+            id: window.PropTypes.string,
+            defaultValue: window.PropTypes.string,
+            value: window.PropTypes.string,
+            onChange: window.PropTypes.func,
+            maxDate: window.PropTypes.string,
+            disabled: window.PropTypes.bool,
+            placeholder: window.PropTypes.string,
+            dateFormat: window.PropTypes.string,
+            readOnly: window.PropTypes.bool,
 
             // This allows us to force update the form because the Datepicker
             // events don't fire properly for React to listen to them
@@ -35,10 +33,6 @@ module.exports = class FormElementDate extends React.Component {
             },
         }
     };
-
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         const $this = $(ReactDOM.findDOMNode(this));
@@ -81,7 +75,7 @@ module.exports = class FormElementDate extends React.Component {
                 onChange={this.props.onChange}
                 type="text"
                 disabled={this.props.disabled}
-                readOnly="true"
+                readOnly={this.props.readOnly}
             />
         );
     }
