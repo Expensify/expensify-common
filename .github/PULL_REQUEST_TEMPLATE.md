@@ -2,7 +2,8 @@
 
 [Explanation of the change or anything fishy that is going on]
 
-Fixes <issue_link>
+# Fixes
+<issue_link>
 
 # Tests
 1. What tests did you perform that validates your changed worked?
