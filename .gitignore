@@ -1,5 +1,6 @@
 /node_modules
+/.idea/*
 
 npm-debug.log
 package.json-e
-/.idea/*
+package-lock.json
