@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "1.8.25",
+  "version": "2.0.0",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -14,6 +14,9 @@
     "type": "git",
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
+  "dependencies": {
+    "classnames": "^2.2.5"
+  },
   "devDependencies": {
     "eslint-config-expensify": "*",
     "grunt": "*",
@@ -26,15 +29,12 @@
         "babelify",
         {
           "presets": [
-            "es2015",
+            "env",
             "react",
             "stage-0"
           ]
         }
       ]
     ]
-  },
-  "dependencies": {
-    "classnames": "^2.2.5"
   }
 }
