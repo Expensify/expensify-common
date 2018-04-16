@@ -390,12 +390,8 @@ module.exports = window.CreateClass({
         if (this.state.isDropdownOpen) {
             this.closeDropdown();
 
-            // Check if any value is allowed in to combobox
-            if (this.props.allowAnyValue) {
-                this.props.onChange(this.state.currentValue);
-            } else {
-                this.props.onChange('');
-            }
+            // Trigger a change so that inline editor knows to cancel itself
+            this.props.onChange(this.state.currentValue);
         } else {
             this.openDropdown();
         }
