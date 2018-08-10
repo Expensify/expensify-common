@@ -1,11 +1,12 @@
-@(reviewer), will you please review this?
+TAG_REVIEWER will you please review this?
 
 [Explanation of the change or anything fishy that is going on]
 
-# Fixes
-<issue_link>
+### Fixed Issues
+$ GH_LINK
 
 # Tests
+1. What unit/integration tests cover your change? What autoQA tests cover your change?
 1. What tests did you perform that validates your changed worked?
 
 # QA
