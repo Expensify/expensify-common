@@ -15,7 +15,9 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "dependencies": {
-    "classnames": "^2.2.5"
+    "classnames": "^2.2.5",
+    "react": "16.2.0",
+    "react-dom": "16.2.0"
   },
   "devDependencies": {
     "eslint-config-expensify": "*",
