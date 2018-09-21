@@ -17,7 +17,8 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "react": "16.2.0",
-    "react-dom": "16.2.0"
+    "react-dom": "16.2.0",
+    "underscore": "1.9.1"
   },
   "devDependencies": {
     "eslint-config-expensify": "*",
