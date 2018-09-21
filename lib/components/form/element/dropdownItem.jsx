@@ -77,4 +77,3 @@ DropDownItem.propTypes = propTypes;
 DropDownItem.defaultProps = defaultProps;
 
 export default DropDownItem;
-// module.exports = DropDownItem;
