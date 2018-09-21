@@ -16,9 +16,12 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
+    "lodash.get": "4.4.2",
+    "lodash.has": "4.5.2",
     "react": "16.2.0",
     "react-dom": "16.2.0",
-    "underscore": "1.9.1"
+    "underscore": "1.9.1",
+    "underscore.string": "3.3.4"
   },
   "devDependencies": {
     "eslint-config-expensify": "*",

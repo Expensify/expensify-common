@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import _ from 'underscore';
+import get from 'lodash.get';
+import has from 'lodash.has';
 import Str from '../../../str';
-import DropDown from '../element/dropdown';
+import DropDown from './dropdown';
 
 const propTypes = {
     // These are the elements to show in the dropdown
@@ -121,30 +123,30 @@ class Combobox extends React.Component {
         super(props);
 
         // Bind to our private methods
-        // this.getStartState = this.getStartState.bind(this);
-        // this.getTruncatedOptions = this.getTruncatedOptions.bind(this);
-        // this.getValue = this.getValue.bind(this);
-        // this.setValue = this.setValue.bind(this);
-        // this.setText = this.setText.bind(this);
-        // this.setDisabled = this.setDisabled.bind(this);
-        // this.setError = this.setError.bind(this);
-        // this.deselectCurrentOption = this.deselectCurrentOption.bind(this);
-        // this.switchFocusedIndex = this.switchFocusedIndex.bind(this);
-        // this.reset = this.reset.bind(this);
-        // this.resetFocusedElements = this.resetFocusedElements.bind(this);
-        // this.handleClickAway = this.handleClickAway.bind(this);
-        // this.resetClickAwayHandler = this.resetClickAwayHandler.bind(this);
-        // this.clearError = this.clearError.bind(this);
-        // this.toggleDropdown = this.toggleDropdown.bind(this);
+        this.getInitialState = this.getInitialState.bind(this);
+        this.getTruncatedOptions = this.getTruncatedOptions.bind(this);
+        this.getValue = this.getValue.bind(this);
+        this.setValue = this.setValue.bind(this);
+        this.setText = this.setText.bind(this);
+        this.setDisabled = this.setDisabled.bind(this);
+        this.setError = this.setError.bind(this);
+        this.deselectCurrentOption = this.deselectCurrentOption.bind(this);
+        this.switchFocusedIndex = this.switchFocusedIndex.bind(this);
+        this.reset = this.reset.bind(this);
+        this.resetFocusedElements = this.resetFocusedElements.bind(this);
+        this.handleClickAway = this.handleClickAway.bind(this);
+        this.resetClickAwayHandler = this.resetClickAwayHandler.bind(this);
+        this.clearError = this.clearError.bind(this);
+        this.toggleDropdown = this.toggleDropdown.bind(this);
         this.openDropdown = this.openDropdown.bind(this);
-        // this.closeDropdown = this.closeDropdown.bind(this);
-        // this.closeDropdownOnTabOut = this.closeDropdownOnTabOut.bind(this);
-        // this.stopEvent = this.stopEvent.bind(this);
-        // this.handleKeyDown = this.handleKeyDown.bind(this);
-        // this.performSearch = this.performSearch.bind(this);
-        // this.handleClick = this.handleClick.bind(this);
-        // this.createTooltips = this.createTooltips.bind(this);
-        // this.destroyTooltips = this.destroyTooltips.bind(this);
+        this.closeDropdown = this.closeDropdown.bind(this);
+        this.closeDropdownOnTabOut = this.closeDropdownOnTabOut.bind(this);
+        this.stopEvent = this.stopEvent.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.performSearch = this.performSearch.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.createTooltips = this.createTooltips.bind(this);
+        this.destroyTooltips = this.destroyTooltips.bind(this);
 
         this.options = this.props.options;
         const value = _.isUndefined(this.props.value) ? this.props.defaultValue || '' : this.props.value;
@@ -219,7 +221,7 @@ class Combobox extends React.Component {
         if (!_.isUndefined(nextProps.options)) {
             // If the options have an id property, we use that to compare them and determine if they changed, if not
             // we'll use the whole options array.
-            if (_.has(nextProps.options, '0.id')) {
+            if (has(nextProps.options, '0.id')) {
                 if (!_.isEqual(_.pluck(nextProps.options, 'id'), _.pluck(this.props.options, 'id')) || !_.isEqual(_.pluck(nextProps.alreadySelectedOptions, 'id'), _.pluck(this.props.alreadySelectedOptions, 'id'))) {
                     this.reset(false, nextProps.options, nextProps.alreadySelectedOptions);
                 }
@@ -316,7 +318,7 @@ class Combobox extends React.Component {
         // We need to look in `this.options` for the matching option because `this.state.options` is a truncated list
         // and might not have every option
         const optionMatchingVal = _.findWhere(this.options, {value: val});
-        const currentText = _.get(optionMatchingVal, 'text', '');
+        const currentText = get(optionMatchingVal, 'text', '');
 
         this.initialValue = val;
         this.setState({
@@ -556,101 +558,101 @@ class Combobox extends React.Component {
 
         // Handle the arrow keys
         switch (e.which) {
-        // Down - move focused selection down
-        case 40:
-            oldFocusedIndex = this.state.focusedIndex;
-            newFocusedIndex = oldFocusedIndex + 1;
+            // Down - move focused selection down
+            case 40:
+                oldFocusedIndex = this.state.focusedIndex;
+                newFocusedIndex = oldFocusedIndex + 1;
 
-            // Wrap around to the top of the list
-            if (newFocusedIndex > this.state.options.length - 1) {
-                newFocusedIndex = 0;
-            }
+                // Wrap around to the top of the list
+                if (newFocusedIndex > this.state.options.length - 1) {
+                    newFocusedIndex = 0;
+                }
 
-            this.switchFocusedIndex(oldFocusedIndex, newFocusedIndex);
-            this.setState({
-                focusedIndex: newFocusedIndex,
-                options: this.state.options,
-                isDropdownOpen: true
-            }, this.resetClickAwayHandler);
-            this.stopEvent(e);
-            break;
+                this.switchFocusedIndex(oldFocusedIndex, newFocusedIndex);
+                this.setState({
+                    focusedIndex: newFocusedIndex,
+                    options: this.state.options,
+                    isDropdownOpen: true
+                }, this.resetClickAwayHandler);
+                this.stopEvent(e);
+                break;
 
-        // Up - move focused selection up
-        case 38:
-            oldFocusedIndex = this.state.focusedIndex;
-            newFocusedIndex = oldFocusedIndex - 1;
+            // Up - move focused selection up
+            case 38:
+                oldFocusedIndex = this.state.focusedIndex;
+                newFocusedIndex = oldFocusedIndex - 1;
 
-            // Wrap around to the bottom of the list
-            if (newFocusedIndex < 0) {
-                newFocusedIndex = this.state.options.length - 1;
-            }
+                // Wrap around to the bottom of the list
+                if (newFocusedIndex < 0) {
+                    newFocusedIndex = this.state.options.length - 1;
+                }
 
-            this.switchFocusedIndex(oldFocusedIndex, newFocusedIndex);
-            this.setState({
-                focusedIndex: newFocusedIndex,
-                options: this.state.options,
-                isDropdownOpen: true
-            }, this.resetClickAwayHandler);
-            this.stopEvent(e);
-            break;
+                this.switchFocusedIndex(oldFocusedIndex, newFocusedIndex);
+                this.setState({
+                    focusedIndex: newFocusedIndex,
+                    options: this.state.options,
+                    isDropdownOpen: true
+                }, this.resetClickAwayHandler);
+                this.stopEvent(e);
+                break;
 
-        // Enter - set selection
-        case 13: {
-            if (!this.state.isDropdownOpen) {
-                return;
-            }
+            // Enter - set selection
+            case 13: {
+                if (!this.state.isDropdownOpen) {
+                    return;
+                }
 
-            // Don't select disabled things
-            if (this.state.options[this.state.focusedIndex].disabled) {
+                // Don't select disabled things
+                if (this.state.options[this.state.focusedIndex].disabled) {
+                    break;
+                }
+                this.deselectCurrentOption();
+
+                currentValue = this.state.options[this.state.focusedIndex].value;
+                currentText = this.state.options[this.state.focusedIndex].text;
+
+                // if allowAnyValue is true and currentValue is absent then set it manually to what the user has entered
+                if (!currentValue && this.props.allowAnyValue) {
+                    currentValue = e.target.value;
+                    currentText = currentValue;
+                }
+
+                this.setState({
+                    options: this.getTruncatedOptions(currentValue),
+                    selectedIndex: this.state.focusedIndex,
+                    currentValue,
+                    currentText,
+                    isDropdownOpen: false
+                }, () => {
+                    this.resetClickAwayHandler();
+                    this.destroyTooltips();
+                });
+
+                // Fire our onChange callback
+                this.props.onChange(currentValue);
+                this.initialValue = currentValue;
+
+                this.stopEvent(e);
                 break;
             }
-            this.deselectCurrentOption();
 
-            currentValue = this.state.options[this.state.focusedIndex].value;
-            currentText = this.state.options[this.state.focusedIndex].text;
+            // Tab & Escape - clear selection
+            case 9:
+            case 27:
+                this.reset(true);
 
-            // if allowAnyValue is true and currentValue is absent then set it manually to what the user has entered
-            if (!currentValue && this.props.allowAnyValue) {
-                currentValue = e.target.value;
-                currentText = currentValue;
-            }
+                // Fire our onChange callback
+                this.props.onChange(this.initialValue || this.props.value || this.props.defaultValue);
 
-            this.setState({
-                options: this.getTruncatedOptions(currentValue),
-                selectedIndex: this.state.focusedIndex,
-                currentValue,
-                currentText,
-                isDropdownOpen: false
-            }, () => {
-                this.resetClickAwayHandler();
-                this.destroyTooltips();
-            });
+                // Stop the event from propagating if the escape key is pressed
+                if (e.which === 27) {
+                    this.stopEvent(e);
+                    this.destroyTooltips();
+                }
+                break;
 
-            // Fire our onChange callback
-            this.props.onChange(currentValue);
-            this.initialValue = currentValue;
-
-            this.stopEvent(e);
-            break;
-        }
-
-        // Tab & Escape - clear selection
-        case 9:
-        case 27:
-            this.reset(true);
-
-            // Fire our onChange callback
-            this.props.onChange(this.initialValue || this.props.value || this.props.defaultValue);
-
-            // Stop the event from propagating if the escape key is pressed
-            if (e.which === 27) {
-                this.stopEvent(e);
-                this.destroyTooltips();
-            }
-            break;
-
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -775,9 +777,9 @@ class Combobox extends React.Component {
             selectedIndex: newSelectedIndex,
             focusedIndex: newSelectedIndex,
             currentValue: selectedValue,
-            currentText: _.get(currentlySelectedOption, 'text', ''),
+            currentText: get(currentlySelectedOption, 'text', ''),
             isDropdownOpen: false,
-            hasError: _.get(currentlySelectedOption, 'hasError', false)
+            hasError: get(currentlySelectedOption, 'hasError', false)
         }, () => {
             this.resetClickAwayHandler();
             this.destroyTooltips();

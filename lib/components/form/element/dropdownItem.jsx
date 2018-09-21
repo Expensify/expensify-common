@@ -9,7 +9,6 @@ import Str from '../../../str';
 const propTypes = {
     // The function to be called when this item is being clicked
     onClick: PropTypes.func.isRequired,
-
     // The value of the option, should be unique
     value: PropTypes.any.isRequired,
     // The human readable text of the option

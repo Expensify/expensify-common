@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import _ from 'underscore';
-import DropDownItem from '../element/dropdownItem';
+import DropDownItem from './dropdownItem';
 
 const propTypes = {
     // These are the elements to show in the dropdown
