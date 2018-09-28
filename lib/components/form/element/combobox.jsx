@@ -123,7 +123,7 @@ class Combobox extends React.Component {
         super(props);
 
         // Bind to our private methods
-        this.getInitialState = this.getInitialState.bind(this);
+        this.getStartState = this.getStartState.bind(this);
         this.getTruncatedOptions = this.getTruncatedOptions.bind(this);
         this.getValue = this.getValue.bind(this);
         this.setValue = this.setValue.bind(this);
@@ -178,7 +178,7 @@ class Combobox extends React.Component {
      *
      * @returns {Object}
      */
-    getInitialState(noDefaultValue, newOptions, newAlreadySelectedOptions) {
+    getStartState(noDefaultValue, newOptions, newAlreadySelectedOptions) {
         this.options = newOptions || this.props.options;
 
         const value = _.isUndefined(this.props.value) ? this.props.defaultValue || '' : this.props.value;
@@ -228,6 +228,18 @@ class Combobox extends React.Component {
             } else if (!_.isEqual(nextProps.options, this.props.options) || !_.isEqual(nextProps.alreadySelectedOptions, this.props.alreadySelectedOptions)) {
                 this.reset(false, nextProps.options, nextProps.alreadySelectedOptions);
             }
+        }
+
+        if (!_.isUndefined(nextProps.openOnInit) && !_.isEqual(nextProps.openOnInit, this.props.openOnInit)) {
+            this.setState({
+                isDropdownOpen: this.props.openOnInit
+            });
+        }
+
+        if (!_.isUndefined(nextProps.isDisabled) && !_.isEqual(nextProps.isDisabled, this.props.isDisabled)) {
+            this.setState({
+                isDisabled: this.props.isReadOnly
+            });
         }
     }
 
@@ -397,7 +409,7 @@ class Combobox extends React.Component {
         if (newOptions) {
             this.options = newOptions;
         }
-        const state = this.getInitialState(noDefaultValue, this.options, newAlreadySelectedOptions);
+        const state = this.getStartState(noDefaultValue, this.options, newAlreadySelectedOptions);
         this.setState(state, () => this.props.onDropdownStateChange(Boolean(state.isDropdownOpen)));
     }
 
