@@ -20,8 +20,7 @@
     "lodash.has": "4.5.2",
     "react": "16.2.0",
     "react-dom": "16.2.0",
-    "underscore": "1.9.1",
-    "underscore.string": "3.3.4"
+    "underscore": "1.9.1"
   },
   "devDependencies": {
     "eslint-config-expensify": "*",

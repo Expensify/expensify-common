@@ -86,7 +86,11 @@ const propTypes = {
     placeholder: PropTypes.string,
 
     // An array of extra classes to put on the combobox
-    extraClasses: PropTypes.arrayOf(PropTypes.string),
+    extraClasses: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.array,
+        PropTypes.object,
+    ]),
 
     // This makes this component hidden till someone manually calls openDropdown
     hideUntilManuallyOpened: PropTypes.bool,
