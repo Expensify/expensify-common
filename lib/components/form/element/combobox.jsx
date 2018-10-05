@@ -101,7 +101,7 @@ const propTypes = {
 
 const defaultProps = {
     defaultValue: '',
-    value: '',
+    value: undefined,
     onChange: () => {},
     onClear: () => {},
     onDropdownStateChange: () => {},

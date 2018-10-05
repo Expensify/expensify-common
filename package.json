@@ -15,7 +15,7 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "dependencies": {
-    "classnames": "^2.2.5",
+    "classnames": "2.2.5",
     "lodash.get": "4.4.2",
     "lodash.has": "4.5.2",
     "react": "16.2.0",
