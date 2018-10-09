@@ -1,6 +1,6 @@
 {
   "name": "js-libs",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "JavaScript libraries that are shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -15,7 +15,12 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "dependencies": {
-    "classnames": "^2.2.5"
+    "classnames": "2.2.5",
+    "lodash.get": "4.4.2",
+    "lodash.has": "4.5.2",
+    "react": "16.2.0",
+    "react-dom": "16.2.0",
+    "underscore": "1.9.1"
   },
   "devDependencies": {
     "eslint-config-expensify": "*",
