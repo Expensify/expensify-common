@@ -1,45 +1,45 @@
 {
-    "name": "js-libs",
-    "version": "2.3.8",
-    "description": "JavaScript libraries that are shared across different repos",
-    "main": "index.js",
-    "license": "UNLICENSED",
-    "private": true,
-    "scripts": {
-        "test": "grunt eslint",
-        "build": "grunt eslint",
-        "package": "./package.sh"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
-    },
-    "dependencies": {
-        "classnames": "2.2.5",
-        "lodash.get": "4.4.2",
-        "lodash.has": "4.5.2",
-        "react": "16.2.0",
-        "react-dom": "16.2.0",
-        "underscore": "1.9.1"
-    },
-    "devDependencies": {
-        "eslint-config-expensify": "*",
-        "grunt": "*",
-        "grunt-eslint": "20.1.0",
-        "load-grunt-tasks": "*"
-    },
-    "browserify": {
-        "transform": [
-            [
-                "babelify",
-                {
-                    "presets": [
-                        "env",
-                        "react",
-                        "stage-0"
-                    ]
-                }
-            ]
-        ]
-    }
+  "name": "js-libs",
+  "version": "2.3.8",
+  "description": "JavaScript libraries that are shared across different repos",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "test": "grunt eslint",
+    "build": "grunt eslint",
+    "package": "./package.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
+  },
+  "dependencies": {
+    "classnames": "2.2.5",
+    "lodash.get": "4.4.2",
+    "lodash.has": "4.5.2",
+    "react": "16.2.0",
+    "react-dom": "16.2.0",
+    "underscore": "1.9.1"
+  },
+  "devDependencies": {
+    "eslint-config-expensify": "*",
+    "grunt": "*",
+    "grunt-eslint": "20.1.0",
+    "load-grunt-tasks": "*"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "env",
+            "react",
+            "stage-0"
+          ]
+        }
+      ]
+    ]
+  }
 }
