@@ -26,7 +26,8 @@
     "eslint-config-expensify": "*",
     "grunt": "*",
     "grunt-eslint": "20.1.0",
-    "load-grunt-tasks": "*"
+    "load-grunt-tasks": "*",
+    "moment": "^2.22.2"
   },
   "browserify": {
     "transform": [
