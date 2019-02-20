@@ -6,22 +6,30 @@ import {exists} from './utils';
  *
  * A simple publisher subscriber system for async / decouple/ cross module communication
  */
+
+const eventMap = {};
+
+// Used to generate the uniq id of the event
+let counter = 0;
+
+/**
+ * Create a unique ID for each event subscriber
+ * @param {String} eventName Name of the event to listen to
+ * @return {String} unique ID
+ */
+const generateID = (eventName) => {
+    counter++;
+    return `${eventName}@#@${counter}`;
+};
+
+/**
+* Find the name of the event from the ID
+* @param {string} eventID
+* @return {String}
+*/
+const extractEventName = eventID => eventID.substr(0, eventID.indexOf('@#@'));
+
 module.exports = {
-    eventMap: {},
-
-    // Used to generate the uniq id of the event
-    counter: 0,
-
-    /**
-     * Create a unique ID for each event subscriber
-     * @param {String} eventName Name of the event to listen to
-     * @return {String} unique ID
-     */
-    _generateID(eventName) {
-        this.counter++;
-        return `${eventName}@#@${this.counter}`;
-    },
-
     /**
      * Publish an event
      *
@@ -29,15 +37,15 @@ module.exports = {
      * @param {Object} [para] Parameters to send with the event, send to the callback
      */
     publish(eventName, para) {
-        if (this.eventMap[eventName] === undefined) {
+        if (eventMap[eventName] === undefined) {
             return;
         }
 
         const param = para || {};
-        const eventIDs = _.keys(this.eventMap[eventName]);
+        const eventIDs = _.keys(eventMap[eventName]);
 
         _.each(eventIDs, (eventID) => {
-            const subscriber = this.eventMap[eventName][eventID];
+            const subscriber = eventMap[eventName][eventID];
             if (subscriber) {
                 subscriber.callback.call(subscriber.scope, param);
             }
@@ -77,13 +85,13 @@ module.exports = {
 
         const callback = _.isFunction(optionalCallback) ? optionalCallback : () => {};
         const scope = _.isObject(optionalScope) ? optionalScope : window;
-        const eventID = this.generateID(eventName);
+        const eventID = generateID(eventName);
 
-        if (this.eventMap[eventName] === undefined) {
-            this.eventMap[eventName] = {};
+        if (eventMap[eventName] === undefined) {
+            eventMap[eventName] = {};
         }
 
-        this.eventMap[eventName][eventID] = {
+        eventMap[eventName][eventID] = {
             callback,
             scope
         };
@@ -99,19 +107,10 @@ module.exports = {
     unsubscribe(bindID) {
         const IDs = _.isArray(bindID) ? bindID : [bindID];
         _.each(IDs, (id) => {
-            const eventName = this.extractEventName(id);
-            if (exists(this.eventMap[eventName][id])) {
-                delete this.eventMap[eventName][id];
+            const eventName = extractEventName(id);
+            if (exists(eventMap[eventName][id])) {
+                delete eventMap[eventName][id];
             }
         });
-    },
-
-    /**
-    * Find the name of the event from the ID
-    * @param {string} eventID
-    * @return {String}
-    */
-    extractEventName(eventID) {
-        return eventID.substr(0, eventID.indexOf('@#@'));
     }
 };
