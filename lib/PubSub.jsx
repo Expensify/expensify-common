@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import {exists} from './utils';
+import has from 'lodash.has';
 
 /**
  * PubSub
@@ -108,7 +108,7 @@ module.exports = {
         const IDs = _.isArray(bindID) ? bindID : [bindID];
         _.each(IDs, (id) => {
             const eventName = extractEventName(id);
-            if (exists(eventMap[eventName][id])) {
+            if (has(eventMap, `${eventName}.${id}`)) {
                 delete eventMap[eventName][id];
             }
         });
