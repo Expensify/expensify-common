@@ -9,17 +9,15 @@ import PubSub from './PubSub';
  * @param {Function} callback Function to fire
  * @constructor
  */
-module.exports = (eventName, callback) => {
-    this.id = null;
-    this.eventName = eventName;
-    this.callback = callback;
+module.exports = function (eventName, callback) {
+    let id = null;
     return {
-        subscribe: (scope) => {
-            this.id = PubSub.subscribe(this.eventName, this.callback, scope);
+        subscribe(scope) {
+            id = PubSub.subscribe(eventName, callback, scope);
         },
-        unsubscribe: () => {
-            PubSub.unsubscribe(this.id);
-            this.id = null;
+        unsubscribe() {
+            PubSub.unsubscribe(id);
+            id = null;
         }
     };
 };
