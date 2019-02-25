@@ -34,14 +34,13 @@ module.exports = {
      * Publish an event
      *
      * @param {String} eventName Name of the event to fire
-     * @param {Object} [para] Parameters to send with the event, send to the callback
+     * @param {Object} [param] Parameters to send with the event, send to the callback
      */
-    publish(eventName, para) {
+    publish(eventName, param = {}) {
         if (eventMap[eventName] === undefined) {
             return;
         }
 
-        const param = para || {};
         const eventIDs = _.keys(eventMap[eventName]);
 
         _.each(eventIDs, (eventID) => {
