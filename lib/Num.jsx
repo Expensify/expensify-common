@@ -74,14 +74,14 @@ module.exports = {
             h = f[0];
             f[0] = '';
             for (j = 3; j < h.length; j += 3) {
-                i = h.slice(h.length - j, h.length - (j + 3));
+                i = h.slice(h.length - j, h.length - j + 3);
                 f[0] = `${d}${i}${f[0]}`;
             }
             j = h.substr(0, (h.length % 3 === 0) ? 3 : (h.length % 3));
             f[0] = j + f[0];
         }
         c = (b <= 0) ? '' : c;
-        return sign + f[0] + c + f[1];
+        return `${sign}${f[0]}${c}${f[1]}`;
     },
 
     generateRandom6DigitID() {
