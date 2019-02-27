@@ -9,7 +9,6 @@ import $ from 'jquery';
  * @type Module
  * @constructor
  */
-
 const Templates = (function () {
     const templateStore = {};
 
