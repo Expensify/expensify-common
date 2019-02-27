@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import $ from 'jquery';
 
 /**
  * JS Templating system, powered by underscore template
