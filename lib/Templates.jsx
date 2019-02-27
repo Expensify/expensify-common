@@ -14,6 +14,69 @@ const Templates = (function () {
     const templateStore = {};
 
     /**
+     * Class representing a registered template
+     */
+    class InlineTemplate {
+        /**
+         * Store a compiled template and id
+         *
+         * @param {String} templateValue
+         */
+        constructor(templateValue) {
+            this.templateValue = templateValue;
+            this.compiled = null;
+            this.get = this.get.bind(this);
+        }
+
+        /**
+         * Gets the compiled template using the provided data
+         *
+         * @param {Object} data
+         *
+         * @returns {String}
+         */
+        get(data = {}) {
+            if (!this.compiled) {
+                this.compiled = _.template(this.templateValue);
+                this.templateValue = '';
+            }
+            return this.compiled(data);
+        }
+    }
+
+    /**
+     * Class representing a template existing in the DOM
+     */
+    class DOMTemplate {
+        /**
+         * Store a compiled template and id
+         * @param {String} id
+         */
+        constructor(id) {
+            this.id = id;
+            this.compiled = null;
+            this.get = this.get.bind(this);
+        }
+
+        /**
+         * Gets the compiled template using the provided data
+         *
+         * @param {Object} data
+         *
+         * @returns {String}
+         */
+        get(data = {}) {
+            // Add the "template" object to the parameter to allow nested templates
+            const dataToCompile = {...data};
+            dataToCompile.nestedTemplate = Templates.get;
+            if (!this.compiled) {
+                this.compiled = _.template($(`#${this.id}`).html());
+            }
+            return this.compiled(dataToCompile);
+        }
+    }
+
+    /**
      * Returns the template
      *
      * @param {Array} templatePath
@@ -81,8 +144,7 @@ const Templates = (function () {
          * @return {Boolean}
          */
         has(templatePath) {
-            const template = getTemplate(templatePath);
-            return !_.isUndefined(template);
+            return !_.isUndefined(getTemplate(templatePath));
         },
 
         /**
@@ -97,7 +159,6 @@ const Templates = (function () {
                 // remove the prefix "template" that MUST be added to have clean HTML ids
                 namespaceElements.shift();
                 const namespace = getTemplateNamespace(namespaceElements);
-                // eslint-disable-next-line no-use-before-define
                 namespace[id] = new DOMTemplate($el.id);
             });
         },
@@ -117,11 +178,9 @@ const Templates = (function () {
                     // If the template is an object, add templates for all keys
                     namespace[key] = {};
                     _.each(_.keys(template), (templateKey) => {
-                        // eslint-disable-next-line no-use-before-define
                         namespace[key][templateKey] = new InlineTemplate(template[templateKey]);
                     });
                 } else {
-                    // eslint-disable-next-line no-use-before-define
                     namespace[key] = new InlineTemplate(template);
                 }
             });
@@ -170,40 +229,5 @@ const Templates = (function () {
         }
     };
 })();
-
-// Template Constructors
-class InlineTemplate {
-    constructor(templateValue) {
-        this.templateValue = templateValue;
-        this.compiled = null;
-        this.get = this.get.bind(this);
-    }
-
-    get(data = {}) {
-        if (!this.compiled) {
-            this.compiled = _.template(this.templateValue);
-            this.templateValue = '';
-        }
-        return this.compiled(data);
-    }
-}
-
-class DOMTemplate {
-    constructor(id) {
-        this.id = id;
-        this.compiled = null;
-        this.get = this.get.bind(this);
-    }
-
-    get(data = {}) {
-        // Add the "template" object to the parameter to allow nested templates
-        const dataToCompile = {...data};
-        dataToCompile.nestedTemplate = Templates.get;
-        if (!this.compiled) {
-            this.compiled = _.template($(`#${this.id}`).html());
-        }
-        return this.compiled(dataToCompile);
-    }
-}
 
 module.exports = Templates;
