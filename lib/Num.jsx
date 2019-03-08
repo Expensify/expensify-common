@@ -6,6 +6,7 @@ module.exports = {
      * Converts an exponential number into it's non-exponential string equivalent
      *
      * @param {Number} num
+     *
      * @returns {String}
      */
     notExponential(num) {
