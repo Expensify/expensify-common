@@ -115,7 +115,9 @@ module.exports = {
 
     /**
      * Check if a number is finite and not NaN. i.e.
+     *
      * @param {number} number The number to test
+     *
      * @returns {Boolean} true if the number is finite and not NaN.
      */
     isFiniteNumber(number) {
@@ -124,8 +126,10 @@ module.exports = {
 
     /**
      * Truncates the given number to the given precision.
+     *
      * @param {number} number the number to truncate.
      * @param {number} decimals the number of decimals to keep.
+     *
      * @returns {number} the truncated number.
      */
     toPrecision(number, decimals) {
@@ -135,9 +139,11 @@ module.exports = {
 
     /**
      * Check if a number is between 2 numbers, including them.
+     *
      * @param {number} number to check
      * @param {number} a the 1st limit
      * @param {number} b the 2nd limit
+     *
      * @returns {boolean}
      */
     isNumberBetween(number, a, b) {
@@ -148,8 +154,10 @@ module.exports = {
 
         /**
          * Calculate the pre-tax, or net amount
+         *
          * @param {Number} total The total to calculate from, in negative cents
          * @param {UserDefinedField} taxUDF The tax UDF
+         *
          * @returns {number} The pre-tax amount, in negative cents
          */
         calculatePreTaxAmount(total, taxUDF) {
@@ -158,8 +166,10 @@ module.exports = {
 
         /**
          * Calculate the tax amount from the total.
+         *
          * @param {Number} total The total to calculate from
          * @param {String} percentage The percentage, as a string, e.g. '20%'
+         *
          * @returns {number} The amount of tax
          */
         calculateTaxFromPercentage(total, percentage) {
@@ -169,8 +179,10 @@ module.exports = {
 
         /**
          * Calculate the tax amount from a divisor.
+         *
          * @param {Number} total The total to calculate from
          * @param {Number} divisor The divisor (0.1 = 10%)
+         *
          * @returns {number} The amount of tax
          */
         calculateTaxFromDivisor(total, divisor) {
