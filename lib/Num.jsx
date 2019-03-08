@@ -2,6 +2,12 @@ import _ from 'underscore';
 import Str from './str';
 
 module.exports = {
+    /**
+     * Converts an exponential number into it's non-exponential string equivalent
+     *
+     * @param {Number} num
+     * @returns {String}
+     */
     notExponential(num) {
         const numStr = num.toString();
 
@@ -36,7 +42,7 @@ module.exports = {
      * @param {String} [d="."] The thousands separator
      *
      * @todo should be camelCase.
-     * @return {String}
+     * @returns {String}
      */
     number_format(a, b = 0, c = '.', d = ',') {
         let sign = '';
@@ -119,7 +125,7 @@ module.exports = {
      * Truncates the given number to the given precision.
      * @param {number} number the number to truncate.
      * @param {number} decimals the number of decimals to keep.
-     * @return {number} the truncated number.
+     * @returns {number} the truncated number.
      */
     toPrecision(number, decimals) {
         const numeral = 10 ** decimals;
@@ -131,7 +137,7 @@ module.exports = {
      * @param {number} number to check
      * @param {number} a the 1st limit
      * @param {number} b the 2nd limit
-     * @return {boolean}
+     * @returns {boolean}
      */
     isNumberBetween(number, a, b) {
         return number >= (Math.min(a, b)) && number <= (Math.max(a, b));
