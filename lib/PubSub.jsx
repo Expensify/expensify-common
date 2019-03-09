@@ -42,6 +42,10 @@ module.exports = {
         }
 
         const eventIDs = _.keys(eventMap[eventName]);
+        if (eventName === 'ev_error') {
+            // Doing the split slice 2 because the 1st element of the trace will always be from here (Object.publish)
+            Log.hmmm('Error published', 0, {...param, stackTrace: new Error().stack.split(" at ").slice(2)});
+        }
 
         _.each(eventIDs, (eventID) => {
             const subscriber = eventMap[eventName][eventID];
