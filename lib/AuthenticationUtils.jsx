@@ -2,8 +2,8 @@ let _authResult = {};
 const _publicDomains = ['expensify.sms', 'gmail.com', 'yahoo.com', 'hotmail.com', 'me.com', 'aol.com', 'mac.com', 'comcast.net', 'msn.com', 'live.com', 'sbcglobal.net', 'cox.net', 'yahoo.co.uk', 'att.net', 'ymail.com', 'verizon.net', 'bellsouth.net', 'googlemail.com', 'earthlink.net', 'hotmail.co.uk', 'charter.net', 'btinternet.com', 'yahoo.com.hk', 'yahoo.com.br', 'yahoo.com.mx', 'rocketmail.com', 'shaw.ca', 'bigpond.com', 'yahoo.com.sg', 'yahoo.com.tw', 'hotmail.it'];
 
 const _getAuthenticationStatusJSON = function (email) {
-    var deferred = new Deferred();
-    var json = _authResult[email];
+    const deferred = new Deferred();
+    const json = _authResult[email];
     if (!_.isUndefined(json)) {
         deferred.resolve(json);
     } else {
@@ -31,7 +31,7 @@ export default {
      * @returns {Deferred}
      */
     doesAccountExist: function (email) {
-        var deferred = new Deferred();
+        const deferred = new Deferred();
         _getAuthenticationStatusJSON(email).done(function (json) {
             if (json.jsonCode === 405 || (json.jsonCode === 200 && json.partnerList.length)) {
                 deferred.resolve(true, json.domainControlled);
@@ -48,7 +48,7 @@ export default {
      * @returns {Deferred}
      */
     isAccountValidated: function (email) {
-        var deferred = new Deferred();
+        const deferred = new Deferred();
         _getAuthenticationStatusJSON(email).done(function (json) {
             if (json.jsonCode === 405) {
                 deferred.resolve(false);
@@ -65,7 +65,7 @@ export default {
      * @returns {Deferred}
      */
     isAccountOnDomainControl: function (email) {
-        var deferred = new Deferred();
+        const deferred = new Deferred();
         _getAuthenticationStatusJSON(email).done(function (json) {
             if (json.jsonCode === 200 && json.domainControlled) {
                 deferred.resolve(true);
@@ -83,7 +83,7 @@ export default {
      * @return {Boolean}
      */
     doesAccountHavePartnerLogin: function (email, partnerName) {
-        var deferred = new Deferred();
+        const deferred = new Deferred();
         _getAuthenticationStatusJSON(email).done(function (json) {
             if (json.jsonCode === 200 && json.partnerList.length && _.contains(json.partnerList, partnerName)) {
                 deferred.resolve(true);
@@ -101,7 +101,7 @@ export default {
      * @returns {*}
      */
     requireSAML: function (email) {
-        var deferred = new Deferred();
+        const deferred = new Deferred();
         _getAuthenticationStatusJSON(email).done(function (json) {
             deferred.resolve(json.samlRequired === true);
         });
@@ -164,7 +164,7 @@ export default {
      * @returns {APIDeferred}
      */
     signOut: function (email) {
-        var signOutPromise = API.signOut();
+        let signOutPromise = API.signOut();
         if (!_.isUndefined(email)) {
             signOutPromise.always(function () {
                 delete _authResult[email];
@@ -202,7 +202,7 @@ export default {
      * @returns {Boolean} True if all entries are valid or if input is empty
      */
     areValidLogins: function (loginsCsv) {
-        var logins = Str.removeTrailingComma(loginsCsv);
+        let logins = Str.removeTrailingComma(loginsCsv);
         if (logins === '') {
             return true;
         }
