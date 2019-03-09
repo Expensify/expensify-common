@@ -1,7 +1,7 @@
 const Animation = {
     // Flash an element to a flareColor and then return it to its original background color.
     flare: function ($element, options) {
-        var defaults = {
+        const defaults = {
             flareColor: '#ffffbb',
             flareUpDuration: 1000,
             flareDownDuration: 2000,
@@ -43,7 +43,7 @@ const Growl = {
      * @param {Object} [options] Additional options to pass to the growl
      */
     growl: function (messageOrTemplate, data, options) {
-        var message = '';
+        let message = '';
         if (_.isArray(messageOrTemplate)) {
             message = Templates.get(messageOrTemplate, data);
         } else if (_.isString(messageOrTemplate)) {
@@ -128,7 +128,7 @@ const Growl = {
      * @param {Object}  [options] Additional options to pass to the growl
      */
     promise: function (promise, templatePathSuccess, templatePathError, data, time, options) {
-        var self = this;
+        const self = this;
         promise.done(function () {
             self.success(templatePathSuccess, data, time, options);
         }).fail(function () {
@@ -218,7 +218,7 @@ const Loading = {
      * @param {Boolean} args.noDelay
      */
     show: function (args) {
-        var noDelay = !_.isEmpty(args) ? args.noDelay : null;
+        let noDelay = !_.isEmpty(args) ? args.noDelay : null;
         this._toggle(true, noDelay);
         $(document).on('keydown', this._swallowKeyboardEvents);
     },
@@ -268,7 +268,7 @@ const Loading = {
      * @private
      */
     _toggle: function (showOrHide, noDelay) {
-        var newDisplayValue = showOrHide ? 'block' : 'none';
+        const newDisplayValue = showOrHide ? 'block' : 'none';
         this._isVisble = showOrHide;
         if (!_.isNull(this._loadingBackground) && !_.isNull(this._loadingImage)) {
             if (this._loadingBackground.style.display !== newDisplayValue) {
@@ -308,11 +308,11 @@ const Loading = {
 }
 
 const Progress = (function () {
-    var _initialized = false;
-    var _increments = 0;
-    var _count = 0;
-    var _title = '';
-    var _text = '';
+    let _initialized = false;
+    let _increments = 0;
+    let _count = 0;
+    let _title = '';
+    let _text = '';
 
     return {
         /**
@@ -374,7 +374,7 @@ const Progress = (function () {
          * @param {String} text Optional extra text to display in the dialog window
          */
         update: function (title, text) {
-            var percentage;
+            let percentage;
 
             if (_initialized) {
                 if (title) {
@@ -454,10 +454,10 @@ const QRCode = {
      * @return {String} Returns eReceipt HTML.
      */
     getcontainer: function (expense, identifyingClass) {
-        var cardType = CardUtils.getTypeFromPAN(expense.getCardNumber());
-        var bank = expense.getBank();
-        var bankName = null;
-        var bankURL = null;
+        let cardType = CardUtils.getTypeFromPAN(expense.getCardNumber());
+        let bank = expense.getBank();
+        let bankName = null;
+        let bankURL = null;
         if (cardType === 'Unknown') {
             cardType = 'Account';
         }
@@ -489,12 +489,12 @@ const QRCode = {
         });
     },
     generate: function ($elements) {
-        var processingQueue = $({});
+        let processingQueue = $({});
         $elements.each(function () {
-            var e = $(this);
+            let e = $(this);
             e.empty();
             processingQueue.queue(function (next) {
-                var size = e.attr('width');
+                let size = e.attr('width');
                 e.qrcode({
                     text: decodeURIComponent(e.data('qr')),
                     render: Browser.supportsCanvas() ? 'canvas' : 'table',
@@ -524,8 +524,8 @@ const ConstructorAutoComplete = function ($elements) {
 };
 
 const Intercom = (function () {
-    var unreadCount = 0;
-    var isPolling = false;
+    let unreadCount = 0;
+    let isPolling = false;
 
     return {
         /**
@@ -565,18 +565,18 @@ const Intercom = (function () {
          * Initialize the Intercom messenger if necessary
          */
         init: function () {
-            var ic = window.Intercom;
-            var i = function () {
+            let ic = window.Intercom;
+            let i = function () {
                 i.c(arguments);
             };
-            var options = {};
-            var referer;
-            var UTM;
-            var phoneNumber;
-            var promoCode;
-            var promoDiscount;
-            var script;
-            var x;
+            let options = {};
+            let referer;
+            let UTM;
+            let phoneNumber;
+            let promoCode;
+            let promoDiscount;
+            let script;
+            let x;
 
             if (!window.intercomSettings || User.isSupportLoggedIn()) {
                 return;
@@ -692,7 +692,7 @@ const Intercom = (function () {
             // Start polling for updates if we're not already
             if (!UIUtils.Intercom.isPolling) {
                 UIUtils.Intercom.isPolling = true;
-                var autoRefreshIntercomWidget = window.setInterval(function () {
+                const autoRefreshIntercomWidget = window.setInterval(function () {
                     UIUtils.Intercom.update();
                 }, 1000);
                 window.setTimeout(function () {
@@ -706,7 +706,7 @@ const Intercom = (function () {
          * Wrapper around window.Intercom('update');
          */
         update: function () {
-            window.Intercom('update', {last_request_at: parseInt((new Date()).getTime() / 1000, 10)});
+            window.Intercom('update', {last_request_at: parseInt((new window.Date()).getTime() / 1000, 10)});
         },
 
         /**
@@ -794,7 +794,7 @@ export default {
      * @returns {String} Email address with depreciated domain
      */
     depreciateDomain: function (email) {
-        var emailParts = email.split('@');
+        const emailParts = email.split('@');
         return emailParts[0] + UIUtils.depreciate('@' + emailParts[1]);
     },
 
@@ -808,8 +808,8 @@ export default {
      */
     depreciateMaskedCardDigits: function (cardNumber) {
         // Remove all whitespace and non-numeric characters
-        var cleanCardNumber = Str.stripNonNumeric(cardNumber);
-        var maskedPan;
+        const cleanCardNumber = Str.stripNonNumeric(cardNumber);
+        let maskedPan;
 
         if (CONST.REG_EXP.MASKED_CARD.test(cardNumber)) {
             return CardUtils.groupCardNumberByBlocks(cardNumber, '-');
@@ -834,8 +834,8 @@ export default {
      * @returns {String} the strings, tokenized
      */
     tokenize: function (tokens, classes) {
-        var wrappedStrings = _.map(tokens, function (token, index) {
-            var tokenClass = _.get(classes, index, '');
+        let wrappedStrings = _.map(tokens, function (token, index) {
+            let tokenClass = _.get(classes, index, '');
             return '<span class="token ' + tokenClass + '">' + token + '</span>';
         });
         return wrappedStrings.join(' ');
@@ -866,8 +866,8 @@ export default {
      * @param {Boolean} [dark] Display a dark overlay or not?
      */
     showLoading: function (element, dark) {
-        var overlay = $('<div class="elementOverlay"></div>');
-        var spinner = $(UI.spinnerSmallDIV).addClass(UI.spinnerClass);
+        let overlay = $('<div class="elementOverlay"></div>');
+        let spinner = $(UI.spinnerSmallDIV).addClass(UI.spinnerClass);
         if (dark) {
             overlay.addClass('dark');
         }
@@ -900,7 +900,7 @@ export default {
      * @returns {String} card number with depreciated digits
      */
     typewatch: (function () {
-        var timerID = 0;
+        let timerID = 0;
         return function (callback, delay) {
             delay = delay || UIUtils.DEFAULT_TYPEWATCH_DELAY;
             clearTimeout(timerID);
@@ -919,7 +919,7 @@ export default {
     isCharacterKeyPress: function (event) {
         // Keycodes that don't generate/modify the val() of an input. Add more
         // if you find more.
-        var muteKeys = [
+        let muteKeys = [
             // Meta, Cmd
             91,
             // Alt
@@ -956,7 +956,7 @@ export default {
      * @param {jQueryElement} $elem
      */
     triggerClickOnCheckbox: function ($elem) {
-        var checked = $elem.is(':checked');
+        const checked = $elem.is(':checked');
         $elem.trigger('click').prop('checked', checked);
     },
 
@@ -992,10 +992,10 @@ export default {
      * @returns {DOMElement} the option element
      */
     getOptionElement: function (value, text, isSelected, klass) {
-        var option = document.createElement('option');
-        var optionText = document.createTextNode(text);
-        var selected = isSelected || false;
-        var className = klass || '';
+        let option = document.createElement('option');
+        let optionText = document.createTextNode(text);
+        let selected = isSelected || false;
+        let className = klass || '';
 
         option.value = value;
         option.selected = selected;
@@ -1028,8 +1028,8 @@ export default {
      *                   shown, respectively.
      */
     getStickySubheaderPopupOffset: function ($button) {
-        var buttonHeight = Number(Str.cutAfter($($button).css('padding-top'), 'px')) + Number(Str.cutAfter($($button).css('padding-bottom'), 'px')) + Number(Str.cutAfter($($button).css('border-top'), 'px')) + Number(Str.cutAfter($($button).css('border-bottom'), 'px')) + $button.height();
-        var top = $('#bannerAnnouncement').height() + buttonHeight;
+        let buttonHeight = Number(Str.cutAfter($($button).css('padding-top'), 'px')) + Number(Str.cutAfter($($button).css('padding-bottom'), 'px')) + Number(Str.cutAfter($($button).css('border-top'), 'px')) + Number(Str.cutAfter($($button).css('border-bottom'), 'px')) + $button.height();
+        let top = $('#bannerAnnouncement').height() + buttonHeight;
 
         return {
             top: top + Number(Str.cutAfter($('.page-header').css('padding-top'), 'px')),
@@ -1044,7 +1044,7 @@ export default {
      * @param {Object} [queryParams] A map from param names to param values used to build a query string
      */
     openTab: function (url, queryParams) {
-        var queryString = '';
+        let queryString = '';
         if (_.isObject(queryParams) && !_.isEmpty(queryParams)) {
             queryString = '?' + _.map(queryParams, function (paramVal, paramName) {
                 return String(paramName) + '=' + encodeURIComponent(String(paramVal));
@@ -1063,7 +1063,7 @@ export default {
      * @returns {Object} An offset object with the computed coordinates
      */
     computeStickyPopupOffset: function (anchorElement) {
-        var offset = $(anchorElement).offset();
+        let offset = $(anchorElement).offset();
         offset.top -= $(window).scrollTop() - $(anchorElement).outerHeight();
         offset.left -= $(window).scrollLeft();
         return offset;
@@ -1090,8 +1090,8 @@ export default {
      * @return {*} Whatever the callback function returns
      */
     keepScroll: function (callback) {
-        var scrollTop = window.scrollY;
-        var result = Func.invoke(callback);
+        let scrollTop = window.scrollY;
+        let result = Func.invoke(callback);
         $(window).scrollTop(scrollTop);
         return result;
     },
@@ -1101,7 +1101,7 @@ export default {
      * @param {Object} input Element from JQuery
      */
     positionCursorAtEnd: function (input) {
-        var value = input.val();
+        let value = input.val();
         input.focus();
         input.val('');
         input.val(value);
@@ -1151,8 +1151,8 @@ export default {
      */
     getIntegrationLogoURL: function (connectionName, isAlert) {
         // Combine our integrations for easier searching
-        var integrations = Object.assign(CONST.DIRECT_INTEGRATIONS, CONST.INDIRECT_INTEGRATIONS);
-        var integrationData = integrations[connectionName];
+        const integrations = Object.assign(CONST.DIRECT_INTEGRATIONS, CONST.INDIRECT_INTEGRATIONS);
+        const integrationData = integrations[connectionName];
 
         return _.get(integrationData, isAlert ? 'alert_image' : 'image') || g_cloudFrontImg + 'exportIcons/exportIcon-IS.png';
     },
@@ -1163,7 +1163,7 @@ export default {
      * @param {Object} [data] any parameters needed for the message template
      */
     error: function (messageOrTemplate, data) {
-        var message = '';
+        let message = '';
         if (_.isArray(messageOrTemplate)) {
             message = Templates.get(messageOrTemplate, data);
         } else if (_.isString(messageOrTemplate)) {
