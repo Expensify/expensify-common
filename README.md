@@ -10,16 +10,18 @@ These libraries are provided as-is, and the repos which use them will need to do
 3. Run `npm install grunt-cli -g` to install the Grunt CLI tool globally
 4. Send Florent a message on slack and thank him for getting these instructions added
 
-# Deploying a New Version
+# Deploying a Change
 
 1. Create a PR for your branch
-2. Run `npm run package` to increment the version in `package.json`
-3. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for Web-Expensify and Web-Secure to point to that hash, and run `npm update js-libs`.
+2. Push up your changes
+3. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for Web-Expensify and Web-Secure to point to that hash, and run `npm update js-libs && npm install`.
 
 ## Versioning
 We use `<major>.<minor>.<patch>` versioning scheme.
 
 When choosing a version, keep other open PRs in mind and the order that they might get merged.
+
+Run `npm run package` to increment the version in `package.json`.
 
 # Development
 * Write all code as ES6.
