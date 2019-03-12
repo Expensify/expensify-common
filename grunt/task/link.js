@@ -13,7 +13,7 @@ module.exports = (grunt) => {
         grunt.log.writeln('Linking Web-Expensify with global node_modules...');
         const webe = exec('cd ../Web-Expensify && npm link js-libs');
         grunt.log.writeln(webe);
-        grunt.log.writeln('Linking Web-Expensify with global node_modules...');
+        grunt.log.writeln('Linking Web-Secure with global node_modules...');
         const webs = exec('cd ../Web-Secure && npm link js-libs');
         grunt.log.writeln(webs);
     });
