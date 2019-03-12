@@ -2,7 +2,7 @@ const exec = require('child_process').execSync;
 
 /**
  * A series of commands to execute when the watchChokidar task runs
- * 
+ *
  * @param {Object} grunt
  */
 module.exports = (grunt) => {

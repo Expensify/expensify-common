@@ -2,7 +2,7 @@ const exec = require('child_process').execSync;
 
 /**
  * Removes symlinks and restores Web-Expensify and Web-Secure node_modules back to their default JS-Libs version
- * 
+ *
  * @param {Object} grunt
  */
 module.exports = (grunt) => {
