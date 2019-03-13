@@ -30,6 +30,8 @@ const generateID = (eventName) => {
 const extractEventName = eventID => eventID.substr(0, eventID.indexOf('@#@'));
 
 module.exports = {
+    ERROR: 'ev_error',
+
     /**
      * Publish an event
      *
@@ -42,6 +44,11 @@ module.exports = {
         }
 
         const eventIDs = _.keys(eventMap[eventName]);
+        if (eventName === this.ERROR) {
+            // Doing the split slice 2 because the 1st element of the stacktrace will always be from here (PubSub.publish)
+            // When debugging, we just need to know who called PubSub.publish (so, all next elements in the stack)
+            Log.hmmm('Error published', 0, {tplt: param.tplt, stackTrace: new Error().stack.split(" at ").slice(2)});
+        }
 
         _.each(eventIDs, (eventID) => {
             const subscriber = eventMap[eventName][eventID];
