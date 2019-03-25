@@ -8,7 +8,8 @@ module.exports = {
     },
     js: {
         src: [
-            './lib/**/*.js'
+            './lib/**/*.js',
+            './lib/**/*.jsx'
         ]
     }
 };
