@@ -37,16 +37,18 @@ module.exports = {
     /**
      * Format a number, similar to PHP's number_format.
      *
-     * @param {Number} a The number you want to format
+     * @param {Number} _a The number you want to format
      * @param {Number} [b="0"] The number of decimal places you want
-     * @param {String} [c=","] The decimal separator
+     * @param {String} [_c=","] The decimal separator
      * @param {String} [d="."] The thousands separator
      *
-     * @todo should be camelCase.
+     * @todo should be camelCase / needs refactor
      * @returns {String}
      */
-    number_format(a, b = 0, c = '.', d = ',') {
+    number_format(_a, b = 0, _c = '.', d = ',') {
         let sign = '';
+        let a = _a;
+        let c = _c;
         let e = null;
         let f = null;
         let g = null;
