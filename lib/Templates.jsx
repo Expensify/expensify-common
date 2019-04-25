@@ -187,8 +187,8 @@ const Templates = (function () {
 
         /**
          * Removes a namespace from the templateStore (only used for testing purposes)
-         * 
-         * @param {String} nameSpace 
+         *
+         * @param {String} nameSpace
          */
         unregister(nameSpace) {
             delete templateStore[nameSpace];
