@@ -46,6 +46,7 @@ module.exports = {
      * @returns {String}
      */
     number_format(_a, b = 0, _c = '.', d = ',') {
+        /* eslint-disable prefer-destructuring */
         let sign = '';
         let a = _a;
         let c = _c;
