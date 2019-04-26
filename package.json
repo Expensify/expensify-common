@@ -6,8 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "test": "grunt eslint",
-    "build": "grunt eslint",
+    "grunt": "grunt",
     "package": "./package.sh"
   },
   "repository": {
