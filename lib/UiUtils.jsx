@@ -1,6 +1,11 @@
+import _ from 'underscore';
+import $ from 'jquery';
+
+
+
 const Animation = {
     // Flash an element to a flareColor and then return it to its original background color.
-    flare: function ($element, options) {
+    flare: ($element, options) => {
         const defaults = {
             flareColor: '#ffffbb',
             flareUpDuration: 1000,
@@ -25,7 +30,7 @@ const Animation = {
      * @param {Number}  duration
      * @param {Function} [callback]
      */
-    scrollPage: function (location, duration, callback) {
+    scrollPage: (location, duration, callback) => {
         if (duration === 0) {
             $('html, body').scrollTop(location || 0);
         } else {
@@ -42,7 +47,7 @@ const Growl = {
      * @param {Object} [data] Template data
      * @param {Object} [options] Additional options to pass to the growl
      */
-    growl: function (messageOrTemplate, data, options) {
+    growl: (messageOrTemplate, data, options) => {
         let message = '';
         if (_.isArray(messageOrTemplate)) {
             message = Templates.get(messageOrTemplate, data);
@@ -68,7 +73,7 @@ const Growl = {
      * @param {Number} [time=2000] Time in ms to display the growl
      * @param {Object} [options] Additional options to pass to the growl
      */
-    success: function (messageOrTemplate, data, time, options) {
+    success: (messageOrTemplate, data, time, options) => {
         if (!options) {
             options = {};
         }
@@ -80,7 +85,7 @@ const Growl = {
     /**
      * Manually trigger an active growl to close
      */
-    close: function () {
+    close:  () => {
         $('#jGrowl').jGrowl('close');
     },
 
@@ -93,7 +98,7 @@ const Growl = {
      * @param {Number} [time=10000] Time in ms to display the growl
      * @param {Object} [options] Additional options to pass to the growl
      */
-    error: function (messageOrTemplate, data, time, options) {
+    error: (messageOrTemplate, data, time, options) => {
         Log.client('We are deprecating error growls, so please use PubSub to throw up a user-friendly dialog.');
         if (!options) {
             options = {};
@@ -110,7 +115,7 @@ const Growl = {
      * @param {Object} [data] Template data
      * @param {Number} [time=2000] Time in ms to display the growl
      */
-    warn: function (messageOrTemplate, data, time) {
+    warn: (messageOrTemplate, data, time) => {
         UIUtils.Growl.growl(messageOrTemplate, data, {
             life: _.isNumber(time) ? time : 2000,
             theme: 'warn'
@@ -127,7 +132,7 @@ const Growl = {
      * @param {Number}  [time=2000] Time in ms to display the growl
      * @param {Object}  [options] Additional options to pass to the growl
      */
-    promise: function (promise, templatePathSuccess, templatePathError, data, time, options) {
+    promise: (promise, templatePathSuccess, templatePathError, data, time, options) => {
         const self = this;
         promise.done(function () {
             self.success(templatePathSuccess, data, time, options);
@@ -144,7 +149,7 @@ const Growl = {
      * @param {Number} [time=2000] Time in ms to display the growl
      * @param {Object} [options] Additional options to pass to the growl
      */
-    concierge: function (messageOrTemplate, data, time, options) {
+    concierge: (messageOrTemplate, data, time, options) => {
         if (!options) {
             options = {};
         }
@@ -217,7 +222,7 @@ const Loading = {
      * @param {Object} [args]
      * @param {Boolean} args.noDelay
      */
-    show: function (args) {
+    show: (args) => {
         let noDelay = !_.isEmpty(args) ? args.noDelay : null;
         this._toggle(true, noDelay);
         $(document).on('keydown', this._swallowKeyboardEvents);
@@ -226,7 +231,7 @@ const Loading = {
     /**
      * Hide the global spinner
      */
-    hide: function () {
+    hide: () => {
         this._toggle(false);
         this._$loadingList.empty();
         this._$loadinWraper.addClass(UI.HIDDEN);
@@ -238,7 +243,7 @@ const Loading = {
      *
      * @param {string} html
      */
-    updateText: function (html) {
+    updateText: (html) => {
         if (!this._textContainer) {
             return;
         }
@@ -246,7 +251,7 @@ const Loading = {
         this._textContainer.innerHTML = html;
     },
 
-    addStep: function (title, message) {
+    addStep: (title, message) => {
         if (!this._isVisble) {
             return;
         }
@@ -267,7 +272,7 @@ const Loading = {
      * @param {Boolean} [noDelay]
      * @private
      */
-    _toggle: function (showOrHide, noDelay) {
+    _toggle:  (showOrHide, noDelay) => {
         const newDisplayValue = showOrHide ? 'block' : 'none';
         this._isVisble = showOrHide;
         if (!_.isNull(this._loadingBackground) && !_.isNull(this._loadingImage)) {
@@ -299,7 +304,7 @@ const Loading = {
      *
      * @return {Deferred}
      */
-    promise: function (promise, noDelay) {
+    promise: (promise, noDelay) => {
         PubSub.publish(EVENT.LOADING.START, {noDelay: !!noDelay});
         return promise.always(function () {
             PubSub.publish(EVENT.LOADING.STOP);
