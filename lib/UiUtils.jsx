@@ -1,7 +1,9 @@
 import _ from 'underscore';
 import $ from 'jquery';
-
-
+import moment from 'moment';
+import Templates from './Templates';
+import Log from './Log';
+import PubSub from './PubSub';
 
 const Animation = {
     // Flash an element to a flareColor and then return it to its original background color.
@@ -79,7 +81,7 @@ const Growl = {
         }
         options.life = _.isNumber(time) ? time : 2000;
 
-        UIUtils.Growl.growl(messageOrTemplate, data, options);
+        this.growl(messageOrTemplate, data, options);
     },
 
     /**
@@ -105,7 +107,7 @@ const Growl = {
         }
         options.life = _.isNumber(time) ? time : 10000;
         options.theme = 'error';
-        UIUtils.Growl.growl(messageOrTemplate, data, options);
+        this.growl(messageOrTemplate, data, options);
     },
 
     /**
@@ -116,7 +118,7 @@ const Growl = {
      * @param {Number} [time=2000] Time in ms to display the growl
      */
     warn: (messageOrTemplate, data, time) => {
-        UIUtils.Growl.growl(messageOrTemplate, data, {
+        this.growl(messageOrTemplate, data, {
             life: _.isNumber(time) ? time : 2000,
             theme: 'warn'
         });
@@ -169,7 +171,7 @@ const Growl = {
             }, 500);
         };
 
-        UIUtils.Growl.growl(messageOrTemplate, data, options);
+        this.growl(messageOrTemplate, data, options);
     },
 }
 
