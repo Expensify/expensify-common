@@ -26,7 +26,7 @@
   "devDependencies": {
     "eslint-config-expensify": "2.0.1",
     "grunt": "*",
-    "grunt-eslint": "20.1.0",
+    "grunt-eslint": "21.0.0",
     "grunt-chokidar": "1.0.0",
     "babelify": "8.0.0",
     "babel-core": "6.26.0",
