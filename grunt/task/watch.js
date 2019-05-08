@@ -1,3 +1,3 @@
 module.exports = (grunt) => {
-    grunt.registerTask('watch', ['watchChokidar']);
+    grunt.registerTask('watch', ['chokidar']);
 };
