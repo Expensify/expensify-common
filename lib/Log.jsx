@@ -7,6 +7,7 @@ const expensifyAPI = API(Network('/api.php'), {
 });
 
 const TEMP_LOG_LINES_TO_KEEP = 50;
+
 // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
 const logLines = [];
 
@@ -37,6 +38,7 @@ const add = (message, parameters) => {
 const get = (messageCount) => {
     // Default to 1
     let mc = _.isUndefined(messageCount) ? 1 : messageCount;
+
     // Don't get more than we have
     mc = Math.min(TEMP_LOG_LINES_TO_KEEP, mc);
     return logLines.slice(logLines.length - mc);
@@ -51,19 +53,19 @@ const get = (messageCount) => {
 */
 const logToServer = (message, recentMessages, parameters) => {
     // Optionally append recent log lines as context
+    let msg = message;
     if (recentMessages > 0) {
-        let msg = message + ' | Context:  ';
-        msg = msg + JSON.stringify(get(recentMessages));
+        msg += ' | Context:  ';
+        msg += JSON.stringify(get(recentMessages));
     }
 
     // Output the message to the console too.
     if (window.DEBUG) {
-       this.client(msg + ' - ' + JSON.stringify(parameters));
+        this.client(`${msg} - ${JSON.stringify(parameters)}`);
     }
 
     expensifyAPI.performPOSTRequest('Log', parameters);
 };
-
 
 export default {
     /**
@@ -76,7 +78,7 @@ export default {
      */
     info: (message, sendNow, parameters) => {
         if (sendNow) {
-            let msg = '[info] ' + message;
+            const msg = `[info] ${message}`;
             logToServer(msg, 0, parameters);
         } else {
             add(message, parameters);
@@ -91,10 +93,11 @@ export default {
      * @param {object|String} parameters The parameters to send along with the message
      */
     alert: (message, recentMessages, parameters = {}) => {
-        let msg = '[alrt] ' + message;
-        parameters.stack = JSON.stringify(new Error().stack);
-        logToServer(msg, recentMessages, parameters);
-        add(msg, parameters);
+        const msg = `[alrt] ${message}`;
+        const params = parameters;
+        params.stack = JSON.stringify(new Error().stack);
+        logToServer(msg, recentMessages, params);
+        add(msg, params);
     },
 
     /**
@@ -105,7 +108,7 @@ export default {
      * @param {object|String} parameters The parameters to send along with the message
      */
     warn: (message, recentMessages, parameters) => {
-        let msg = '[warn] ' + message;
+        const msg = `[warn] ${message}`;
         logToServer(msg, recentMessages, parameters);
         add(msg, parameters);
     },
@@ -118,7 +121,7 @@ export default {
      * @param {object|String} parameters The parameters to send along with the message
      */
     hmmm: (message, recentMessages, parameters) => {
-        let msg = '[hmmm] ' + message;
+        const msg = `[hmmm] ${message}`;
         logToServer(msg, recentMessages, parameters);
         add(msg, parameters);
     },
@@ -135,7 +138,7 @@ export default {
             return;
         }
 
-        if (exists(window.console) && _.isFunction(console.log)) {
+        if (window.console && _.isFunction(console.log)) {
             console.log(message);
         }
     }
