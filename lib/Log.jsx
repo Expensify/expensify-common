@@ -1,4 +1,10 @@
 import _ from 'underscore';
+import API from './API';
+import Network from './Network';
+
+const expensifyAPI = API(Network('/api.php'), {
+    enhanceParameters: data => ({...data, csrfToken: window.csrfToken}),
+});
 
 const TEMP_LOG_LINES_TO_KEEP = 50;
 // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
@@ -24,45 +30,38 @@ const add = (message, parameters) => {
 
 /**
  * Get the last messageCount lines
- * @param {int} messageCount Number of messages to get (optional,
+ * @param {Number} messageCount Number of messages to get (optional,
  *              defaults to 1)
  * @return {array} an array of messages (oldest first)
  */
 const get = (messageCount) => {
     // Default to 1
-    messageCount = _.isUndefined(messageCount) ? 1 : messageCount;
+    let mc = _.isUndefined(messageCount) ? 1 : messageCount;
     // Don't get more than we have
-    messageCount = Math.min(TEMP_LOG_LINES_TO_KEEP, messageCount);
-    return logLines.slice(logLines.length - messageCount);
+    mc = Math.min(TEMP_LOG_LINES_TO_KEEP, mc);
+    return logLines.slice(logLines.length - mc);
 };
 
 /**
 * Ask the server to write the log message
 *
 * @param {String} message The message to write
-* @param {int} recentMessages A number of recent messages to append as context
+* @param {Number} recentMessages A number of recent messages to append as context
 * @param {object|String} parameters The parameters to send along with the message
 */
-
 const logToServer = (message, recentMessages, parameters) => {
     // Optionally append recent log lines as context
     if (recentMessages > 0) {
-        message += ' | Context:  ';
-        message += JSON.stringify(get(recentMessages));
+        let msg = message + ' | Context:  ';
+        msg = msg + JSON.stringify(get(recentMessages));
     }
 
     // Output the message to the console too.
     if (window.DEBUG) {
-       this.client(message + ' - ' + JSON.stringify(parameters));
+       this.client(msg + ' - ' + JSON.stringify(parameters));
     }
- 
-    // TODO: Remove dependency on ajax() which is deprecated.
-    ajax('/api', {
-        command: 'Log',
-        message: message,
-        parameters: parameters,
-        referer: 'webjs'
-    });
+
+    expensifyAPI.performPOSTRequest('Log', parameters);
 };
 
 
@@ -77,8 +76,8 @@ export default {
      */
     info: (message, sendNow, parameters) => {
         if (sendNow) {
-            message = '[info] ' + message;
-            logToServer(message, 0, parameters);
+            let msg = '[info] ' + message;
+            logToServer(msg, 0, parameters);
         } else {
             add(message, parameters);
         }
@@ -88,43 +87,40 @@ export default {
      * Logs an alert.
      *
      * @param {String} message The message to alert.
-     * @param {int} recentMessages A number of recent messages to append as context
+     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
      */
-    alert: (message, recentMessages, parameters) => {
-        message = '[alrt] ' + message;
-
-        parameters = parameters || {};
+    alert: (message, recentMessages, parameters = {}) => {
+        let msg = '[alrt] ' + message;
         parameters.stack = JSON.stringify(new Error().stack);
-
-        logToServer(message, recentMessages, parameters);
-        add(message, parameters);
+        logToServer(msg, recentMessages, parameters);
+        add(msg, parameters);
     },
 
     /**
      * Logs a warn.
      *
      * @param {String} message The message to warn.
-     * @param {int} recentMessages A number of recent messages to append as context
+     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
      */
     warn: (message, recentMessages, parameters) => {
-        message = '[warn] ' + message;
-        logToServer(message, recentMessages, parameters);
-        add(message, parameters);
+        let msg = '[warn] ' + message;
+        logToServer(msg, recentMessages, parameters);
+        add(msg, parameters);
     },
 
     /**
      * Logs a hmmm.
      *
      * @param {String} message The message to hmmm.
-     * @param {int} recentMessages A number of recent messages to append as context
+     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
      */
     hmmm: (message, recentMessages, parameters) => {
-        message = '[hmmm] ' + message;
-        logToServer(message, recentMessages, parameters);
-        add(message, parameters);
+        let msg = '[hmmm] ' + message;
+        logToServer(msg, recentMessages, parameters);
+        add(msg, parameters);
     },
 
     /**
