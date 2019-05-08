@@ -17,10 +17,8 @@ module.exports = function (grunt) {
         grunt.verbose.writeln(`Loading task file: ${files[i]}`);
 
         // Disable this lint rule so that we can have our debug output before requiring the file.
-        /* eslint-disable vars-on-top */
         // This path is relative to this file, so we have to remove the grunt part
         const task = require(files[i].replace('/grunt', ''));
-        /* eslint-enable vars-on-top */
 
         task(grunt);
     }

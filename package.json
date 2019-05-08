@@ -6,8 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "test": "grunt eslint",
-    "build": "grunt eslint",
+    "grunt": "grunt",
     "package": "./package.sh"
   },
   "repository": {
@@ -19,23 +18,24 @@
     "jquery": "3.3.1",
     "lodash.get": "4.4.2",
     "lodash.has": "4.5.2",
+    "prop-types": "15.6.0",
     "react": "16.2.0",
     "react-dom": "16.2.0",
     "underscore": "1.9.1",
     "moment": "2.20.1"
   },
   "devDependencies": {
-    "eslint-config-expensify": "1.2.0",
+    "eslint-config-expensify": "2.0.1",
     "grunt": "*",
-    "grunt-eslint": "20.1.0",
-    "grunt-contrib-watch-chokidar": "1.0.0",
+    "grunt-eslint": "21.0.0",
+    "grunt-chokidar": "1.0.0",
     "babelify": "8.0.0",
     "babel-core": "6.26.0",
     "babel-plugin-transform-decorators-legacy": "1.3.4",
     "babel-preset-env": "1.6.1",
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-0": "6.24.1",
-    "load-grunt-tasks": "*"
+    "jit-grunt": "^0.10.0"
   },
   "browserify": {
     "transform": [
