@@ -164,23 +164,6 @@ export default function API(network, args) {
         });
     }
 
-    /**
-     * Stores unique request IDs in an array
-     *
-     * @private
-     * @param  {Object} json
-     */
-    function recordRequestID(json) {
-        if (json.requestID && !_(this._requestIDs).contains(json.requestID)) {
-            this._requestIDs.push(json.requestID);
-            // Cap the array at 10 elements by removing the first element if there are too many
-            if (this._requestIDs.length > 10) {
-                this._requestIDs.shift();
-            }
-        }
-    }
-
-
     return {
         /**
          * @param  {Number[]} jsonCodes
@@ -332,14 +315,6 @@ export default function API(network, args) {
             const commandName = 'Graphite';
             requireParameters(['type', 'statName', 'value'], parameters, commandName);
             return performPOSTRequest(commandName, parameters, null, sync);
-        },
-       
-        /**
-         * Return the recent request IDs
-         * @returns {String[]}
-         */
-        getRecentRequestIDs: function () {
-            return this._requestIDs;
         },
 
         expensiworks: {
