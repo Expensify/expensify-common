@@ -217,6 +217,15 @@ export default function API(network, args) {
 
         /**
          * @param  {Object} parameters
+         * @return {ExpensifyAPIDeferred}
+         */
+        logToServer(parameters) {
+            const commandName = 'Log';
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * @param  {Object} parameters
          * @param  {String} parameters.email
          * @return {ExpensifyAPIDeferred}
          */

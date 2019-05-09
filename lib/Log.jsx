@@ -44,30 +44,30 @@ const get = (messageCount) => {
     return logLines.slice(logLines.length - mc);
 };
 
-/**
-* Ask the server to write the log message
-*
-* @param {String} message The message to write
-* @param {Number} recentMessages A number of recent messages to append as context
-* @param {object|String} parameters The parameters to send along with the message
-*/
-const logToServer = (message, recentMessages, parameters) => {
-    // Optionally append recent log lines as context
-    let msg = message;
-    if (recentMessages > 0) {
-        msg += ' | Context:  ';
-        msg += JSON.stringify(get(recentMessages));
-    }
+const Log = {
+    /**
+    * Ask the server to write the log message
+    *
+    * @param {String} message The message to write
+    * @param {Number} recentMessages A number of recent messages to append as context
+    * @param {object|String} parameters The parameters to send along with the message
+    */
+    logToServer: (message, recentMessages, parameters = {}) => {
+        // Optionally append recent log lines as context
+        let msg = message;
+        if (recentMessages > 0) {
+            msg += ' | Context:  ';
+            msg += JSON.stringify(get(recentMessages));
+        }
 
-    // Output the message to the console too.
-    if (window.DEBUG) {
-        this.client(`${msg} - ${JSON.stringify(parameters)}`);
-    }
+        // Output the message to the console too.
+        if (window.DEBUG) {
+            Log.client(`${msg} - ${JSON.stringify(parameters)}`);
+        }
+        const params = {...parameters, message};
+        expensifyAPI.logToServer(params);
+    },
 
-    expensifyAPI.performPOSTRequest('Log', parameters);
-};
-
-export default {
     /**
      * Caches an informational message locally, to be sent to the server if
      * needed later.
@@ -79,7 +79,7 @@ export default {
     info: (message, sendNow, parameters) => {
         if (sendNow) {
             const msg = `[info] ${message}`;
-            logToServer(msg, 0, parameters);
+            Log.logToServer(msg, 0, parameters);
         } else {
             add(message, parameters);
         }
@@ -96,7 +96,7 @@ export default {
         const msg = `[alrt] ${message}`;
         const params = parameters;
         params.stack = JSON.stringify(new Error().stack);
-        logToServer(msg, recentMessages, params);
+        Log.logToServer(msg, recentMessages, params);
         add(msg, params);
     },
 
@@ -109,7 +109,7 @@ export default {
      */
     warn: (message, recentMessages, parameters) => {
         const msg = `[warn] ${message}`;
-        logToServer(msg, recentMessages, parameters);
+        Log.logToServer(msg, recentMessages, parameters);
         add(msg, parameters);
     },
 
@@ -122,7 +122,7 @@ export default {
      */
     hmmm: (message, recentMessages, parameters) => {
         const msg = `[hmmm] ${message}`;
-        logToServer(msg, recentMessages, parameters);
+        Log.logToServer(msg, recentMessages, parameters);
         add(msg, parameters);
     },
 
@@ -142,4 +142,16 @@ export default {
             console.log(message);
         }
     }
+};
+
+const {
+    info, alert, warn, hmmm, client
+} = Log;
+
+export default {
+    info,
+    alert,
+    warn,
+    hmmm,
+    client,
 };

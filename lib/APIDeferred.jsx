@@ -5,7 +5,7 @@
  */
 
 import _ from 'underscore';
-import {invoke, bulkInvoke} from './func';
+import {invoke, bulkInvoke} from './Func';
 
 /**
  * @param {jquery.Deferred} promise
