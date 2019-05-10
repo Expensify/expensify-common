@@ -2,10 +2,6 @@ import _ from 'underscore';
 import API from './API';
 import Network from './Network';
 
-const expensifyAPI = API(Network('/api.php'), {
-    enhanceParameters: data => ({...data, csrfToken: window.csrfToken}),
-});
-
 const TEMP_LOG_LINES_TO_KEEP = 50;
 
 // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
@@ -65,7 +61,7 @@ const Log = {
             Log.client(`${msg} - ${JSON.stringify(parameters)}`);
         }
         const params = {...parameters, message};
-        expensifyAPI.logToServer(params);
+        API(Network('/api.php')).logToServer(params);
     },
 
     /**
@@ -144,14 +140,4 @@ const Log = {
     }
 };
 
-const {
-    info, alert, warn, hmmm, client
-} = Log;
-
-export default {
-    info,
-    alert,
-    warn,
-    hmmm,
-    client,
-};
+export default _.omit(Log, 'logToServer');
