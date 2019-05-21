@@ -1,5 +1,5 @@
+const chokidarConfig = require('./configs/chokidar');
 const eslintConfig = require('./configs/eslint');
-const watchConfig = require('./configs/watch');
 
 /**
  * This will load all of the configs in the `./configs` folder and add
@@ -11,7 +11,7 @@ const watchConfig = require('./configs/watch');
 module.exports = (grunt) => {
     grunt.initConfig({
         eslint: eslintConfig,
-        watchChokidar: watchConfig
+        chokidar: chokidarConfig(grunt)
     });
     return grunt;
 };
