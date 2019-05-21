@@ -484,6 +484,12 @@ export const CONST = {
     }
 };
 
+if (!window.DEBUG) {
+    CONST.URL.BUCKET_RECEIPT = 'https://s3.amazonaws.com/receipts.expensify.com/';
+} else {
+    CONST.URL.BUCKET_RECEIPT = 'https://s3.amazonaws.com/dev-receipts-expensify-com/';
+}
+
 /**
  * UI Constants
  */
