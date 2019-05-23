@@ -60,7 +60,7 @@ const Log = {
         if (window.DEBUG) {
             Log.client(`${msg} - ${JSON.stringify(parameters)}`);
         }
-        const params = {...parameters, message};
+        const params = {parameters, message};
         API(Network('/api.php')).logToServer(params);
     },
 
