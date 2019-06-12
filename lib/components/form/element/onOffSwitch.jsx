@@ -1,59 +1,98 @@
 import React from 'react';
 import {invoke} from '../../../Func';
 import {UI} from '../../../CONST';
+import PropTypes from 'prop-types';
+import Switch from './switch';
+import cn from 'classnames';
 
 /**
- * On off switch.
+ * An on off switch.
  *
  * To be used like this :
  * <React.c.OnOffSwitch
  *      extraClasses=""
  *      id="intacct_category"
- *      label="Categories"                  // Label to be displayed left to the switch
- *      checked={true}                      // True if the switch is on
- *      description="This is it"            // Description to be displayed below the switch (optional)
- *      preventEdit={true}                  // Disable edition of the switch (optional)
- *      onChangeCallback={this.onCallback}  // Callback function to call when changing the switch (optional)
- *      onlyShowDescriptionWhenOn={false}   // If set to true, the description of the switch is only displayed when it is in the 'checked' state (optional)
- *      noLeftPaddingOnChildren={false}     // If set to true, children elements won't be applied a left padding (optional)
- *      descriptionBeforeChildren={false}   // If set to true, the description of the switch will be placed above the children elements (optional)
+ *      label="Categories"
+ *      checked={true}
+ *      description="This is it"
+ *      preventEdit={true}
+ *      onChangeCallback={this.onCallback}
+ *      onlyShowDescriptionWhenOn={false}
+ *      noLeftPaddingOnChildren={false}
+ *      descriptionBeforeChildren={false}
  * >
- *      <Children />                        // Element to be displayed below the switch when it's on (optional)
+ *      <Children />
  * </React.c.OnOffSwitch>
  */
-React.c.OnOffSwitch = window.CreateClass({
-    propTypes: {
-        id: window.PropTypes.string.isRequired,
-        label: window.PropTypes.string,
-        labelOnRight: window.PropTypes.bool,
-        labelClasses: window.PropTypes.any,
-        checked: window.PropTypes.bool.isRequired,
-        onChangeCallback: window.PropTypes.func,
-        children: window.PropTypes.node,
-        preventEdit: window.PropTypes.bool,
-        description: window.PropTypes.string,
-        onlyShowDescriptionWhenOn: window.PropTypes.bool,
-        noLeftPaddingOnChildren: window.PropTypes.bool,
-        alwaysShowChildren: window.PropTypes.bool,
-        descriptionBeforeChildren: window.PropTypes.bool,
-        safeDescription: window.PropTypes.bool
-    },
+ const propTypes = {
+    id: PropTypes.string.isRequired,
+    alwaysShowChildren: PropTypes.bool,
+    labelClasses: PropTypes.any,
+    labelOnRight: PropTypes.bool,
 
-    mixins: [React.m.ExtraClasses],
+    // Label to be displayed left to the switch
+    label: PropTypes.string,
 
-    getDefaultProps() {
-        return {
-            safeDescription: false
-        };
-    },
+    // True if the switch is on
+    checked: PropTypes.bool.isRequired,
+
+    // Callback function to call when changing the switch (optional)
+    onChangeCallback: PropTypes.func,
+
+    // Element to be displayed below the switch when it's on (optional)
+    children: PropTypes.node,
+
+    // Disable edition of the switch (optional)
+    preventEdit: PropTypes.bool,
+
+    // Description to be displayed below the switch (optional)
+    description: PropTypes.string,
+
+    // If set to true, the description of the switch is only displayed when it is in the 'checked' state (optional)
+    onlyShowDescriptionWhenOn: PropTypes.bool,
+
+    // If set to true, children elements won't be applied a left padding (optional)
+    noLeftPaddingOnChildren: PropTypes.bool,
+
+    // If set to true, the description of the switch will be placed above the children elements (optional)
+    descriptionBeforeChildren: PropTypes.bool,
+
+    //
+    safeDescription: PropTypes.bool,
+
+    // An array of extra classes to put on the combobox
+    extraClasses: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.array,
+        PropTypes.object,
+    ]),
+};
+
+const defaultProps = {
+    checked: false,
+    safeDescription: false,
+    extraClasses: [],
+};
+
+class onOffSwitch extends React.Component {
+    constructor (props) {
+        super(props);
+
+        this.getInitialState = this.getInitialState.bind(this);
+        this.onChangeCallback = this.onChangeCallback.bind(this);
+        this.lock = this.lock.bind(this);
+        this.unlock = this.unlock.bind(this);
+
+        this.state = this.getInitialState();
+    }
 
     getInitialState() {
         return {
             checked: this.props.checked,
             preventEdit: this.props.preventEdit,
-            preventEditDescription: ''
+            preventEditDescription: '',
         };
-    },
+    }
 
     /**
      * Callback function called after toggling the switch
@@ -64,7 +103,7 @@ React.c.OnOffSwitch = window.CreateClass({
         this.setState({
             checked: newState
         });
-    },
+    }
 
     /**
      * Is the switch on or off ?
@@ -73,7 +112,7 @@ React.c.OnOffSwitch = window.CreateClass({
      */
     getValue() {
         return this.state.checked;
-    },
+    }
 
     /**
      * Force switch off and prevent editing it
@@ -82,26 +121,25 @@ React.c.OnOffSwitch = window.CreateClass({
      */
     lock(checked, msg) {
         this.setState({
-            checked,
+            checked: checked,
             preventEdit: true,
             preventEditDescription: msg
         });
-    },
+    }
 
     /**
      * Release switch to its original value, and allow editing it
      */
     unlock() {
         this.setState({
-            checked: this.props.checked,
+            checked: this.state.checked,
             preventEdit: false,
             preventEditDescription: ''
         });
-    },
-
-    defaultClasses: ['onoffswitch-wrapper'],
+    }
 
     render() {
+        console.log('~~HELLOOOO from js-libs');
         const childrenClasses = {
             depreciated: !this.props.noLeftPaddingOnChildren,
             helperLabel: !this.props.noLeftPaddingOnChildren
@@ -111,7 +149,7 @@ React.c.OnOffSwitch = window.CreateClass({
         }
 
         const children = this.props.children
-            ? <div className={React.classNames(childrenClasses)}>{this.props.children}</div>
+            ? <div className={cn(childrenClasses)}>{this.props.children}</div>
             : null;
 
         // Only use dangerouslySetInnerHTML if we explicitly pass safeDescription as a parameter; otherwise, just set the description inside a div
@@ -128,15 +166,15 @@ React.c.OnOffSwitch = window.CreateClass({
 
         return (
             <div>
-                {this.props.label && !this.props.labelOnRight ? <label className={React.classNames(this.props.labelClasses)} htmlFor={this.props.id}>{this.props.label}</label> : null}
-                <React.c.FormElementSwitch
+                {this.props.label && !this.props.labelOnRight ? <label className={cn(this.props.labelClasses)} htmlFor={this.props.id}>{this.props.label}</label> : null}
+                <Switch
                     id={this.props.id}
                     checked={this.state.checked}
                     disabled={this.state.preventEdit}
                     onChange={this.onChangeCallback}
-                    extraClasses={[this.state.classes, !this.props.labelOnRight ? 'marginLeft10' : '']}
+                    extraClasses={[cn('onoffswitch-wrapper', this.props.extraClasses), !this.props.labelOnRight ? 'marginLeft10' : '']}
                 />
-                {this.props.label && this.props.labelOnRight ? <label className={React.classNames(this.props.labelClasses, 'marginLeft5')} htmlFor={this.props.id}>{this.props.label}</label> : null}
+                {this.props.label && this.props.labelOnRight ? <label className={cn(this.props.labelClasses, 'marginLeft5')} htmlFor={this.props.id}>{this.props.label}</label> : null}
                 {this.props.descriptionBeforeChildren ? <div>
                     {descriptionElm}
                     {children}
@@ -147,4 +185,9 @@ React.c.OnOffSwitch = window.CreateClass({
             </div>
         );
     }
-});
+};
+
+onOffSwitch.propTypes = propTypes;
+onOffSwitch.defaultProps = defaultProps;
+
+export default onOffSwitch;
