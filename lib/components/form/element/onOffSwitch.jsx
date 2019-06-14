@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import {invoke} from '../../../Func';
@@ -9,6 +9,7 @@ import Switch from './switch';
  * Displays an on off switch (optionally) with label
  */
 const propTypes = {
+    // A unique identifier
     id: PropTypes.string.isRequired,
 
     // Label to be displayed left to the switch
@@ -74,20 +75,15 @@ const defaultProps = {
     extraClasses: [],
 };
 
-class onOffSwitch extends React.Component {
+class OnOffSwitcher extends Component {
     constructor(props) {
         super(props);
 
-        this.getInitialState = this.getInitialState.bind(this);
         this.onChangeCallback = this.onChangeCallback.bind(this);
         this.lock = this.lock.bind(this);
         this.unlock = this.unlock.bind(this);
 
-        this.state = this.getInitialState();
-    }
-
-    getInitialState() {
-        return {
+        this.state = {
             checked: this.props.checked,
             preventEdit: this.props.preventEdit,
             preventEditDescription: '',
@@ -179,26 +175,26 @@ class onOffSwitch extends React.Component {
                 {/* For 100% a11y compliance we'd need to move the <input> into the <label> element */}
                 {/* eslint-disable jsx-a11y/label-has-for */}
                 {this.props.label && !this.props.labelOnRight
-                    ? <label className={cn(this.props.labelClasses)} htmlFor={this.props.id}>{this.props.label}</label>
-                    : null}
+                    && <label className={cn(this.props.labelClasses)} htmlFor={this.props.id}>{this.props.label}</label>
+                }
                 <Switch
                     id={this.props.id}
                     checked={this.state.checked}
                     disabled={this.state.preventEdit}
                     onChange={this.onChangeCallback}
                     extraClasses={[
-                        cn('onoffswitch-wrapper', this.props.extraClasses),
-                        !this.props.labelOnRight ? 'marginLeft10' : ''
+                        this.props.extraClasses,
+                        {'marginLeft10': !this.props.labelOnRight}
                     ]}
                 />
-                {this.props.label && this.props.labelOnRight ? (
+                {this.props.label && this.props.labelOnRight && (
                     <label
                         className={cn(this.props.labelClasses, 'marginLeft5')}
                         htmlFor={this.props.id}
                     >
                         {this.props.label}
                     </label>
-                ) : null}
+                )}
                 {this.props.descriptionBeforeChildren ? (
                     <div>
                         {descriptionElm}
@@ -215,7 +211,7 @@ class onOffSwitch extends React.Component {
     }
 }
 
-onOffSwitch.propTypes = propTypes;
-onOffSwitch.defaultProps = defaultProps;
+OnOffSwitcher.propTypes = propTypes;
+OnOffSwitcher.defaultProps = defaultProps;
 
-export default onOffSwitch;
+export default OnOffSwitcher;
