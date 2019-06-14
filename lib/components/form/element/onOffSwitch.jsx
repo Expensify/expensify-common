@@ -75,7 +75,7 @@ const defaultProps = {
     extraClasses: [],
 };
 
-class OnOffSwitcher extends Component {
+class OnOffSwitch extends Component {
     constructor(props) {
         super(props);
 
@@ -211,7 +211,7 @@ class OnOffSwitcher extends Component {
     }
 }
 
-OnOffSwitcher.propTypes = propTypes;
-OnOffSwitcher.defaultProps = defaultProps;
+OnOffSwitch.propTypes = propTypes;
+OnOffSwitch.defaultProps = defaultProps;
 
-export default OnOffSwitcher;
+export default OnOffSwitch;
