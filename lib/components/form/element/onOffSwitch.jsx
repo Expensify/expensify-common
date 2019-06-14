@@ -82,6 +82,7 @@ class OnOffSwitch extends Component {
         this.onChangeCallback = this.onChangeCallback.bind(this);
         this.lock = this.lock.bind(this);
         this.unlock = this.unlock.bind(this);
+        this.getValue = this.getValue.bind(this);
 
         this.state = {
             checked: this.props.checked,
