@@ -155,6 +155,15 @@ export const CONST = {
         MOMENT_DATE_TIME: 'YYYY-MM-DD HH:mm',
 
         /**
+         * Pretty format used for report history items
+         *
+         * @example Jun 19, 2019 12:38 PM PDT
+         *
+         * @type {String}
+         */
+        MOMENT_DATE_TIME_PRETTY: 'MMM DD YYYY h:mma',
+
+        /**
          * Date-time format, including timezone information, eg "2015-10-14T19:44:35+07:00"
          *
          * @type {String}
@@ -194,6 +203,7 @@ export const CONST = {
         DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
         DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING)
     },
+
     /**
      * Message used by the Func.die() exception
      *
@@ -512,8 +522,10 @@ export const UI = {
     REQUIRED: 'required',
     SELECT_DEFAULT: '###',
     SELECTED: 'selected',
+
     // Class used to identify qrCode container
     QR_CODE: 'js_qrCode',
+
     // Base z-index for dialogs $zindex-dialog in _vars.scss should take it's value from here!
     DIALOG_Z_INDEX: 4000
 };
