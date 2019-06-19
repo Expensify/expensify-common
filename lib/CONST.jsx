@@ -157,7 +157,7 @@ export const CONST = {
         /**
          * Pretty format used for report history items
          *
-         * @example Jun 19, 2019 12:38 PM PDT
+         * @example Jun 19, 2019 12:38 PM
          *
          * @type {String}
          */
