@@ -128,7 +128,10 @@ export const CONST = {
         HELP_ROOT: 'http://help.expensify.com/',
         HELP_DOC_ROOT: 'https://docs.expensify.com/',
         FORUM_ROOT: 'https://community.expensify.com/',
-        BUCKET_RECEIPT: !window.DEBUG ? 'https://s3.amazonaws.com/receipts.expensify.com/' : 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
+        BUCKET_RECEIPT: {
+            DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
+            PROD: 'https://s3.amazonaws.com/receipts.expensify.com/'
+        },
         CLOUDFRONT: 'https://d2k5nsl2zxldvw.cloudfront.net',
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
