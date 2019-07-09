@@ -7,6 +7,8 @@ import _ from 'underscore';
 import $ from 'jquery';
 import ExpensifyAPIDeferred from './APIDeferred';
 
+const Deferred = $.Deferred || window.Deferred;
+
 /**
  * @param {Network} network
  * @param {Object} [args]
@@ -40,7 +42,7 @@ export default function API(network, args) {
      * @returns {Object} $.Deferred
      */
     function isRunningLatestVersionOfCode() {
-        const promise = new $.Deferred();
+        const promise = new Deferred();
 
         $.get('/revision.txt')
             .done((codeRevision) => {
@@ -111,11 +113,11 @@ export default function API(network, args) {
         // This promise is to check to see if we are running the latest version of code
         const codeRevisionPromise = checkCodeRevision
             ? isRunningLatestVersionOfCode
-            : () => new $.Deferred().resolve();
+            : () => new Deferred().resolve();
 
         // This is a dummy promise that will perform the actions from our network POST. We have to create it here
         // because we need the final APIDeferred object to return immediately, and then have all this async code run.
-        const networkRequestPromise = new $.Deferred();
+        const networkRequestPromise = new Deferred();
 
         // This is the final APIDeferred which gets returned from the API lib.
         const finalApiDeferred = new ExpensifyAPIDeferred(networkRequestPromise, returnedPropertyName);
