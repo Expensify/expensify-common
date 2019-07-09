@@ -1,28 +1,21 @@
-/* globals yaplWriteFile, yaplFileExists, yaplReadFile */
+/* globals yaplWriteFile, yaplFileExists, yaplReadFile, globalThis */
 
 import _ from 'underscore';
 import LocalStorage from './LocalStorage';
-import Network from '../Network';
-import API from '../API';
 
-const Deferred = window.Deferred;
+const {API, Deferred, APIDeferred} = globalThis;
 
 export default class ReportHistoryCache {
-    constructor(platform, csrfToken) {
+    constructor(platform) {
         this.storeExists = false;
         this.platform = platform;
         this.reportHistory = platform === 'mobile' ? this.getReportHistoryFromYapl() : this.getReportHistoryFromLocalStorage();
 
-        const network = Network('/api.php');
-        this.expensifyAPI = API(network, {
-            enhanceParameters: data => ({
-                ...data,
-                csrfToken,
-            })
-        });
-
+        /**
+         * These area is for publicly defined methods that are exposed when we instantiate the ReportHistoryCache object
+         */
         return {
-            getHistoryByReportID: reportID => this.getHistoryByReportID(reportID),
+            getByReportID: reportID => this.getByReportID(reportID),
             setItem: (reportID, newItem, previousItem) => this.setItem(reportID, newItem, previousItem),
         };
     }
@@ -73,10 +66,10 @@ export default class ReportHistoryCache {
      *
      * @param {Number} reportID
      *
-     * @return {Deferred}
+     * @return {APIDeferred}
      */
     fetchAllHistoryByReportID(reportID) {
-        return this.expensifyAPI.Report_GetHistory({
+        return API.Report_GetHistory({
             reportID
         })
             .done((history) => {
@@ -110,7 +103,7 @@ export default class ReportHistoryCache {
      * @param {Number} reportID
      * @param {Array} newHistory
      */
-    mergeHistoryItems(reportID, newHistory) {
+    mergeItems(reportID, newHistory) {
         // Set local history
         this.reportHistory[reportID] = _.reduce(newHistory.reverse(), (prev, curr) => {
             // Only add history items whose sequence numbers are not in the cache to prevent duplicates
@@ -131,9 +124,9 @@ export default class ReportHistoryCache {
      * @param {Number} reportID
      * @param {Boolean} cacheFirst - Attempts to return from the local cache first before making a network request
      *
-     * @return {Deferred}
+     * @return {APIDeferred}
      */
-    getHistoryByReportID(reportID, cacheFirst) {
+    getByReportID(reportID, cacheFirst) {
         const history = this.reportHistory[reportID] || [];
 
         // First check to see if we even have this history in cache
@@ -153,7 +146,7 @@ export default class ReportHistoryCache {
         const firstHistoryItem = _.first(history) || {};
 
         // Grabbing the most current sequenceNumber we have and poll the API for fresh data
-        this.expensifyAPI.Report_GetHistoryFromSequenceNumber({
+        API.Report_GetHistoryFromSequenceNumber({
             reportID,
             sequenceNumber: firstHistoryItem.sequenceNumber || 0
         })
@@ -165,17 +158,17 @@ export default class ReportHistoryCache {
                 }
 
                 // Update history with new items fetched
-                this.mergeHistoryItems(reportID, response.history);
+                this.mergeItems(reportID, response.history);
 
                 // Return history for this report
                 promise.resolve(this.reportHistory[reportID]);
             });
 
-        return promise;
+        return new APIDeferred(promise);
     }
 
     /**
-     * Used by Pusher subscriptions and device notifications.
+     * Inserts an item directly into the cache.
      *
      * This method must be supplied an incoming report action and the previous report action.
      * If we have the incoming action then we can assume that we have the previous one and we'll return the cache in memory.
@@ -192,7 +185,7 @@ export default class ReportHistoryCache {
         const promise = new Deferred();
 
         // Get the history with a cacheFirst policy
-        this.getHistoryByReportID(reportID, true)
+        this.getByReportID(reportID, true)
             .done((history) => {
                 // If we have the action in the cache already - just return the history in cache since we're up to date
                 if (_.findWhere(history, {sequenceNumber: newItem.sequenceNumber})) {
@@ -211,10 +204,8 @@ export default class ReportHistoryCache {
 
                 // If we get here we have an incomplete history and should get
                 // the report history again but this time use a network only policy.
-                this.getHistoryByReportID(reportID)
-                    .done((recentHistory) => {
-                        promise.resolve(recentHistory);
-                    });
+                this.getByReportID(reportID)
+                    .done(promise.resolve);
             });
 
         return promise;

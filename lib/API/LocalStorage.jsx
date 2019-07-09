@@ -16,8 +16,6 @@ const isAvailable = (() => {
  *
  * @param {String} key
  * @param {Object} object
- *
- * @return {Boolean}
  */
 function set(key, object) {
     if (!isAvailable) {
@@ -26,9 +24,8 @@ function set(key, object) {
 
     try {
         localStorage.setItem(key, JSON.stringify(object));
-        return true;
-    } catch (err) {
-        return false;
+    } catch (error) {
+        console.debug('Error setting item to localStorage', {error});
     }
 }
 
@@ -51,15 +48,12 @@ function keyExists(key) {
  * Removes key and data returns true if successful.
  *
  * @param {String} key
- *
- * @return {Boolean}
  */
 function remove(key) {
     try {
         localStorage.removeItem(key);
-        return true;
-    } catch (err) {
-        return false;
+    } catch (error) {
+        console.debug('Error removing item from localStorage', {error});
     }
 }
 
@@ -77,13 +71,13 @@ function get(key) {
 
     try {
         return JSON.parse(localStorage.getItem(key));
-    } catch (err) {
+    } catch (error) {
+        console.debug('Error getting item from localStorage', {error});
         return {};
     }
 }
 
 export default {
-    isAvailable,
     set,
     get,
     keyExists,
