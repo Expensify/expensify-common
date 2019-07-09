@@ -5,6 +5,8 @@ import LocalStorage from './LocalStorage';
 import Network from '../Network';
 import API from '../API';
 
+const Deferred = window.Deferred;
+
 export default class ReportHistoryCache {
     constructor(platform, csrfToken) {
         this.storeExists = false;
@@ -139,7 +141,7 @@ export default class ReportHistoryCache {
             return this.fetchAllHistoryByReportID(reportID);
         }
 
-        const promise = new $.Deferred();
+        const promise = new Deferred();
 
         // We can override the fetch policy which is to get this
         // from the network if we have passed a param of cacheFirst
@@ -187,7 +189,7 @@ export default class ReportHistoryCache {
      * @returns {Deferred}
      */
     setItem(reportID, newItem, previousItem) {
-        const promise = new $.Deferred();
+        const promise = new Deferred();
 
         // Get the history with a cacheFirst policy
         this.getHistoryByReportID(reportID, true)
