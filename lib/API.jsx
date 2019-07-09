@@ -317,6 +317,45 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters, null, sync);
         },
 
+        /**
+         * Performs API command Report_GetHistory
+         * @param {Object} parameters API parameters. Must contain reportID
+         * @returns {APIDeferred}
+         */
+        Report_GetHistory(parameters) {
+            const commandName = 'Report_GetHistory';
+            requireParameters(['reportID'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters, 'history');
+        },
+
+        /**
+         * Retrieves the report history for action items after a given sequence number
+         *
+         * @param {Object} parameters
+         * @param {Number} parameters.reportID
+         * @param {Number} parameters.sequenceNumber
+         *
+         * @returns {APIDeferred}
+         */
+        Report_GetHistoryFromSequenceNumber(parameters) {
+            const commandName = 'Report_GetHistoryFromSequenceNumber';
+            requireParameters(['reportID', 'sequenceNumber'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * Performs API command Report_AddComment
+         *
+         * @param {Object} parameters The API call parameters. Must contain reportID and reportComment
+         *
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        Report_AddComment(parameters) {
+            const commandName = 'Report_AddComment';
+            requireParameters(['reportID', 'reportComment'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
