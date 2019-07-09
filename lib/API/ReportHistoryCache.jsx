@@ -135,41 +135,41 @@ export default class ReportHistoryCache {
         const history = this.reportHistory[reportID] || [];
 
         // First check to see if we even have this history in cache
-        if (!_.isEmpty(history)) {
-            const promise = new $.Deferred();
+        if (_.isEmpty(history)) {
+            return this.fetchAllHistoryByReportID(reportID);
+        }
 
-            // We can override the fetch policy which is to get this
-            // from the network if we have passed a param of cacheFirst
-            if (cacheFirst) {
-                promise.resolve(history);
-                return promise;
-            }
+        const promise = new $.Deferred();
 
-            const firstHistoryItem = _.first(history) || {};
-
-            // Grabbing the most current sequenceNumber we have and poll the API for fresh data
-            this.expensifyAPI.Report_GetHistoryFromSequenceNumber({
-                reportID,
-                sequenceNumber: firstHistoryItem.sequenceNumber || 0
-            })
-                .done((response) => {
-                    // History returned with no new entries we're up to date
-                    if (response.history.length === 0) {
-                        promise.resolve(this.reportHistory[reportID]);
-                        return;
-                    }
-
-                    // Update history with new items fetched
-                    this.mergeHistoryItems(reportID, response.history);
-
-                    // Return history for this report
-                    promise.resolve(this.reportHistory[reportID]);
-                });
-
+        // We can override the fetch policy which is to get this
+        // from the network if we have passed a param of cacheFirst
+        if (cacheFirst) {
+            promise.resolve(history);
             return promise;
         }
 
-        return this.fetchAllHistoryByReportID(reportID);
+        const firstHistoryItem = _.first(history) || {};
+
+        // Grabbing the most current sequenceNumber we have and poll the API for fresh data
+        this.expensifyAPI.Report_GetHistoryFromSequenceNumber({
+            reportID,
+            sequenceNumber: firstHistoryItem.sequenceNumber || 0
+        })
+            .done((response) => {
+                // History returned with no new entries we're up to date
+                if (response.history.length === 0) {
+                    promise.resolve(this.reportHistory[reportID]);
+                    return;
+                }
+
+                // Update history with new items fetched
+                this.mergeHistoryItems(reportID, response.history);
+
+                // Return history for this report
+                promise.resolve(this.reportHistory[reportID]);
+            });
+
+        return promise;
     }
 
     /**
