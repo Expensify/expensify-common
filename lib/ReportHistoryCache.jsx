@@ -1,21 +1,10 @@
 /* globals globalThis */
 
 import _ from 'underscore';
-import Network from 'js-libs/lib/Network';
-import API from 'js-libs/lib/API';
-import APIDeferred from 'js-libs/lib/APIDeferred';
 
-// TODO: Make Deferred JS-Libs versions all platform independent if possible.
-// For now we are just looking for it on the globalThis object
-const {Deferred} = globalThis;
-
-const expensifyAPI = new API(Network('/api.php'), {
-    enhanceParameters: data => ({
-        ...data,
-        csrfToken: window.g_csrfToken,
-        deferredOverride: Deferred,
-    })
-});
+// TODO: Make JS-Libs versions all platform independent if possible.
+// For now we are just looking for these on the globalThis object
+const {API, APIDeferred, Deferred} = globalThis;
 
 /**
  * Main report history cache
@@ -35,7 +24,7 @@ const cache = {};
  * @private
  */
 function fetchAll(reportID) {
-    return expensifyAPI.Report_GetHistory({reportID})
+    return API.Report_GetHistory({reportID})
         .done((reportHistory) => {
             cache[reportID] = reportHistory;
         });
@@ -86,7 +75,7 @@ function getHistory(reportID, cacheFirst = false) {
     const firstHistoryItem = _.first(history) || {};
 
     // Grabbing the most current sequenceNumber we have and poll the API for fresh data
-    expensifyAPI.Report_GetHistory({
+    API.Report_GetHistory({
         reportID,
         cursor: firstHistoryItem.sequenceNumber || 0
     })

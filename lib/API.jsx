@@ -12,7 +12,6 @@ import ExpensifyAPIDeferred from './APIDeferred';
  * @param {Object} [args]
  * @param {Function} [args.enhanceParameters] A function that takes the existing command parameters and returns a
  *                      modified version of them (for things like adding CSRF tokens)
- * @param {Function} [args.deferredOverride] Override implementation of $.Deferred for mobile
  *
  * @returns {Object}
  */
@@ -23,13 +22,6 @@ export default function API(network, args) {
      * Maps jsonCode => array of callback functions
      */
     const defaultHandlers = {};
-
-    /**
-     * @private
-     *
-     * Override the default jQuery Deferred implementation
-     */
-    const Deferred = args.deferredOverride ? args.deferredOverride : $.Deferred;
 
     /**
      * This allows us to track when the version of JS has changed on the server and then let programs treat the
@@ -48,7 +40,7 @@ export default function API(network, args) {
      * @returns {Object} $.Deferred
      */
     function isRunningLatestVersionOfCode() {
-        const promise = new Deferred();
+        const promise = new $.Deferred();
 
         $.get('/revision.txt')
             .done((codeRevision) => {
@@ -119,11 +111,11 @@ export default function API(network, args) {
         // This promise is to check to see if we are running the latest version of code
         const codeRevisionPromise = checkCodeRevision
             ? isRunningLatestVersionOfCode
-            : () => new Deferred().resolve();
+            : () => new $.Deferred().resolve();
 
         // This is a dummy promise that will perform the actions from our network POST. We have to create it here
         // because we need the final APIDeferred object to return immediately, and then have all this async code run.
-        const networkRequestPromise = new Deferred();
+        const networkRequestPromise = new $.Deferred();
 
         // This is the final APIDeferred which gets returned from the API lib.
         const finalApiDeferred = new ExpensifyAPIDeferred(networkRequestPromise, returnedPropertyName);
@@ -323,12 +315,6 @@ export default function API(network, args) {
             const commandName = 'Graphite';
             requireParameters(['type', 'statName', 'value'], parameters, commandName);
             return performPOSTRequest(commandName, parameters, null, sync);
-        },
-
-        Report_GetHistory(parameters) {
-            const commandName = 'Report_GetHistory';
-            requireParameters(['reportID'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters, 'history');
         },
 
         expensiworks: {
