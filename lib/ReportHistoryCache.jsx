@@ -67,27 +67,27 @@ export default class ReportHistoryCache {
             setItem: (reportID, reportAction) => {
                 const promise = new this.Deferred();
                 this.getHistory(reportID, true)
-                    .done((history) => {
+                    .done((cachedHistory) => {
                         const sequenceNumber = reportAction.sequenceNumber;
 
                         // If we have the action in the cache already - just return the history in cache since we're up to date
-                        if (_.findWhere(history, {sequenceNumber})) {
-                            return promise.resolve(history);
+                        if (_.findWhere(cachedHistory, {sequenceNumber})) {
+                            return promise.resolve(this.filterHiddenActions(cachedHistory));
                         }
 
                         // Do we have the reportAction immediately before this one?
-                        if (_.findWhere(history, {sequenceNumber: sequenceNumber  - 1})) {
+                        if (_.findWhere(cachedHistory, {sequenceNumber: sequenceNumber - 1})) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
                             // Unshift it on to the front of the history list and resolve.
                             this.cache[reportID].unshift(reportAction);
-                            promise.resolve(this.cache[reportID]);
+                            promise.resolve(this.filterHiddenActions(this.cache[reportID]));
                             return;
                         }
 
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
                         this.getHistory(reportID)
-                            .done(promise.resolve);
+                            .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)));
                     });
 
                 return promise;
@@ -139,10 +139,10 @@ export default class ReportHistoryCache {
      * @returns {Deferred}
      */
     getHistory(reportID, cacheFirst = false) {
-        const history = this.cache[reportID] || [];
+        const cachedHistory = this.cache[reportID] || [];
 
         // First check to see if we even have this history in cache
-        if (_.isEmpty(history)) {
+        if (_.isEmpty(cachedHistory)) {
             return this.fetchAll(reportID);
         }
 
@@ -152,16 +152,16 @@ export default class ReportHistoryCache {
         // from the network if we have passed a param of cacheFirst.
         // This way, we can get the items in the cache if the history is not empty.
         if (cacheFirst) {
-            promise.resolve(history);
+            promise.resolve(cachedHistory);
             return promise;
         }
 
-        const firstHistoryItem = _.first(history) || {};
+        const firstHistoryItem = _.first(cachedHistory) || {};
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
             reportID,
-            cursor: firstHistoryItem.sequenceNumber || 0
+            offset: firstHistoryItem.sequenceNumber || 0
         })
             .done((recentHistory) => {
                 // History returned with no new entries we're up to date
