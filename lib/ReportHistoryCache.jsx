@@ -1,130 +1,184 @@
-/* globals globalThis */
-
 import _ from 'underscore';
+import Str from './str';
 
-// TODO: Make JS-Libs versions all platform independent if possible.
-// For now we are just looking for these on the globalThis object
-const {API, APIDeferred, Deferred} = globalThis;
+export default class ReportHistoryCache {
+    /**
+     * Actions we should never show on web or mobile, but are required to store in the cache.
+     */
+    static HIDDEN_ACTIONS = [
+        'BILLABLEUPDATETRANSACTION',
+        'BILLABLEDELEGATE',
+        'QUEUEDFOREXPORT',
+        'REIMBURSEMENTACHBOUNCEFASTDEBIT',
+        'REIMBURSEMENTRETRYDEBIT',
+        'DIGITALSIGNATURE'
+    ];
 
-/**
- * Main report history cache
- * Map of reportIDs with value of report history items array
- *
- * @private
- */
-const cache = {};
+    // We need to instantiate the history cache with the platform specific implementations
+    constructor(API, Deferred, APIDeferred) {
+        this.API = API;
+        this.Deferred = Deferred;
+        this.APIDeferred = APIDeferred;
 
-/**
- * Fetches the entire report history from the API
- *
- * @param {Number} reportID
- *
- * @returns {APIDeferred}
- *
- * @private
- */
-function fetchAll(reportID) {
-    return API.Report_GetHistory({reportID})
-        .done((reportHistory) => {
-            cache[reportID] = reportHistory;
-        });
-}
+        /**
+         * Main report history cache
+         * Map of reportIDs with value of report history items array
+         *
+         * @private
+         */
+        this.cache = {};
 
-/**
- * Merges partial history items into the cache.
- *
- * @param {Number} reportID
- * @param {Object[]} newHistory
- *
- * @private
- */
-function mergeItems(reportID, newHistory) {
-    cache[reportID] = _.reduce(newHistory.reverse(), (prev, curr) => {
-        if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
-            prev.unshift(curr);
-        }
-        return prev;
-    }, cache[reportID]);
-}
+        /**
+        * @public
+        *
+        * Filters out actions we never want to display on web or mobile.
+        *
+        * @param {Object[]} historyItems
+        */
+        this.filterHiddenActions = (historyItems) => {
+            return _.filter(historyItems, historyItem => {
+                return !_.contains(ReportHistoryCache.HIDDEN_ACTIONS, historyItem.actionName) && !Str.startsWith(historyItem.actionName, 'CC');
+            });
+        };
 
-/**
- * Gets the history.
- *
- * @param {Number} reportID
- * @param {Boolean} cacheFirst - private usage only
- *
- * @returns {APIDeferred}
- */
-function getHistory(reportID, cacheFirst = false) {
-    const history = cache[reportID] || [];
+        /**
+         * Public Methods
+         */
+        return {
+            /**
+             * @public
+             *
+             * Returns the history for a given report.
+             * Note that we are unable to ask for the cached history.
+             *
+             * @returns {Deferred}
+             */
+            getHistory: reportID => {
+                return this.getHistory(reportID)
+                    .done(history => {
+                        return this.filterHiddenActions(history);
+                    });
+            },
 
-    // First check to see if we even have this history in cache
-    if (_.isEmpty(history)) {
-        return fetchAll(reportID);
+            /**
+             * @public
+             *
+             * Set a history item directly into the cache. Checks to see if we have the previous item first.
+             *
+             * @returns {Deferred}
+             */
+            setItem: (reportID, reportAction) => {
+                const promise = new this.Deferred();
+                this.getHistory(reportID, true)
+                    .done((history) => {
+                        const sequenceNumber = reportAction.sequenceNumber;
+
+                        // If we have the action in the cache already - just return the history in cache since we're up to date
+                        if (_.findWhere(history, {sequenceNumber})) {
+                            return promise.resolve(history);
+                        }
+
+                        // Do we have the reportAction immediately before this one?
+                        if (_.findWhere(history, {sequenceNumber: sequenceNumber  - 1})) {
+                            // If we have the previous one then we can assume we have an up to date history minus the most recent
+                            // Unshift it on to the front of the history list, save to disk, and resolve.
+                            this.cache[reportID].unshift(reportAction);
+                            promise.resolve(this.cache[reportID]);
+                            return;
+                        }
+
+                        // If we get here we have an incomplete history and should get
+                        // the report history again but this time use a network only policy.
+                        this.getHistory(reportID)
+                            .done(promise.resolve);
+                    });
+
+                return promise;
+            },
+
+            filterHiddenActions: (historyItems) => this.filterHiddenActions(historyItems),
+        };
     }
 
-    const promise = new Deferred();
-
-    // We can override the fetch policy which is to get this
-    // from the network if we have passed a param of cacheFirst
-    if (cacheFirst) {
-        promise.resolve(history);
-        return promise;
+    /**
+     * Fetches the entire report history from the API
+     *
+     * @param {Number} reportID
+     *
+     * @returns {APIDeferred}
+     *
+     * @private
+     */
+    fetchAll(reportID) {
+        return this.API.Report_GetHistory({reportID})
+            .done((reportHistory) => {
+                this.cache[reportID] = reportHistory;
+            });
     }
 
-    const firstHistoryItem = _.first(history) || {};
-
-    // Grabbing the most current sequenceNumber we have and poll the API for fresh data
-    API.Report_GetHistory({
-        reportID,
-        cursor: firstHistoryItem.sequenceNumber || 0
-    })
-        .done((recentHistory) => {
-            // History returned with no new entries we're up to date
-            if (recentHistory.length === 0) {
-                promise.resolve(cache[reportID]);
-                return;
+    /**
+     * Merges partial history items into the cache.
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     *
+     * @private
+     */
+    mergeItems(reportID, newHistory) {
+        this.cache[reportID] = _.reduce(newHistory.reverse(), (prev, curr) => {
+            if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
+                prev.unshift(curr);
             }
+            return prev;
+        }, this.cache[reportID]);
+    }
 
-            // Update history with new items fetched
-            mergeItems(reportID, recentHistory);
+    /**
+     * Gets the history.
+     *
+     * @param {Number} reportID
+     * @param {Boolean} cacheFirst - private usage only
+     *
+     * @returns {Deferred}
+     */
+    getHistory(reportID, cacheFirst = false) {
+        const history = this.cache[reportID] || [];
 
-            // Return history for this report
-            promise.resolve(cache[reportID]);
-        });
+        // First check to see if we even have this history in cache
+        if (_.isEmpty(history)) {
+            return this.fetchAll(reportID);
+        }
 
-    return new APIDeferred(promise);
-}
+        const promise = new this.Deferred();
 
-/**
- * Public Methodss
- */
-export default {
-    getHistory: reportID => getHistory(reportID),
-    setItem: (reportID, reportAction, previousSequenceNumber) => {
-        const promise = new Deferred();
-        getHistory(reportID, true)
-            .done((history) => {
-                // If we have the action in the cache already - just return the history in cache since we're up to date
-                if (_.findWhere(history, {sequenceNumber: reportAction.sequenceNumber})) {
-                    return promise.resolve(history);
-                }
+        // We can override the fetch policy which is to get this
+        // from the network if we have passed a param of cacheFirst
+        if (cacheFirst) {
+            promise.resolve(history);
+            return promise;
+        }
 
-                // Do we have the reportAction immediately before this one?
-                if (_.findWhere(history, {sequenceNumber: previousSequenceNumber})) {
-                    // If we have the previous one then we can assume we have an up to date history minus the most recent
-                    // Unshift it on to the front of the history list, save to disk, and resolve.
-                    cache[reportID].unshift(reportAction);
-                    promise.resolve(cache[reportID]);
+        const firstHistoryItem = _.first(history) || {};
+
+        // Grabbing the most current sequenceNumber we have and poll the API for fresh data
+        this.API.Report_GetHistory({
+            reportID,
+            cursor: firstHistoryItem.sequenceNumber || 0
+        })
+            .done((recentHistory) => {
+                // History returned with no new entries we're up to date
+                if (recentHistory.length === 0) {
+                    promise.resolve(this.cache[reportID]);
                     return;
                 }
 
-                // If we get here we have an incomplete history and should get
-                // the report history again but this time use a network only policy.
-                getHistory(reportID)
-                    .done(promise.resolve);
+                // Update history with new items fetched
+                this.mergeItems(reportID, recentHistory);
+
+                // Return history for this report
+                promise.resolve(this.cache[reportID]);
             });
 
         return promise;
     }
-};
+}
