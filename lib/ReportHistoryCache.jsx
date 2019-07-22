@@ -81,14 +81,14 @@ export default class ReportHistoryCache {
                         // Do we have the reportAction immediately before this one?
                         if (_.findWhere(history, {sequenceNumber: sequenceNumber  - 1})) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
-                            // Unshift it on to the front of the history list, save to disk, and resolve.
+                            // Unshift it on to the front of the history list and resolve.
                             this.cache[reportID].unshift(reportAction);
                             promise.resolve(this.cache[reportID]);
                             return;
                         }
 
                         // If we get here we have an incomplete history and should get
-                        // the report history again but this time use a network only policy.
+                        // the report history again, but this time do not check the cache first.
                         this.getHistory(reportID)
                             .done(promise.resolve);
                     });
@@ -152,7 +152,8 @@ export default class ReportHistoryCache {
         const promise = new this.Deferred();
 
         // We can override the fetch policy which is to get this
-        // from the network if we have passed a param of cacheFirst
+        // from the network if we have passed a param of cacheFirst.
+        // This way, we can get the items in the cache if the history is not empty.
         if (cacheFirst) {
             promise.resolve(history);
             return promise;
@@ -160,7 +161,7 @@ export default class ReportHistoryCache {
 
         const firstHistoryItem = _.first(history) || {};
 
-        // Grabbing the most current sequenceNumber we have and poll the API for fresh data
+        // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
             reportID,
             cursor: firstHistoryItem.sequenceNumber || 0
