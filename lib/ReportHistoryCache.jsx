@@ -1,19 +1,19 @@
 import _ from 'underscore';
 import Str from './str';
 
-export default class ReportHistoryCache {
-    /**
-     * Actions we should never show on web or mobile, but are required to store in the cache.
-     */
-    static HIDDEN_ACTIONS = [
-        'BILLABLEUPDATETRANSACTION',
-        'BILLABLEDELEGATE',
-        'QUEUEDFOREXPORT',
-        'REIMBURSEMENTACHBOUNCEFASTDEBIT',
-        'REIMBURSEMENTRETRYDEBIT',
-        'DIGITALSIGNATURE'
-    ];
+/**
+ * Actions we should never show on web or mobile, but are required to store in the cache.
+ */
+const HIDDEN_ACTIONS = [
+    'BILLABLEUPDATETRANSACTION',
+    'BILLABLEDELEGATE',
+    'QUEUEDFOREXPORT',
+    'REIMBURSEMENTACHBOUNCEFASTDEBIT',
+    'REIMBURSEMENTRETRYDEBIT',
+    'DIGITALSIGNATURE'
+];
 
+export default class ReportHistoryCache {
     // We need to instantiate the history cache with the platform specific implementations
     constructor(API, Deferred, APIDeferred) {
         this.API = API;
@@ -34,12 +34,10 @@ export default class ReportHistoryCache {
         * Filters out actions we never want to display on web or mobile.
         *
         * @param {Object[]} historyItems
+        *
+        * @returns {Object[]}
         */
-        this.filterHiddenActions = (historyItems) => {
-            return _.filter(historyItems, historyItem => {
-                return !_.contains(ReportHistoryCache.HIDDEN_ACTIONS, historyItem.actionName) && !Str.startsWith(historyItem.actionName, 'CC');
-            });
-        };
+        this.filterHiddenActions = historyItems => _.filter(historyItems, historyItem => !_.contains(HIDDEN_ACTIONS, historyItem.actionName) && !Str.startsWith(historyItem.actionName, 'CC'));
 
         /**
          * Public Methods
@@ -51,19 +49,18 @@ export default class ReportHistoryCache {
              * Returns the history for a given report.
              * Note that we are unable to ask for the cached history.
              *
+             * @param {Number} reportID
              * @returns {Deferred}
              */
-            getHistory: reportID => {
-                return this.getHistory(reportID)
-                    .done(history => {
-                        return this.filterHiddenActions(history);
-                    });
-            },
+            getHistory: reportID => this.getHistory(reportID).done(this.filterHiddenActions),
 
             /**
              * @public
              *
              * Set a history item directly into the cache. Checks to see if we have the previous item first.
+             *
+             * @param {Number} reportID
+             * @param {Object} reportAction
              *
              * @returns {Deferred}
              */
@@ -96,7 +93,7 @@ export default class ReportHistoryCache {
                 return promise;
             },
 
-            filterHiddenActions: (historyItems) => this.filterHiddenActions(historyItems),
+            filterHiddenActions: historyItems => this.filterHiddenActions(historyItems),
         };
     }
 
