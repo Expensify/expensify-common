@@ -52,7 +52,14 @@ export default class ReportHistoryCache {
              * @param {Number} reportID
              * @returns {Deferred}
              */
-            getHistory: reportID => this.getHistory(reportID).done(this.filterHiddenActions),
+            getHistory: (reportID) => {
+                const promise = new this.Deferred();
+                this.getHistory(reportID)
+                    .done((reportHistory) => {
+                        promise.resolve(this.filterHiddenActions(reportHistory));
+                    });
+                return promise;
+            },
 
             /**
              * @public
