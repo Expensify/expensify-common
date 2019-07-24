@@ -23,8 +23,6 @@ export default class ReportHistoryStore {
         /**
          * Main report history cache
          * Map of reportIDs with value of report history items array
-         *
-         * @private
          */
         this.cache = {};
 
@@ -42,8 +40,6 @@ export default class ReportHistoryStore {
          */
         return {
             /**
-             * @public
-             *
              * Returns the history for a given report.
              * Note that we are unable to ask for the cached history.
              *
@@ -60,8 +56,6 @@ export default class ReportHistoryStore {
             },
 
             /**
-             * @public
-             *
              * Set a history item directly into the cache. Checks to see if we have the previous item first.
              *
              * @param {Number} reportID
@@ -145,12 +139,13 @@ export default class ReportHistoryStore {
     get(reportID, cacheFirst = false) {
         const cachedHistory = this.cache[reportID] || [];
 
+        const promise = new this.Deferred();
+
         // First check to see if we even have this history in cache
         if (_.isEmpty(cachedHistory)) {
-            return this.fetchAll(reportID);
+            this.fetchAll(reportID)
+                .done(promise.resolve);
         }
-
-        const promise = new this.Deferred();
 
         // We can override the fetch policy which is to get this
         // from the network if we have passed a param of cacheFirst.
