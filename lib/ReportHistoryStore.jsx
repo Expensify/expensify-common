@@ -13,7 +13,7 @@ const HIDDEN_ACTIONS = [
     'DIGITALSIGNATURE'
 ];
 
-export default class ReportHistoryCache {
+export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
     constructor(API, Deferred, APIDeferred) {
         this.API = API;
@@ -29,8 +29,6 @@ export default class ReportHistoryCache {
         this.cache = {};
 
         /**
-        * @public
-        *
         * Filters out actions we never want to display on web or mobile.
         *
         * @param {Object[]} historyItems
@@ -52,9 +50,9 @@ export default class ReportHistoryCache {
              * @param {Number} reportID
              * @returns {Deferred}
              */
-            getHistory: (reportID) => {
+            get(reportID) {
                 const promise = new this.Deferred();
-                this.getHistory(reportID)
+                this.get(reportID)
                     .done((reportHistory) => {
                         promise.resolve(this.filterHiddenActions(reportHistory));
                     });
@@ -71,9 +69,9 @@ export default class ReportHistoryCache {
              *
              * @returns {Deferred}
              */
-            setItem: (reportID, reportAction) => {
+            set: (reportID, reportAction) => {
                 const promise = new this.Deferred();
-                this.getHistory(reportID, true)
+                this.get(reportID, true)
                     .done((cachedHistory) => {
                         const sequenceNumber = reportAction.sequenceNumber;
 
@@ -87,20 +85,19 @@ export default class ReportHistoryCache {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
                             // Unshift it on to the front of the history list and resolve.
                             this.cache[reportID].unshift(reportAction);
-                            promise.resolve(this.filterHiddenActions(this.cache[reportID]));
-                            return;
+                            return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
                         }
 
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
-                        this.getHistory(reportID)
+                        this.get(reportID)
                             .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)));
                     });
 
                 return promise;
             },
 
-            filterHiddenActions: historyItems => this.filterHiddenActions(historyItems),
+            filterHiddenActions: this.filterHiddenActions,
         };
     }
 
@@ -110,8 +107,6 @@ export default class ReportHistoryCache {
      * @param {Number} reportID
      *
      * @returns {APIDeferred}
-     *
-     * @private
      */
     fetchAll(reportID) {
         return this.API.Report_GetHistory({reportID})
@@ -125,10 +120,12 @@ export default class ReportHistoryCache {
      *
      * @param {Number} reportID
      * @param {Object[]} newHistory
-     *
-     * @private
      */
     mergeItems(reportID, newHistory) {
+        if (newHistory.length === 0) {
+            return;
+        }
+
         this.cache[reportID] = _.reduce(newHistory.reverse(), (prev, curr) => {
             if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
                 prev.unshift(curr);
@@ -145,7 +142,7 @@ export default class ReportHistoryCache {
      *
      * @returns {Deferred}
      */
-    getHistory(reportID, cacheFirst = false) {
+    get(reportID, cacheFirst = false) {
         const cachedHistory = this.cache[reportID] || [];
 
         // First check to see if we even have this history in cache
@@ -171,12 +168,6 @@ export default class ReportHistoryCache {
             offset: firstHistoryItem.sequenceNumber || 0
         })
             .done((recentHistory) => {
-                // History returned with no new entries we're up to date
-                if (recentHistory.length === 0) {
-                    promise.resolve(this.cache[reportID]);
-                    return;
-                }
-
                 // Update history with new items fetched
                 this.mergeItems(reportID, recentHistory);
 
