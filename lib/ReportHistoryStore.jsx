@@ -145,6 +145,7 @@ export default class ReportHistoryStore {
         if (_.isEmpty(cachedHistory)) {
             this.fetchAll(reportID)
                 .done(promise.resolve);
+            return promise;
         }
 
         // We can override the fetch policy which is to get this
