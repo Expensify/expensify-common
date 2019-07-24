@@ -4,7 +4,8 @@
  * ----------------------------------------------------------------------------------------------
  */
 import _ from 'underscore';
-import $ from 'jquery';
+// Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
+import {Deferred} from 'simply-deferred';
 import ExpensifyAPIDeferred from './APIDeferred';
 
 /**
@@ -40,9 +41,9 @@ export default function API(network, args) {
      * @returns {Object} $.Deferred
      */
     function isRunningLatestVersionOfCode() {
-        const promise = new $.Deferred();
+        const promise = new Deferred();
 
-        $.get('/revision.txt')
+        network.get('/revision.txt')
             .done((codeRevision) => {
                 if (codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
@@ -111,11 +112,11 @@ export default function API(network, args) {
         // This promise is to check to see if we are running the latest version of code
         const codeRevisionPromise = checkCodeRevision
             ? isRunningLatestVersionOfCode
-            : () => new $.Deferred().resolve();
+            : () => new Deferred().resolve();
 
         // This is a dummy promise that will perform the actions from our network POST. We have to create it here
         // because we need the final APIDeferred object to return immediately, and then have all this async code run.
-        const networkRequestPromise = new $.Deferred();
+        const networkRequestPromise = new Deferred();
 
         // This is the final APIDeferred which gets returned from the API lib.
         const finalApiDeferred = new ExpensifyAPIDeferred(networkRequestPromise, returnedPropertyName);
@@ -223,6 +224,17 @@ export default function API(network, args) {
         },
 
         /**
+         * @param  {Object} parameters
+         * @param  {String} parameters.email
+         * @return {ExpensifyAPIDeferred}
+         */
+        Domain_RequestAccess(parameters) {
+            const commandName = 'Domain_RequestAccess';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String[]} parameters.emailList
          *
@@ -244,6 +256,19 @@ export default function API(network, args) {
         signIn(parameters) {
             const commandName = 'SignIn';
             requireParameters(['email', 'password'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         * @param {String} parameters.token
+         * @param {String} [parameters.promoCode]
+         * @returns {APIDeferred}
+         */
+        signInGoogle(parameters) {
+            const commandName = 'SignInGoogle';
+            requireParameters(['email', 'token'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
@@ -457,6 +482,21 @@ export default function API(network, args) {
                 const commandName = 'ChatBot_Chat_AddHistory';
                 requireParameters(['chatID', 'eventName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Exits out of all the chats the agent was working on
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chats
+             * @param {Boolean} [sync]
+             *
+             * @returns {APIDeferred}
+             */
+            exitChats(parameters, sync = false) {
+                const commandName = 'ChatBot_ExitChats';
+                requireParameters(['chats'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, null, sync);
             },
 
             /**

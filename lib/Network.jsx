@@ -21,6 +21,14 @@ export default function Network(endpoint) {
 
     return {
         /**
+         * @param {String} url to fetch
+         * @returns {Deferred}
+         */
+        get(url) {
+            return $.get(url);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {Boolean} [sync] Whether or not the request should be synchronous
          *
