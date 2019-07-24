@@ -46,7 +46,7 @@ export default class ReportHistoryStore {
              * @param {Number} reportID
              * @returns {Deferred}
              */
-            get(reportID) {
+            get: (reportID) => {
                 const promise = new this.Deferred();
                 this.get(reportID)
                     .done((reportHistory) => {
