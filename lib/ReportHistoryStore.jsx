@@ -65,7 +65,7 @@ export default class ReportHistoryStore {
              */
             set: (reportID, reportAction) => {
                 const promise = new this.Deferred();
-                this.get(reportID, true)
+                this.getFromCacheFirst(reportID)
                     .done((cachedHistory) => {
                         const sequenceNumber = reportAction.sequenceNumber;
 
@@ -91,6 +91,7 @@ export default class ReportHistoryStore {
                 return promise;
             },
 
+            // We need this to be publically available for cases where we get the report history via PHP pages
             filterHiddenActions: this.filterHiddenActions,
         };
     }
@@ -136,26 +137,18 @@ export default class ReportHistoryStore {
      *
      * @returns {Deferred}
      */
-    get(reportID, cacheFirst = false) {
+    get(reportID) {
+        const promise = new this.Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
-        const promise = new this.Deferred();
-
-        // First check to see if we even have this history in cache
+        // If no cache exists for this report fully load the history.
         if (_.isEmpty(cachedHistory)) {
             this.fetchAll(reportID)
                 .done(promise.resolve);
             return promise;
         }
 
-        // We can override the fetch policy which is to get this
-        // from the network if we have passed a param of cacheFirst.
-        // This way, we can get the items in the cache if the history is not empty.
-        if (cacheFirst) {
-            promise.resolve(cachedHistory);
-            return promise;
-        }
-
+        // Otherwise we'll poll the API for the missing history
         const firstHistoryItem = _.first(cachedHistory) || {};
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
@@ -171,6 +164,28 @@ export default class ReportHistoryStore {
                 promise.resolve(this.cache[reportID]);
             });
 
+        return promise;
+    }
+
+    /**
+     * Gets the history from the cache if it exists. Otherwise fully loads the history.
+     *
+     * @param {Numberr} reportID
+     *
+     * @return {Deferrred}
+     */
+    getFromCacheFirst(reportID) {
+        const promise = new this.Deferred();
+        const cachedHistory = this.cache[reportID] || [];
+
+        // First check to see if we even have this history in cache
+        if (_.isEmpty(cachedHistory)) {
+            this.fetchAll(reportID)
+                .done(promise.resolve);
+            return promise;
+        }
+
+        promise.resolve(cachedHistory);
         return promise;
     }
 }
