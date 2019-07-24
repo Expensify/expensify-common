@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import {Deferred} from 'simply-deferred';
 import Str from './str';
 
 /**
@@ -15,10 +16,8 @@ const HIDDEN_ACTIONS = [
 
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
-    constructor(API, Deferred, APIDeferred) {
+    constructor(API) {
         this.API = API;
-        this.Deferred = Deferred;
-        this.APIDeferred = APIDeferred;
 
         /**
          * Main report history cache
@@ -47,7 +46,7 @@ export default class ReportHistoryStore {
              * @returns {Deferred}
              */
             get: (reportID) => {
-                const promise = new this.Deferred();
+                const promise = new Deferred();
                 this.get(reportID)
                     .done((reportHistory) => {
                         promise.resolve(this.filterHiddenActions(reportHistory));
@@ -64,7 +63,7 @@ export default class ReportHistoryStore {
              * @returns {Deferred}
              */
             set: (reportID, reportAction) => {
-                const promise = new this.Deferred();
+                const promise = new Deferred();
                 this.getFromCacheFirst(reportID)
                     .done((cachedHistory) => {
                         const sequenceNumber = reportAction.sequenceNumber;
@@ -138,7 +137,7 @@ export default class ReportHistoryStore {
      * @returns {Deferred}
      */
     get(reportID) {
-        const promise = new this.Deferred();
+        const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
         // If no cache exists for this report fully load the history.
@@ -175,7 +174,7 @@ export default class ReportHistoryStore {
      * @return {Deferrred}
      */
     getFromCacheFirst(reportID) {
-        const promise = new this.Deferred();
+        const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
         // First check to see if we even have this history in cache
