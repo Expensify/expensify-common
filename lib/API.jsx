@@ -4,6 +4,7 @@
  * ----------------------------------------------------------------------------------------------
  */
 import _ from 'underscore';
+
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
 import ExpensifyAPIDeferred from './APIDeferred';
@@ -788,6 +789,21 @@ export default function API(network, args) {
              */
             getFroalaS3Hash() {
                 return performPOSTRequest('ChatBot_FroalaS3Hash_Get');
+            },
+
+
+            /**
+             * Retrieves a fresh S3 hash for the Froala editor to use for image upload
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             *
+             * @returns {APIDeferred}
+             */
+            getMostUsedEvents(parameters) {
+                const commandName = 'ChatBot_Event_GetMostUsed';
+                requireParameters(['limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
             },
         },
 
