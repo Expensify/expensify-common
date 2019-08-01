@@ -793,7 +793,7 @@ export default function API(network, args) {
 
 
             /**
-             * Retrieves a fresh S3 hash for the Froala editor to use for image upload
+             * Get the most used events from chatbot
              *
              * @param {Object} parameters
              * @param {String} parameters.limit
