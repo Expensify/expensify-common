@@ -17,6 +17,10 @@ const HIDDEN_ACTIONS = [
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
     constructor(API) {
+        if (!API) {
+            throw new Error('Cannot instantiate ReportHistoryStore without API');
+        }
+
         this.API = API;
 
         /**
