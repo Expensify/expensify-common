@@ -508,7 +508,8 @@ export const UI = {
         MANAGED_CARD: 'corporate-card',
         CARD: 'credit-card',
         CLOCK: 'time',
-        PER_DIEM: 'per-diem'
+        PER_DIEM: 'per-diem',
+        PENDING_CARD: 'card-transaction-pending'
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
