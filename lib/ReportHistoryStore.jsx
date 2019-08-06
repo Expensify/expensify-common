@@ -67,7 +67,7 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            set: (reportID, reportAction) => {
+            setInCache: (reportID, reportAction) => {
                 const promise = new Deferred();
                 this.getWithCache(reportID)
                     .done((cachedHistory) => {
