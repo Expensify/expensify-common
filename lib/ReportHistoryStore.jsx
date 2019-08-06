@@ -1,18 +1,5 @@
 import _ from 'underscore';
 import {Deferred} from 'simply-deferred';
-import Str from './str';
-
-/**
- * Actions we should never show on web or mobile, but are required to store in the cache.
- */
-const HIDDEN_ACTIONS = [
-    'BILLABLEUPDATETRANSACTION',
-    'BILLABLEDELEGATE',
-    'QUEUEDFOREXPORT',
-    'REIMBURSEMENTACHBOUNCEFASTDEBIT',
-    'REIMBURSEMENTRETRYDEBIT',
-    'DIGITALSIGNATURE'
-];
 
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
@@ -36,7 +23,7 @@ export default class ReportHistoryStore {
         *
         * @returns {Object[]}
         */
-        this.filterHiddenActions = historyItems => _.filter(historyItems, historyItem => !_.contains(HIDDEN_ACTIONS, historyItem.actionName) && !Str.startsWith(historyItem.actionName, 'CC'));
+        this.filterHiddenActions = historyItems => _.filter(historyItems, historyItem => historyItem.shouldShow);
 
         /**
          * Public Methods
