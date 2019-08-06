@@ -353,6 +353,17 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters, 'history');
         },
 
+        /**
+         * Performs API command Report_AddComment
+         * @param {Object} parameters The API call parameters. Must contain reportID and reportComment
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        Report_AddComment(parameters) {
+            const commandName = 'Report_AddComment';
+            requireParameters(['reportID', 'reportComment'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
