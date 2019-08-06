@@ -342,6 +342,17 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters, null, sync);
         },
 
+        /**
+         * Performs API command Report_GetHistory
+         * @param {Object} parameters API parameters. Must contain reportID
+         * @returns {APIDeferred}
+         */
+        Report_GetHistory(parameters) {
+            const commandName = 'Report_GetHistory';
+            requireParameters(['reportID'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters, 'history');
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
