@@ -54,9 +54,9 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            setInCache: (reportID, reportAction) => {
+            insertIntoCache: (reportID, reportAction) => {
                 const promise = new Deferred();
-                this.getWithCache(reportID)
+                this.getFromCache(reportID)
                     .done((cachedHistory) => {
                         const sequenceNumber = reportAction.sequenceNumber;
 
@@ -79,7 +79,8 @@ export default class ReportHistoryStore {
                 return promise;
             },
 
-            // We need this to be publically available for cases where we get the report history via PHP pages
+            // We need this to be publically available for cases where we get the report history
+            // via PHP or html pages within the app e.g. printablereport.html
             filterHiddenActions: this.filterHiddenActions,
         };
     }
@@ -142,7 +143,7 @@ export default class ReportHistoryStore {
      *
      * @return {Deferrred}
      */
-    getWithCache(reportID) {
+    getFromCache(reportID) {
         const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
@@ -157,7 +158,6 @@ export default class ReportHistoryStore {
             return promise;
         }
 
-        promise.resolve(cachedHistory);
-        return promise;
+        return promise.resolve(cachedHistory);
     }
 }

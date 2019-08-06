@@ -344,7 +344,9 @@ export default function API(network, args) {
 
         /**
          * Performs API command Report_GetHistory
-         * @param {Object} parameters API parameters. Must contain reportID
+         * @param {Object} parameters
+         * @param {Number} parameters.reportID
+         * @param {Number} parameters.offset - optional offset (inclusive defaults to 0)
          * @returns {APIDeferred}
          */
         Report_GetHistory(parameters) {
@@ -356,6 +358,8 @@ export default function API(network, args) {
         /**
          * Performs API command Report_AddComment
          * @param {Object} parameters The API call parameters. Must contain reportID and reportComment
+         * @param {Number} parameters.reportID
+         * @param {String} parameters.reportComment
          * @returns {APIDeferred} An APIDeferred representing the promise of this request
          */
         Report_AddComment(parameters) {
