@@ -346,7 +346,7 @@ export default function API(network, args) {
          * Performs API command Report_GetHistory
          * @param {Object} parameters
          * @param {Number} parameters.reportID
-         * @param {Number} parameters.offset - optional offset (inclusive defaults to 0)
+         * @param {Number} [parameters.offset] - optional offset (inclusive defaults to 0)
          * @returns {APIDeferred}
          */
         Report_GetHistory(parameters) {
