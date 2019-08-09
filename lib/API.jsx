@@ -343,6 +343,32 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters, null, sync);
         },
 
+        /**
+         * Performs API command Report_GetHistory
+         * @param {Object} parameters
+         * @param {Number} parameters.reportID
+         * @param {Number} [parameters.offset] - optional offset (inclusive defaults to 0)
+         * @returns {APIDeferred}
+         */
+        Report_GetHistory(parameters) {
+            const commandName = 'Report_GetHistory';
+            requireParameters(['reportID'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters, 'history');
+        },
+
+        /**
+         * Performs API command Report_AddComment
+         * @param {Object} parameters The API call parameters. Must contain reportID and reportComment
+         * @param {Number} parameters.reportID
+         * @param {String} parameters.reportComment
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        Report_AddComment(parameters) {
+            const commandName = 'Report_AddComment';
+            requireParameters(['reportID', 'reportComment'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
