@@ -819,17 +819,18 @@ export default function API(network, args) {
 
 
             /**
-             * Get the most used events from chatbot
+             * Get recent events from chatbot
              *
              * @param {Object} parameters
              * @param {String} parameters.limit
+             * @param {String} parameters.type
              *
              * @returns {APIDeferred}
              */
-            getMostUsedEvents(parameters) {
-                const commandName = 'ChatBot_Event_GetMostUsed';
-                requireParameters(['limit'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters);
+            getRecentEvents(parameters) {
+                const commandName = 'ChatBot_Event_GetRecent';
+                requireParameters(['limit', 'type'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'events');
             },
         },
 
