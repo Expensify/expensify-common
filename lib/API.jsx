@@ -793,7 +793,7 @@ export default function API(network, args) {
 
 
             /**
-             * Get the most used events from chatbot
+             * Get recent events from chatbot
              *
              * @param {Object} parameters
              * @param {String} parameters.limit
