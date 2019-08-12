@@ -817,7 +817,6 @@ export default function API(network, args) {
                 return performPOSTRequest('ChatBot_FroalaS3Hash_Get');
             },
 
-
             /**
              * Get recent events from chatbot
              *
@@ -831,6 +830,17 @@ export default function API(network, args) {
                 const commandName = 'ChatBot_Event_GetRecent';
                 requireParameters(['limit', 'type'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'events');
+            },
+
+            /**
+             * Get the scoring data for saved responses from Bedrock.
+             *
+             * @param {Object} [parameters]
+             *
+             * @returns {APIDeferred}
+             */
+            getResponseData(parameters) {
+                return performPOSTRequest('ChatBot_GetResponseData', parameters);
             },
         },
 
