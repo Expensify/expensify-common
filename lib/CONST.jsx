@@ -494,7 +494,11 @@ export const CONST = {
     LOGIN_TYPES: {
         WEB: 'login',
         MOBILE: 'device'
-    }
+    },
+
+    EXPENSIFY_CARD: {
+        FEED_NAME: 'Expensify Card',
+    },
 };
 
 /**
