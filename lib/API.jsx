@@ -833,6 +833,22 @@ export default function API(network, args) {
             },
 
             /**
+             * Get recent notes from the chats with a user
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.accountID
+             * @param {String} parameters.queue
+             * @param {Number} [parameters.limit]
+             *
+             * @returns {APIDeferred}
+             */
+            getLaunchNotesForUser(parameters) {
+                const commandName = 'ChatBot_User_GetNotes';
+                requireParameters(['accountID', 'queue'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'chats');
+            },
+
+            /**
              * Get the scoring data for saved responses from Bedrock.
              *
              * @param {Object} [parameters]
