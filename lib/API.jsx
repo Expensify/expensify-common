@@ -833,20 +833,6 @@ export default function API(network, args) {
             },
 
             /**
-             * Get user info from email
-             *
-             * @param {Object} parameters
-             * @param {String} parameters.email
-             *
-             * @returns {APIDeferred}
-             */
-            getUserFromEmail(parameters) {
-                const commandName = 'ChatBot_User_GetFromEmail';
-                requireParameters(['email'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters, 'user');
-            },
-
-            /**
              * Get recent notes from the chats with a user
              *
              * @param {Object} parameters
