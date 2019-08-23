@@ -835,7 +835,7 @@ export default function API(network, args) {
             },
 
             /**
-             * Get recent notes from the chats with a user
+             * Get the notes from the chats we have with a user
              *
              * @param {Object} parameters
              * @param {Number} parameters.accountID
@@ -844,7 +844,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            getLaunchNotesForUser(parameters) {
+            getNotesForUser(parameters) {
                 const commandName = 'ChatBot_User_GetNotes';
                 requireParameters(['accountID', 'queue'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'chats');
