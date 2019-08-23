@@ -844,7 +844,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            getNotesForUser(parameters) {
+            getUserNotes(parameters) {
                 const commandName = 'ChatBot_User_GetNotes';
                 requireParameters(['accountID', 'queue'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'chats');
