@@ -783,6 +783,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {String} parameters.chatID
+             * @param {String} [parameters.email]
              *
              * @returns {APIDeferred}
              */
@@ -830,6 +831,22 @@ export default function API(network, args) {
                 const commandName = 'ChatBot_Event_GetRecent';
                 requireParameters(['limit', 'type'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'events');
+            },
+
+            /**
+             * Get the notes from the chats we have with a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email
+             * @param {String} parameters.queue
+             * @param {Number} [parameters.limit]
+             *
+             * @returns {APIDeferred}
+             */
+            getUserNotes(parameters) {
+                const commandName = 'ChatBot_User_GetNotes';
+                requireParameters(['email', 'queue'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'chats');
             },
 
             /**
