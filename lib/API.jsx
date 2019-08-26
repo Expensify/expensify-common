@@ -432,6 +432,19 @@ export default function API(network, args) {
             },
         },
 
+        user: {
+            getUserTravelDetails(parameters) {
+                const commandName = 'GetTravelDetails';
+                requireParameters(['chatID', 'supportPassword'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+            setUserTravelDetails(parameters) {
+                const commandName = 'SetTravelDetails';
+                requireParameters(['chatID', 'details'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+        },
+
         chatbot: {
             /**
              * Gets a specific chat from chatbot
