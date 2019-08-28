@@ -96,12 +96,15 @@ export default class ReportHistoryStore {
             return;
         }
 
-        this.cache[reportID] = _.reduce(newHistory.reverse(), (prev, curr) => {
+        const newCache =  _.reduce(newHistory.reverse(), (prev, curr) => {
             if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
                 prev.unshift(curr);
             }
             return prev;
         }, this.cache[reportID] || []);
+
+        // Sort items in case they have become out of sync
+        this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
     }
 
     /**
