@@ -61,7 +61,10 @@ export default class ReportHistoryStore {
                         const sequenceNumber = reportAction.sequenceNumber;
 
                         // Do we have the reportAction immediately before this one?
-                        if (cachedHistory.length >= sequenceNumber - 1) {
+                        // Note: History is zero indexed. So if we want to check if we have the previous message before an
+                        // incoming message with a sequenceNumber of 18 then we'd be looking for a cache length of 18
+                        // which would indicate that we have sequenceNumber 17)
+                        if (cachedHistory.length >= sequenceNumber) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
                             // and must merge it into the cache
                             this.mergeItems(reportID, [reportAction]);
