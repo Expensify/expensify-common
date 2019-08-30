@@ -99,7 +99,7 @@ export default class ReportHistoryStore {
             return;
         }
 
-        const newCache =  _.reduce(newHistory.reverse(), (prev, curr) => {
+        const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
             if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
                 prev.unshift(curr);
             }
