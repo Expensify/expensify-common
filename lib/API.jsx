@@ -435,7 +435,7 @@ export default function API(network, args) {
         user: {
             getUserTravelDetails(parameters) {
                 const commandName = 'GetTravelDetails';
-                requireParameters(['chatID', 'password'], parameters, commandName);
+                requireParameters(['chatID'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
             setUserTravelDetails(parameters) {
