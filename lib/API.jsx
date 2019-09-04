@@ -783,7 +783,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {String} parameters.chatID
-             * @param {String} [parameters.email]
+             * @param {String} [parameters.searchEmail]
              *
              * @returns {APIDeferred}
              */
