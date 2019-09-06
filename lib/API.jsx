@@ -261,6 +261,16 @@ export default function API(network, args) {
         },
 
         /**
+         * Perform API command 'SignOut'
+         *
+         * @param {Object} [parameters] Given 'clean', the backend will also clear the 'email' cookie
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        signOut(parameters) {
+            return performPOSTRequest('SignOut', parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.token
@@ -783,7 +793,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {String} parameters.chatID
-             * @param {String} [parameters.email]
+             * @param {String} [parameters.searchEmail]
              *
              * @returns {APIDeferred}
              */
