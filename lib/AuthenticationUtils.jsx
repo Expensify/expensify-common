@@ -2,44 +2,9 @@ import _ from 'underscore';
 import {Deferred} from 'simply-deferred';
 import ExpensifyAPI from './ExpensifyAPI';
 import Str from './str';
+import {PUBLIC_DOMAINS} from './CONST';
 
 const authResult = {};
-
-// TODO: Replace this temporary list of public domains with something more reliable, without bloating the JS with ~2500 domains
-// TODO: When you change this list, please let the Mobile team know because we have it hard-coded as well.
-const publicDomains = [
-    'expensify.sms',
-    'gmail.com',
-    'yahoo.com',
-    'hotmail.com',
-    'me.com',
-    'aol.com',
-    'mac.com',
-    'comcast.net',
-    'msn.com',
-    'live.com',
-    'sbcglobal.net',
-    'cox.net',
-    'yahoo.co.uk',
-    'att.net',
-    'ymail.com',
-    'verizon.net',
-    'bellsouth.net',
-    'googlemail.com',
-    'earthlink.net',
-    'hotmail.co.uk',
-    'charter.net',
-    'btinternet.com',
-    'yahoo.com.hk',
-    'yahoo.com.br',
-    'yahoo.com.mx',
-    'rocketmail.com',
-    'shaw.ca',
-    'bigpond.com',
-    'yahoo.com.sg',
-    'yahoo.com.tw',
-    'hotmail.it'
-];
 
 /**
  * Get and cache the result of the 'signin' call to check the status of the account
@@ -142,7 +107,7 @@ export default {
      * @return {Boolean}
      */
     isPublicDomain(email) {
-        return _.contains(publicDomains, Str.extractEmailDomain(email));
+        return _.contains(PUBLIC_DOMAINS, Str.extractEmailDomain(email));
     },
 
     /**
