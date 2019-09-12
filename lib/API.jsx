@@ -873,7 +873,7 @@ export default function API(network, args) {
             reopenChat(parameters) {
                 requireParameters(['chatID', 'accountID', 'shouldReassign']);
                 return performPOSTRequest('ChatBot_Chat_Reopen', parameters);
-            }
+            },
         },
 
         JSON_CODES: {
