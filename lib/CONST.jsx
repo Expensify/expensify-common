@@ -538,7 +538,7 @@ export const UI = {
     DIALOG_Z_INDEX: 4000
 };
 
-// List of public domains. Must be kept in sync with mobile. @TODO: Make mobile use this list directly.
+// List of public domains.
 export const PUBLIC_DOMAINS = [
     'expensify.sms',
     'gmail.com',
