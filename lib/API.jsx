@@ -263,7 +263,8 @@ export default function API(network, args) {
         /**
          * Perform API command 'SignOut'
          *
-         * @param {Object} [parameters] Given 'clean', the backend will also clear the 'email' cookie
+         * @param {Object} [parameters]
+         * @param {Boolean} [parameters.clean] clear the 'email' cookie
          * @returns {APIDeferred} An APIDeferred representing the promise of this request
          */
         signOut(parameters) {
