@@ -841,6 +841,22 @@ export default function API(network, args) {
             getResponseData(parameters) {
                 return performPOSTRequest('ChatBot_GetResponseData', parameters);
             },
+
+            /**
+             * Reopens a chat that has been closed.
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chatID
+             * @param {Number} parameters.accountID
+             * @param {Boolean} parameters.shouldReassign
+             *
+             * @returns {APIDeferred}
+             */
+            reopenChat(parameters) {
+                const commandName = 'ChatBot_Chat_Reopen';
+                requireParameters(['chatID', 'accountID', 'shouldReassign'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
         },
 
         JSON_CODES: {
