@@ -261,6 +261,17 @@ export default function API(network, args) {
         },
 
         /**
+         * Perform API command 'SignOut'
+         *
+         * @param {Object} [parameters]
+         * @param {Boolean} [parameters.clean] clear the 'email' cookie
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        signOut(parameters) {
+            return performPOSTRequest('SignOut', parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.token

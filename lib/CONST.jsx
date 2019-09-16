@@ -537,3 +537,38 @@ export const UI = {
     // Base z-index for dialogs $zindex-dialog in _vars.scss should take it's value from here!
     DIALOG_Z_INDEX: 4000
 };
+
+// List of public domains.
+export const PUBLIC_DOMAINS = [
+    'expensify.sms',
+    'gmail.com',
+    'yahoo.com',
+    'hotmail.com',
+    'me.com',
+    'aol.com',
+    'mac.com',
+    'comcast.net',
+    'msn.com',
+    'live.com',
+    'sbcglobal.net',
+    'cox.net',
+    'yahoo.co.uk',
+    'att.net',
+    'ymail.com',
+    'verizon.net',
+    'bellsouth.net',
+    'googlemail.com',
+    'earthlink.net',
+    'hotmail.co.uk',
+    'charter.net',
+    'btinternet.com',
+    'yahoo.com.hk',
+    'yahoo.com.br',
+    'yahoo.com.mx',
+    'rocketmail.com',
+    'shaw.ca',
+    'bigpond.com',
+    'yahoo.com.sg',
+    'yahoo.com.tw',
+    'hotmail.it'
+];
