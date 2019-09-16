@@ -556,24 +556,6 @@ export default function API(network, args) {
             },
 
             /**
-             * Escalate a chat to the success team
-             *
-             * @param {Object} parameters
-             * @param {String} parameters.teamID
-             * @param {String} parameters.notehtml
-             * @param {Number} parameters.chatID
-             * @param {Number} parameters.inputID
-             * @param {Number} parameters.jobID
-             *
-             * @returns {APIDeferred}
-             */
-            escalateToTeam(parameters) {
-                const commandName = 'ChatBot_Escalate_AssignToTeam';
-                requireParameters(['teamID', 'note-html', 'chatID', 'inputID', 'jobID'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters);
-            },
-
-            /**
              * Trigger an event for an input
              *
              * @param {Object} parameters
@@ -794,7 +776,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {String} parameters.chatID
-             * @param {String} [parameters.searchEmail]
+             * @param {String} [parameters.targetEmail]
              *
              * @returns {APIDeferred}
              */
@@ -869,6 +851,22 @@ export default function API(network, args) {
              */
             getResponseData(parameters) {
                 return performPOSTRequest('ChatBot_GetResponseData', parameters);
+            },
+
+            /**
+             * Reopens a chat that has been closed.
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chatID
+             * @param {Number} parameters.accountID
+             * @param {Boolean} parameters.shouldReassign
+             *
+             * @returns {APIDeferred}
+             */
+            reopenChat(parameters) {
+                const commandName = 'ChatBot_Chat_Reopen';
+                requireParameters(['chatID', 'accountID', 'shouldReassign'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
             },
         },
 
