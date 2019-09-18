@@ -188,8 +188,7 @@ module.exports = {
          * @returns {number} The amount of tax
          */
         calculateTaxFromDivisor(total, divisor) {
-            const roundedQuotient = Math.round(total / divisor);
-            return parseInt(total - roundedQuotient, 10);
+            return parseInt(Math.round(total - (total / divisor)), 10);
         }
     }
 };
