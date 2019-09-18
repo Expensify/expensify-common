@@ -865,7 +865,7 @@ export default function API(network, args) {
              */
             reopenChat(parameters) {
                 const commandName = 'ChatBot_Chat_Reopen';
-                requireParameters(['chatID', 'accountID', 'shouldReassign'], parameters, commandName);
+                requireParameters(['chatID', 'shouldReassign'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
         },
