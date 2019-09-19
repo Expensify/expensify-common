@@ -437,7 +437,7 @@ export default function API(network, args) {
              * Get the travel details for a
              *
              * @param {Object} parameters
-             * @param {String} [parameters.chatID]
+             * @param {String} parameters.chatID
              * @param {String} [parameters.password] only needed if we don't have it stored in the cookie
              *
              * @returns {APIDeferred}
@@ -452,8 +452,8 @@ export default function API(network, args) {
              * Save the travel details for a user
              *
              * @param {Object} parameters
-             * @param {String} [parameters.chatID]
-             * @param {String} [parameters.details]
+             * @param {String} parameters.chatID
+             * @param {String} parameters.details
              *
              * @returns {APIDeferred}
              */
