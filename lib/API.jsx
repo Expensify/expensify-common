@@ -870,6 +870,23 @@ export default function API(network, args) {
             },
         },
 
+        card: {
+            /**
+             * Set the limit of an expensify card
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.cardID
+             * @param {Number} parameters.limit should be in positive cents
+             *
+             * @returns {APIDeferred}
+             */
+            setLimit(parameters) {
+                const commandName = 'ExpensifyCard_SetLimit';
+                requireParameters(['cardID', 'limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+        },
+
         JSON_CODES: {
             AUTH_FAILURES: [
                 403, // CSRF Token is invalid (expired, absent or mal-formed)
