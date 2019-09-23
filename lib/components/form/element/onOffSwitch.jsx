@@ -76,7 +76,7 @@ const defaultProps = {
     alwaysShowChildren: false,
     descriptionBeforeChildren: false,
     safeDescription: false,
-    hideEnabledDisabledText: true,
+    hideEnabledDisabledText: false,
     extraClasses: [],
 };
 
