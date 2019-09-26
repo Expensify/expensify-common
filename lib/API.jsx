@@ -875,16 +875,16 @@ export default function API(network, args) {
              * Set the limit of an expensify card
              *
              * @param {Object} parameters
-             * @param {Number} [parameters.cardID]
              * @param {String} parameters.email who the card is assigned to
-             * @param {Boolean} parameters.enabled whether or not the card has a custom limit
+             * @param {Boolean} parameters.hasCustomLimit whether or not the card has a custom limit
+             * @param {Number} [parameters.cardID]
              * @param {Number} [parameters.limit] should be in positive cents
              *
              * @returns {APIDeferred}
              */
             setLimit(parameters) {
                 const commandName = 'ExpensifyCard_SetLimit';
-                requireParameters(['email', 'enabled'], parameters, commandName);
+                requireParameters(['email', 'hasCustomLimit'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
         },
