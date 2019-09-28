@@ -868,6 +868,20 @@ export default function API(network, args) {
                 requireParameters(['chatID', 'shouldReassign'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
+
+            /**
+             * Get first responder escalations
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             *
+             * @returns {APIDeferred}
+             */
+            getFirstResponderEscalations(parameters) {
+                const commandName = 'ChatBot_GetFirstResponderEscalations';
+                requireParameters(['limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'escalations');
+            },
         },
 
         card: {
