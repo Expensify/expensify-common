@@ -897,7 +897,7 @@ export default function API(network, args) {
              * @returns {APIDeferred}
              */
             setLimit(parameters) {
-                const commandName = 'ExpensifyCard_SetLimit';
+                const commandName = 'Card_setLimit';
                 requireParameters(['email', 'hasCustomLimit'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
