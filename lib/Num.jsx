@@ -195,9 +195,8 @@ module.exports = {
         /**
          * Returns how many decimals to display (used for currencies).
          *
-         * @private
-         * @param {float} rate
-         * @return {int}
+         * @param {Number} rate
+         * @return {Number}
          */
         getDisplayDecimals(rate) {
             if (rate % 1 === 0) {
