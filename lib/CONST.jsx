@@ -51,6 +51,213 @@ export const CONST = {
         NZ: 'NZD'
     },
 
+    STATES: {
+        AK: {
+            stateISO: 'AK',
+            stateName: 'Alaska'
+        },
+        AL: {
+            stateISO: 'AL',
+            stateName: 'Alabama'
+        },
+        AR: {
+            stateISO: 'AR',
+            stateName: 'Arkansas'
+        },
+        AZ: {
+            stateISO: 'AZ',
+            stateName: 'Arizona'
+        },
+        CA: {
+            stateISO: 'CA',
+            stateName: 'California'
+        },
+        CO: {
+            stateISO: 'CO',
+            stateName: 'Colorado'
+        },
+        CT: {
+            stateISO: 'CT',
+            stateName: 'Connecticut'
+        },
+        DE: {
+            stateISO: 'DE',
+            stateName: 'Delaware'
+        },
+        FL: {
+            stateISO: 'FL',
+            stateName: 'Florida'
+        },
+        GA: {
+            stateISO: 'GA',
+            stateName: 'Georgia'
+        },
+        HI: {
+            stateISO: 'HI',
+            stateName: 'Hawaii'
+        },
+        IA: {
+            stateISO: 'IA',
+            stateName: 'Iowa'
+        },
+        ID: {
+            stateISO: 'ID',
+            stateName: 'Idaho'
+        },
+        IL: {
+            stateISO: 'IL',
+            stateName: 'Illinois'
+        },
+        IN: {
+            stateISO: 'IN',
+            stateName: 'Indiana'
+        },
+        KS: {
+            stateISO: 'KS',
+            stateName: 'Kansas'
+        },
+        KY: {
+            stateISO: 'KY',
+            stateName: 'Kentucky'
+        },
+        LA: {
+            stateISO: 'LA',
+            stateName: 'Louisiana'
+        },
+        MA: {
+            stateISO: 'MA',
+            stateName: 'Massachusetts'
+        },
+        MD: {
+            stateISO: 'MD',
+            stateName: 'Maryland'
+        },
+        ME: {
+            stateISO: 'ME',
+            stateName: 'Maine'
+        },
+        MI: {
+            stateISO: 'MI',
+            stateName: 'Michigan'
+        },
+        MN: {
+            stateISO: 'MN',
+            stateName: 'Minnesota'
+        },
+        MO: {
+            stateISO: 'MO',
+            stateName: 'Missouri'
+        },
+        MS: {
+            stateISO: 'MS',
+            stateName: 'Mississippi'
+        },
+        MT: {
+            stateISO: 'MT',
+            stateName: 'Montana'
+        },
+        NC: {
+            stateISO: 'NC',
+            stateName: 'North Carolina'
+        },
+        ND: {
+            stateISO: 'ND',
+            stateName: 'North Dakota'
+        },
+        NE: {
+            stateISO: 'NE',
+            stateName: 'Nebraska'
+        },
+        NH: {
+            stateISO: 'NH',
+            stateName: 'New Hampshire'
+        },
+        NJ: {
+            stateISO: 'NJ',
+            stateName: 'New Jersey'
+        },
+        NM: {
+            stateISO: 'NM',
+            stateName: 'New Mexico'
+        },
+        NV: {
+            stateISO: 'NV',
+            stateName: 'Nevada'
+        },
+        NY: {
+            stateISO: 'NY',
+            stateName: 'New York'
+        },
+        OH: {
+            stateISO: 'OH',
+            stateName: 'Ohio'
+        },
+        OK: {
+            stateISO: 'OK',
+            stateName: 'Oklahoma'
+        },
+        OR: {
+            stateISO: 'OR',
+            stateName: 'Oregon'
+        },
+        PA: {
+            stateISO: 'PA',
+            stateName: 'Pennsylvania'
+        },
+        RI: {
+            stateISO: 'RI',
+            stateName: 'Rhode Island'
+        },
+        SC: {
+            stateISO: 'SC',
+            stateName: 'South Carolina'
+        },
+        SD: {
+            stateISO: 'SD',
+            stateName: 'South Dakota'
+        },
+        TN: {
+            stateISO: 'TN',
+            stateName: 'Tennessee'
+        },
+        TX: {
+            stateISO: 'TX',
+            stateName: 'Texas'
+        },
+        UT: {
+            stateISO: 'UT',
+            stateName: 'Utah'
+        },
+        VA: {
+            stateISO: 'VA',
+            stateName: 'Virginia'
+        },
+        VT: {
+            stateISO: 'VT',
+            stateName: 'Vermont'
+        },
+        WA: {
+            stateISO: 'WA',
+            stateName: 'Washington'
+        },
+        WI: {
+            stateISO: 'WI',
+            stateName: 'Wisconsin'
+        },
+        WV: {
+            stateISO: 'WV',
+            stateName: 'West Virginia'
+        },
+        WY: {
+            stateISO: 'WY',
+            stateName: 'Wyoming'
+        },
+        DC: {
+            stateISO: 'DC',
+            stateName: 'District Of Columbia'
+        }
+    },
+
     /**
      * Store all the regular expression we are using for matching stuff
      */
