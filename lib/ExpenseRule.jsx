@@ -1,10 +1,16 @@
 import _ from 'underscore';
 
+/**
+ *  Represents a user's Personal Details object, which includes their
+ *  - First name
+ *  - Last name
+ *  - Avatar
+ */
 export default class ExpenseRule {
     /**
      * Creates a new instance of this class.
      *
-     * @param {array} ruleArray
+     * @param {Array} ruleArray
      */
     constructor(ruleArray) {
         _.each(ruleArray, (value, key) => {
@@ -18,22 +24,18 @@ export default class ExpenseRule {
      *
      * @param {string} field
      *
-     * @return {array}
+     * @return {Object}
      */
     getApplyWhenByField(field) {
-        let returnConditions = [];
-        _.each(this.applyWhen, (conditions) => {
-            if (conditions.field === field) {
-                returnConditions = conditions;
-            }
-        });
-        return returnConditions;
+        return _.find(this.applyWhen, (condition) => {
+            return conditions.field === field;
+        }) || {};
     }
 
     /**
      * Get the externalID saved deep in the tax field
      *
-     * @returns {string}
+     * @returns {String}
      */
     getExternalTaxID() {
         return this.tax.field_id_TAX.externalID || '';
