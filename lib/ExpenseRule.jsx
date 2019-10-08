@@ -27,7 +27,7 @@ export default class ExpenseRule {
      * @return {Object}
      */
     getApplyWhenByField(field) {
-        return _.find(this.applyWhen, (condition) => {
+        return _.find(this.applyWhen, (conditions) => {
             return conditions.field === field;
         }) || {};
     }
