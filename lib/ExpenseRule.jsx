@@ -1,11 +1,5 @@
 import _ from 'underscore';
 
-/**
- *  Represents a user's Personal Details object, which includes their
- *  - First name
- *  - Last name
- *  - Avatar
- */
 export default class ExpenseRule {
     /**
      * Creates a new instance of this class.
