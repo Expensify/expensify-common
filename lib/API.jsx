@@ -865,7 +865,40 @@ export default function API(network, args) {
              */
             reopenChat(parameters) {
                 const commandName = 'ChatBot_Chat_Reopen';
-                requireParameters(['chatID', 'accountID', 'shouldReassign'], parameters, commandName);
+                requireParameters(['chatID', 'shouldReassign'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Get first responder escalations
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             *
+             * @returns {APIDeferred}
+             */
+            getFirstResponderEscalations(parameters) {
+                const commandName = 'ChatBot_GetFirstResponderEscalations';
+                requireParameters(['limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'escalations');
+            },
+        },
+
+        card: {
+            /**
+             * Set the limit of an expensify card
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email who the card is assigned to
+             * @param {Boolean} parameters.hasCustomLimit whether or not the card has a custom limit
+             * @param {Number} [parameters.cardID]
+             * @param {Number} [parameters.limit] should be in positive cents
+             *
+             * @returns {APIDeferred}
+             */
+            setLimit(parameters) {
+                const commandName = 'Card_setLimit';
+                requireParameters(['email', 'hasCustomLimit'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
         },

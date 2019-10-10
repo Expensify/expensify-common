@@ -189,6 +189,24 @@ module.exports = {
          */
         calculateTaxFromDivisor(total, divisor) {
             return parseInt(Math.round(total - (total / divisor)), 10);
+        },
+
+        /**
+         * Returns how many decimals to display (used for currencies).
+         *
+         * @param {Number} rate
+         * @return {Number}
+         */
+        getDisplayDecimals(rate) {
+            if (rate % 1 === 0) {
+                return 2;
+            }
+
+            if (rate * 10 % 1 === 0) {
+                return 3;
+            }
+
+            return 4;
         }
     }
 };
