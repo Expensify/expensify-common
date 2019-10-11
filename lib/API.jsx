@@ -827,18 +827,17 @@ export default function API(network, args) {
             },
 
             /**
-             * Get the notes from the chats we have with a user
+             * Get the chats we have with a user
              *
              * @param {Object} parameters
              * @param {String} parameters.email
-             * @param {String} parameters.queue
              * @param {Number} [parameters.limit]
              *
              * @returns {APIDeferred}
              */
-            getUserNotes(parameters) {
-                const commandName = 'ChatBot_User_GetNotes';
-                requireParameters(['email', 'queue'], parameters, commandName);
+            getUserChats(parameters) {
+                const commandName = 'ChatBot_User_GetChats';
+                requireParameters(['email'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'chats');
             },
 
