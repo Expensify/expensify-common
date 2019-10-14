@@ -843,6 +843,21 @@ export default function API(network, args) {
             },
 
             /**
+             * Get the chats we have with a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email
+             * @param {Number} [parameters.limit]
+             *
+             * @returns {APIDeferred}
+             */
+            getUserChats(parameters) {
+                const commandName = 'ChatBot_User_GetChats';
+                requireParameters(['email'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'chats');
+            },
+
+            /**
              * Get the scoring data for saved responses from Bedrock.
              *
              * @param {Object} [parameters]
