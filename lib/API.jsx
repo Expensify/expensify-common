@@ -311,6 +311,20 @@ export default function API(network, args) {
         },
 
         /**
+         * Reopen a closed account.
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         *
+         * @return {ExpensifyAPIDeferred}
+         */
+        reopenAccount(parameters) {
+            const commandName = 'User_ReopenAccount';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Resets the password for an account
          * @param {Object} parameters
          * @param {String} parameters.email
