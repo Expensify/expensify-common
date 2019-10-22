@@ -313,6 +313,7 @@ export default function API(network, args) {
         /**
          * Reopen a closed account.
          *
+         * @param {Object} parameters
          * @param {String} parameters.email
          *
          * @return {ExpensifyAPIDeferred}
