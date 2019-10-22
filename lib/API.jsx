@@ -922,7 +922,7 @@ export default function API(network, args) {
              * @returns {APIDeferred}
              */
             getGHChatIDsAndState(parameters) {
-                const commandName = 'ChatBot_GetGHChatIDs_And_State';
+                const commandName = 'ChatBot_GetGHChatIDsAndState';
                 requireParameters(['githubLink'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
