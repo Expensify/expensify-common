@@ -472,7 +472,9 @@ export default function API(network, args) {
             },
 
             /**
-             * Get the agent's accuracy fields
+             * Get the logged in agent's accuracy fields
+             *
+             * @returns {APIDeferred}
              */
             getAgentAccuracy() {
                 const commandName = 'SSDos_GetAgentAccuracy';
