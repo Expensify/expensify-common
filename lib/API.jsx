@@ -470,6 +470,17 @@ export default function API(network, args) {
                 const commandName = 'SSDos_GetCurrencyList';
                 return performPOSTRequest(commandName);
             },
+
+            /**
+             * Get the logged in agent's accuracy fields
+             *
+             * @returns {APIDeferred}
+             */
+            getAgentAccuracy() {
+                const commandName = 'SSDos_GetAgentAccuracy';
+
+                return performPOSTRequest(commandName);
+            },
         },
 
         chatbot: {
