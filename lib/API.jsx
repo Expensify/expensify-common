@@ -311,6 +311,20 @@ export default function API(network, args) {
         },
 
         /**
+         * Reopen a closed account.
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         *
+         * @return {ExpensifyAPIDeferred}
+         */
+        reopenAccount(parameters) {
+            const commandName = 'User_ReopenAccount';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Resets the password for an account
          * @param {Object} parameters
          * @param {String} parameters.email
@@ -377,6 +391,21 @@ export default function API(network, args) {
         Report_AddComment(parameters) {
             const commandName = 'Report_AddComment';
             requireParameters(['reportID', 'reportComment'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * Performs API command Github_Close
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.githubLink
+         * @param {Boolean} [parameters.reopen] True by default. If false, we will not reopen the Concierge chats linked in the Github
+         *
+         * @returns {APIDeferred}
+         */
+        githubClose(parameters) {
+            const commandName = 'Github_Close';
+            requireParameters(['githubLink'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
@@ -836,22 +865,6 @@ export default function API(network, args) {
             },
 
             /**
-             * Get the notes from the chats we have with a user
-             *
-             * @param {Object} parameters
-             * @param {String} parameters.email
-             * @param {String} parameters.queue
-             * @param {Number} [parameters.limit]
-             *
-             * @returns {APIDeferred}
-             */
-            getUserNotes(parameters) {
-                const commandName = 'ChatBot_User_GetNotes';
-                requireParameters(['email', 'queue'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters, 'chats');
-            },
-
-            /**
              * Get the chats we have with a user
              *
              * @param {Object} parameters
@@ -905,6 +918,35 @@ export default function API(network, args) {
                 const commandName = 'ChatBot_GetFirstResponderEscalations';
                 requireParameters(['limit'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, 'escalations');
+            },
+
+            /**
+             * Gets the Concierge ChatIDs linked in the Github along with the state of the Github
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.githubLink
+             *
+             * @returns {APIDeferred}
+             */
+            getGHChatIDsAndState(parameters) {
+                const commandName = 'ChatBot_GetGHChatIDsAndState';
+                requireParameters(['githubLink'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Sends a response to all the Concierge chatIDs provided
+             *
+             * @param {Object} parameters
+             * @param {Number[]} parameters.chatIDs
+             * @param {Object} parameters.chatbotMessage
+             *
+             * @returns {APIDeferred}
+             */
+            sendBulkResponse(parameters) {
+                const commandName = 'ChatBot_Respond_BulkChatIDs';
+                requireParameters(['chatIDs', 'chatbotMessage'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
             },
         },
 
