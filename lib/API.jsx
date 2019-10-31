@@ -441,6 +441,15 @@ export default function API(network, args) {
                 const commandName = 'SSDos_GetCurrencyList';
                 return performPOSTRequest(commandName);
             },
+
+            /**
+             * Get the agent's accuracy fields (merchant, isCash, overall...)
+             */
+            getAgentAccuracy() {
+                const commandName = 'SSDos_GetAgentAccuracy';
+
+                return performPOSTRequest(commandName);
+            },
         },
 
         chatbot: {
