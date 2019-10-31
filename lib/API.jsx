@@ -443,7 +443,7 @@ export default function API(network, args) {
             },
 
             /**
-             * Get the agent's accuracy fields (merchant, isCash, overall...)
+             * Get the agent's accuracy fields (merchantAccuracy, isCashAccuracy, overallAccuracy)
              */
             getAgentAccuracy() {
                 const commandName = 'SSDos_GetAgentAccuracy';
