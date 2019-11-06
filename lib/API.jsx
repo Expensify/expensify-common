@@ -261,6 +261,17 @@ export default function API(network, args) {
         },
 
         /**
+         * Perform API command 'SignOut'
+         *
+         * @param {Object} [parameters]
+         * @param {Boolean} [parameters.clean] clear the 'email' cookie
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        signOut(parameters) {
+            return performPOSTRequest('SignOut', parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.token
@@ -297,6 +308,20 @@ export default function API(network, args) {
         resendValidateCode() {
             const commandName = 'ResendValidateCode';
             return performPOSTRequest(commandName, {api_setCookie: false});
+        },
+
+        /**
+         * Reopen a closed account.
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         *
+         * @return {ExpensifyAPIDeferred}
+         */
+        reopenAccount(parameters) {
+            const commandName = 'User_ReopenAccount';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
         },
 
         /**
@@ -369,6 +394,21 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command Github_Close
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.githubLink
+         * @param {Boolean} [parameters.reopen] True by default. If false, we will not reopen the Concierge chats linked in the Github
+         *
+         * @returns {APIDeferred}
+         */
+        githubClose(parameters) {
+            const commandName = 'Github_Close';
+            requireParameters(['githubLink'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
@@ -428,6 +468,17 @@ export default function API(network, args) {
              */
             getCurrencyList() {
                 const commandName = 'SSDos_GetCurrencyList';
+                return performPOSTRequest(commandName);
+            },
+
+            /**
+             * Get the logged in agent's accuracy fields
+             *
+             * @returns {APIDeferred}
+             */
+            getAgentAccuracy() {
+                const commandName = 'SSDos_GetAgentAccuracy';
+
                 return performPOSTRequest(commandName);
             },
         },
@@ -574,24 +625,6 @@ export default function API(network, args) {
                 const commandName = 'ChatBot_Escalate_RequeueChat';
                 requireParameters(['queue', 'jobID'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, null, sync);
-            },
-
-            /**
-             * Escalate a chat to the success team
-             *
-             * @param {Object} parameters
-             * @param {String} parameters.teamID
-             * @param {String} parameters.notehtml
-             * @param {Number} parameters.chatID
-             * @param {Number} parameters.inputID
-             * @param {Number} parameters.jobID
-             *
-             * @returns {APIDeferred}
-             */
-            escalateToTeam(parameters) {
-                const commandName = 'ChatBot_Escalate_AssignToTeam';
-                requireParameters(['teamID', 'note-html', 'chatID', 'inputID', 'jobID'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters);
             },
 
             /**
@@ -815,6 +848,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {String} parameters.chatID
+             * @param {String} [parameters.targetEmail]
              *
              * @returns {APIDeferred}
              */
@@ -865,6 +899,21 @@ export default function API(network, args) {
             },
 
             /**
+             * Get the chats we have with a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email
+             * @param {Number} [parameters.limit]
+             *
+             * @returns {APIDeferred}
+             */
+            getUserChats(parameters) {
+                const commandName = 'ChatBot_User_GetChats';
+                requireParameters(['email'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'chats');
+            },
+
+            /**
              * Get the scoring data for saved responses from Bedrock.
              *
              * @param {Object} [parameters]
@@ -873,6 +922,84 @@ export default function API(network, args) {
              */
             getResponseData(parameters) {
                 return performPOSTRequest('ChatBot_GetResponseData', parameters);
+            },
+
+            /**
+             * Reopens a chat that has been closed.
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chatID
+             * @param {Number} parameters.accountID
+             * @param {Boolean} parameters.shouldReassign
+             *
+             * @returns {APIDeferred}
+             */
+            reopenChat(parameters) {
+                const commandName = 'ChatBot_Chat_Reopen';
+                requireParameters(['chatID', 'shouldReassign'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Get first responder escalations
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             *
+             * @returns {APIDeferred}
+             */
+            getFirstResponderEscalations(parameters) {
+                const commandName = 'ChatBot_GetFirstResponderEscalations';
+                requireParameters(['limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'escalations');
+            },
+
+            /**
+             * Gets the Concierge ChatIDs linked in the Github along with the state of the Github
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.githubLink
+             *
+             * @returns {APIDeferred}
+             */
+            getGHChatIDsAndState(parameters) {
+                const commandName = 'ChatBot_GetGHChatIDsAndState';
+                requireParameters(['githubLink'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Sends a response to all the Concierge chatIDs provided
+             *
+             * @param {Object} parameters
+             * @param {Number[]} parameters.chatIDs
+             * @param {Object} parameters.chatbotMessage
+             *
+             * @returns {APIDeferred}
+             */
+            sendBulkResponse(parameters) {
+                const commandName = 'ChatBot_Respond_BulkChatIDs';
+                requireParameters(['chatIDs', 'chatbotMessage'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+        },
+
+        card: {
+            /**
+             * Set the limit of an expensify card
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email who the card is assigned to
+             * @param {Boolean} parameters.hasCustomLimit whether or not the card has a custom limit
+             * @param {Number} [parameters.cardID]
+             * @param {Number} [parameters.limit] should be in positive cents
+             *
+             * @returns {APIDeferred}
+             */
+            setLimit(parameters) {
+                const commandName = 'Card_setLimit';
+                requireParameters(['email', 'hasCustomLimit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
             },
         },
 

@@ -57,6 +57,10 @@ const propTypes = {
         PropTypes.array,
         PropTypes.object,
     ]),
+
+    // There is usually text just following a switch that says "ENABLED" and "DISABLED" and
+    // you can use this option to hide that text
+    hideEnabledDisabledText: PropTypes.bool,
 };
 
 const defaultProps = {
@@ -72,6 +76,7 @@ const defaultProps = {
     alwaysShowChildren: false,
     descriptionBeforeChildren: false,
     safeDescription: false,
+    hideEnabledDisabledText: false,
     extraClasses: [],
 };
 
@@ -185,8 +190,9 @@ class OnOffSwitch extends Component {
                     onChange={this.onChangeCallback}
                     extraClasses={[
                         this.props.extraClasses,
-                        {'marginLeft10': !this.props.labelOnRight}
+                        {marginLeft10: !this.props.labelOnRight}
                     ]}
+                    hideEnabledDisabledText={this.props.hideEnabledDisabledText}
                 />
                 {this.props.label && this.props.labelOnRight && (
                     <label

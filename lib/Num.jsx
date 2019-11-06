@@ -152,6 +152,24 @@ module.exports = {
         return number >= (Math.min(a, b)) && number <= (Math.max(a, b));
     },
 
+    /**
+     * Returns how many decimals to display (used for currencies).
+     *
+     * @param {Number} rate
+     * @return {Number}
+     */
+    getDisplayDecimals(rate) {
+        if (rate % 1 === 0) {
+            return 2;
+        }
+
+        if (rate * 10 % 1 === 0) {
+            return 3;
+        }
+
+        return 4;
+    },
+
     tax: {
 
         /**
@@ -188,8 +206,7 @@ module.exports = {
          * @returns {number} The amount of tax
          */
         calculateTaxFromDivisor(total, divisor) {
-            const roundedQuotient = Math.round(total / divisor);
-            return parseInt(total - roundedQuotient, 10);
+            return parseInt(Math.round(total - (total / divisor)), 10);
         }
     }
 };
