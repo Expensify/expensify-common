@@ -483,6 +483,38 @@ export default function API(network, args) {
             },
         },
 
+        user: {
+            /**
+             * Get the travel details for a
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatID
+             * @param {String} [parameters.password] only needed if we don't have it stored in the cookie
+             *
+             * @returns {APIDeferred}
+             */
+            getUserTravelDetails(parameters) {
+                const commandName = 'GetTravelDetails';
+                requireParameters(['chatID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Save the travel details for a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatID
+             * @param {String} parameters.details
+             *
+             * @returns {APIDeferred}
+             */
+            setUserTravelDetails(parameters) {
+                const commandName = 'SetTravelDetails';
+                requireParameters(['chatID', 'details'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+        },
+
         chatbot: {
             /**
              * Gets a specific chat from chatbot
