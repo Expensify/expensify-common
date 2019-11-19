@@ -745,7 +745,7 @@ export const UI = {
     DIALOG_Z_INDEX: 4000
 };
 
-// List of most often used public domains
+// List of most frequently used public domains
 export const PUBLIC_DOMAINS = [
     'expensify.sms',
     'chromeexpensify.com',
