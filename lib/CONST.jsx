@@ -706,6 +706,55 @@ export const CONST = {
     EXPENSIFY_CARD: {
         FEED_NAME: 'Expensify Card',
     },
+
+    // Domains we don't want to serve ads to
+    COMPETITOR_DOMAINS: [
+        'concur.com',
+        'certify.com',
+        'tallie.com',
+        'oracle.com',
+        'sap.com',
+        'rydoo.com',
+        'chromeriver.com',
+        'zoho.com',
+        'receiptbank.com',
+        'brex.com',
+        'getdivvy.com',
+        'hubdoc.com',
+        'intuit.com',
+        'xero.com',
+        'netsuite.com',
+        'intacct.com',
+        'sage.com',
+        'mastercard.com',
+        'visa.com',
+        'americanexpress.com',
+        'chase.com',
+        'bentoforbusiness.com',
+        'nexonia.com',
+        'myob.com',
+        'tripactions.com',
+        'pleo.com',
+        'abacus.com',
+        'paylocity.com',
+        'bigtime.net',
+        'paycom.com',
+        'workday.com',
+        'fyle.com',
+        'paychex.com',
+        'travelbank.com',
+        'spendesk.com',
+        'webexpenses.com',
+        'deem.com',
+        'happay.com',
+    ],
+
+    // Expensify domains
+    EXPENSIFY_DOMAINS: [
+        'expensify.com',
+        'expensifail.com',
+        'expensicorp.com'
+    ],
 };
 
 /**
