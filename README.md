@@ -11,7 +11,7 @@ These libraries are provided as-is, and the repos which use them will need to do
 # Deploying a Change
 1. Create a PR for your branch
 2. Push up your changes
-3. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for Web-Expensify and Web-Secure to point to that hash, and run `npm update js-libs && npm install`.
+3. Once the PR has been merged, get newest commit SHA for `master` from [here](https://github.com/Expensify/JS-Libs/commits/master), and update the entry in `package.json` for Web-Expensify and Web-Secure to point to that hash, and run `npm update js-libs && npm install`. Even if your change is only required in either Web-Expensify or Web-Secure, it is important to update `package.json` in both repos to prevent somebody from deploying changes they don't know about.
 
 # Development
 * Write all code as ES6.
