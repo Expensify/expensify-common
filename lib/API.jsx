@@ -194,6 +194,26 @@ export default function API(network, args) {
         },
 
         /**
+         * Extend the base API with methods.
+         *
+         * @param {Array} methods
+         */
+        registerMethods(methods = []) {
+            _.each(methods, method => {
+                this[method.name] = function (parameters) {
+                    requireParameters(method.requiredParameters, parameters, method.commandName);
+                    return performPOSTRequest(
+                        method.commandName,
+                        parameters,
+                        method.returnedPropertyName,
+                        method.sync,
+                        method.checkCodeRevision
+                    );
+                }
+            });
+        },
+
+        /**
          * @return {Network}
          */
         getNetwork() {
