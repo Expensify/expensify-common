@@ -216,31 +216,33 @@ export default function API(network, args) {
         registerMethods(key, methods = []) {
             this[key] = {};
             _.each(methods, method => {
+                const name = method.name;
+                const args = method();
 
                 // Halt execution if we are not passing these two parameters to one of our methods.
-                if (!method.name) {
+                if (!name) {
                     throw new Error('Must pass name field to API.registerMethods');
                 }
 
-                if (!method.commandName) {
+                if (!args.commandName) {
                     throw new Error('Must pass commandName to API.registerMethods')
                 }
 
                 // Appending the method under the key passed e.g. 'chatbot'
-                this[key][method.name] = function (parameters, sync = false) {
+                this[key][name] = function (parameters, sync = false) {
 
                     // preSend is an optional callback for any extra logic before making the call. e.g. validating params in the front-end etc.
-                    if (_.isFunction(method.preSend)) {
-                        method.preSend(parameters);
+                    if (_.isFunction(args.validate)) {
+                        args.validate(parameters);
                     };
 
-                    requireParameters(method.requireParameters || [], parameters, method.commandName);
+                    requireParameters(args.requireParameters || [], parameters, args.commandName);
                     return performPOSTRequest(
-                        method.commandName,
+                        args.commandName,
                         parameters,
-                        method.returnedPropertyName || false,
+                        args.returnedPropertyName || false,
                         sync,
-                        method.checkCodeRevision || false
+                        args.checkCodeRevision || false
                     );
                 }
             });
