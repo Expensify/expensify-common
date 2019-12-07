@@ -4,6 +4,8 @@
  * ----------------------------------------------------------------------------------------------
  */
 import _ from 'underscore';
+import get from 'lodash.get';
+import set from 'lodash.set';
 
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
@@ -196,30 +198,38 @@ export default function API(network, args) {
         /**
          * Extend the base API with methods.
          *
-         * @param {String} key - key to store extension methods under e.g. 'chatbot'
-         * @param {Object[]} methods
+         * @param {String[]} path - key to store extension methods under e.g. 'chatbot'
+         * @param {Object} methods
+         * @param {Function} methods[methodName] -
          *
-         *     Each method takes the following shape:
+         *     Each method takes the following shape of a function returning an object:
          *
-         *     {
-         *         name: String,
-         *         commandName: String,
+         *     methodName() {
+         *         return {
+         *             // Required
+         *             commandName: String,
          *
-         *         // Optional Parameters
-         *         preSend: Function,
-         *         requireParameters: String[],
-         *         returnedPropertyType: String,
-         *         checkCodeRevision: Boolean,
+         *             // Optional
+         *             validate: Function,
+         *             requireParameters: String[],
+         *             returnedPropertyType: String,
+         *             checkCodeRevision: Boolean,
+         *         };
          *     }
-         *
          */
-        registerMethods(key, methods = []) {
-            this[key] = {};
-            _.each(methods, method => {
-                const name = method.name;
+        registerMethods(methods = {}, path = []) {
+            // Initialize the namespace in case it doesn't exist
+            if (!get(this, path)) {
+                set(this, path, {});
+            }
+
+            _.each(methods, (method, name) => {
                 const args = method();
 
-                // Halt execution if we are not passing these two parameters to one of our methods.
+                if (get(this, [...path, name])) {
+                    throw new Error('Can\'t add method because it already exists. Method overwriting is not permitted.');
+                }
+
                 if (!name) {
                     throw new Error('Must pass name field to API.registerMethods');
                 }
@@ -229,7 +239,7 @@ export default function API(network, args) {
                 }
 
                 // Appending the method under the key passed e.g. 'chatbot'
-                this[key][name] = function (parameters, sync = false) {
+                set(this, [...path, name], (parameters, sync = false) => {
 
                     // preSend is an optional callback for any extra logic before making the call. e.g. validating params in the front-end etc.
                     if (_.isFunction(args.validate)) {
@@ -244,7 +254,7 @@ export default function API(network, args) {
                         sync,
                         args.checkCodeRevision || false
                     );
-                }
+                });
             });
         },
 
