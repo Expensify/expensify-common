@@ -241,7 +241,7 @@ export default function API(network, args) {
                 // Appending the method under the key passed e.g. 'chatbot'
                 set(this, [...path, name], (parameters, sync = false) => {
 
-                    // preSend is an optional callback for any extra logic before making the call. e.g. validating params in the front-end etc.
+                    // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
                     if (_.isFunction(args.validate)) {
                         args.validate(parameters);
                     };
