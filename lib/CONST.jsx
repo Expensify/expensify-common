@@ -796,6 +796,7 @@ export const UI = {
 
 // List of most frequently used public domains
 export const PUBLIC_DOMAINS = [
+    'evernote.user',
     'expensify.sms',
     'chromeexpensify.com',
     'gmail.com',
