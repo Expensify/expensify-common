@@ -4,8 +4,6 @@
  * ----------------------------------------------------------------------------------------------
  */
 import _ from 'underscore';
-import get from 'lodash.get';
-import set from 'lodash.set';
 
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
