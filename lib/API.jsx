@@ -196,66 +196,47 @@ export default function API(network, args) {
         },
 
         /**
-         * Extend the base API with methods.
+         * Used to extend an API instance with new methods.
          *
-         * @param {String[]} path - key to store extension methods under e.g. 'chatbot'
-         * @param {Object} methods
-         * @param {Function} methods[methodName] -
+         * @example
          *
-         *     Each method takes the following shape of a function returning an object:
+         * conciergeAPI.chatbot.getNew = (parameters) => {
+         *     return conciergeAPI.extendMethod({
+         *         commandName: 'ChatBot_Escalate_GetNextChat',
+         *         requireParameters: ['queueList'],
+         *         checkCodeRevision: true,
+         *     })(parameters);
+         * }
          *
-         *     methodName() {
-         *         return {
-         *             // Required
-         *             commandName: String,
+         * @param {Object} data
+         * @param {String} data.commandName
+         * @param {Function} [data.validate]
+         * @param {String[]} [data.requireParameters]
+         * @param {String} [data.returnedPropertyType]
+         * @param {Boolean} data.checkCodeRevision
          *
-         *             // Optional
-         *             validate: Function,
-         *             requireParameters: String[],
-         *             returnedPropertyType: String,
-         *             checkCodeRevision: Boolean,
-         *         };
-         *     }
+         * @return {Function}
          */
-        registerMethods(methods = {}, path = []) {
-            // Initialize the namespace in case it doesn't exist
-            if (!get(this, path)) {
-                set(this, path, {});
+        extendMethod: (data) => {
+            if (!data.commandName) {
+                throw new Error('Must pass commandName to API.extendMethod');
             }
 
-            _.each(methods, (method, name) => {
-                const args = method();
-
-                if (get(this, [...path, name])) {
-                    throw new Error('Can\'t add method because it already exists. Method overwriting is not permitted.');
+            return (parameters, sync = false) => {
+                // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
+                if (_.isFunction(data.validate)) {
+                    data.validate(parameters);
                 }
 
-                if (!name) {
-                    throw new Error('Must pass name field to API.registerMethods');
-                }
-
-                if (!args.commandName) {
-                    throw new Error('Must pass commandName to API.registerMethods')
-                }
-
-                // Appending the method under the key passed e.g. 'chatbot'
-                set(this, [...path, name], (parameters, sync = false) => {
-
-                    // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
-                    if (_.isFunction(args.validate)) {
-                        args.validate(parameters);
-                    };
-
-                    requireParameters(args.requireParameters || [], parameters, args.commandName);
-                    return performPOSTRequest(
-                        args.commandName,
-                        parameters,
-                        args.returnedPropertyName || false,
-                        sync,
-                        args.checkCodeRevision || false
-                    );
-                });
-            });
+                requireParameters(data.requireParameters || [], parameters, data.commandName);
+                return performPOSTRequest(
+                    data.commandName,
+                    parameters,
+                    data.returnedPropertyName || false,
+                    sync,
+                    data.checkCodeRevision || false
+                );
+            };
         },
 
         /**
