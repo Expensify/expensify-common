@@ -800,6 +800,20 @@ export default function API(network, args) {
             },
 
             /**
+             * Adds a compliment on an input
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             *
+             * @returns {APIDeferred}
+             */
+            complimentResponse(parameters) {
+                const commandName = 'ChatBot_Input_ComplimentResponse';
+                requireParameters(['inputID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
              * Add an agent's recommendation to the recommendation list
              *
              * @param {Object} parameters
