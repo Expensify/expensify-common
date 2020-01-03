@@ -628,6 +628,20 @@ export default function API(network, args) {
             },
 
             /**
+             * Open chats associated with a given GH issue
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.githubLink
+             *
+             * @returns {APIDeferred}
+             */
+            openAssociatedChats(parameters) {
+                const commandName = 'ChatBot_Open_Associated_Chats';
+                requireParameters(['githubLink'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
              * Trigger an event for an input
              *
              * @param {Object} parameters
@@ -637,6 +651,7 @@ export default function API(network, args) {
              * @param {Boolean} parameters.shouldTeachResponse
              * @param {Number} parameters.jobID
              * @param {String} [parameters.feedbackText]
+             * @param {String} [parameters.githubLink]
              *
              * @returns {APIDeferred}
              */
@@ -775,6 +790,7 @@ export default function API(network, args) {
              * @param {Boolean} [parameters.respondAsSelf]
              * @param {String} [parameters.notehtml]
              * @param {String} [parameters.feedbacktext]
+             * @param {String} [parameters.githubLink]
              *
              * @returns {APIDeferred}
              */
