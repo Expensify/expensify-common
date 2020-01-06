@@ -198,20 +198,18 @@ export default function API(network, args) {
          *
          * @example
          *
-         * conciergeAPI.chatbot.getNew = (parameters) => {
-         *     return conciergeAPI.extendMethod({
-         *         commandName: 'ChatBot_Escalate_GetNextChat',
-         *         requireParameters: ['queueList'],
-         *         checkCodeRevision: true,
-         *     })(parameters);
-         * }
+         * conciergeAPI.chatbot.getNew = (parameters) => conciergeAPI.extendMethod({
+         *     commandName: 'ChatBot_Escalate_GetNextChat',
+         *     requireParameters: ['queueList'],
+         *     checkCodeRevision: true,
+         * })(parameters);
          *
          * @param {Object} data
          * @param {String} data.commandName
          * @param {Function} [data.validate]
          * @param {String[]} [data.requireParameters]
          * @param {String} [data.returnedPropertyType]
-         * @param {Boolean} data.checkCodeRevision
+         * @param {Boolean} [data.checkCodeRevision]
          *
          * @return {Function}
          */
