@@ -194,6 +194,48 @@ export default function API(network, args) {
         },
 
         /**
+         * Used to extend an API instance with new methods.
+         *
+         * @example
+         *
+         * conciergeAPI.chatbot.getNew = (parameters) => conciergeAPI.extendMethod({
+         *     commandName: 'ChatBot_Escalate_GetNextChat',
+         *     requireParameters: ['queueList'],
+         *     checkCodeRevision: true,
+         * })(parameters);
+         *
+         * @param {Object} data
+         * @param {String} data.commandName
+         * @param {Function} [data.validate]
+         * @param {String[]} [data.requireParameters]
+         * @param {String} [data.returnedPropertyType]
+         * @param {Boolean} [data.checkCodeRevision]
+         *
+         * @return {Function}
+         */
+        extendMethod: (data) => {
+            if (!data.commandName) {
+                throw new Error('Must pass commandName to API.extendMethod');
+            }
+
+            return (parameters, sync = false) => {
+                // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
+                if (_.isFunction(data.validate)) {
+                    data.validate(parameters);
+                }
+
+                requireParameters(data.requireParameters || [], parameters, data.commandName);
+                return performPOSTRequest(
+                    data.commandName,
+                    parameters,
+                    data.returnedPropertyName || false,
+                    sync,
+                    data.checkCodeRevision || false
+                );
+            };
+        },
+
+        /**
          * @return {Network}
          */
         getNetwork() {
