@@ -559,6 +559,505 @@ export default function API(network, args) {
             },
         },
 
+        chatbot: {
+            /**
+             * Gets a specific chat from chatbot
+             *
+             * @param {Object} parameters
+             * @param {String} [parameters.chatID] either chatID or channelID are required
+             * @param {String} [parameters.channelID] either chatID or channelID are required
+             *
+             * @returns {APIDeferred}
+             */
+            get(parameters) {
+                if (!parameters.chatID && !parameters.channelID) {
+                    throw new Error('You must pass either a chatID or a channelID to chatbot.get()');
+                }
+
+                return performPOSTRequest('ChatBot_Chat_Get', parameters);
+            },
+
+            /**
+             * Gets a new chat from chatbot
+             *
+             * @param {Object} parameters
+             * @param {String[]} parameters.queueList
+             * @param {Boolean} [parameters.prefetching] Lets the server know that this is a prefetch request
+             *
+             * @returns {APIDeferred}
+             */
+            getNew(parameters) {
+                const commandName = 'ChatBot_Escalate_GetNextChat';
+                requireParameters(['queueList'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, null, null, true);
+            },
+
+            /**
+             * Triggers an input in chatbot, typically used for creating a brand new conversation with a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.recipient
+             * @param {String} parameters.chatbotMessage
+             *
+             * @returns {APIDeferred}
+             */
+            triggerInput(parameters) {
+                const commandName = 'ChatBot_Input_Trigger';
+                requireParameters(['recipient', 'chatbotMessage'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Escalate a chat to the logged in user in Intercom
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             * @param {String} parameters.jobID
+             *
+             * @returns {APIDeferred}
+             */
+            escalateToMyself(parameters) {
+                const commandName = 'ChatBot_Escalate_AssignToMe';
+                requireParameters(['inputID', 'jobID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Adds a history event to the last input of a given chat
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chatID
+             * @param {String} parameters.eventName
+             * @param {Number} [parameters.timestamp]
+             *
+             * @returns {APIDeferred}
+             */
+            addHistoryEvent(parameters) {
+                const commandName = 'ChatBot_Chat_AddHistory';
+                requireParameters(['chatID', 'eventName'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Exits out of all the chats the agent was working on
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chats
+             * @param {Boolean} [sync]
+             *
+             * @returns {APIDeferred}
+             */
+            exitChats(parameters, sync = false) {
+                const commandName = 'ChatBot_ExitChats';
+                requireParameters(['chats'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, null, sync);
+            },
+
+            /**
+             * Requeue a chat into a desired queue
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.queue
+             * @param {Number} parameters.jobID
+             * @param {String} [parameters.notes]
+             * @param {Boolean} [parameters.wasExited]
+             * @param {Boolean} [sync]
+             *
+             * @returns {APIDeferred}
+             */
+            requeueChat(parameters, sync = false) {
+                const commandName = 'ChatBot_Escalate_RequeueChat';
+                requireParameters(['queue', 'jobID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, null, sync);
+            },
+
+            /**
+             * Open chats associated with a given GH issue
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.githubLink
+             *
+             * @returns {APIDeferred}
+             */
+            openAssociatedChats(parameters) {
+                const commandName = 'ChatBot_Open_Associated_Chats';
+                requireParameters(['githubLink'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Trigger an event for an input
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.inputID
+             * @param {Number} parameters.eventID
+             * @param {Boolean} paramters.needsReview
+             * @param {Boolean} parameters.shouldTeachResponse
+             * @param {Number} parameters.jobID
+             * @param {String} [parameters.feedbackText]
+             * @param {String} [parameters.githubLink]
+             *
+             * @returns {APIDeferred}
+             */
+            triggerEvent(parameters) {
+                const commandName = 'ChatBot_Input_TriggerEvent';
+                requireParameters(['inputID', 'eventID', 'needsReview', 'shouldTeachResponse', 'jobID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Retrieves an updated concierge authtoken
+             *
+             * @returns {APIDeferred}
+             */
+            updateConciergeAuthToken() {
+                const commandName = 'ChatBot_Update_ConciergeAuthToken';
+                return performPOSTRequest(commandName);
+            },
+
+            /**
+             * Updates an event response
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.eventID
+             * @param {String} [parameters.bodyhtml]
+             * @param {String} [parameters.githubLink]
+             *
+             * @returns {APIDeferred}
+             */
+            updateResponse(parameters) {
+                const commandName = 'ChatBot_Event_Update_Response';
+                requireParameters(['eventID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Deletes a specific event
+             *
+             * @param {Objects} parameters
+             * @param {Number} parameters.eventID
+             *
+             * @returns {APIDeferred}
+             */
+            deleteEvent(parameters) {
+                const commandName = 'ChatBot_Event_Delete';
+                requireParameters(['eventID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Get an event by eventID
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.eventID
+             *
+             * @returns {APIDeferred}
+             */
+            getByEventID(parameters) {
+                const commandName = 'ChatBot_Event_Get';
+                requireParameters(['eventID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Get events for a specific input ID
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.inputID
+             *
+             * @returns {APIDeferred}
+             */
+            getByInputID(parameters) {
+                const commandName = 'ChatBot_Event_GetRelevantByInputID';
+                requireParameters(['inputID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Creates a new event and immediately responds.
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatbotDetails
+             * @param {String} parameters.stateID
+             * @param {String} parameters.inputID
+             * @param {Number} parameters.jobID
+             * @param {Boolean} [parameters.shouldTeachResponse]
+             * @param {String} [parameters.githubLink]
+             * @param {String} [parameters.feedbacktext]
+             *
+             * @returns {APIDeferred}
+             */
+            createAndTrigger(parameters) {
+                const commandName = 'ChatBot_Event_CreateAndTrigger';
+                requireParameters(['chatbotDetails', 'stateID', 'inputID', 'jobID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Marks an input as incorrect
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             * @param {Number} parameters.eventID
+             * @param {String} parameters.reason
+             *
+             * @returns {APIDeferred}
+             */
+            markIncorrect(parameters) {
+                const commandName = 'ChatBot_Input_MarkResponseAsIncorrect';
+                requireParameters(['inputID', 'eventID', 'reason'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Mark an agent's response as correct
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.inputID
+             *
+             * @returns {APIDeferred}
+             */
+            markAgentCorrect(parameters) {
+                const commandName = 'ChatBot_Input_MarkAgentCorrect';
+                requireParameters(['inputID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Send a response to a input
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             * @param {Number} parameters.jobID
+             * @param {String} parameters.chatbotMessage
+             * @param {String} [parameters.reason]
+             * @param {Boolean} [parameters.respondAsSelf]
+             * @param {String} [parameters.notehtml]
+             * @param {String} [parameters.feedbacktext]
+             * @param {String} [parameters.githubLink]
+             *
+             * @returns {APIDeferred}
+             */
+            respond(parameters) {
+                const commandName = 'ChatBot_Input_Respond';
+                requireParameters(['inputID', 'jobID', 'chatbotMessage'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Add an audit note to an input
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             * @param {String} [parameters.notehtml]
+             *
+             * @returns {APIDeferred}
+             */
+            addNote(parameters) {
+                const commandName = 'ChatBot_Input_Note';
+                requireParameters(['inputID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Adds a compliment on an input
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.inputID
+             *
+             * @returns {APIDeferred}
+             */
+            complimentResponse(parameters) {
+                const commandName = 'ChatBot_Input_ComplimentResponse';
+                requireParameters(['inputID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Add an agent's recommendation to the recommendation list
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.inputID
+             * @param {Number} parameters.eventID
+             * @param {Number} parameters.jobID
+             * @param {String} [parameters.reason]
+             * @param {String} [parameters.notehtml]
+             *
+             * @returns {APIDeferred}
+             */
+            addRecommendation(parameters) {
+                const commandName = 'ChatBot_Input_AddRecommendation';
+                requireParameters(['inputID', 'eventID', 'jobID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Add an agent's written recommendation to the recommendation list
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.inputID
+             * @param {Number} parameters.jobID
+             * @param {Boolean} parameters.shouldTeachResponse
+             * @param {String} [parameters.notehtml]
+             *
+             * @returns {APIDeferred}
+             */
+            addWrittenRecommendation(parameters) {
+                const commandName = 'ChatBot_Input_AddWrittenRecommendation';
+                requireParameters(['inputID', 'jobID', 'shouldTeachResponse'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Gets all our intercom tags
+             *
+             * @returns {APIDeferred}
+             */
+            getIntercomTags() {
+                return performPOSTRequest('ChatBot_GetIntercomTags');
+            },
+
+            /**
+             * Gets the user info specific for the chatID provided.
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatID
+             * @param {String} [parameters.targetEmail]
+             *
+             * @returns {APIDeferred}
+             */
+            getUserInfo(parameters) {
+                const commandName = 'ChatBot_GetUserInfo';
+                requireParameters(['chatID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Toggle an intercom tag for a specific user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.tag
+             * @param {String} parameters.email
+             * @param {Boolean} parameters.state
+             *
+             * @returns {APIDeferred}
+             */
+            toggleIntercomTag(parameters) {
+                const commandName = 'ChatBot_User_Tag';
+                requireParameters(['tag', 'email', 'state'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Retrieves a fresh S3 hash for the Froala editor to use for image upload
+             *
+             * @returns {APIDeferred}
+             */
+            getFroalaS3Hash() {
+                return performPOSTRequest('ChatBot_FroalaS3Hash_Get');
+            },
+
+            /**
+             * Get recent events from chatbot
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             * @param {String} parameters.type
+             *
+             * @returns {APIDeferred}
+             */
+            getRecentEvents(parameters) {
+                const commandName = 'ChatBot_Event_GetRecent';
+                requireParameters(['limit', 'type'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'events');
+            },
+
+            /**
+             * Get the chats we have with a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.email
+             * @param {Number} [parameters.limit]
+             *
+             * @returns {APIDeferred}
+             */
+            getUserChats(parameters) {
+                const commandName = 'ChatBot_User_GetChats';
+                requireParameters(['email'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'chats');
+            },
+
+            /**
+             * Get the scoring data for saved responses from Bedrock.
+             *
+             * @param {Object} [parameters]
+             *
+             * @returns {APIDeferred}
+             */
+            getResponseData(parameters) {
+                return performPOSTRequest('ChatBot_GetResponseData', parameters);
+            },
+
+            /**
+             * Reopens a chat that has been closed.
+             *
+             * @param {Object} parameters
+             * @param {Number} parameters.chatID
+             * @param {Number} parameters.accountID
+             * @param {Boolean} parameters.shouldReassign
+             *
+             * @returns {APIDeferred}
+             */
+            reopenChat(parameters) {
+                const commandName = 'ChatBot_Chat_Reopen';
+                requireParameters(['chatID', 'shouldReassign'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Get first responder escalations
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.limit
+             *
+             * @returns {APIDeferred}
+             */
+            getFirstResponderEscalations(parameters) {
+                const commandName = 'ChatBot_GetFirstResponderEscalations';
+                requireParameters(['limit'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters, 'escalations');
+            },
+
+            /**
+             * Gets the Concierge ChatIDs linked in the Github along with the state of the Github
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.githubLink
+             *
+             * @returns {APIDeferred}
+             */
+            getGHChatIDsAndState(parameters) {
+                const commandName = 'ChatBot_GetGHChatIDsAndState';
+                requireParameters(['githubLink'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Sends a response to all the Concierge chatIDs provided
+             *
+             * @param {Object} parameters
+             * @param {Number[]} parameters.chatIDs
+             * @param {Object} parameters.chatbotMessage
+             *
+             * @returns {APIDeferred}
+             */
+            sendBulkResponse(parameters) {
+                const commandName = 'ChatBot_Respond_BulkChatIDs';
+                requireParameters(['chatIDs', 'chatbotMessage'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+        },
+
         card: {
             /**
              * Set the limit of an expensify card
