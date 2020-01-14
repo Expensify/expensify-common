@@ -252,6 +252,28 @@ export default function API(network, args) {
         },
 
         /**
+         * Performs API command "Get"
+         *
+         *  Note: We don't pass the returnValueList to performPost because we translate request 'x,y' into response { x:, y: }
+         *  and it causes the payload validation to fail. If you're using this function, you need to extract the result manually. e.g.
+         *
+         *  API.get({ returnValueList: 'account'}).done( function( result ){ Log.client( result.account ) } );
+         *
+         * @param {Object} parameters The API call parameters, must contain "returnValueList"
+         * @param {Domain} [domain] If you want to run this command as the domain account of this domain
+         * @param {DomainMember} [domainMember] If you want to run this command as specified domain member
+         *
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
+         */
+        get: function (parameters) {
+            // @todo implement domain/domainMember
+
+            const commandName = 'Get';
+            requireParameters(['returnValueList'], parameters, commandName);
+            return performGETRequest(commandName, parameters);
+        },
+
+        /**
          * @param  {Object} parameters
          * @param  {String} parameters.email
          * @return {ExpensifyAPIDeferred}
