@@ -1065,12 +1065,13 @@ export default function API(network, args) {
              * @param {Boolean} parameters.hasCustomLimit whether or not the card has a custom limit
              * @param {Number} [parameters.cardID]
              * @param {Number} [parameters.limit] should be in positive cents
+             * @param {String} [parameters.domainName] The domain of the card
              *
              * @returns {APIDeferred}
              */
             setLimit(parameters) {
                 const commandName = 'Card_setLimit';
-                requireParameters(['email', 'hasCustomLimit'], parameters, commandName);
+                requireParameters(['email', 'hasCustomLimit', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
         },
