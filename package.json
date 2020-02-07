@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "classnames": "2.2.5",
+    "clipboard": "^2.0.4",
+    "clipboard-polyfill": "^2.8.6",
     "jquery": "3.3.1",
     "lodash.get": "4.4.2",
     "lodash.has": "4.5.2",
