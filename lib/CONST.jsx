@@ -707,6 +707,26 @@ export const CONST = {
         FEED_NAME: 'Expensify Card',
     },
 
+    TRAVEL_BOOKING: {
+        TYPES: {
+            shortFlightFare: {
+                economy: 'Economy',
+                premiumEconomy: 'Premium Economy',
+                business: 'Business',
+                first: 'First'
+            },
+            longFlightFare: {
+                economy: 'Economy',
+                premiumEconomy: 'Premium Economy',
+                business: 'Business',
+                first: 'First'
+            },
+            hotelStar: HOTEL_CLASS_OPTIONS
+        },
+        DEFAULT_FLIGHT_CLASS: 'economy',
+        DEFAULT_HOTEL_CLASS: 'fourStars'
+    },
+
     // Domains we don't want to serve ads to
     COMPETITOR_DOMAINS: [
         'concur.com',
