@@ -708,7 +708,7 @@ export const CONST = {
     },
 
     TRAVEL_BOOKING: {
-        TYPES: {
+        OPTIONS: {
             shortFlightFare: {
                 economy: 'Economy',
                 premiumEconomy: 'Premium Economy',
@@ -721,10 +721,19 @@ export const CONST = {
                 business: 'Business',
                 first: 'First'
             },
-            hotelStar: HOTEL_CLASS_OPTIONS
+            hotelStar: {
+                oneStar: '1',
+                twoStars: '2',
+                threeStars: '3',
+                fourStars: '4',
+                fiveStars: '5'
+            },
         },
-        DEFAULT_FLIGHT_CLASS: 'economy',
-        DEFAULT_HOTEL_CLASS: 'fourStars'
+        DEFAULT_OPTIONS: {
+            shortFlightFare: 'economy',
+            longFlightFare: 'economy',
+            hotelStar: 'fourStars'
+        },
     },
 
     // Domains we don't want to serve ads to
