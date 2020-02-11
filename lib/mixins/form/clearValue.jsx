@@ -1,4 +1,4 @@
-import Func from '../../Func';
+import {invoke} from '../../Func';
 import ReactDOM from 'react-dom';
 
 /**
@@ -15,6 +15,6 @@ export default {
         if (shouldFocus !== false) {
             $elm.focus();
         }
-        Func.invoke(this.props.forcedUpdate);
+        invoke(this.props.forcedUpdate);
     }
 };
