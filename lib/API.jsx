@@ -478,7 +478,7 @@ export default function API(network, args) {
              */
             processJob(parameters) {
                 const commandName = 'Expensiworks_ProcessJob';
-                requireParameters(['jobID', 'answers', 'duration'], parameters, commandName);
+                requireParameters(['jobID', 'jobName', 'answers', 'duration'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
 
