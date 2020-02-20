@@ -411,7 +411,19 @@ export const CONST = {
          * Start and End dates for report, expenses filters, receipts,...
          */
         DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
-        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING)
+        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
+
+        /**
+         * Legacy formats
+         */
+        LEGACY_DATE_MONTH_DAY: 'MMM d', // previously g_dateMonthDay
+        LEGACT_DATE_TIME_FORMAT: 'yyyy-MM-dd HH:mm:ss', // previously g_dateTimeFormat
+
+        /**
+         * Localized
+         */
+        LOCAL_DATE_TIME: 'MMM D [at] LT',
+        LOCAL_DATE_TIME_YEAR: 'MMM D, YYYY [at] LT',
     },
 
     /**
