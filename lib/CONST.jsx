@@ -417,7 +417,7 @@ export const CONST = {
          * Legacy formats
          */
         LEGACY_DATE_MONTH_DAY: 'MMM d', // previously g_dateMonthDay
-        LEGACT_DATE_TIME_FORMAT: 'yyyy-MM-dd HH:mm:ss', // previously g_dateTimeFormat
+        LEGACY_DATE_TIME_FORMAT: 'yyyy-MM-dd HH:mm:ss', // previously g_dateTimeFormat
 
         /**
          * Localized
