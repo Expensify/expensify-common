@@ -413,17 +413,11 @@ export const CONST = {
         DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
         DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
 
-        /**
-         * Legacy formats
-         */
-        LEGACY_DATE_MONTH_DAY: 'MMM d', // previously g_dateMonthDay
-        LEGACY_DATE_TIME_FORMAT: 'yyyy-MM-dd HH:mm:ss', // previously g_dateTimeFormat
+        SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
+        LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
 
-        /**
-         * Localized
-         */
-        LOCAL_DATE_TIME: 'MMM D [at] LT',
-        LOCAL_DATE_TIME_YEAR: 'MMM D, YYYY [at] LT',
+        SHORT_MONTH_DAY_LOCAL_TIME: 'MMM D [at] LT', // e.g. Jan 1 at 12:00 PM
+        SHORT_MONTH_DAY_YEAR_LOCAL_TIME: 'MMM D, YYYY [at] LT', // e.g. Jan 1, 2020 at 12:00 PM
     },
 
     /**
