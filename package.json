@@ -21,10 +21,12 @@
     "lodash.has": "4.5.2",
     "moment": "2.20.1",
     "prop-types": "15.6.0",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
     "simply-deferred": "3.0.0",
     "underscore": "1.9.1"
+  },
+  "peerDependencies": {
+    "react": "16.12.0",
+    "react-dom": "16.12.0"
   },
   "devDependencies": {
     "eslint-config-expensify": "2.0.1",
