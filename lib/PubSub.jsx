@@ -31,7 +31,7 @@ const generateID = (eventName) => {
 */
 const extractEventName = eventID => eventID.substr(0, eventID.indexOf('@#@'));
 
-module.exports = {
+const PubSubModule = {
     ERROR: 'ev_error',
 
     /**
@@ -122,3 +122,5 @@ module.exports = {
         });
     }
 };
+
+module.exports = (window !== undefined && window.PubSub) ? window.PubSub : PubSubModule;
