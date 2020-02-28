@@ -20,4 +20,6 @@ These libraries are provided as-is, and the repos which use them will need to do
 
 ## Testing your code while you are developing
 The best way to test your code while you are developing changes is to link this directory to your local copies of the Web-Expensify and Web-Secure repositories.
-`npm run grunt link` and `npm run grunt unlink` are your friends to automatically do so. 
+`npm run grunt link` and `npm run grunt unlink` are your friends to automatically do so.
+
+derp
