@@ -415,7 +415,13 @@ export const CONST = {
          * Start and End dates for report, expenses filters, receipts,...
          */
         DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
-        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING)
+        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
+
+        SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
+        LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
+
+        SHORT_MONTH_DAY_LOCAL_TIME: 'MMM D [at] LT', // e.g. Jan 1 at 12:00 PM
+        SHORT_MONTH_DAY_YEAR_LOCAL_TIME: 'MMM D, YYYY [at] LT', // e.g. Jan 1, 2020 at 12:00 PM
     },
 
     /**
@@ -709,6 +715,35 @@ export const CONST = {
 
     EXPENSIFY_CARD: {
         FEED_NAME: 'Expensify Card',
+    },
+
+    TRAVEL_BOOKING: {
+        OPTIONS: {
+            shortFlightFare: {
+                economy: 'Economy',
+                premiumEconomy: 'Premium Economy',
+                business: 'Business',
+                first: 'First'
+            },
+            longFlightFare: {
+                economy: 'Economy',
+                premiumEconomy: 'Premium Economy',
+                business: 'Business',
+                first: 'First'
+            },
+            hotelStar: {
+                oneStar: '1',
+                twoStars: '2',
+                threeStars: '3',
+                fourStars: '4',
+                fiveStars: '5'
+            },
+        },
+        DEFAULT_OPTIONS: {
+            shortFlightFare: 'economy',
+            longFlightFare: 'economy',
+            hotelStar: 'fourStars'
+        },
     },
 
     // Domains we don't want to serve ads to
