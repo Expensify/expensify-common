@@ -204,6 +204,10 @@ export const CONST = {
             stateISO: 'PA',
             stateName: 'Pennsylvania'
         },
+        PR: {
+            stateISO: 'PR',
+            stateName: 'Puerto Rico'
+        },
         RI: {
             stateISO: 'RI',
             stateName: 'Rhode Island'
