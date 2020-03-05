@@ -88,6 +88,26 @@ export default function API(network, args) {
 
     /**
      * @private
+     * Takes the command and the parameters for the request and combines them. Then it
+     * passes them through args.enhanceParameters() if it was supplied to the API lib
+     *
+     * @param {string} command
+     * @param {string} parameters
+     * @returns {object}
+     */
+    function getEnhancedParameters(command, parameters) {
+        let newParameters = {...parameters, command};
+
+        // If there was an enhanceParameters() method supplied in our args, then we will call that here
+        if (args && _.isFunction(args.enhanceParameters)) {
+            newParameters = args.enhanceParameters(newParameters);
+        }
+
+        return newParameters;
+    }
+
+    /**
+     * @private
      *
      * @param {String} command Name of the command to run
      * @param {Object} [parameters] A map of parameter names to their values
@@ -99,12 +119,7 @@ export default function API(network, args) {
      * @returns {APIDeferred} An APIDeferred representing the promise of this request
      */
     function performPOSTRequest(command, parameters, returnedPropertyName, sync, checkCodeRevision) {
-        let newParameters = {...parameters, command};
-
-        // If there was an enhanceParameters() method supplied in our args, then we will call that here
-        if (args && _.isFunction(args.enhanceParameters)) {
-            newParameters = args.enhanceParameters(newParameters);
-        }
+        const newParameters = getEnhancedParameters(command, parameters);
 
         // We need to setup multiple promises here depending on our arguments. If there is no argument, then we will just
         // use an immediately resolved promise for sake of code readability (ie. the promise will always exist and code
@@ -136,6 +151,10 @@ export default function API(network, args) {
         });
 
         return finalApiDeferred;
+    }
+
+    function performKeepaliveRequest(command, parameters, returnedPropertyName, checkCodeRevision) {
+        const newParameters = getEnhancedParameters(command, parameters);
     }
 
     /**
