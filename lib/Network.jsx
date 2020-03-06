@@ -30,17 +30,15 @@ export default function Network(endpoint) {
 
         /**
          * @param {Object} parameters
-         * @param {Boolean} [sync] Whether or not the request should be synchronous
          *
-         * @returns {Deferred}
+         * @returns {$.Deferred}
          */
-        post(parameters, sync) {
+        post(parameters) {
             // Build request
             const settings = {
                 url: endpoint,
                 type: 'POST',
                 data: parameters,
-                async: !sync,
             };
             const formData = new FormData();
             let shouldUseFormData = false;
@@ -76,6 +74,72 @@ export default function Network(endpoint) {
             }
 
             return $.ajax(settings);
+        },
+
+        /**
+         * Uses the fetch API to send a keepalive request that will complete
+         * even if the browser is closed
+         *
+         * Note: This method ONLY provides partial support for sending complex data structures.
+         * It supports a single level array of objects with no nested properties
+         * eg. [{one: 1}, {two:2}]
+         *
+         * @param {Object} parameters
+         * @returns {$.Deferred}
+         */
+        keepalive(parameters) {
+            // Build request
+            const settings = {
+                method: 'POST',
+                keepalive: true,
+                credentials: 'same-origin',
+            };
+            let url = endpoint;
+
+            // Add the API command to our URL (for console debugging purposes)
+            if (parameters.command) {
+                // Add a ? to the end of the URL if there isn't one already
+                if (url.indexOf('?') === -1) {
+                    url = `${url}?`;
+                }
+                url = `${url}&command=${parameters.command}`;
+            }
+
+            // Add our data as form data
+            const formData = new FormData();
+            _(parameters).each((value, key) => {
+                if (!value) {
+                    return;
+                }
+                if (_.isArray(value)) {
+                    _.each(value, (valueItem, i) => {
+                        if (_.isObject(valueItem)) {
+                            _.each(valueItem, (valueItemObjectValue, valueItemObjectKey) => {
+                                formData.append(`${key}[${i}][${valueItemObjectKey}]`, valueItemObjectValue);
+                            });
+                        } else {
+                            formData.append(`${key}[${i}]`, valueItem);
+                        }
+                    });
+                } else {
+                    formData.append(key, value);
+                }
+            });
+            settings.body = formData;
+
+            // Make our request via the fetch API but return it in the form of a jQuery promise
+            // so that our API can be consistent
+            const promise = new $.Deferred();
+            fetch(url, settings)
+                .then((response) => {
+                    // Note: this response object is going to be quite a bit different
+                    // than a normal jQuery response
+                    promise.resolve(response);
+                })
+                .catch((error) => {
+                    promise.reject(error);
+                });
+            return promise;
         },
 
         /**

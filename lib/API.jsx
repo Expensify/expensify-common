@@ -88,38 +88,24 @@ export default function API(network, args) {
 
     /**
      * @private
-     * Takes the command and the parameters for the request and combines them. Then it
-     * passes them through args.enhanceParameters() if it was supplied to the API lib
      *
-     * @param {string} command
-     * @param {string} parameters
-     * @returns {object}
+     * @param {String} command Name of the command to run
+     * @param {Object} [parameters] A map of parameter names to their values
+     * @param {String} [returnedPropertyName] The value of the property that you want to return if you don't want to
+     *                      return the whole response JSON
+     * @param {Boolean} [keepalive] Whether or not the request should be kept alive if the browser is closed in the
+     *                      middle of the request
+     * @param {Boolean} [checkCodeRevision] Whether or not the code revision should be validated
+     *
+     * @returns {APIDeferred} An APIDeferred representing the promise of this request
      */
-    function getEnhancedParameters(command, parameters) {
+    function performPOSTRequest(command, parameters, returnedPropertyName, keepalive, checkCodeRevision) {
         let newParameters = {...parameters, command};
 
         // If there was an enhanceParameters() method supplied in our args, then we will call that here
         if (args && _.isFunction(args.enhanceParameters)) {
             newParameters = args.enhanceParameters(newParameters);
         }
-
-        return newParameters;
-    }
-
-    /**
-     * @private
-     *
-     * @param {String} command Name of the command to run
-     * @param {Object} [parameters] A map of parameter names to their values
-     * @param {String} [returnedPropertyName] The value of the property that you want to return if you don't want to
-     *                      return the whole response JSON
-     * @param {Boolean} [sync] Whether or not the request should be synchronous
-     * @param {Boolean} [checkCodeRevision] Whether or not the code revision should be validated
-     *
-     * @returns {APIDeferred} An APIDeferred representing the promise of this request
-     */
-    function performPOSTRequest(command, parameters, returnedPropertyName, sync, checkCodeRevision) {
-        const newParameters = getEnhancedParameters(command, parameters);
 
         // We need to setup multiple promises here depending on our arguments. If there is no argument, then we will just
         // use an immediately resolved promise for sake of code readability (ie. the promise will always exist and code
@@ -141,9 +127,15 @@ export default function API(network, args) {
         codeRevisionPromise().done(() => {
             // We are done checking the code version, so now we can make our network request. We then use our
             // dummy promise here in done() and fail() because that was the promise attached to our APIDeferred.
-            network.post(newParameters, sync)
-                .done(networkRequestPromise.resolve)
-                .fail(networkRequestPromise.reject);
+            if (keepalive) {
+                network.keepalive(newParameters)
+                    .done(networkRequestPromise.resolve)
+                    .fail(networkRequestPromise.reject);
+            } else {
+                network.post(newParameters)
+                    .done(networkRequestPromise.resolve)
+                    .fail(networkRequestPromise.reject);
+            }
 
             // Finally, we can attach any JSONCode callbacks to our APIDeferred because we know that at this point
             // we're making a real network request.
@@ -151,10 +143,6 @@ export default function API(network, args) {
         });
 
         return finalApiDeferred;
-    }
-
-    function performKeepaliveRequest(command, parameters, returnedPropertyName, checkCodeRevision) {
-        const newParameters = getEnhancedParameters(command, parameters);
     }
 
     /**
@@ -237,7 +225,7 @@ export default function API(network, args) {
                 throw new Error('Must pass commandName to API.extendMethod');
             }
 
-            return (parameters, sync = false) => {
+            return (parameters, keepalive = false) => {
                 // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
                 if (_.isFunction(data.validate)) {
                     data.validate(parameters);
@@ -248,7 +236,7 @@ export default function API(network, args) {
                     data.commandName,
                     parameters,
                     data.returnedPropertyName || false,
-                    sync,
+                    keepalive,
                     data.checkCodeRevision || false
                 );
             };
@@ -420,13 +408,13 @@ export default function API(network, args) {
          * @param {String} parameters.type This can be one of ['timer', 'counter']
          * @param {String} parameters.statName
          * @param {Number} parameters.value
-         * @param {Boolean} sync whether or not to make the request synchronously
+         * @param {Boolean} [keepalive] whether or not the request can complete after the browser is closed
          * @returns {APIDeferred}
          */
-        graphite(parameters, sync) {
+        graphite(parameters, keepalive) {
             const commandName = 'Graphite';
             requireParameters(['type', 'statName', 'value'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters, null, sync);
+            return performPOSTRequest(commandName, parameters, null, keepalive);
         },
 
         /**
@@ -508,16 +496,14 @@ export default function API(network, args) {
              * @param {Number} parameters.jobID
              * @param {Object[]} parameters.jobData
              * @param {Number} parameters.startedAt
-             * @param {Boolean} [sync] Whether or not the request should be synchronous. It is synchronous when someone
-             *                      is closing the browser or refreshing the page. We need to make sure the requests
-             *                      complete before the page is closed (or we end up with stuck jobs)
+             * @param {Boolean} [keepalive] Whether or not the request can complete after the page is closed
              *
              * @returns {APIDeferred}
              */
-            returnJob(parameters, sync) {
+            returnJob(parameters, keepalive) {
                 const commandName = 'Expensiworks_ReturnJob';
                 requireParameters(['jobID', 'jobData', 'startedAt'], parameters, commandName);
-                return performPOSTRequest(commandName, parameters, null, sync);
+                return performPOSTRequest(commandName, parameters, null, keepalive);
             },
         },
 
