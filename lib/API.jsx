@@ -451,6 +451,21 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command Upload_Travel_Receipt
+         *
+         * @param {Object} parameters API parameters. Must contain 'transactionList'
+         *
+         * @returns {APIDeferred}
+         */
+        uploadTravelReceipt: function (parameters) {
+            const commandName = 'Upload_Travel_Receipt';
+
+            requireParameters(['transactionList'], parameters, commandName);
+
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
