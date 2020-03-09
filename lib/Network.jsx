@@ -2,6 +2,28 @@ import $ from 'jquery';
 import _ from 'underscore';
 
 /**
+ * Adds our API command to the URL so the API call is more easily identified in the
+ * network tab of the JS console
+ *
+ * @param {string} command
+ * @param {string} url
+ * @returns {string}
+ */
+function addCommandToUrl(command, url) {
+    let newUrl = url;
+
+    if (command) {
+        // Add a ? to the end of the URL if there isn't one already
+        if (newUrl.indexOf('?') === -1) {
+            newUrl = `${newUrl}?`;
+        }
+        newUrl = `${newUrl}&command=${command}`;
+    }
+
+    return newUrl;
+}
+
+/**
  * @param {String} endpoint
  *
  * @returns {Object}
@@ -44,13 +66,7 @@ export default function Network(endpoint) {
             let shouldUseFormData = false;
 
             // Add the API command to our URL (for console debugging purposes)
-            if (parameters.command) {
-                // Add a ? to the end of the URL if there isn't one already
-                if (settings.url.indexOf('?') === -1) {
-                    settings.url = `${settings.url}?`;
-                }
-                settings.url = `${settings.url}&command=${parameters.command}`;
-            }
+            settings.url = addCommandToUrl(parameters.command, settings.url);
 
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
@@ -97,13 +113,7 @@ export default function Network(endpoint) {
             let url = endpoint;
 
             // Add the API command to our URL (for console debugging purposes)
-            if (parameters.command) {
-                // Add a ? to the end of the URL if there isn't one already
-                if (url.indexOf('?') === -1) {
-                    url = `${url}?`;
-                }
-                url = `${url}&command=${parameters.command}`;
-            }
+            url = addCommandToUrl(parameters.command, url);
 
             // Add our data as form data
             const formData = new FormData();
