@@ -141,10 +141,10 @@ export default function Network(endpoint) {
             // so that our API can be consistent
             const promise = new $.Deferred();
             fetch(url, settings)
-                .then((response) => {
-                    // Note: this response object is going to be quite a bit different
-                    // than a normal jQuery response
-                    promise.resolve(response);
+                .then(() => {
+                    // No need to return a response since there is no script to process it
+                    // due to the browser being closed
+                    promise.resolve();
                 })
                 .catch((error) => {
                     promise.reject(error);
