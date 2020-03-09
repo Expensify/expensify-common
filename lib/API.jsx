@@ -452,14 +452,14 @@ export default function API(network, args) {
         },
 
         /**
-         * Performs API command Upload_Travel_Receipt
+         * Performs API command Expense_Create
          *
          * @param {Object} parameters API parameters. Must contain 'transactionList'
          *
          * @returns {APIDeferred}
          */
-        uploadTravelReceipt: function (parameters) {
-            const commandName = 'Upload_Travel_Receipt';
+        expense_create: function (parameters) {
+            const commandName = 'Expense_Create';
 
             requireParameters(['transactionList'], parameters, commandName);
 
