@@ -458,7 +458,7 @@ export default function API(network, args) {
          *
          * @returns {APIDeferred}
          */
-        expense_create: function (parameters) {
+        Expense_Create: function (parameters) {
             const commandName = 'Expense_Create';
 
             requireParameters(['transactionList'], parameters, commandName);
