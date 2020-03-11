@@ -2,6 +2,28 @@ import $ from 'jquery';
 import _ from 'underscore';
 
 /**
+ * Adds our API command to the URL so the API call is more easily identified in the
+ * network tab of the JS console
+ *
+ * @param {string} command
+ * @param {string} url
+ * @returns {string}
+ */
+function addCommandToUrl(command, url) {
+    let newUrl = url;
+
+    if (command) {
+        // Add a ? to the end of the URL if there isn't one already
+        if (newUrl.indexOf('?') === -1) {
+            newUrl = `${newUrl}?`;
+        }
+        newUrl = `${newUrl}&command=${command}`;
+    }
+
+    return newUrl;
+}
+
+/**
  * @param {String} endpoint
  *
  * @returns {Object}
@@ -30,29 +52,21 @@ export default function Network(endpoint) {
 
         /**
          * @param {Object} parameters
-         * @param {Boolean} [sync] Whether or not the request should be synchronous
          *
-         * @returns {Deferred}
+         * @returns {$.Deferred}
          */
-        post(parameters, sync) {
+        post(parameters) {
             // Build request
             const settings = {
                 url: endpoint,
                 type: 'POST',
                 data: parameters,
-                async: !sync,
             };
             const formData = new FormData();
             let shouldUseFormData = false;
 
             // Add the API command to our URL (for console debugging purposes)
-            if (parameters.command) {
-                // Add a ? to the end of the URL if there isn't one already
-                if (settings.url.indexOf('?') === -1) {
-                    settings.url = `${settings.url}?`;
-                }
-                settings.url = `${settings.url}&command=${parameters.command}`;
-            }
+            settings.url = addCommandToUrl(parameters.command, settings.url);
 
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
@@ -76,6 +90,66 @@ export default function Network(endpoint) {
             }
 
             return $.ajax(settings);
+        },
+
+        /**
+         * Uses the fetch API to send a keepalive request that will complete
+         * even if the browser is closed
+         *
+         * Note: This method ONLY provides partial support for sending complex data structures.
+         * It supports a single level array of objects with no nested properties
+         * eg. [{one: 1}, {two:2}]
+         *
+         * @param {Object} parameters
+         * @returns {$.Deferred}
+         */
+        keepalive(parameters) {
+            // Build request
+            const settings = {
+                method: 'POST',
+                keepalive: true,
+                credentials: 'same-origin',
+            };
+            let url = endpoint;
+
+            // Add the API command to our URL (for console debugging purposes)
+            url = addCommandToUrl(parameters.command, url);
+
+            // Add our data as form data
+            const formData = new FormData();
+            _(parameters).each((value, key) => {
+                if (!value) {
+                    return;
+                }
+                if (_.isArray(value)) {
+                    _.each(value, (valueItem, i) => {
+                        if (_.isObject(valueItem)) {
+                            _.each(valueItem, (valueItemObjectValue, valueItemObjectKey) => {
+                                formData.append(`${key}[${i}][${valueItemObjectKey}]`, valueItemObjectValue);
+                            });
+                        } else {
+                            formData.append(`${key}[${i}]`, valueItem);
+                        }
+                    });
+                } else {
+                    formData.append(key, value);
+                }
+            });
+            settings.body = formData;
+
+            // Make our request via the fetch API but return it in the form of a jQuery promise
+            // so that our API can be consistent
+            const promise = new $.Deferred();
+            fetch(url, settings)
+                .then(() => {
+                    // No need to return a response since there is no script to process it
+                    // due to the browser being closed
+                    promise.resolve();
+                })
+                .catch((error) => {
+                    promise.reject(error);
+                });
+            return promise;
         },
 
         /**
