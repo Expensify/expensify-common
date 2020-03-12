@@ -509,7 +509,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {Number} parameters.jobID
-             * @param {Object[]} parameters.jobData
+             * @param {String} parameters.receiptIDList
              * @param {Number} parameters.startedAt
              * @param {Boolean} [keepalive] Whether or not the request can complete after the page is closed
              *
@@ -517,7 +517,7 @@ export default function API(network, args) {
              */
             returnJob(parameters, keepalive) {
                 const commandName = 'Expensiworks_ReturnJob';
-                requireParameters(['jobID', 'jobData', 'startedAt'], parameters, commandName);
+                requireParameters(['jobID', 'receiptIDList', 'startedAt'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, null, keepalive);
             },
         },
