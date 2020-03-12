@@ -458,6 +458,21 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command Expense_Create
+         *
+         * @param {Object} parameters API parameters. Must contain 'transactionList'
+         *
+         * @returns {APIDeferred}
+         */
+        Expense_Create: function (parameters) {
+            const commandName = 'Expense_Create';
+
+            requireParameters(['transactionList'], parameters, commandName);
+
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
