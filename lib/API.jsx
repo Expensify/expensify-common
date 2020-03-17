@@ -465,7 +465,7 @@ export default function API(network, args) {
          *
          * @returns {APIDeferred}
          */
-        Expense_Create: function (parameters) {
+        Expense_Create(parameters) {
             const commandName = 'Expense_Create';
 
             requireParameters(['transactionList'], parameters, commandName);
@@ -509,7 +509,7 @@ export default function API(network, args) {
              *
              * @param {Object} parameters
              * @param {Number} parameters.jobID
-             * @param {String} parameters.receiptIDList
+             * @param {Array} parameters.jobData
              * @param {Number} parameters.startedAt
              * @param {Boolean} [keepalive] Whether or not the request can complete after the page is closed
              *
@@ -517,7 +517,7 @@ export default function API(network, args) {
              */
             returnJob(parameters, keepalive) {
                 const commandName = 'Expensiworks_ReturnJob';
-                requireParameters(['jobID', 'receiptIDList', 'startedAt'], parameters, commandName);
+                requireParameters(['jobID', 'jobData', 'startedAt'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters, null, keepalive);
             },
         },
