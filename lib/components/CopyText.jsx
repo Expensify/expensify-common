@@ -1,5 +1,22 @@
 import React from 'react';
 import Clipboard from 'clipboard'
+import PropTypes from 'prop-types';
+
+const propTypes = {
+    // Callback fired when text has been copied - useful to display UI confirmation
+    onSuccess: PropTypes.func,
+
+    // The text to be copied
+    textContent: PropTypes.string,
+
+    // Function as a child exposes the copyTextToClipboard fuction
+    children: PropTypes.func.isRequired
+};
+
+const defaultProps = {
+    onSuccess: () => {},
+    textContent: '',
+};
 
 /**
  * Simple render prop component that encapsulates the Clipboard feature and exposes a function that can be tied to any event
@@ -15,26 +32,6 @@ import Clipboard from 'clipboard'
  * </React.c.CopyText>
  */
 class CopyText extends React.Component {
-    static get propTypes() {
-        return {
-            // Callback fired when text has been copied - useful to display UI confirmation
-            onSuccess: window.PropTypes.func,
-
-            // The text to be copied
-            textContent: window.PropTypes.string,
-
-            // Function as a child exposes the copyTextToClipboard fuction
-            children: window.PropTypes.func.isRequired
-        };
-    }
-
-    static get defaultProps() {
-        return {
-            onSuccess: () => {},
-            textContent: '',
-        };
-    }
-
     componentDidMount() {
         this.hiddenLink = document.createElement('a');
 
@@ -64,4 +61,8 @@ class CopyText extends React.Component {
         return this.props.children(() => this.copyTextToClipboard());
     }
 }
+
+CopyText.propTypes = propTypes;
+CopyText.defaultProps = defaultProps;
+
 export default CopyText;
