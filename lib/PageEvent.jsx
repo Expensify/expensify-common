@@ -9,7 +9,7 @@ import PubSub from './PubSub';
  * @param {Function} callback Function to fire
  * @constructor
  */
-module.exports = function (eventName, callback) {
+export default function (eventName, callback) {
     let id = null;
     return {
         subscribe(scope) {

@@ -123,4 +123,4 @@ const PubSubModule = {
     }
 };
 
-module.exports = (window !== undefined && window.PubSub) ? window.PubSub : PubSubModule;
+export default (window !== undefined && window.PubSub) ? window.PubSub : PubSubModule;
