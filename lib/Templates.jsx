@@ -9,7 +9,7 @@ import $ from 'jquery';
  * @type Module
  * @constructor
  */
-const Templates = (function () {
+export default (function () {
     const templateStore = {};
 
     /**
@@ -187,8 +187,8 @@ const Templates = (function () {
 
         /**
          * Removes a namespace from the templateStore (only used for testing purposes)
-         * 
-         * @param {String} nameSpace 
+         *
+         * @param {String} nameSpace
          */
         unregister(nameSpace) {
             delete templateStore[nameSpace];
@@ -228,5 +228,3 @@ const Templates = (function () {
         }
     };
 })();
-
-module.exports = Templates;

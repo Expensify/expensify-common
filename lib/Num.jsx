@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import Str from './str';
 
-module.exports = {
+export default {
     /**
      * Converts an exponential number into it's non-exponential string equivalent
      *
