@@ -10,7 +10,7 @@ export default class ExpensiDownParser {
             {
                 name: 'link',
                 regex: '([_*~]*?)(((?:https?):\\/\\/|www\\.)?[^\\s<>"\'´.-][^\\s<>"\'´]*?\\.[a-z\\d.]+[^\\s<>"\']*)\\1',
-                replacement: '$1<a href="$2" target="_blank">$2</a>$1\n',
+                replacement: '$1<a href="$2" target="_blank">$2</a>$1',
             },
             {
                 name: 'bold',
