@@ -36,7 +36,7 @@ export default class ExpensiDownParser {
              * The replacements for bold/italic/strikethrough have spaces added on the front and back of the replacement
              * value (since we're capturing those spaces), so make sure we trim the string after the replacement is done
              *
-             * We want to capture those spaces so that we capture "* test *" but not "test*test*test"
+             * We want to capture those spaces so that we capture " *test* " but not "test*test*test"
              */
             text = text.replace(new RegExp(rule.regex, "g"), rule.replacement).trim();
         });
