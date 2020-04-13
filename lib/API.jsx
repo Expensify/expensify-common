@@ -473,6 +473,24 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command Domain_AddNote
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.note-html
+         * @param {String} parameters.targetEmail
+         * @param {String} [parameters.domainName]
+         *
+         * @returns {APIDeferred}
+         */
+        Domain_Add_Note(parameters) {
+            const commandName = 'Domain_AddNote';
+
+            requireParameters(['note-html', 'targetEmail'], parameters, commandName);
+
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
