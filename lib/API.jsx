@@ -467,9 +467,7 @@ export default function API(network, args) {
          */
         Expense_Create(parameters) {
             const commandName = 'Expense_Create';
-
             requireParameters(['transactionList'], parameters, commandName);
-
             return performPOSTRequest(commandName, parameters);
         },
 
@@ -485,9 +483,7 @@ export default function API(network, args) {
          */
         Domain_Add_Note(parameters) {
             const commandName = 'Domain_AddNote';
-
             requireParameters(['note-html', 'targetEmail'], parameters, commandName);
-
             return performPOSTRequest(commandName, parameters);
         },
 
