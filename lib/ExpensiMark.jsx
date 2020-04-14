@@ -15,7 +15,7 @@ export default class ExpensiMark {
             {
                 /**
                  * Use \b in this case because it will match on words, letters, and _: https://www.rexegg.com/regex-boundaries.html#wordboundary
-                 * The !_blank is to prevent the `target="_blank">` seciton of the link replacement from being captured
+                 * The !_blank is to prevent the `target="_blank">` section of the link replacement from being captured
                  * Additionally, something like `\b\_([^<>]*?)\_\b` doesn't work because it won't replace `_https://www.test.com_`
                  */
                 name: 'italic',
