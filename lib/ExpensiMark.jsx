@@ -1,3 +1,5 @@
+import Str from "./str";
+
 export default class ExpensiMark {
     constructor() {
         /**
@@ -36,7 +38,16 @@ export default class ExpensiMark {
         ];
     }
 
+    /**
+     * Replaces markdown with html elements
+     *
+     * @param {String} text
+     * @returns {String}
+     */
     replace(text) {
+        // This ensures that any html the user puts into the comment field shows as raw html
+        text = Str.htmlEncode(text);
+
         this.rules.forEach((rule) => {
             text = text.replace(new RegExp(rule.regex, "g"), rule.replacement);
         });
