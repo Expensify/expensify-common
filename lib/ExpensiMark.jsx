@@ -46,7 +46,7 @@ export default class ExpensiMark {
      */
     replace(text) {
         // This ensures that any html the user puts into the comment field shows as raw html
-        text = Str.htmlEncode(text);
+        text = Str.safeEscape(text);
 
         this.rules.forEach((rule) => {
             text = text.replace(new RegExp(rule.regex, "g"), rule.replacement);
