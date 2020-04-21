@@ -474,7 +474,7 @@ export const CONST = {
      */
     SMART_SCAN: {
         COST: 20,
-        FREE_NUMBER: 5
+        FREE_NUMBER: 25
     },
 
     SMS: {
