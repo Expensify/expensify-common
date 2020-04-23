@@ -34,6 +34,11 @@ export default class ExpensiMark {
                 name: 'strikethrough',
                 regex: '\\B\\~(.*?)\\~\\B',
                 replacement: '<del>$1</del>'
+            },
+            {
+                name: 'newline',
+                regex: '(\\n)',
+                replacement: '<br>',
             }
         ];
     }
