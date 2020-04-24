@@ -37,7 +37,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'newline',
-                regex: '(\\n)',
+                regex: '\\n',
                 replacement: '<br>',
             }
         ];
