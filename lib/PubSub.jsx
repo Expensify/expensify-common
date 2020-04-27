@@ -1,7 +1,6 @@
-/* global Log */
-
 import _ from 'underscore';
 import has from 'lodash.has';
+import Log from './Log';
 
 /**
  * PubSub
