@@ -38,6 +38,7 @@ const PubSubModule = {
      *
      * @param {String} eventName Name of the event to fire
      * @param {Object} [param] Parameters to send with the event, send to the callback
+     * @returns {PubSub}
      */
     publish(eventName, param = {}) {
         if (eventMap[eventName] === undefined) {
@@ -57,6 +58,8 @@ const PubSubModule = {
                 subscriber.callback.call(subscriber.scope, param);
             }
         });
+
+        return this;
     },
 
     /**
