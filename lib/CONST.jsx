@@ -715,6 +715,18 @@ export const CONST = {
 
     EXPENSIFY_CARD: {
         FEED_NAME: 'Expensify Card',
+
+        // The following variables must be kept up to date with the Card::FraudState constants found in Auth
+        FRAUD_STATES: {
+            NONE: 0,
+            DOMAIN_CARDS_REIMBURSEMENTS_INVESTIGATION: 1,
+            DOMAIN_CARDS_RAPID_INCREASE_INVESTIGATION: 2,
+            DOMAIN_CARDS_RAPID_INCREASE_CLEARED: 3,
+            DOMAIN_CARDS_RAPID_INCREASE_CONFIRMED: 4,
+            INDIVIDUAL_CARD_RAPID_INCREASE_INVESTIGATION: 5,
+            INDIVIDUAL_CARD_RAPID_INCREASE_CLEARED: 6,
+            INDIVIDUAL_CARD_RAPID_INCREASE_CONFIRMED: 7,
+        }
     },
 
     TRAVEL_BOOKING: {
