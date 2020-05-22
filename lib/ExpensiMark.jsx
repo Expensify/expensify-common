@@ -11,7 +11,7 @@ export default class ExpensiMark {
         this.rules = [
             {
                 name: 'link',
-                regex: '([_*~]*?)(((?:https?):\\/\\/|www\\.)?[^\\s<>*~_"\'´.-][^\\s<>"\'´]*?\\.[a-z\\d.]+[^\\s<>*~"\']*)\\1',
+                regex: '([_*~]*?)(((?:https?):\\/\\/|www\\.)[^\\s<>*~_"\'´.-][^\\s<>"\'´]*?\\.[a-z\\d]+[^\\s<>*~"\']*)\\1',
                 replacement: '$1<a href="$2" target="_blank">$2</a>$1',
             },
             {
@@ -34,6 +34,11 @@ export default class ExpensiMark {
                 name: 'strikethrough',
                 regex: '\\B\\~(.*?)\\~\\B',
                 replacement: '<del>$1</del>'
+            },
+            {
+                name: 'newline',
+                regex: '\\n',
+                replacement: '<br>',
             }
         ];
     }

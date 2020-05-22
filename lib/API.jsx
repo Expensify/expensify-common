@@ -487,6 +487,21 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command Domain_DeleteNote
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.note-html
+         * @param {String} [parameters.domainName]
+         *
+         * @returns {APIDeferred}
+         */
+        Domain_Delete_Note(parameters) {
+            const commandName = 'Domain_DeleteNote';
+            requireParameters(['note-html'], parameters, commandName)
+            return  performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get a job to work on
