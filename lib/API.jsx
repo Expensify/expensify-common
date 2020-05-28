@@ -388,6 +388,20 @@ export default function API(network, args) {
         },
 
         /**
+         * Sets the password for an account
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         * @param {String} parameters.password
+         * @param {String} parameters.validateCode
+         * @returns {ExpensifyAPIDeferred}
+         */
+        setPassword(parameters) {
+            const commandName = 'SetPassword';
+            requireParameters(['email', 'password', 'validateCode'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Sets the value of an NVP
          *
          * @param {Object} parameters
