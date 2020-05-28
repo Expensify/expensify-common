@@ -389,6 +389,7 @@ export default function API(network, args) {
 
         /**
          * Sets the password for an account
+         *
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.password
