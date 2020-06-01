@@ -403,6 +403,20 @@ export default function API(network, args) {
         },
 
         /**
+         * Validate a user
+         *
+         * @param {Object} parameters
+         * @param {String} validateCode
+         * @param {String} email
+         * @returns {ExpensifyAPIDeferred}
+         */
+        validateEmail(parameters) {
+            const commandName = 'ValidateEmail';
+            requireParameters(['validateCode', 'email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Sets the value of an NVP
          *
          * @param {Object} parameters
