@@ -683,6 +683,11 @@ export const CONST = {
             text: 'Multiple Tax Export',
             image: `${g_cloudFrontImg}icons/accounting-other.svg`,
         },
+        perdiem: {
+            value: 'per_diem_export',
+            text: 'Per Diem Export',
+            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+        },
     },
 
     NVP: {
