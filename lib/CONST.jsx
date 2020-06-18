@@ -336,8 +336,6 @@ export const CONST = {
      * Root URLs
      */
     URL: {
-        HELP_ROOT: 'http://help.expensify.com/',
-        HELP_DOC_ROOT: 'https://docs.expensify.com/',
         FORUM_ROOT: 'https://community.expensify.com/',
         BUCKET_RECEIPT: {
             DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
