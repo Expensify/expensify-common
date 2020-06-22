@@ -329,7 +329,12 @@ export const CONST = {
          *
          * @type {String}
          */
-        TITLE_FORMULA: '{report:title}'
+        TITLE_FORMULA: '{report:title}',
+
+        /**
+         * The max time a comment can be made after another to be considered the same comment, in seconds
+         */
+        MAX_AGE_SAME_COMMENT: 300
     },
 
     /**
