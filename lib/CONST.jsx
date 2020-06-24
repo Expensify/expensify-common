@@ -892,4 +892,5 @@ export const PUBLIC_DOMAINS = [
     'yahoo.com',
     'yahoo.com.br',
     'ymail.com',
+    'privaterelay.appleid.com',
 ];
