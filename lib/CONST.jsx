@@ -881,4 +881,5 @@ export const PUBLIC_DOMAINS = [
     'hotmail.it',
     'hotmail.fr',
     'yahoo.ca',
+    'privaterelay.appleid.com',
 ];
