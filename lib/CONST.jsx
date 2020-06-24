@@ -329,7 +329,12 @@ export const CONST = {
          *
          * @type {String}
          */
-        TITLE_FORMULA: '{report:title}'
+        TITLE_FORMULA: '{report:title}',
+
+        /**
+         * The max time a comment can be made after another to be considered the same comment, in seconds
+         */
+        MAX_AGE_SAME_COMMENT: 300
     },
 
     /**
@@ -683,6 +688,11 @@ export const CONST = {
             text: 'Multiple Tax Export',
             image: `${g_cloudFrontImg}icons/accounting-other.svg`,
         },
+        perdiem: {
+            value: 'per_diem_export',
+            text: 'Per Diem Export',
+            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+        },
     },
 
     NVP: {
@@ -848,38 +858,39 @@ export const UI = {
 
 // List of most frequently used public domains
 export const PUBLIC_DOMAINS = [
+    'aol.com',
+    'att.net',
+    'bellsouth.net',
     'bills.expensify.com',
+    'btinternet.com',
+    'chromeexpensify.com',
+    'comcast.net',
+    'cox.net',
+    'cpa.com',
     'evernote.user',
     'expensify.sms',
-    'chromeexpensify.com',
     'gmail.com',
-    'yahoo.com',
+    'gmail.con',
+    'googlemail.com',
+    'hotmail.co.uk',
     'hotmail.com',
-    'aol.com',
-    'me.com',
-    'outlook.com',
+    'hotmail.fr',
+    'hotmail.it',
     'icloud.com',
     'live.com',
-    'comcast.net',
-    'msn.com',
-    'googlemail.com',
     'mac.com',
-    'hotmail.co.uk',
-    'ymail.com',
-    'sbcglobal.net',
     'mail.ru',
-    'yahoo.co.uk',
-    'att.net',
+    'me.com',
+    'msn.com',
+    'outlook.com',
     'qq.com',
+    'sbcglobal.net',
     'verizon.net',
-    'gmail.con',
-    'cox.net',
-    'bellsouth.net',
-    'yahoo.com.br',
-    'btinternet.com',
-    'yahoo.co.in',
-    'hotmail.it',
-    'hotmail.fr',
     'yahoo.ca',
+    'yahoo.co.in',
+    'yahoo.co.uk',
+    'yahoo.com',
+    'yahoo.com.br',
+    'ymail.com',
     'privaterelay.appleid.com',
 ];
