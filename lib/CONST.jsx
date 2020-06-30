@@ -831,7 +831,8 @@ export const UI = {
         CLOCK: 'time',
         PER_DIEM: 'per-diem',
         PENDING_CARD: 'card-transaction-pending',
-        CSV_UPLOAD: 'csv-upload'
+        CSV_UPLOAD: 'csv-upload',
+        PENDING_CREDIT_CARD: 'credit-card-pending'
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
