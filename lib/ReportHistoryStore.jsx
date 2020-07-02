@@ -17,12 +17,12 @@ export default class ReportHistoryStore {
         this.cache = {};
 
         /**
-        * Filters out actions we never want to display on web or mobile.
-        *
-        * @param {Object[]} historyItems
-        *
-        * @returns {Object[]}
-        */
+         * Filters out actions we never want to display on web or mobile.
+         *
+         * @param {Object[]} historyItems
+         *
+         * @returns {Object[]}
+         */
         this.filterHiddenActions = historyItems => _.filter(historyItems, historyItem => historyItem.shouldShow);
 
         /**
@@ -34,11 +34,13 @@ export default class ReportHistoryStore {
              * Note that we are unable to ask for the cached history.
              *
              * @param {Number} reportID
+             * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
+             *
              * @returns {Deferred}
              */
-            get: (reportID) => {
+            get: (reportID, ignoreCache) => {
                 const promise = new Deferred();
-                this.get(reportID)
+                this.get(reportID, ignoreCache)
                     .done((reportHistory) => {
                         promise.resolve(this.filterHiddenActions(reportHistory));
                     })
@@ -111,19 +113,29 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Completetly replaces history items into the cache for a given report ID.
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    replaceItems(reportID, newHistory) {
+        this.cache[reportID] = _.sortBy(newHistory, 'sequenceNumber').reverse();
+    }
+
+    /**
      * Gets the history.
      *
      * @param {Number} reportID
-     * @param {Boolean} cacheFirst - private usage only
+     * @param {Boolean} ignoreCache
      *
      * @returns {Deferred}
      */
-    get(reportID) {
+    get(reportID, ignoreCache) {
         const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
         // Otherwise we'll poll the API for the missing history
-        const firstHistoryItem = _.first(cachedHistory) || {};
+        const firstHistoryItem = ignoreCache ? {} : (_.first(cachedHistory) || {});
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
@@ -131,8 +143,12 @@ export default class ReportHistoryStore {
             offset: firstHistoryItem.sequenceNumber || 0
         })
             .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeItems(reportID, recentHistory);
+                if (ignoreCache) {
+                    this.replaceItems(reportID, recentHistory);
+                } else {
+                    // Update history with new items fetched
+                    this.mergeItems(reportID, recentHistory);
+                }
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
