@@ -329,7 +329,12 @@ export const CONST = {
          *
          * @type {String}
          */
-        TITLE_FORMULA: '{report:title}'
+        TITLE_FORMULA: '{report:title}',
+
+        /**
+         * The max time a comment can be made after another to be considered the same comment, in seconds
+         */
+        MAX_AGE_SAME_COMMENT: 300
     },
 
     /**
@@ -824,7 +829,8 @@ export const UI = {
         CLOCK: 'time',
         PER_DIEM: 'per-diem',
         PENDING_CARD: 'card-transaction-pending',
-        CSV_UPLOAD: 'csv-upload'
+        CSV_UPLOAD: 'csv-upload',
+        PENDING_CREDIT_CARD: 'credit-card-pending'
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
@@ -885,4 +891,5 @@ export const PUBLIC_DOMAINS = [
     'yahoo.com',
     'yahoo.com.br',
     'ymail.com',
+    'privaterelay.appleid.com',
 ];
