@@ -329,15 +329,18 @@ export const CONST = {
          *
          * @type {String}
          */
-        TITLE_FORMULA: '{report:title}'
+        TITLE_FORMULA: '{report:title}',
+
+        /**
+         * The max time a comment can be made after another to be considered the same comment, in seconds
+         */
+        MAX_AGE_SAME_COMMENT: 300
     },
 
     /**
      * Root URLs
      */
     URL: {
-        HELP_ROOT: 'http://help.expensify.com/',
-        HELP_DOC_ROOT: 'https://docs.expensify.com/',
         FORUM_ROOT: 'https://community.expensify.com/',
         BUCKET_RECEIPT: {
             DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
@@ -683,6 +686,11 @@ export const CONST = {
             text: 'Multiple Tax Export',
             image: `${g_cloudFrontImg}icons/accounting-other.svg`,
         },
+        perdiem: {
+            value: 'per_diem_export',
+            text: 'Per Diem Export',
+            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+        },
     },
 
     NVP: {
@@ -821,7 +829,8 @@ export const UI = {
         CLOCK: 'time',
         PER_DIEM: 'per-diem',
         PENDING_CARD: 'card-transaction-pending',
-        CSV_UPLOAD: 'csv-upload'
+        CSV_UPLOAD: 'csv-upload',
+        PENDING_CREDIT_CARD: 'credit-card-pending'
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
@@ -848,37 +857,39 @@ export const UI = {
 
 // List of most frequently used public domains
 export const PUBLIC_DOMAINS = [
+    'aol.com',
+    'att.net',
+    'bellsouth.net',
     'bills.expensify.com',
+    'btinternet.com',
+    'chromeexpensify.com',
+    'comcast.net',
+    'cox.net',
+    'cpa.com',
     'evernote.user',
     'expensify.sms',
-    'chromeexpensify.com',
     'gmail.com',
-    'yahoo.com',
+    'gmail.con',
+    'googlemail.com',
+    'hotmail.co.uk',
     'hotmail.com',
-    'aol.com',
-    'me.com',
-    'outlook.com',
+    'hotmail.fr',
+    'hotmail.it',
     'icloud.com',
     'live.com',
-    'comcast.net',
-    'msn.com',
-    'googlemail.com',
     'mac.com',
-    'hotmail.co.uk',
-    'ymail.com',
-    'sbcglobal.net',
     'mail.ru',
-    'yahoo.co.uk',
-    'att.net',
+    'me.com',
+    'msn.com',
+    'outlook.com',
     'qq.com',
+    'sbcglobal.net',
     'verizon.net',
-    'gmail.con',
-    'cox.net',
-    'bellsouth.net',
-    'yahoo.com.br',
-    'btinternet.com',
-    'yahoo.co.in',
-    'hotmail.it',
-    'hotmail.fr',
     'yahoo.ca',
+    'yahoo.co.in',
+    'yahoo.co.uk',
+    'yahoo.com',
+    'yahoo.com.br',
+    'ymail.com',
+    'privaterelay.appleid.com',
 ];
