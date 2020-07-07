@@ -38,7 +38,7 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            get: (reportID, ignoreCache) => {
+            get: (reportID, ignoreCache = false) => {
                 const promise = new Deferred();
                 this.get(reportID, ignoreCache)
                     .done((reportHistory) => {
@@ -113,16 +113,6 @@ export default class ReportHistoryStore {
     }
 
     /**
-     * Completetly replaces history items into the cache for a given report ID.
-     *
-     * @param {Number} reportID
-     * @param {Object[]} newHistory
-     */
-    replaceItems(reportID, newHistory) {
-        this.cache[reportID] = _.sortBy(newHistory, 'sequenceNumber').reverse();
-    }
-
-    /**
      * Gets the history.
      *
      * @param {Number} reportID
@@ -132,10 +122,15 @@ export default class ReportHistoryStore {
      */
     get(reportID, ignoreCache) {
         const promise = new Deferred();
-        const cachedHistory = this.cache[reportID] || [];
 
-        // Otherwise we'll poll the API for the missing history
-        const firstHistoryItem = ignoreCache ? {} : (_.first(cachedHistory) || {});
+        // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
+        if (ignoreCache) {
+            delete this.cache[reportID];
+        }
+
+        // We'll poll the API for the un-cached history
+        const cachedHistory = this.cache[reportID] || [];
+        const firstHistoryItem = _.first(cachedHistory) || {};
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
@@ -143,12 +138,8 @@ export default class ReportHistoryStore {
             offset: firstHistoryItem.sequenceNumber || 0
         })
             .done((recentHistory) => {
-                if (ignoreCache) {
-                    this.replaceItems(reportID, recentHistory);
-                } else {
-                    // Update history with new items fetched
-                    this.mergeItems(reportID, recentHistory);
-                }
+                // Update history with new items fetched
+                this.mergeItems(reportID, recentHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
