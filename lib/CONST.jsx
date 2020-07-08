@@ -341,8 +341,6 @@ export const CONST = {
      * Root URLs
      */
     URL: {
-        HELP_ROOT: 'http://help.expensify.com/',
-        HELP_DOC_ROOT: 'https://docs.expensify.com/',
         FORUM_ROOT: 'https://community.expensify.com/',
         BUCKET_RECEIPT: {
             DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
@@ -831,7 +829,8 @@ export const UI = {
         CLOCK: 'time',
         PER_DIEM: 'per-diem',
         PENDING_CARD: 'card-transaction-pending',
-        CSV_UPLOAD: 'csv-upload'
+        CSV_UPLOAD: 'csv-upload',
+        PENDING_CREDIT_CARD: 'credit-card-pending'
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
