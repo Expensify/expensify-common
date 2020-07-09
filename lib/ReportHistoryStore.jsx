@@ -84,6 +84,13 @@ export default class ReportHistoryStore {
                 return promise;
             },
 
+            /**
+             * Clears the entire report history cache.
+             */
+            clear: () => {
+                this.cache = {};
+            },
+
             // We need this to be publically available for cases where we get the report history
             // via PHP or html pages within the app e.g. printablereport.html
             filterHiddenActions: this.filterHiddenActions,
