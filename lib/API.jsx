@@ -403,6 +403,15 @@ export default function API(network, args) {
         },
 
         /**
+         * Change a password for an account
+         */
+        changePassword(parameters) {
+            const commandName = 'ChangePassword';
+            requireParameters(['oldPassword', 'password'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Validate a user
          *
          * @param {Object} parameters
