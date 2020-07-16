@@ -354,9 +354,10 @@ export default function API(network, args) {
          *
          * @return {ExpensifyAPIDeferred}
          */
-        resendValidateCode() {
+        resendValidateCode(parameters) {
             const commandName = 'ResendValidateCode';
-            return performPOSTRequest(commandName, {api_setCookie: false});
+            const newParameters = _.extend({api_setCookie: false}, parameters);
+            return performPOSTRequest(commandName, newParameters);
         },
 
         /**
