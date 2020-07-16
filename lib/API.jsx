@@ -351,7 +351,7 @@ export default function API(network, args) {
 
         /**
          * Resends the validate code.
-         * 
+         *
          * @param {Object} parameters
          * @param {String} [parameters.email]
          *
@@ -531,8 +531,8 @@ export default function API(network, args) {
          */
         Domain_Delete_Note(parameters) {
             const commandName = 'Domain_DeleteNote';
-            requireParameters(['note-html'], parameters, commandName)
-            return  performPOSTRequest(commandName, parameters);
+            requireParameters(['note-html'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
         },
 
         expensiworks: {
