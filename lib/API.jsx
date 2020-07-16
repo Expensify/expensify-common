@@ -357,7 +357,7 @@ export default function API(network, args) {
          *
          * @return {ExpensifyAPIDeferred}
          */
-        resendValidateCode(parameters) {
+        resendValidateCode(parameters = {}) {
             const commandName = 'ResendValidateCode';
             return performPOSTRequest(commandName, {
                 ...parameters, 
