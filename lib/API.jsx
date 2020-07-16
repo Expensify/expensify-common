@@ -353,6 +353,7 @@ export default function API(network, args) {
          * Resends the validate code.
          * 
          * @param {Object} parameters
+         * @param {String} [parameters.email]
          *
          * @return {ExpensifyAPIDeferred}
          */
