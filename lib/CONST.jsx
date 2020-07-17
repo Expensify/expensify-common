@@ -341,8 +341,6 @@ export const CONST = {
      * Root URLs
      */
     URL: {
-        HELP_ROOT: 'http://help.expensify.com/',
-        HELP_DOC_ROOT: 'https://docs.expensify.com/',
         FORUM_ROOT: 'https://community.expensify.com/',
         BUCKET_RECEIPT: {
             DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
@@ -873,6 +871,7 @@ export const PUBLIC_DOMAINS = [
     'gmail.com',
     'gmail.con',
     'googlemail.com',
+    'hey.com',
     'hotmail.co.uk',
     'hotmail.com',
     'hotmail.fr',
@@ -884,14 +883,14 @@ export const PUBLIC_DOMAINS = [
     'me.com',
     'msn.com',
     'outlook.com',
+    'privaterelay.appleid.com',
     'qq.com',
     'sbcglobal.net',
     'verizon.net',
     'yahoo.ca',
     'yahoo.co.in',
     'yahoo.co.uk',
-    'yahoo.com',
     'yahoo.com.br',
+    'yahoo.com',
     'ymail.com',
-    'privaterelay.appleid.com',
 ];

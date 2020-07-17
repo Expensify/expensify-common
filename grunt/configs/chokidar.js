@@ -14,6 +14,10 @@ module.exports = function (grunt) {
         tasks: ['eslint'],
         options: {
             spawn: false,
+
+            // This checks to see if we are inside the vm, if we are we use polling because fsevents
+            // are not forwarded over an NFS connection.
+            usePolling: process.cwd().indexOf('/vagrant') !== -1
         }
     };
 };
