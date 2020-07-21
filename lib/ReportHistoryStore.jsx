@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import {Deferred} from 'simply-deferred';
+import PubSub from './PubSub';
 
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
@@ -82,6 +83,17 @@ export default class ReportHistoryStore {
                     .fail(promise.reject);
 
                 return promise;
+            },
+
+            /**
+             * Certain events need to completely clear the cache. This method allows other code modules using this
+             * (like Web, Mobile) to assign which events would do so.
+             *
+             * @param {String[]} events
+             * @param {PubSub} pubSubInstance
+             */
+            bindCacheClearingEvents(events, pubSubInstance = PubSub) {
+                _.each(events, event => pubSubInstance.subscribe(event, this.clearCache));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -172,5 +184,12 @@ export default class ReportHistoryStore {
         }
 
         return promise.resolve(cachedHistory);
+    }
+
+    /**
+     * Clears the entire report history cache.
+     */
+    clearCache() {
+        this.cache = {};
     }
 }
