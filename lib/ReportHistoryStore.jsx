@@ -90,9 +90,10 @@ export default class ReportHistoryStore {
              * (like Web, Mobile) to assign which events would do so.
              *
              * @param {String[]} events
+             * @param {PubSub} pubSubInstance
              */
-            bindCacheClearingEvents(events) {
-                _.each(events, event => PubSub.subscribe(event, this.clearCache));
+            bindCacheClearingEvents(events, pubSubInstance = PubSub) {
+                _.each(events, event => pubSubInstance.subscribe(event, this.clearCache));
             },
 
             // We need this to be publically available for cases where we get the report history
