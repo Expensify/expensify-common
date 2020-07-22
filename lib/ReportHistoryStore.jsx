@@ -99,7 +99,7 @@ export default class ReportHistoryStore {
              * @param {String[]} events
              */
             bindCacheClearingEvents: (events) => {
-                _.each(events, event => this.PubSub.subscribe(event, this.clearCache));
+                _.each(events, event => this.PubSub.subscribe(event, () => this.cache = {}));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -190,12 +190,5 @@ export default class ReportHistoryStore {
         }
 
         return promise.resolve(cachedHistory);
-    }
-
-    /**
-     * Clears the entire report history cache.
-     */
-    clearCache() {
-        this.cache = {};
     }
 }
