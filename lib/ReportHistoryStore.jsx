@@ -98,7 +98,7 @@ export default class ReportHistoryStore {
              *
              * @param {String[]} events
              */
-            bindCacheClearingEvents(events) {
+            bindCacheClearingEvents: (events) => {
                 _.each(events, event => this.PubSub.subscribe(event, this.clearCache));
             },
 
