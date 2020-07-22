@@ -1,10 +1,9 @@
 import _ from 'underscore';
 import {Deferred} from 'simply-deferred';
-import PubSub from './PubSub';
 
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
-    constructor(API) {
+    constructor(API, PubSub) {
         if (!API) {
             throw new Error('Cannot instantiate ReportHistoryStore without API');
         }
@@ -16,6 +15,14 @@ export default class ReportHistoryStore {
          * Map of reportIDs with value of report history items array
          */
         this.cache = {};
+
+        /**
+         * PubSub instance used for the bindCacheClearingEvents method.
+         *
+         * Since Mobile and Web use different instances of PubSub, this is unfortunately necessary to subscribe to
+         * events in both code bases.
+         */
+        this.PubSub = PubSub;
 
         /**
          * Filters out actions we never want to display on web or mobile.
@@ -90,10 +97,9 @@ export default class ReportHistoryStore {
              * (like Web, Mobile) to assign which events would do so.
              *
              * @param {String[]} events
-             * @param {PubSub} pubSubInstance
              */
-            bindCacheClearingEvents(events, pubSubInstance = PubSub) {
-                _.each(events, event => pubSubInstance.subscribe(event, this.clearCache));
+            bindCacheClearingEvents: (events) => {
+                _.each(events, event => this.PubSub.subscribe(event, () => this.cache = {}));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -184,12 +190,5 @@ export default class ReportHistoryStore {
         }
 
         return promise.resolve(cachedHistory);
-    }
-
-    /**
-     * Clears the entire report history cache.
-     */
-    clearCache() {
-        this.cache = {};
     }
 }
