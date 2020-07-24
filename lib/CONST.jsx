@@ -650,7 +650,7 @@ export const CONST = {
         generic_indirect_connection: {
             value: 'generic_indirect_connection',
             text: 'Other',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
             types: ['hr', 'accounting'],
         },
     },
@@ -659,37 +659,37 @@ export const CONST = {
         default: {
             value: 'default_template',
             text: 'Basic Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         tag: {
             value: 'tag_template',
             text: 'Tag Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         category: {
             value: 'category_template',
             text: 'Category Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         detailed: {
             value: 'detailed_export',
             text: 'Detailed Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         report: {
             value: 'report_level_export',
             text: 'Report Level Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         tax: {
             value: 'multiple_tax_export',
             text: 'Multiple Tax Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         perdiem: {
             value: 'per_diem_export',
             text: 'Per Diem Export',
-            image: `${g_cloudFrontImg}icons/accounting-other.svg`,
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
     },
 
