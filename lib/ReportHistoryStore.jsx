@@ -3,7 +3,7 @@ import {Deferred} from 'simply-deferred';
 
 export default class ReportHistoryStore {
     // We need to instantiate the history cache with the platform specific implementations
-    constructor(API) {
+    constructor(API, PubSub) {
         if (!API) {
             throw new Error('Cannot instantiate ReportHistoryStore without API');
         }
@@ -15,6 +15,14 @@ export default class ReportHistoryStore {
          * Map of reportIDs with value of report history items array
          */
         this.cache = {};
+
+        /**
+         * PubSub instance used for the bindCacheClearingEvents method.
+         *
+         * Since Mobile and Web use different instances of PubSub, this is unfortunately necessary to subscribe to
+         * events in both code bases.
+         */
+        this.PubSub = PubSub;
 
         /**
          * Filters out actions we never want to display on web or mobile.
@@ -82,6 +90,16 @@ export default class ReportHistoryStore {
                     .fail(promise.reject);
 
                 return promise;
+            },
+
+            /**
+             * Certain events need to completely clear the cache. This method allows other code modules using this
+             * (like Web, Mobile) to assign which events would do so.
+             *
+             * @param {String[]} events
+             */
+            bindCacheClearingEvents: (events) => {
+                _.each(events, event => this.PubSub.subscribe(event, () => this.cache = {}));
             },
 
             // We need this to be publically available for cases where we get the report history
