@@ -47,8 +47,9 @@ const Log = {
     * @param {String} message The message to write
     * @param {Number} recentMessages A number of recent messages to append as context
     * @param {object|String} parameters The parameters to send along with the message
+    * @param {object} requestParameters The parameters to send along with the request
     */
-    logToServer: (message, recentMessages, parameters = {}) => {
+    logToServer: (message, recentMessages, parameters = {}, requestParameters = {}) => {
         // Optionally append recent log lines as context
         let msg = message;
         if (recentMessages > 0) {
@@ -60,7 +61,7 @@ const Log = {
         if (window.DEBUG) {
             Log.client(`${msg} - ${JSON.stringify(parameters)}`);
         }
-        const params = {parameters, message};
+        const params = {parameters, message, ...requestParameters};
         API(Network('/api.php')).logToServer(params);
     },
 
@@ -71,11 +72,12 @@ const Log = {
      * @param {String} message The message to log.
      * @param {Boolean} sendNow if true, the message will be sent right away.
      * @param {object|String} parameters The parameters to send along with the message
+     * @param {object} requestParameters The parameters to send along with the request
      */
-    info: (message, sendNow, parameters) => {
+    info: (message, sendNow, parameters, requestParameters = {}) => {
         if (sendNow) {
             const msg = `[info] ${message}`;
-            Log.logToServer(msg, 0, parameters);
+            Log.logToServer(msg, 0, parameters, requestParameters);
         } else {
             add(message, parameters);
         }
@@ -87,12 +89,13 @@ const Log = {
      * @param {String} message The message to alert.
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
+     * @param {object} requestParameters The parameters to send along with the request
      */
-    alert: (message, recentMessages, parameters = {}) => {
+    alert: (message, recentMessages, parameters = {}, requestParameters = {}) => {
         const msg = `[alrt] ${message}`;
         const params = parameters;
         params.stack = JSON.stringify(new Error().stack);
-        Log.logToServer(msg, recentMessages, params);
+        Log.logToServer(msg, recentMessages, params, requestParameters);
         add(msg, params);
     },
 
@@ -102,10 +105,11 @@ const Log = {
      * @param {String} message The message to warn.
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
+     * @param {object} requestParameters The parameters to send along with the request
      */
-    warn: (message, recentMessages, parameters) => {
+    warn: (message, recentMessages, parameters, requestParameters = {}) => {
         const msg = `[warn] ${message}`;
-        Log.logToServer(msg, recentMessages, parameters);
+        Log.logToServer(msg, recentMessages, parameters, requestParameters);
         add(msg, parameters);
     },
 
@@ -115,10 +119,11 @@ const Log = {
      * @param {String} message The message to hmmm.
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
+     * @param {object} requestParameters The parameters to send along with the request
      */
-    hmmm: (message, recentMessages, parameters) => {
+    hmmm: (message, recentMessages, parameters, requestParameters = {}) => {
         const msg = `[hmmm] ${message}`;
-        Log.logToServer(msg, recentMessages, parameters);
+        Log.logToServer(msg, recentMessages, parameters, requestParameters);
         add(msg, parameters);
     },
 
