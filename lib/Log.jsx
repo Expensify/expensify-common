@@ -60,7 +60,9 @@ const Log = {
         if (window.DEBUG) {
             Log.client(`${msg} - ${JSON.stringify(parameters)}`);
         }
-        const params = {parameters, message};
+
+        // We don't care about log setting web cookies so let's define it as false
+        const params = {parameters, message, api_setCookie: false};
         API(Network('/api.php')).logToServer(params);
     },
 
