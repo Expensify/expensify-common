@@ -20,7 +20,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'autolink',
-                regex: /([_*~]*?)(?<!=\\?"|:\/\/)(((?:https?):\/\/|www\.)[^\s<>*~_"\'´.-][^\s<>"\'´]*?\.[a-z\d]+[^\s<>*~"\']*)\1/,
+                regex: /(?![^<]*>|[^<>]*<\/)([_*~]*?)(((?:https?):\/\/|www\.)[^\s<>*~_"\'´.-][^\s<>"\'´]*?\.[a-z\d]+[^\s<>*~"\']*)\1/,
                 replacement: '$1<a href="$2" target="_blank">$2</a>$1',
             },
             {
