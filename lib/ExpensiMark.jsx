@@ -46,7 +46,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'codeFence',
-                regex: /```\n((?:(?!```)[\s\S])+)\n```/,
+                regex: /&#x60;&#x60;&#x60;\n((?:(?!&#x60;&#x60;&#x60;)[\s\S])+)\n&#x60;&#x60;&#x60;/,
                 replacement: '<pre>$1</pre>',
             },
             {
