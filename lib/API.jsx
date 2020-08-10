@@ -479,6 +479,17 @@ export default function API(network, args) {
         },
 
         /**
+         * Performs API command GetRequestCountryCode
+         * Fetches the country code based on the location of the request
+         * 
+         * @return {APIDeferred}
+         */
+        getRequestCountryCode() {
+            const commandName = 'GetRequestCountryCode';
+            return performPOSTRequest(commandName, {});
+        },
+
+        /**
          * Performs API command Github_Close
          *
          * @param {Object} parameters
