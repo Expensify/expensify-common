@@ -485,7 +485,7 @@ export default function API(network, args) {
          * @return {APIDeferred}
          */
         getRequestCountryCode() {
-            var commandName = 'GetRequestCountryCode';
+            const commandName = 'GetRequestCountryCode';
             return performPOSTRequest(commandName, {});
         },
 
