@@ -46,7 +46,9 @@ export default class ExpensiMark {
             },
             {
                 name: 'inlineCodeBlock',
-                regex: /\B`(.*?)`\B/,
+
+                // Use the url escaped version of a backtick (`) symbol
+                regex: /\B&#x60;(.*?)&#x60;\B/,
                 replacement: '<code>$1</code>',
             },
             {
