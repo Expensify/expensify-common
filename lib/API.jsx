@@ -479,11 +479,12 @@ export default function API(network, args) {
         },
 
         /**
+         * Performs API command GetRequestCountryCode
          * Fetches the country code based on the location of the request
          * 
          * @return {APIDeferred}
          */
-        getRequestCountryCode: function () {
+        getRequestCountryCode() {
             var commandName = 'GetRequestCountryCode';
             return performPOSTRequest(commandName, {});
         },
