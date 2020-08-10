@@ -45,6 +45,11 @@ export default class ExpensiMark {
                 replacement: '<del>$1</del>'
             },
             {
+                name: 'codeFence',
+                regex: /```\n((?:(?!```)[\s\S])+)\n```/,
+                replacement: '<pre>$1</pre>',
+            },
+            {
                 name: 'newline',
                 regex: /\n/,
                 replacement: '<br>',
