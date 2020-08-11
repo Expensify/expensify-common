@@ -53,6 +53,8 @@ export default class ExpensiMark {
 
                     // We're using a function here to perform an additional replace on the content inside the backticks because
                     // Android is not able to use <pre> tags and does not respect whitespace characters at all like HTML does.
+                    // We do not want to mess with the new lines here since they need to be converted into <br>. And we
+                    // don't want to do this anywhere else since that would break HTML.
                    return `<pre>${firstCapturedGroup.replace(/(?:(?![\n\r])\s)/g, '&nbsp;')}</pre>`;
                 },
             },
