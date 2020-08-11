@@ -46,14 +46,21 @@ export default class ExpensiMark {
             },
             {
                 name: 'codeFence',
+
+                // &#60; is a backtick symbol we are matching on three of them before then after a new line character
                 regex: /&#x60;&#x60;&#x60;\n((?:(?!&#x60;&#x60;&#x60;)[\s\S])+)\n&#x60;&#x60;&#x60;/,
-                replacement: '<pre>$1</pre>',
+                replacement: (match, firstCapturedGroup) => {
+
+                    // We're using a function here to perform an additional replace on the content inside the backticks because
+                    // Android is not able to use <pre> tags and does not respect whitespace characters at all like HTML does.
+                   return `<pre>${firstCapturedGroup.replace(/(?:(?![\n\r])\s)/g, '&nbsp;')}</pre>`;
+                },
             },
             {
                 name: 'newline',
                 regex: /\n/,
                 replacement: '<br>',
-            }
+            },
         ];
     }
 
