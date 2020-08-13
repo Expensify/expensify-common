@@ -57,6 +57,8 @@ export default class ExpensiMark {
                     // don't want to do this anywhere else since that would break HTML.
                    return `<pre>${firstCapturedGroup.replace(/(?:(?![\n\r])\s)/g, '&nbsp;')}</pre>`;
                 },
+            },
+            {
                 name: 'inlineCodeBlock',
 
                 // Use the url escaped version of a backtick (`) symbol
