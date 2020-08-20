@@ -70,6 +70,11 @@ export default class ExpensiMark {
                 regex: /\n/,
                 replacement: '<br>',
             },
+            {
+                name: 'email',
+                regex: /\S+@\S+\.\S+/,
+                replacement: (match) => `<a href="mailto:${match}">${match}</a>`,
+            }
         ];
     }
 
