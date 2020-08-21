@@ -66,15 +66,15 @@ export default class ExpensiMark {
                 replacement: '<code>$1</code>',
             },
             {
+                name: 'email',
+                regex: /\b[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\b/,
+                replacement: (match) => `<a href="mailto:${match}">${match}</a>`,
+            },
+            {
                 name: 'newline',
                 regex: /\n/,
                 replacement: '<br>',
             },
-            {
-                name: 'email',
-                regex: /\S+@\S+\.\S+/,
-                replacement: (match) => `<a href="mailto:${match}">${match}</a>`,
-            }
         ];
     }
 
