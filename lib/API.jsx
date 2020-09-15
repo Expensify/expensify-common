@@ -360,7 +360,7 @@ export default function API(network, args) {
         resendValidateCode(parameters = {}) {
             const commandName = 'ResendValidateCode';
             return performPOSTRequest(commandName, {
-                ...parameters, 
+                ...parameters,
                 api_setCookie: false,
             });
         },
@@ -481,11 +481,22 @@ export default function API(network, args) {
         /**
          * Performs API command GetRequestCountryCode
          * Fetches the country code based on the location of the request
-         * 
+         *
          * @return {APIDeferred}
          */
         getRequestCountryCode() {
             const commandName = 'GetRequestCountryCode';
+            return performPOSTRequest(commandName, {});
+        },
+
+        /**
+         * Preforms the API command GetRequestCountry
+         * Fetches the country based on the request IP
+         *
+         * @returns {APIDeferred}
+         */
+        getRequestCountry() {
+            const commandName = 'GetRequestCountry';
             return performPOSTRequest(commandName, {});
         },
 
