@@ -33,7 +33,7 @@ export default class ExpensiMark {
              */
             {
                 name: 'link',
-                regex: /\[([\w\s\d\-\?\!,.;:/#_~%{}]+)\]\(((?:\/|https?:\/\/)[\w\d./?=#]+)\)/,
+                regex: /\[([\w\s\d\-\?\!,.;:/#_~%{}]+)\]\(((?:\/|https?:\/\/)[\w\d./?=#%{},.;:~_\-]+)\)/,
                 replacement: '<a href="$2" target="_blank">$1</a>',
             },
             {
