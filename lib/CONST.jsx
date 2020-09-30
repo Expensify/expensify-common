@@ -703,9 +703,6 @@ export const CONST = {
     },
 
     NVP: {
-        // Should we show full page receipts on a downloaded PDF?
-        REPORT_SHOW_FULLPAGE_RECEIPTS: 'expensify_report_showFullPageReceipts',
-
         // Should we show receipts on the report page?
         REPORT_SHOW_RECEIPTS: 'expensify_report_showThumbnailReceipts',
 
