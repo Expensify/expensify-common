@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "grunt": "grunt",
-    "package": "./package.sh"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "underscore": "1.9.1"
   },
   "devDependencies": {
+    "babel-jest": "^26.3.0",
     "eslint-config-expensify": "2.0.7",
     "grunt": "*",
     "grunt-eslint": "22.0.0",
@@ -52,6 +53,7 @@
     "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
+    "jest": "^26.4.2",
     "jit-grunt": "^0.10.0"
   },
   "browserify": {
