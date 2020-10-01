@@ -456,7 +456,7 @@ export const CONST = {
     /**
      * Bill Processing-related constants
      */
-    BILL_PROCESSING_PARTNER_NAME: 'bills.expensify.com',
+    BILL_PROCESSING_PARTNER_NAME: 'expensify.cash',
     BILL_PROCESSING_EMAIL_DOMAIN: 'bills.expensify.com',
 
     /**
@@ -873,6 +873,7 @@ export const PUBLIC_DOMAINS = [
     'cox.net',
     'cpa.com',
     'evernote.user',
+    'expensify.cash',
     'expensify.sms',
     'gmail.com',
     'gmail.con',
