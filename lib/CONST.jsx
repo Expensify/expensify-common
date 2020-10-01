@@ -457,7 +457,7 @@ export const CONST = {
      * Bill Processing-related constants
      */
     BILL_PROCESSING_PARTNER_NAME: 'expensify.cash',
-    BILL_PROCESSING_EMAIL_DOMAIN: 'bills.expensify.com',
+    BILL_PROCESSING_EMAIL_DOMAIN: 'expensify.cash',
 
     /**
      * Bank Import Logic Constants
