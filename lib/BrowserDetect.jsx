@@ -7,6 +7,11 @@ const BROWSERS = {
     MOZILLA: 'Mozilla'
 };
 
+const MOBILE_PLATFORMS = {
+    iOS: 'iOS',
+    android: 'android'
+};
+
 function searchString() {
     const data = [{
         string: navigator.userAgent,
@@ -57,9 +62,30 @@ function searchString() {
     return '';
 }
 
+function getMobileDevice() {
+    const data = [{
+        devices: ['iPhone', 'iPad', 'iPod'],
+        identity: MOBILE_PLATFORMS.iOS
+    }, {
+        devices: ['Android'],
+        identity: MOBILE_PLATFORMS.android
+    }];
+    const dataString = navigator.userAgent;
+
+    for (let i = 0; i < data.length; i++) {
+        const {devices, identity} = data[i];
+        for (let j = 0; j < devices.length; j++) {
+            if (dataString.indexOf(devices[j]) !== -1) {
+                return identity;
+            }
+        }
+    }
+    return '';
+}
+
 export default {
-    BROWSERS: {
-        ...BROWSERS
-    },
-    browser: searchString()
+    BROWSERS,
+    MOBILE_PLATFORMS,
+    browser: searchString(),
+    mobileDevice: getMobileDevice()
 };
