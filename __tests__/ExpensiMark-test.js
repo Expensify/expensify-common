@@ -126,3 +126,15 @@ test('Test markdown style link with various styles', () => {
 
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test links that end in a comma autolink correctly', () => {
+    const testString = 'https://github.com/Expensify/Expensify/issues/143231,';
+    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a>,';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test links inside two backticks autolink correctly', () => {
+    const testString = '`https://github.com/Expensify/Expensify/issues/143231`';
+    const resultString = '<code><a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a></code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
