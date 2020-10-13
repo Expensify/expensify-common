@@ -68,6 +68,11 @@ test('Test inline code blocks', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
 });
 
+test('Test inline code blocks with ExpensiMark syntax inside', () => {
+    const inlineCodeStartString = '`This is how you can write ~strikethrough~, *bold*, and _italics_`';
+    expect(parser.replace(inlineCodeStartString)).toBe('<code>This is how you can write ~strikethrough~, *bold*, and _italics_</code>');
+});
+
 test('Test code fencing with ExpensiMark syntax inside', () => {
     const codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&nbsp;is&nbsp;how&nbsp;you&nbsp;can&nbsp;write&nbsp;~strikethrough~,&nbsp;*bold*,&nbsp;_italics_,&nbsp;and&nbsp;[links](https://www.expensify.com)</pre>');
