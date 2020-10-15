@@ -138,8 +138,8 @@ test('Test links that end in a comma autolink correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test links inside two backticks autolink correctly', () => {
+test('Test links inside two backticks are not autolinked', () => {
     const testString = '`https://github.com/Expensify/Expensify/issues/143231`';
-    const resultString = '<code><a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a></code>';
+    const resultString = '<code>https://github.com/Expensify/Expensify/issues/143231</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
