@@ -98,7 +98,6 @@ test('Test url replacements', () => {
         + 'test again '
         + 'http://test.com/test '
         + 'www.test.com '
-        + 'https://www.test.com '
         + 'http://test.com)';
 
     const urlTestReplacedString = 'Testing '
@@ -106,10 +105,15 @@ test('Test url replacements', () => {
         + 'test again '
         + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
         + '<a href="www.test.com" target="_blank">www.test.com</a> '
-        + '<a href="https://www.test.com" target="_blank">https://www.test.com</a> '
         + '<a href="http://test.com" target="_blank">http://test.com</a>)';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
+});
+
+test('Auto-link works on a www. test url', () => {
+    const testString = 'https://www.test.com';
+    const resultString = '<a href="https://www.test.com" target="_blank">https://www.test.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test markdown style link with various styles', () => {
@@ -141,5 +145,11 @@ test('Test links that end in a comma autolink correctly', () => {
 test('Test links inside two backticks are not autolinked', () => {
     const testString = '`https://github.com/Expensify/Expensify/issues/143231`';
     const resultString = '<code>https://github.com/Expensify/Expensify/issues/143231</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a period at the end of a link autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
     expect(parser.replace(testString)).toBe(resultString);
 });
