@@ -1,15 +1,17 @@
 import Logger from '../lib/Logger';
 
-const loggingCallback = jest.fn();
+const mockServerLoggingCallback = jest.fn();
+const mockClientLoggingCallback = jest.fn();
 
 const Log = new Logger({
-    loggingCallback,
+    serverLoggingCallback: mockServerLoggingCallback,
+    clientLoggingCallback: mockClientLoggingCallback,
 });
 
 test('Test Log.info()', () => {
     Log.info('Test', true);
-    expect(loggingCallback).toHaveBeenCalled();
-    expect(loggingCallback).toHaveBeenCalledWith({
+    expect(mockServerLoggingCallback).toHaveBeenCalled();
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
         parameters: {},
         api_setCookie: false,
         message: '[info] Test',
@@ -18,8 +20,8 @@ test('Test Log.info()', () => {
 
 test('Test Log.alert()', () => {
     Log.alert('Test', 0, {}, false);
-    expect(loggingCallback).toHaveBeenCalled();
-    expect(loggingCallback).toHaveBeenCalledWith({
+    expect(mockServerLoggingCallback).toHaveBeenCalled();
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
         parameters: {},
         api_setCookie: false,
         message: '[alrt] Test',
@@ -28,8 +30,8 @@ test('Test Log.alert()', () => {
 
 test('Test Log.warn()', () => {
     Log.warn('Test', 0);
-    expect(loggingCallback).toHaveBeenCalled();
-    expect(loggingCallback).toHaveBeenCalledWith({
+    expect(mockServerLoggingCallback).toHaveBeenCalled();
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
         parameters: {},
         api_setCookie: false,
         message: '[warn] Test',
@@ -38,10 +40,16 @@ test('Test Log.warn()', () => {
 
 test('Test Log.hmmm()', () => {
     Log.hmmm('Test', 0);
-    expect(loggingCallback).toHaveBeenCalled();
-    expect(loggingCallback).toHaveBeenCalledWith({
+    expect(mockServerLoggingCallback).toHaveBeenCalled();
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
         parameters: {},
         api_setCookie: false,
         message: '[hmmm] Test',
     });
+});
+
+test('Test Log.client()', () => {
+    Log.client('Test');
+    expect(mockClientLoggingCallback).toHaveBeenCalled();
+    expect(mockClientLoggingCallback).toHaveBeenCalledWith('Test');
 });

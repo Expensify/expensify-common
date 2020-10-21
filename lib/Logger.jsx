@@ -1,19 +1,21 @@
 import _ from 'underscore';
 
 export default class Logger {
-    constructor({loggingCallback, isDebug, shouldLogToConsole}) {
+    constructor({serverLoggingCallback, isDebug, clientLoggingCallback}) {
         this.TEMP_LOG_LINES_TO_KEEP = 50;
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
         this.logLines = [];
-        this.loggingCallback = loggingCallback;
+        this.serverLoggingCallback = serverLoggingCallback;
+        this.clientLoggingCallback = clientLoggingCallback;
         this.isDebug = isDebug;
-        this.shouldLogToConsole = shouldLogToConsole;
 
+        // Public Methods
         return {
             info: this.info.bind(this),
             alert: this.alert.bind(this),
             warn: this.warn.bind(this),
             hmmm: this.hmmm.bind(this),
+            client: this.client.bind(this),
         };
     }
 
@@ -39,7 +41,7 @@ export default class Logger {
 
         // We don't care about log setting web cookies so let's define it as false
         const params = {parameters, message, api_setCookie: false};
-        this.loggingCallback(params);
+        this.serverLoggingCallback(params);
     }
 
     /**
@@ -146,10 +148,10 @@ export default class Logger {
     client(message) {
         this.add(message);
 
-        if (!this.shouldLogToConsole) {
+        if (!this.clientLoggingCallback) {
             return;
         }
 
-        console.debug(message);
+        this.clientLoggingCallback(message);
     }
 }
