@@ -9,7 +9,7 @@ import Network from './Network';
  * @param {Object} params.parameters
  * @param {String} params.message
  */
-function loggingCallback(params) {
+function serverLoggingCallback(params) {
     API(Network('/api.php')).logToServer(params);
 }
 
@@ -29,7 +29,7 @@ function clientLoggingCallback(message) {
 }
 
 export default new Logger({
-    loggingCallback,
+    serverLoggingCallback,
     clientLoggingCallback,
     isDebug: window.DEBUG,
 });
