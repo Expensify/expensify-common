@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import API from './API';
 import Network from './Network';
+import Logger from './Logger';
 
 /**
  * Network interface for logger.
