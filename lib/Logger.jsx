@@ -10,7 +10,10 @@ export default class Logger {
         this.shouldLogToConsole = shouldLogToConsole;
 
         return {
-
+            info: this.info.bind(this),
+            alert: this.alert.bind(this),
+            warn: this.warn.bind(this),
+            hmmm: this.hmmm.bind(this),
         };
     }
 
@@ -95,11 +98,16 @@ export default class Logger {
      * @param {String} message The message to alert.
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {object|String} parameters The parameters to send along with the message
+     * @param {Boolean} includeStackTrace Must be disabled for testing
      */
-    alert(message, recentMessages, parameters = {}) {
+    alert(message, recentMessages, parameters = {}, includeStackTrace = true) {
         const msg = `[alrt] ${message}`;
         const params = parameters;
-        params.stack = JSON.stringify(new Error().stack);
+
+        if (includeStackTrace) {
+            params.stack = JSON.stringify(new Error().stack);
+        }
+
         this.logToServer(msg, recentMessages, params);
         this.add(msg, params);
     }
