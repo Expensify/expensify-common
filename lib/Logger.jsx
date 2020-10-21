@@ -31,7 +31,7 @@ export default class Logger {
         let msg = message;
         if (recentMessages > 0) {
             msg += ' | Context:  ';
-            msg += JSON.stringify(get(recentMessages));
+            msg += JSON.stringify(this.get(recentMessages));
         }
 
         // Output the message to the console too.
