@@ -24,7 +24,7 @@ export default class Logger {
     *
     * @param {String} message The message to write
     * @param {Number} recentMessages A number of recent messages to append as context
-    * @param {object|String} parameters The parameters to send along with the message
+    * @param {Object|String} parameters The parameters to send along with the message
     */
     logToServer(message, recentMessages, parameters = {}) {
         // Optionally append recent log lines as context
@@ -47,7 +47,7 @@ export default class Logger {
     /**
      * Add a message to the list
      * @param {String} message
-     * @param {object|String} parameters The parameters associated with the message
+     * @param {Object|String} parameters The parameters associated with the message
      */
     add(message, parameters) {
         const length = this.logLines.push({
@@ -68,13 +68,10 @@ export default class Logger {
      *              defaults to 1)
      * @return {array} an array of messages (oldest first)
      */
-    get(messageCount) {
-        // Default to 1
-        let mc = _.isUndefined(messageCount) ? 1 : messageCount;
-
+    get(messageCount = 1) {
         // Don't get more than we have
-        mc = Math.min(this.TEMP_LOG_LINES_TO_KEEP, mc);
-        return this.logLines.slice(this.logLines.length - mc);
+        const count = Math.min(this.TEMP_LOG_LINES_TO_KEEP, messageCount);
+        return this.logLines.slice(this.logLines.length - count);
     }
 
     /**
@@ -83,7 +80,7 @@ export default class Logger {
      *
      * @param {String} message The message to log.
      * @param {Boolean} sendNow if true, the message will be sent right away.
-     * @param {object|String} parameters The parameters to send along with the message
+     * @param {Object|String} parameters The parameters to send along with the message
      */
     info(message, sendNow, parameters) {
         if (sendNow) {
@@ -99,7 +96,7 @@ export default class Logger {
      *
      * @param {String} message The message to alert.
      * @param {Number} recentMessages A number of recent messages to append as context
-     * @param {object|String} parameters The parameters to send along with the message
+     * @param {Object|String} parameters The parameters to send along with the message
      * @param {Boolean} includeStackTrace Must be disabled for testing
      */
     alert(message, recentMessages, parameters = {}, includeStackTrace = true) {
@@ -119,7 +116,7 @@ export default class Logger {
      *
      * @param {String} message The message to warn.
      * @param {Number} recentMessages A number of recent messages to append as context
-     * @param {object|String} parameters The parameters to send along with the message
+     * @param {Object|String} parameters The parameters to send along with the message
      */
     warn(message, recentMessages, parameters) {
         const msg = `[warn] ${message}`;
@@ -132,7 +129,7 @@ export default class Logger {
      *
      * @param {String} message The message to hmmm.
      * @param {Number} recentMessages A number of recent messages to append as context
-     * @param {object|String} parameters The parameters to send along with the message
+     * @param {Object|String} parameters The parameters to send along with the message
      */
     hmmm(message, recentMessages, parameters) {
         const msg = `[hmmm] ${message}`;
