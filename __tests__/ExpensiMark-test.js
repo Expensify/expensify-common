@@ -157,19 +157,19 @@ test('Test a period at the end of a link autolinks correctly', () => {
 test('Test bulleted list markdown replacement', () => {
     const singleItemAst = '* this is one point of many';
     const singleItemAstSpc = ' * this is one point of many';
-    const singleItemAstHTML = '<li>this is one point of many</li>';
+    const singleItemAstHTML = '<ul><li>this is one point of many</li></ul>';
     expect(parser.replace(singleItemAst)).toBe(singleItemAstHTML);
     expect(parser.replace(singleItemAstSpc)).toBe(singleItemAstHTML);
     const singleItemHyph = '- this one\'s got a hyphen!';
     const singleItemHyphSpc = ' - this one\'s got a hyphen!';
-    const singleItemHyphHTML = '<li>this one&#x27;s got a hyphen!</li>';
+    const singleItemHyphHTML = '<ul><li>this one&#x27;s got a hyphen!</li></ul>';
     expect(parser.replace(singleItemHyph)).toBe(singleItemHyphHTML);
     expect(parser.replace(singleItemHyphSpc)).toBe(singleItemHyphHTML);
     const multiLineAst = `* multi
 * line
 * list`;
-    const mulitLineAstHTML = `<li>multi</li>
+    const mulitLineAstHTML = `<ul><li>multi</li>
 <li>line</li>
-<li>list</li>`;
+<li>list</li></ul>`;
     expect(parser.replace(multiLineAst)).toBe(mulitLineAstHTML);
 })
