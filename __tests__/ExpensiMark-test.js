@@ -153,3 +153,23 @@ test('Test a period at the end of a link autolinks correctly', () => {
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test bulleted list markdown replacement', () => {
+    const singleItemAst = '* this is one point of many';
+    const singleItemAstSpc = ' * this is one point of many';
+    const singleItemAstHTML = '<li>this is one point of many</li>';
+    expect(parser.replace(singleItemAst)).toBe(singleItemAstHTML);
+    expect(parser.replace(singleItemAstSpc)).toBe(singleItemAstHTML);
+    const singleItemHyph = '- this one\'s got a hyphen!';
+    const singleItemHyphSpc = ' - this one\'s got a hyphen!';
+    const singleItemHyphHTML = '<li>this one&#x27;s got a hyphen!</li>';
+    expect(parser.replace(singleItemHyph)).toBe(singleItemHyphHTML);
+    expect(parser.replace(singleItemHyphSpc)).toBe(singleItemHyphHTML);
+    const multiLineAst = `* multi
+* line
+* list`;
+    const mulitLineAstHTML = `<li>multi</li>
+<li>line</li>
+<li>list</li>`;
+    expect(parser.replace(multiLineAst)).toBe(mulitLineAstHTML);
+})
