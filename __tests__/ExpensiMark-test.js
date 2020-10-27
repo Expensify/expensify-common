@@ -157,24 +157,23 @@ test('Test a period at the end of a link autolinks correctly', () => {
 test('Test bulleted list markdown replacement', () => {
     const singleItemAsterisk = '* this is one point of many';
     const singleItemAsteriskSpace = ' * this is one point of many';
-    const singleItemAsteriskHTML = '<ul><li>this is one point of many</li></ul>';
-    expect(parser.replace(singleItemAsterisk)).toBe(singleItemAsteriskHTML);
-    expect(parser.replace(singleItemAsteriskSpace)).toBe(singleItemAsteriskHTML);
-    const singleItemHyphen = '- this one\'s got a hyphen!';
-    const singleItemHyphenSpace = ' - this one\'s got a hyphen!';
-    const singleItemHyphenHTML = '<ul><li>this one&#x27;s got a hyphen!</li></ul>';
-    expect(parser.replace(singleItemHyphen)).toBe(singleItemHyphenHTML);
-    expect(parser.replace(singleItemHyphenSpace)).toBe(singleItemHyphenHTML);
+    const singleItemHyphen = '- this is one point of many';
+    const singleItemHyphenSpace = ' - this is one point of many';
+    const singleItemHTML = '<ul><li>this is one point of many</li></ul>';
+    expect(parser.replace(singleItemAsterisk)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemAsteriskSpace)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemHyphen)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemHyphenSpace)).toBe(singleItemHTML);
     const multiLineAsterisk = `* multi
 * line
 * list`;
+    const multiLineHyphen = `- multi
+- line
+- list`;
     const mulitLineHTML = `<ul><li>multi</li>
 <li>line</li>
 <li>list</li></ul>`;
     expect(parser.replace(multiLineAsterisk)).toBe(mulitLineHTML);
-    const multiLineHyphen = `- multi
-- line
-- list`;
     expect(parser.replace(multiLineHyphen)).toBe(mulitLineHTML);
 });
 
