@@ -155,21 +155,36 @@ test('Test a period at the end of a link autolinks correctly', () => {
 });
 
 test('Test bulleted list markdown replacement', () => {
-    const singleItemAst = '* this is one point of many';
-    const singleItemAstSpc = ' * this is one point of many';
-    const singleItemAstHTML = '<ul><li>this is one point of many</li></ul>';
-    expect(parser.replace(singleItemAst)).toBe(singleItemAstHTML);
-    expect(parser.replace(singleItemAstSpc)).toBe(singleItemAstHTML);
-    const singleItemHyph = '- this one\'s got a hyphen!';
-    const singleItemHyphSpc = ' - this one\'s got a hyphen!';
-    const singleItemHyphHTML = '<ul><li>this one&#x27;s got a hyphen!</li></ul>';
-    expect(parser.replace(singleItemHyph)).toBe(singleItemHyphHTML);
-    expect(parser.replace(singleItemHyphSpc)).toBe(singleItemHyphHTML);
-    const multiLineAst = `* multi
+    const singleItemAsterisk = '* this is one point of many';
+    const singleItemAsteriskSpace = ' * this is one point of many';
+    const singleItemAsteriskHTML = '<ul><li>this is one point of many</li></ul>';
+    expect(parser.replace(singleItemAsterisk)).toBe(singleItemAsteriskHTML);
+    expect(parser.replace(singleItemAsteriskSpace)).toBe(singleItemAsteriskHTML);
+    const singleItemHyphen = '- this one\'s got a hyphen!';
+    const singleItemHyphenSpace = ' - this one\'s got a hyphen!';
+    const singleItemHyphenHTML = '<ul><li>this one&#x27;s got a hyphen!</li></ul>';
+    expect(parser.replace(singleItemHyphen)).toBe(singleItemHyphenHTML);
+    expect(parser.replace(singleItemHyphenSpace)).toBe(singleItemHyphenHTML);
+    const multiLineAsterisk = `* multi
 * line
 * list`;
-    const mulitLineAstHTML = `<ul><li>multi</li>
+    const mulitLineHTML = `<ul><li>multi</li>
 <li>line</li>
 <li>list</li></ul>`;
-    expect(parser.replace(multiLineAst)).toBe(mulitLineAstHTML);
-})
+    expect(parser.replace(multiLineAsterisk)).toBe(mulitLineHTML);
+    const multiLineHyphen = `- multi
+- line
+- list`;
+    expect(parser.replace(multiLineHyphen)).toBe(mulitLineHTML);
+});
+
+test('Test that bullet points are not added mid-line', () => {
+    const sentenceWithHyphen = 'This is a quasi-vague sentence';
+    const sentenceWithSpacedHyphen = 'This sentence - is not gramatically correct';
+    const sentenceWithAsterisk = 'This is almost*bold markdown';
+    const sentenceWithSpacedAskerisk= 'This is asterisk * art';
+    expect(parser.replace(sentenceWithHyphen)).toBe(sentenceWithHyphen);
+    expect(parser.replace(sentenceWithSpacedHyphen)).toBe(sentenceWithSpacedHyphen);
+    expect(parser.replace(sentenceWithAsterisk)).toBe(sentenceWithAsterisk);
+    expect(parser.replace(sentenceWithSpacedAskerisk)).toBe(sentenceWithSpacedAskerisk);
+});
