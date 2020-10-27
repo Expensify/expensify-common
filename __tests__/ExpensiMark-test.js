@@ -123,7 +123,9 @@ test('Test markdown style link with various styles', () => {
         + '[Expensify!](https://www.expensify.com) '
         + '[Expensify?](https://www.expensify.com) '
         + '[Expensify](https://www.expensify-test.com) '
-        + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22})';
+        + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22}) '
+        + '[Expensify](https://www.expensify.com/settings?param=(%22section%22+%22account%22)) '
+        + '[Expensify](https://www.expensify.com/settings?param=[%22section%22:%22account%22])';
 
     const resultString = 'Go to <del><a href="https://www.expensify.com" target="_blank">Expensify</a></del> '
         + '<em><a href="https://www.expensify.com" target="_blank">Expensify</a></em> '
@@ -131,7 +133,9 @@ test('Test markdown style link with various styles', () => {
         + '<a href="https://www.expensify.com" target="_blank">Expensify!</a> '
         + '<a href="https://www.expensify.com" target="_blank">Expensify?</a> '
         + '<a href="https://www.expensify-test.com" target="_blank">Expensify</a> '
-        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a>';
+        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank">Expensify</a>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -139,6 +143,12 @@ test('Test markdown style link with various styles', () => {
 test('Test links that end in a comma autolink correctly', () => {
     const testString = 'https://github.com/Expensify/Expensify/issues/143231,';
     const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a>,';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test links that have a comma in the middle autolink correctly', () => {
+    const testString = 'https://github.com/Expensify/Expensify/issues/143,231';
+    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -151,5 +161,11 @@ test('Test links inside two backticks are not autolinked', () => {
 test('Test a period at the end of a link autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.';
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a period in the middle of a link autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/6.45';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
