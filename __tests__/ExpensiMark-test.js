@@ -169,3 +169,37 @@ test('Test a period in the middle of a link autolinks correctly', () => {
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test bulleted list markdown replacement', () => {
+    const singleItemAsterisk = '* this is one point of many';
+    const singleItemAsteriskSpace = ' * this is one point of many';
+    const singleItemHyphen = '- this is one point of many';
+    const singleItemHyphenSpace = ' - this is one point of many';
+    const singleItemHTML = '<ul><li>this is one point of many</li></ul>';
+    expect(parser.replace(singleItemAsterisk)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemAsteriskSpace)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemHyphen)).toBe(singleItemHTML);
+    expect(parser.replace(singleItemHyphenSpace)).toBe(singleItemHTML);
+    const multiLineAsterisk = `* multi
+* line
+* list`;
+    const multiLineHyphen = `- multi
+- line
+- list`;
+    const mulitLineHTML = `<ul><li>multi</li>
+<li>line</li>
+<li>list</li></ul>`;
+    expect(parser.replace(multiLineAsterisk)).toBe(mulitLineHTML);
+    expect(parser.replace(multiLineHyphen)).toBe(mulitLineHTML);
+});
+
+test('Test that bullet points are not added mid-line', () => {
+    const sentenceWithHyphen = 'This is a quasi-vague sentence';
+    const sentenceWithSpacedHyphen = 'This sentence - is not gramatically correct';
+    const sentenceWithAsterisk = 'This is almost*bold markdown';
+    const sentenceWithSpacedAskerisk= 'This is asterisk * art';
+    expect(parser.replace(sentenceWithHyphen)).toBe(sentenceWithHyphen);
+    expect(parser.replace(sentenceWithSpacedHyphen)).toBe(sentenceWithSpacedHyphen);
+    expect(parser.replace(sentenceWithAsterisk)).toBe(sentenceWithAsterisk);
+    expect(parser.replace(sentenceWithSpacedAskerisk)).toBe(sentenceWithSpacedAskerisk);
+});
