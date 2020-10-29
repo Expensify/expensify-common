@@ -24,7 +24,7 @@
     "prop-types": "15.7.2",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "simply-deferred": "3.0.0",
+    "simply-deferred": "git+https://git@github.com:Jag96/simply-deferred.git#b2a6e1bbab677bc3be20aac1911659357987bebf",
     "underscore": "1.9.1"
   },
   "devDependencies": {
