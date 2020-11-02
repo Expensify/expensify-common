@@ -682,17 +682,17 @@ export const CONST = {
         },
         detailed: {
             value: 'detailed_export',
-            text: 'Detailed Export',
+            text: 'All Data - Expense Level Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         report: {
             value: 'report_level_export',
-            text: 'Report Level Export',
+            text: 'All Data - Report Level Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         tax: {
             value: 'multiple_tax_export',
-            text: 'Multiple Tax Export',
+            text: 'Canadian Multiple Tax Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         perdiem: {
