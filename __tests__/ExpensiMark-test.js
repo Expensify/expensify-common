@@ -28,8 +28,8 @@ test('Test strikethrough markdown replacement', () => {
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
-    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more.';
-    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more.';
+    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com)';
+    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more. <a href="//www.expensify.com" target="_blank">Expensify</a> <a href="// expensify.com" target="_blank">Expensify</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -98,14 +98,16 @@ test('Test url replacements', () => {
         + 'test again '
         + 'http://test.com/test '
         + 'www.test.com '
-        + 'http://test.com)';
+        + 'http://test.com) '
+        + 'test.totallyfaketld';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="//test.com" target="_blank">test.com</a> '
         + 'test again '
         + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
         + '<a href="//www.test.com" target="_blank">www.test.com</a> '
-        + '<a href="http://test.com" target="_blank">http://test.com</a>)';
+        + '<a href="http://test.com" target="_blank">http://test.com</a>) '
+        + 'test.totallyfaketld';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
