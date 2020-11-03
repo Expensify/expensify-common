@@ -99,7 +99,8 @@ test('Test url replacements', () => {
         + 'http://test.com/test '
         + 'www.test.com '
         + 'http://test.com) '
-        + 'test.totallyfaketld';
+        + 'test.totallyfaketld '
+        + 'idrink.beer';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="http://test.com" target="_blank">test.com</a> '
@@ -107,7 +108,8 @@ test('Test url replacements', () => {
         + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
         + '<a href="http://www.test.com" target="_blank">www.test.com</a> '
         + '<a href="http://test.com" target="_blank">http://test.com</a>) '
-        + 'test.totallyfaketld';
+        + 'test.totallyfaketld '
+        + '<a href="http://idrink.beer" target="_blank">idrink.beer</a>';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
