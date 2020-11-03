@@ -49,7 +49,7 @@ test('Test newline markdown replacement', () => {
 
 // Period replacement test
 test('Test period replacements', () => {
-    const periodTestStartString = 'This test ensures that words with trailing... periods.. are. not converted to links. Also, words seperated.by.periods should...not become..links.';
+    const periodTestStartString = 'This test ensures that words with trailing... periods.. are. not converted to links.';
     expect(parser.replace(periodTestStartString)).toBe(periodTestStartString);
 });
 
@@ -101,10 +101,10 @@ test('Test url replacements', () => {
         + 'http://test.com)';
 
     const urlTestReplacedString = 'Testing '
-        + 'test.com '
+        + '<a href="//test.com" target="_blank">test.com</a> '
         + 'test again '
         + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
-        + '<a href="www.test.com" target="_blank">www.test.com</a> '
+        + '<a href="//www.test.com" target="_blank">www.test.com</a> '
         + '<a href="http://test.com" target="_blank">http://test.com</a>)';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
