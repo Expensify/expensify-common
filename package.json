@@ -8,7 +8,8 @@
   "scripts": {
     "grunt": "grunt",
     "package": "./package.sh",
-    "test": "jest"
+    "test": "jest",
+    "update-tlds": "curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
   },
   "repository": {
     "type": "git",
