@@ -175,8 +175,8 @@ test('Test a period in the middle of a link autolinks correctly', () => {
 });
 
 test('Test a url with potentially valid TLD before the actual TLD autolinks correctly', () => {
-    const testString = 'https://docs.google.com/';
-    const resultString = '<a href="https://docs.google.com/" target="_blank">https://docs.google.com/</a>';
+    const testString = 'https://sd1.sd2.docs.google.com/';
+    const resultString = '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
