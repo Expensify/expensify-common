@@ -1,7 +1,5 @@
 # `expensify-common`
-This is a collection of JavaScript libraries and components which are used across various Expensify projects.
-
-These libraries are provided as-is, and the repos which use them will need to do their own bundling, minifying, and uglifying.
+This is a collection of JS libraries and components which are used across various Expensify projects. These libraries are provided as-is, and the repos which use them will need to do their own bundling, minifying, and uglifying.
 
 # Installation
 1. Clone this repo to a directory of your choosing
@@ -10,7 +8,11 @@ These libraries are provided as-is, and the repos which use them will need to do
 # Deploying a Change
 1. Create a PR for your branch
 2. Push up your changes
-3. Once the PR has been merged update the `package.json` version in any repos with a dependency on `expensify-common`
+3. Once the PR has been merged the changes will be deployed the next time the package is published
+
+# Publishing a Change
+Follow the instructions [here]().
+`@todo` link to internal SO document...
 
 # Development
 * Write all code as ES6.
