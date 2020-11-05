@@ -34,6 +34,7 @@
     "grunt": "*",
     "grunt-eslint": "22.0.0",
     "grunt-chokidar": "1.0.2",
+    "@babel/preset-env": "^7.0.0",
     "jest": "^26.4.2",
     "jit-grunt": "^0.10.0"
   }
