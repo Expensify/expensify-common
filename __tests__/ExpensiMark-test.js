@@ -174,6 +174,12 @@ test('Test a period in the middle of a link autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test a url with potentially valid TLD before the actual TLD autolinks correctly', () => {
+    const testString = 'https://docs.google.com/';
+    const resultString = '<a href="https://docs.google.com/" target="_blank">https://docs.google.com/</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test bulleted list markdown replacement', () => {
     const singleItemAsterisk = '* this is one point of many';
     const singleItemAsteriskSpace = ' * this is one point of many';
