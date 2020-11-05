@@ -1,10 +1,9 @@
 {
   "name": "js-libs",
   "version": "2.5.8",
-  "description": "JavaScript libraries that are shared across different repos",
+  "description": "Expensify libraries and components shared across different repos",
   "main": "index.js",
   "license": "UNLICENSED",
-  "private": true,
   "scripts": {
     "grunt": "grunt",
     "test": "jest",
