@@ -22,7 +22,8 @@ Alternatively, you can edit files directly in a project's `node_modules` then ap
 # Proposing a Change (Non-Expensify Contributors)
 1. Fork this repository and create a new branch
 1. Open a PR to merge your changes
-1. Expensify will review and accept your changes, merge them, then deploy a new version
+1. An Expensify engineer will be automatically assigned to your PR
+1. They will review and accept your changes, merge them, then deploy a new version
 
 # Deploying a Change (Expensify Only)
 1. Create a new branch from master and run `npm run patch`
