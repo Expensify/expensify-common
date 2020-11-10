@@ -10,9 +10,8 @@ This is a collection of JS libraries and components which are used across variou
 2. Push up your changes
 3. Once the PR has been merged the changes will be deployed the next time the package is published
 
-# Publishing a Change
-Follow the instructions [here]().
-`@todo` link to internal SO document...
+# Publishing a Change (Expensify only)
+Follow the instructions [here](https://stackoverflow.com/c/expensify/questions/7216).
 
 # Development
 * Write all code as ES6.
