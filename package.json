@@ -1,9 +1,11 @@
 {
   "name": "expensify-common",
   "version": "1.0.0",
+  "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
+  "homepage": "https://expensify.com",
   "main": "index.js",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "grunt": "grunt",
     "test": "jest",
