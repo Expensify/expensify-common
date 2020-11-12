@@ -24,12 +24,6 @@ export const CONST = {
     ACH_DEFAULT_MAX_AMOUNT_LIMIT: 2000000,
 
     /**
-     * UNUSED, BY KEPT FOR "STORAGE"
-     * This key is only valid for URLs in the https://www.expensify.com/ realm.
-     */
-    GOOGLE_API_KEY: 'ABQIAAAAjtisvqrcGboNGaMCOuZ0ohQhhEh1oy_9rMnViic8Bkkf7v7oORR3gYYz-G4SlC7hy72TbmOpwIHAtg',
-
-    /**
      * IRS remimbursement rate for mileage
      * WARNING ! UPDATE THE PHP CONSTANT VERSION WHEN UPDATING THIS ONE
      *
@@ -682,17 +676,17 @@ export const CONST = {
         },
         detailed: {
             value: 'detailed_export',
-            text: 'Detailed Export',
+            text: 'All Data - Expense Level Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         report: {
             value: 'report_level_export',
-            text: 'Report Level Export',
+            text: 'All Data - Report Level Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         tax: {
             value: 'multiple_tax_export',
-            text: 'Multiple Tax Export',
+            text: 'Canadian Multiple Tax Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
         perdiem: {
@@ -771,48 +765,6 @@ export const CONST = {
             hotelStar: 'fourStars'
         },
     },
-
-    // Domains we don't want to serve ads to
-    COMPETITOR_DOMAINS: [
-        'concur.com',
-        'certify.com',
-        'tallie.com',
-        'oracle.com',
-        'sap.com',
-        'rydoo.com',
-        'chromeriver.com',
-        'zoho.com',
-        'receiptbank.com',
-        'brex.com',
-        'getdivvy.com',
-        'hubdoc.com',
-        'intuit.com',
-        'xero.com',
-        'netsuite.com',
-        'intacct.com',
-        'sage.com',
-        'mastercard.com',
-        'visa.com',
-        'americanexpress.com',
-        'chase.com',
-        'bentoforbusiness.com',
-        'nexonia.com',
-        'myob.com',
-        'tripactions.com',
-        'pleo.com',
-        'abacus.com',
-        'paylocity.com',
-        'bigtime.net',
-        'paycom.com',
-        'workday.com',
-        'fyle.com',
-        'paychex.com',
-        'travelbank.com',
-        'spendesk.com',
-        'webexpenses.com',
-        'deem.com',
-        'happay.com',
-    ],
 
     // Expensify domains
     EXPENSIFY_DOMAINS: [

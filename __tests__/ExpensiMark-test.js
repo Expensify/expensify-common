@@ -28,8 +28,8 @@ test('Test strikethrough markdown replacement', () => {
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
-    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more.';
-    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more.';
+    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com)';
+    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more. <a href="http://www.expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">Expensify</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -49,7 +49,7 @@ test('Test newline markdown replacement', () => {
 
 // Period replacement test
 test('Test period replacements', () => {
-    const periodTestStartString = 'This test ensures that words with trailing... periods.. are. not converted to links. Also, words seperated.by.periods should...not become..links.';
+    const periodTestStartString = 'This test ensures that words with trailing... periods.. are. not converted to links.';
     expect(parser.replace(periodTestStartString)).toBe(periodTestStartString);
 });
 
@@ -66,6 +66,11 @@ test('Test code fencing with spaces and new lines', () => {
 test('Test inline code blocks', () => {
     const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you?';
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
+});
+
+test('Test inline code blocks with ExpensiMark syntax inside', () => {
+    const inlineCodeStartString = '`This is how you can write ~strikethrough~, *bold*, and _italics_`';
+    expect(parser.replace(inlineCodeStartString)).toBe('<code>This is how you can write ~strikethrough~, *bold*, and _italics_</code>');
 });
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
@@ -93,18 +98,28 @@ test('Test url replacements', () => {
         + 'test again '
         + 'http://test.com/test '
         + 'www.test.com '
-        + 'https://www.test.com '
-        + 'http://test.com)';
+        + 'http://test.com) '
+        + 'test.totallyfaketld '
+        + 'idrink.beer '
+        + 'mm..food';
 
     const urlTestReplacedString = 'Testing '
-        + 'test.com '
+        + '<a href="http://test.com" target="_blank">test.com</a> '
         + 'test again '
         + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
-        + '<a href="www.test.com" target="_blank">www.test.com</a> '
-        + '<a href="https://www.test.com" target="_blank">https://www.test.com</a> '
-        + '<a href="http://test.com" target="_blank">http://test.com</a>)';
+        + '<a href="http://www.test.com" target="_blank">www.test.com</a> '
+        + '<a href="http://test.com" target="_blank">http://test.com</a>) '
+        + 'test.totallyfaketld '
+        + '<a href="http://idrink.beer" target="_blank">idrink.beer</a> '
+        + 'mm..food';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
+});
+
+test('Auto-link works on a www. test url', () => {
+    const testString = 'https://www.test.com';
+    const resultString = '<a href="https://www.test.com" target="_blank">https://www.test.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test markdown style link with various styles', () => {
@@ -114,7 +129,9 @@ test('Test markdown style link with various styles', () => {
         + '[Expensify!](https://www.expensify.com) '
         + '[Expensify?](https://www.expensify.com) '
         + '[Expensify](https://www.expensify-test.com) '
-        + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22})';
+        + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22}) '
+        + '[Expensify](https://www.expensify.com/settings?param=(%22section%22+%22account%22)) '
+        + '[Expensify](https://www.expensify.com/settings?param=[%22section%22:%22account%22])';
 
     const resultString = 'Go to <del><a href="https://www.expensify.com" target="_blank">Expensify</a></del> '
         + '<em><a href="https://www.expensify.com" target="_blank">Expensify</a></em> '
@@ -122,7 +139,45 @@ test('Test markdown style link with various styles', () => {
         + '<a href="https://www.expensify.com" target="_blank">Expensify!</a> '
         + '<a href="https://www.expensify.com" target="_blank">Expensify?</a> '
         + '<a href="https://www.expensify-test.com" target="_blank">Expensify</a> '
-        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a>';
+        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank">Expensify</a>';
 
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test links that end in a comma autolink correctly', () => {
+    const testString = 'https://github.com/Expensify/Expensify/issues/143231,';
+    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a>,';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test links that have a comma in the middle autolink correctly', () => {
+    const testString = 'https://github.com/Expensify/Expensify/issues/143,231';
+    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test links inside two backticks are not autolinked', () => {
+    const testString = '`https://github.com/Expensify/Expensify/issues/143231`';
+    const resultString = '<code>https://github.com/Expensify/Expensify/issues/143231</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a period at the end of a link autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a period in the middle of a link autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/6.45';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a url with potentially valid TLD before the actual TLD autolinks correctly', () => {
+    const testString = 'https://sd1.sd2.docs.google.com/';
+    const resultString = '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
