@@ -12,6 +12,14 @@ test('Test bold markdown replacement', () => {
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+// Words wrapped in * successfully replaced with <strong></strong>
+test('Test quote markdown replacement', () => {
+    const quoteTestStartString = '&gt;This is a quote that started on a new line.\nHere is a &gt;quote that did not';
+    const quoteTestReplacedString = '<blockquote>This is a quote that started on a new line.</blockquote><br>Here is a &gt;quote that did not';
+
+    expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+});
+
 // Words wrapped in _ successfully replaced with <em></em>
 test('Test italic markdown replacement', () => {
     const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. _test_ _ testing_ test_test_test.';
