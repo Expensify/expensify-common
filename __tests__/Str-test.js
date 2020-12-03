@@ -1,0 +1,27 @@
+import Str from '../lib/str';
+
+const buildTestURLForType = (type) => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
+
+describe('Str.isImage', () => {
+    it('Correctly identifies all valid image types', () => {
+        expect(Str.isImage(buildTestURLForType('gif'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('jpeg'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('jpg'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('bmp'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('png'))).toBeTruthy();
+    });
+
+    it('Does not confirm these types', () => {
+        // Note: These are types that React Native does not support as images so attempt to prevent their addition here
+        expect(Str.isImage(buildTestURLForType('tiff'))).toBeFalsy();
+        expect(Str.isImage(buildTestURLForType('webp'))).toBeFalsy();
+        expect(Str.isImage(buildTestURLForType('psd'))).toBeFalsy();
+        expect(Str.isImage(buildTestURLForType('pdf'))).toBeFalsy();
+    });
+});
+
+describe('Str.isPDF', () => {
+    it('Correctly identifies PDF', () => {
+        expect(Str.isPDF(buildTestURLForType('pdf'))).toBeTruthy();
+    });
+});
