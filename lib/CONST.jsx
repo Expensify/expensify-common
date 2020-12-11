@@ -713,7 +713,8 @@ export const CONST = {
 
     PARTNER_NAMES: {
         IPHONE: 'iphone',
-        ANDROID: 'android'
+        ANDROID: 'android',
+        CHAT: 'chat-expensify-com',
     },
 
     LOGIN_TYPES: {
