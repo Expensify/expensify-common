@@ -27,7 +27,7 @@
     "prop-types": "15.7.2",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "simply-deferred": "3.0.0",
+    "simply-deferred": "git+https://git@github.com:Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
     "underscore": "1.9.1"
   },
   "devDependencies": {
