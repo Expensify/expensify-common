@@ -1,0 +1,35 @@
+name: Test JavaScript
+
+on:
+    push:
+        branches-ignore:
+            - 'master'
+            - 'version-bump-*'
+        tags-ignore:
+            - '*'
+    pull_request_target:
+        types: [opened, synchronize]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+
+            - uses: actions/cache@v2
+              with:
+                  path: ~/.npm
+                  key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-node-
+
+            - name: Setup Node
+              uses: actions/setup-node@v1
+              with:
+                  node-version: '14.x'
+
+            - run: npm ci
+
+            - run: npm run test
+              env:
+                  CI: true
