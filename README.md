@@ -11,7 +11,7 @@ This is a collection of JS libraries and components which are used across variou
 * Make sure you're using http://editorconfig.org/
 
 ## Testing your code while you are developing
-The best way to test your code while you are developing changes is via `npm link`.
+The best way to test your code while you are developing changes is via `npm link`
 
 1. Run `npm link` in the project root
 1. `cd` into the project directory that has a dependency on `expensify-common`
