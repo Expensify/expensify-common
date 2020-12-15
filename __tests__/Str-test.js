@@ -9,6 +9,11 @@ describe('Str.isImage', () => {
         expect(Str.isImage(buildTestURLForType('jpg'))).toBeTruthy();
         expect(Str.isImage(buildTestURLForType('bmp'))).toBeTruthy();
         expect(Str.isImage(buildTestURLForType('png'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('GIF'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('JPEG'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('JPG'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('BMP'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('PNG'))).toBeTruthy();
     });
 
     it('Does not confirm these types', () => {
@@ -23,5 +28,6 @@ describe('Str.isImage', () => {
 describe('Str.isPDF', () => {
     it('Correctly identifies PDF', () => {
         expect(Str.isPDF(buildTestURLForType('pdf'))).toBeTruthy();
+        expect(Str.isPDF(buildTestURLForType('PDF'))).toBeTruthy();
     });
 });
