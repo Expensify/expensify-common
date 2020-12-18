@@ -189,3 +189,15 @@ test('Test a url with potentially valid TLD before the actual TLD autolinks corr
     const resultString = '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test a url wrapped in parentheses autolinks correctly', () => {
+    const testString = '(https://github.com/Expensify/ReactNativeChat/pull/645)';
+    const resultString = '(<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a url ending with a question mark autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
+    expect(parser.replace(testString)).toBe(resultString);
+});
