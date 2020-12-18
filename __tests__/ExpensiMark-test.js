@@ -109,7 +109,8 @@ test('Test url replacements', () => {
         + 'http://test.com) '
         + 'test.totallyfaketld '
         + 'idrink.beer '
-        + 'mm..food';
+        + 'mm..food '
+        + 'test@expensify.com';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="http://test.com" target="_blank">test.com</a> '
@@ -119,7 +120,8 @@ test('Test url replacements', () => {
         + '<a href="http://test.com" target="_blank">http://test.com</a>) '
         + 'test.totallyfaketld '
         + '<a href="http://idrink.beer" target="_blank">idrink.beer</a> '
-        + 'mm..food';
+        + 'mm..food '
+        + 'test@expensify.com';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
@@ -190,14 +192,14 @@ test('Test a url with potentially valid TLD before the actual TLD autolinks corr
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a url wrapped in parentheses autolinks correctly', () => {
-    const testString = '(https://github.com/Expensify/ReactNativeChat/pull/645)';
-    const resultString = '(<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
 test('Test a url ending with a question mark autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test a url wrapped in parentheses autolinks correctly', () => {
+    const testString = '(https://github.com/Expensify/ReactNativeChat/pull/645)';
+    const resultString = '(<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
