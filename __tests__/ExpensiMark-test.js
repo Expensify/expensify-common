@@ -102,34 +102,52 @@ test('Test wrapped URLs', () => {
 
 test('Test url replacements', () => {
     const urlTestStartString = 'Testing '
-        + 'test.com '
-        + 'test again '
-        + 'http://test.com/test '
-        + 'www.test.com '
-        + 'http://test.com) '
-        + 'test.totallyfaketld '
-        + 'idrink.beer '
-        + 'mm..food '
-        + 'test@expensify.com';
+        + 'foo.com '
+        + 'www.foo.com '
+        + 'http://www.foo.com '
+        + 'http://foo.com/blah_blah '
+        + 'http://foo.com/blah_blah/ '
+        + 'http://foo.com/blah_blah_(wikipedia) '
+        + 'http://www.example.com/wpstyle/?p=364 '
+        + 'https://www.example.com/foo/?bar=baz&inga=42&quux '
+        + 'http://foo.com/(something)?after=parens '
+        + 'http://code.google.com/events/#&product=browser '
+        + 'http://foo.bar/?q=Test%20URL-encoded%20stuff '
+        + 'http://1337.net '
+        + 'http://a.b-c.de/ '
+        + 'https://sd1.sd2.docs.google.com/ '
+        + 'https://expensify.cash/#/r/1234 '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/6.45 '
+        + 'https://github.com/Expensify/Expensify/issues/143,231 '
+        + 'testRareTLDs.beer '
+        + 'test@expensify.com '
+        + 'test.completelyFakeTLD '
+        + 'mm..food';
 
     const urlTestReplacedString = 'Testing '
-        + '<a href="http://test.com" target="_blank">test.com</a> '
-        + 'test again '
-        + '<a href="http://test.com/test" target="_blank">http://test.com/test</a> '
-        + '<a href="http://www.test.com" target="_blank">www.test.com</a> '
-        + '<a href="http://test.com" target="_blank">http://test.com</a>) '
-        + 'test.totallyfaketld '
-        + '<a href="http://idrink.beer" target="_blank">idrink.beer</a> '
-        + 'mm..food '
-        + 'test@expensify.com';
+        + '<a href="http://foo.com" target="_blank">foo.com</a> '
+        + '<a href="http://www.foo.com" target="_blank">www.foo.com</a> '
+        + '<a href="http://www.foo.com" target="_blank">http://www.foo.com</a> '
+        + '<a href="http://foo.com/blah_blah" target="_blank">http://foo.com/blah_blah</a> '
+        + '<a href="http://foo.com/blah_blah/" target="_blank">http://foo.com/blah_blah/</a> '
+        + '<a href="http://foo.com/blah_blah_(wikipedia)" target="_blank">http://foo.com/blah_blah_(wikipedia)</a> '
+        + '<a href="http://www.example.com/wpstyle/?p=364" target="_blank">http://www.example.com/wpstyle/?p=364</a> '
+        + '<a href="https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux" target="_blank">https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux</a> '
+        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
+        + '<a href="http://code.google.com/events/#&amp;product=browser" target="_blank">http://code.google.com/events/#&amp;product=browser</a> '
+        + '<a href="http://foo.bar/?q=Test%20URL-encoded%20stuff" target="_blank">http://foo.bar/?q=Test%20URL-encoded%20stuff</a> '
+        + '<a href="http://1337.net" target="_blank">http://1337.net</a> '
+        + '<a href="http://a.b-c.de/" target="_blank">http://a.b-c.de/</a> '
+        + '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a> '
+        + '<a href="https://expensify.cash/#/r/1234" target="_blank">https://expensify.cash/#/r/1234</a> '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a> '
+        + '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a> '
+        + '<a href="http://testRareTLDs.beer" target="_blank">testRareTLDs.beer</a> '
+        + 'test@expensify.com '
+        + 'test.completelyFakeTLD '
+        + 'mm..food';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
-});
-
-test('Auto-link works on a www. test url', () => {
-    const testString = 'https://www.test.com';
-    const resultString = '<a href="https://www.test.com" target="_blank">https://www.test.com</a>';
-    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test markdown style link with various styles', () => {
@@ -162,12 +180,6 @@ test('Test links that end in a comma autolink correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test links that have a comma in the middle autolink correctly', () => {
-    const testString = 'https://github.com/Expensify/Expensify/issues/143,231';
-    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
 test('Test links inside two backticks are not autolinked', () => {
     const testString = '`https://github.com/Expensify/Expensify/issues/143231`';
     const resultString = '<code>https://github.com/Expensify/Expensify/issues/143231</code>';
@@ -180,26 +192,14 @@ test('Test a period at the end of a link autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a period in the middle of a link autolinks correctly', () => {
-    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/6.45';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test a url with potentially valid TLD before the actual TLD autolinks correctly', () => {
-    const testString = 'https://sd1.sd2.docs.google.com/';
-    const resultString = '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
 test('Test a url ending with a question mark autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a url wrapped in parentheses autolinks correctly', () => {
-    const testString = '(https://github.com/Expensify/ReactNativeChat/pull/645)';
-    const resultString = '(<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+test('Test a url ending with a closing parentheses autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645)';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
