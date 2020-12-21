@@ -297,6 +297,32 @@ export default function API(network, args) {
         },
 
         /**
+         * Returns the current active policy of authToken
+         *
+         * @returns {APIDeferred}
+         */
+        policy_GetActiveID() {
+            const commandName = 'Policy_GetActiveID';
+            return performPOSTRequest(commandName);
+        },
+
+        /**
+         * Queues an InboxCallUser so that the inbox team can call the user.
+         *
+         * @param {object} parameters
+         * @param {string} parameters.policyID
+         * @param {string} parameters.firstName
+         * @param {string} parameters.lastName
+         * @param {string} parameters.phoneNumber
+         * @returns {APIDeferred}
+         */
+        Inbox_CallUser(parameters) {
+            const commandName = 'Inbox_CallUser';
+            requireParameters(['policyID', 'firstName', 'lastName', 'phoneNumber'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.password
@@ -360,7 +386,7 @@ export default function API(network, args) {
         resendValidateCode(parameters = {}) {
             const commandName = 'ResendValidateCode';
             return performPOSTRequest(commandName, {
-                ...parameters, 
+                ...parameters,
                 api_setCookie: false,
             });
         },
@@ -481,7 +507,7 @@ export default function API(network, args) {
         /**
          * Performs API command GetRequestCountryCode
          * Fetches the country code based on the location of the request
-         * 
+         *
          * @return {APIDeferred}
          */
         getRequestCountryCode() {
