@@ -297,13 +297,18 @@ export default function API(network, args) {
         },
 
         /**
-         * Returns the current active policy of authToken
+         * Performs API command "Get"
          *
-         * @returns {APIDeferred}
+         * @param {Object} parameters The API call parameters, must contain "returnValueList"
+         * @param {Domain} [domain] If you want to run this command as the domain account of this domain
+         * @param {DomainMember} [domainMember] If you want to run this command as specified domain member
+         *
+         * @returns {APIDeferred} An APIDeferred representing the promise of this request
          */
-        policy_GetActiveID() {
-            const commandName = 'Policy_GetActiveID';
-            return performPOSTRequest(commandName);
+        get(parameters) {
+            const commandName = 'Get';
+            requireParameters(['returnValueList'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
         },
 
         /**
