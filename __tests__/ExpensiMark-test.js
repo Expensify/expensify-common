@@ -145,7 +145,7 @@ test('Test url replacements', () => {
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a> '
         + '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a> '
         + '<a href="http://testRareTLDs.beer" target="_blank">testRareTLDs.beer</a> '
-        + 'test@expensify.com '
+        + '<a href="mailto:test@expensify.com">test@expensify.com</a> '
         + 'test.completelyFakeTLD '
         + 'mm..food';
 
@@ -203,5 +203,35 @@ test('Test a url ending with a question mark autolinks correctly', () => {
 test('Test a url ending with a closing parentheses autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645)';
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown style email link with various styles', () => {
+    const testString = 'Go to ~[Expensify](concierge@expensify.com)~ '
+        + '_[Expensify](concierge@expensify.com)_ '
+        + '*[Expensify](concierge@expensify.com)* '
+        + '[Expensify!](no-concierge1@expensify.com) '
+        + '[Expensify?](concierge?@expensify.com) ';
+
+    const resultString = 'Go to <del><a href="mailto:concierge@expensify.com">Expensify</a></del> '
+        + '<em><a href="mailto:concierge@expensify.com">Expensify</a></em> '
+        + '<strong><a href="mailto:concierge@expensify.com">Expensify</a></strong> '
+        + '<a href="mailto:no-concierge1@expensify.com">Expensify!</a> '
+        + '<a href="mailto:concierge?@expensify.com">Expensify?</a> ';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test general email link with various styles', () => {
+    const testString = 'Go to concierge@expensify.com '
+        + 'no-concierge@expensify.com '
+        + 'concierge!@expensify.com '
+        + 'concierge1?@expensify.com ';
+
+    const resultString = 'Go to <a href="mailto:concierge@expensify.com">concierge@expensify.com</a> '
+        + '<a href="mailto:no-concierge@expensify.com">no-concierge@expensify.com</a> '
+        + '<a href="mailto:concierge!@expensify.com">concierge!@expensify.com</a> '
+        + '<a href="mailto:concierge1?@expensify.com">concierge1?@expensify.com</a> ';
+
     expect(parser.replace(testString)).toBe(resultString);
 });
