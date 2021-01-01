@@ -15,7 +15,7 @@ test('Test bold markdown replacement', () => {
 // Words wrapped in * successfully replaced with <strong></strong>
 test('Test quote markdown replacement', () => {
     const quoteTestStartString = '&gt;This is a *quote* that started on a new line.\nHere is a &gt;quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-    const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br><pre>here&nbsp;is&nbsp;a&nbsp;codefenced&nbsp;quote<br>&gt;it&nbsp;should&nbsp;not&nbsp;be&nbsp;quoted</pre>';
+    const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br>&gt;it&#32;should&#32;not&#32;be&#32;quoted</pre>';
 
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
@@ -63,12 +63,12 @@ test('Test period replacements', () => {
 
 test('Test code fencing', () => {
     const codeFenceExampleMarkdown = '```\nconst javaScript = \'javaScript\'\n```';
-    expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&nbsp;javaScript&nbsp;=&nbsp;&#x27;javaScript&#x27;</pre>');
+    expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;</pre>');
 });
 
 test('Test code fencing with spaces and new lines', () => {
     const codeFenceExample = '```\nconst javaScript = \'javaScript\'\n    const php = \'php\'\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&nbsp;javaScript&nbsp;=&nbsp;&#x27;javaScript&#x27;<br>&nbsp;&nbsp;&nbsp;&nbsp;const&nbsp;php&nbsp;=&nbsp;&#x27;php&#x27;</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br>&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 });
 
 test('Test inline code blocks', () => {
@@ -83,7 +83,7 @@ test('Test inline code blocks with ExpensiMark syntax inside', () => {
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
     const codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>This&nbsp;is&nbsp;how&nbsp;you&nbsp;can&nbsp;write&nbsp;~strikethrough~,&nbsp;*bold*,&nbsp;_italics_,&nbsp;and&nbsp;[links](https://www.expensify.com)</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
 });
 
 test('Test combination replacements', () => {
