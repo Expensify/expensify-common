@@ -37,8 +37,8 @@ test('Test strikethrough markdown replacement', () => {
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
-    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com)';
-    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more. <a href="http://www.expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">It&#x27;s really the coolest</a>';
+    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [Some Special Characters - + . =](expensify.com)';
+    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more. <a href="http://www.expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">It&#x27;s really the coolest</a> <a href="http://expensify.com" target="_blank">Some Special Characters - + . =</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
