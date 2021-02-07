@@ -1,5 +1,7 @@
 /* eslint-disable no-useless-escape */
-import moment from 'moment';
+import sub from 'date-fns/sub';
+import add from 'date-fns/add';
+import format from 'date-fns/format';
 
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
 
@@ -420,8 +422,8 @@ export const CONST = {
         /**
          * Start and End dates for report, expenses filters, receipts,...
          */
-        DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
-        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
+        DEFAULT_START_DATE: format(sub(new Date(), {weeks: 6}), 'yyyy-MM-dd'),
+        DEFAULT_END_DATE: format(add(new Date(), {day: 1}), 'yyyy-MM-dd'),
 
         SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
         LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
