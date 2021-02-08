@@ -1,39 +1,5 @@
 /* eslint-disable no-useless-escape */
 
-/**
- * Formats a Date object into YYYY-MM-DD
- *
- * @returns {String}
- */
-function formatDate(date) {
-    const addLeadingZero = n => `${n < 10 ? '0' : ''}${n}`;
-    const day = addLeadingZero(date.getDate());
-    const month = addLeadingZero(date.getMonth() + 1);
-    return `${date.getFullYear()}-${month}-${day}`;
-}
-
-/**
- * Return the YYYY-MM-DD format for date six weeks before today.
- *
- * @returns {String}
- */
-function getSixWeeksBeforeToday() {
-    const today = new Date();
-    today.setDate(today.getDate() - (7 * 6));
-    return formatDate(today);
-}
-
-/**
- * Return the YYYY-MM-DD format for one day after.
- *
- * @returns {String}
- */
-function getOneDayAfterToday() {
-    const today = new Date();
-    today.setDate(today.getDate() + 1);
-    return formatDate(today);
-}
-
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
 
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
@@ -449,12 +415,6 @@ export const CONST = {
          * Difference between the local time and UTC time in ms
          */
         TIMEZONE_OFFSET_MS: new Date().getTimezoneOffset() * 60000,
-
-        /**
-         * Start and End dates for report, expenses filters, receipts,...
-         */
-        DEFAULT_START_DATE: getSixWeeksBeforeToday(),
-        DEFAULT_END_DATE: getOneDayAfterToday(),
 
         SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
         LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
