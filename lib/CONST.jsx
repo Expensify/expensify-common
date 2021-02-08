@@ -1,6 +1,18 @@
 /* eslint-disable no-useless-escape */
 
 /**
+ * Formats a Date object into YYYY-MM-DD
+ *
+ * @returns {String}
+ */
+function formatDate(date) {
+    const addLeadingZero = n => `${n < 10 ? '0' : ''}${n}`;
+    const day = addLeadingZero(date.getDate());
+    const month = addLeadingZero(date.getMonth() + 1);
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/**
  * Return the YYYY-MM-DD format for date six weeks before today.
  *
  * @returns {String}
@@ -8,9 +20,7 @@
 function getSixWeeksBeforeToday() {
     const today = new Date();
     today.setDate(today.getDate() - (7 * 6));
-    const date = `${(today.getDate() < 10 ? '0' : '')}${today.getDate()}`;
-    const month = `${(today.getMonth() < 10 ? '0' : '')}${today.getMonth()}`;
-    return `${today.getFullYear()}-${month}-${date}`;
+    return formatDate(today);
 }
 
 /**
@@ -21,9 +31,7 @@ function getSixWeeksBeforeToday() {
 function getOneDayAfterToday() {
     const today = new Date();
     today.setDate(today.getDate() + 1);
-    const date = `${(today.getDate() < 10 ? '0' : '')}${today.getDate()}`;
-    const month = `${(today.getMonth() < 10 ? '0' : '')}${today.getMonth()}`;
-    return `${today.getFullYear()}-${month}-${date}`;
+    return formatDate(today);
 }
 
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
