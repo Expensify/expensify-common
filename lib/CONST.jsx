@@ -1,5 +1,26 @@
 /* eslint-disable no-useless-escape */
-import moment from 'moment';
+
+/**
+ * Return the YYYY-MM-DD format for date six weeks before today.
+ *
+ * @returns {String}
+ */
+function getSixWeeksBeforeToday() {
+    const today = new Date();
+    today.setDate(today.getDate() - (7 * 6));
+    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
+
+/**
+ * Return the YYYY-MM-DD format for one day after.
+ *
+ * @returns {String}
+ */
+function getOneDayAfterToday() {
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+}
 
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
 
@@ -420,8 +441,8 @@ export const CONST = {
         /**
          * Start and End dates for report, expenses filters, receipts,...
          */
-        DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
-        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
+        DEFAULT_START_DATE: getSixWeeksBeforeToday(),
+        DEFAULT_END_DATE: getOneDayAfterToday(),
 
         SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
         LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
