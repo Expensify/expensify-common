@@ -8,7 +8,9 @@
 function getSixWeeksBeforeToday() {
     const today = new Date();
     today.setDate(today.getDate() - (7 * 6));
-    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    const date = `${(today.getDate() < 10 ? '0' : '')}${today.getDate()}`;
+    const month = `${(today.getMonth() < 10 ? '0' : '')}${today.getMonth()}`;
+    return `${today.getFullYear()}-${month}-${date}`;
 }
 
 /**
@@ -19,7 +21,9 @@ function getSixWeeksBeforeToday() {
 function getOneDayAfterToday() {
     const today = new Date();
     today.setDate(today.getDate() + 1);
-    return `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    const date = `${(today.getDate() < 10 ? '0' : '')}${today.getDate()}`;
+    const month = `${(today.getMonth() < 10 ? '0' : '')}${today.getMonth()}`;
+    return `${today.getFullYear()}-${month}-${date}`;
 }
 
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
