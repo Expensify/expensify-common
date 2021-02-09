@@ -26,6 +26,4 @@ Alternatively, you can edit files directly in a project's `node_modules` then ap
 1. They will review and accept your changes, merge them, then deploy a new version
 
 # Deploying a Change (Expensify Only)
-1. Create a new branch from master and run `npm run patch`
-2. Push up the changes, create a PR, and get it reviewed and merged
-3. Publish a new version by following the instructions [here](https://stackoverflow.com/c/expensify/questions/7216)
+1. Once the PR has been merged update the `package.json` commit hash in any repos with a dependency on `expensify-common`
