@@ -61,6 +61,9 @@ const propTypes = {
     // There is usually text just following a switch that says "ENABLED" and "DISABLED" and
     // you can use this option to hide that text
     hideEnabledDisabledText: PropTypes.bool,
+
+    // Text to display in a tooltip
+    tooltipText: PropTypes.string,
 };
 
 const defaultProps = {
@@ -78,6 +81,7 @@ const defaultProps = {
     safeDescription: false,
     hideEnabledDisabledText: false,
     extraClasses: [],
+    tooltipText: '',
 };
 
 class OnOffSwitch extends Component {
@@ -193,6 +197,7 @@ class OnOffSwitch extends Component {
                         {marginLeft10: !this.props.labelOnRight}
                     ]}
                     hideEnabledDisabledText={this.props.hideEnabledDisabledText}
+                    tooltipText={this.props.tooltipText}
                 />
                 {this.props.label && this.props.labelOnRight && (
                     <label
