@@ -1,5 +1,4 @@
 /* eslint-disable no-useless-escape */
-import moment from 'moment';
 
 const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
 
@@ -416,12 +415,6 @@ export const CONST = {
          * Difference between the local time and UTC time in ms
          */
         TIMEZONE_OFFSET_MS: new Date().getTimezoneOffset() * 60000,
-
-        /**
-         * Start and End dates for report, expenses filters, receipts,...
-         */
-        DEFAULT_START_DATE: moment().subtract(6, 'weeks').format(MOMENT_FORMAT_STRING),
-        DEFAULT_END_DATE: moment().add(1, 'day').format(MOMENT_FORMAT_STRING),
 
         SHORT_MONTH_SHORT_DAY: 'MMM d', // e.g. Jan 1
         LONG_YEAR_MONTH_DAY_24_TIME: 'yyyy-MM-dd HH:mm:ss', // e.g. 2020-01-01 20:45:15
