@@ -29,15 +29,15 @@ describe('GithubUtils.getStagingDeployCash', () => {
         const octokit = new Octokit();
         const github = new GithubUtils(octokit);
         octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [{a: 1}, {b: 2}]});
-        return github.getStagingDeployCash().catch(e =>
-            expect(e).toEqual(new Error('Found more than one StagingDeployCash issue.')));
+        return github.getStagingDeployCash()
+            .catch(e => expect(e).toEqual(new Error('Found more than one StagingDeployCash issue.')));
     });
 
     test('Test finding no issues', () => {
         const octokit = new Octokit();
         const github = new GithubUtils(octokit);
         octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: []});
-        return github.getStagingDeployCash().catch(e =>
-            expect(e).toEqual(new Error('Unable to find StagingDeployCash issue.')));
+        return github.getStagingDeployCash()
+            .catch(e => expect(e).toEqual(new Error('Unable to find StagingDeployCash issue.')));
     });
 });
