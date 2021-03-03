@@ -63,6 +63,18 @@ describe('GithubUtils.getStagingDeployCash', () => {
         return github.getStagingDeployCash().then(data => expect(data).toStrictEqual(notReleasedExpectedResponse));
     });
 
+    test('Test finding an open issue without a body', () => {
+        const octokit = new Octokit();
+        const github = new GithubUtils(octokit);
+
+        const noBodyIssue = issue;
+        noBodyIssue.body = '';
+
+        octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [noBodyIssue]});
+        return github.getStagingDeployCash()
+            .catch(e => expect(e).toEqual(new Error('Unable to find StagingDeployCash issue with correct data.')));
+    });
+
     test('Test finding more than one issue', () => {
         const octokit = new Octokit();
         const github = new GithubUtils(octokit);
@@ -78,12 +90,4 @@ describe('GithubUtils.getStagingDeployCash', () => {
         return github.getStagingDeployCash()
             .catch(e => expect(e).toEqual(new Error('Unable to find StagingDeployCash issue.')));
     });
-
-    // test('Test finding an issue', () => {
-    //     const octokit = new Octokit({
-    //         auth: process.env.GITHUB_TOKEN
-    //     });
-    //     const github = new GithubUtils(octokit);
-    //     return github.getStagingDeployCash().then(data => expect(data).toStrictEqual(expectedResponse));
-    // });
 });
