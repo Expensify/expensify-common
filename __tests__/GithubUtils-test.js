@@ -26,7 +26,6 @@ const expectedResponse = {
         'https://github.com/Expensify/Expensify.cash/pull/23'
     ],
     comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401',
-    isDeployedToProduction: true,
     labels: [
         {
             color: '6FC269',
@@ -50,17 +49,6 @@ describe('GithubUtils.getStagingDeployCash', () => {
         octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [issue]});
         octokit.git.getRef = jest.fn().mockResolvedValue({data: []});
         return github.getStagingDeployCash().then(data => expect(data).toStrictEqual(expectedResponse));
-    });
-
-    test('Test finding an open issue successfully not released', () => {
-        const octokit = new Octokit();
-        const github = new GithubUtils(octokit);
-        octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [issue]});
-        octokit.git.getRef = jest.fn().mockRejectedValue(new Error());
-
-        const notReleasedExpectedResponse = expectedResponse;
-        notReleasedExpectedResponse.isDeployedToProduction = false;
-        return github.getStagingDeployCash().then(data => expect(data).toStrictEqual(notReleasedExpectedResponse));
     });
 
     test('Test finding an open issue without a body', () => {
