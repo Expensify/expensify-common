@@ -47,7 +47,6 @@ describe('GithubUtils.getStagingDeployCash', () => {
         const octokit = new Octokit();
         const github = new GithubUtils(octokit);
         octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [issue]});
-        octokit.git.getRef = jest.fn().mockResolvedValue({data: []});
         return github.getStagingDeployCash().then(data => expect(data).toStrictEqual(expectedResponse));
     });
 
