@@ -1,49 +1,54 @@
 import {Octokit} from '@octokit/rest';
 import GithubUtils from '../lib/GithubUtils';
 
-const issue = {
-    url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/issues/29',
-    title: 'Andrew Test Issue',
-    labels: [
-        {
-            id: 2783847782,
-            node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
-            url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/labels/StagingDeployCash',
-            name: 'StagingDeployCash',
-            color: '6FC269',
-            default: false,
-            description: ''
-        }
-    ],
-    // eslint-disable-next-line max-len
-    body: '**Release Version:** `1.0.1-472`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401\r\n**This release contains changes from the following PRs:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n',
-};
-
-const expectedResponse = {
-    PRList: [
-        'https://github.com/Expensify/Expensify.cash/pull/21',
-        'https://github.com/Expensify/Expensify.cash/pull/22',
-        'https://github.com/Expensify/Expensify.cash/pull/23'
-    ],
-    comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401',
-    labels: [
-        {
-            color: '6FC269',
-            default: false,
-            description: '',
-            id: 2783847782,
-            name: 'StagingDeployCash',
-            node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
-            url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/labels/StagingDeployCash'
-        }
-    ],
-    tag: '1.0.1-472',
-    title: 'Andrew Test Issue',
-    url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/issues/29'
-};
-
 describe('GithubUtils', () => {
     describe('getStagingDeployCash', () => {
+        const issue = {
+            url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/issues/29',
+            title: 'Andrew Test Issue',
+            labels: [
+                {
+                    id: 2783847782,
+                    node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
+                    url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/labels/StagingDeployCash',
+                    name: 'StagingDeployCash',
+                    color: '6FC269',
+                    default: false,
+                    description: ''
+                }
+            ],
+            // eslint-disable-next-line max-len
+            body: '**Release Version:** `1.0.1-472`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n',
+        };
+
+        const expectedResponse = {
+            PRList: [
+                'https://github.com/Expensify/Expensify.cash/pull/21',
+                'https://github.com/Expensify/Expensify.cash/pull/22',
+                'https://github.com/Expensify/Expensify.cash/pull/23'
+            ],
+            deployBlockers: [
+                'https://github.com/Expensify/Expensify.cash/issues/1',
+                'https://github.com/Expensify/Expensify.cash/issues/2',
+                'https://github.com/Expensify/Expensify.cash/pull/1234',
+            ],
+            comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401',
+            labels: [
+                {
+                    color: '6FC269',
+                    default: false,
+                    description: '',
+                    id: 2783847782,
+                    name: 'StagingDeployCash',
+                    node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
+                    url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/labels/StagingDeployCash'
+                }
+            ],
+            tag: '1.0.1-472',
+            title: 'Andrew Test Issue',
+            url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/issues/29'
+        };
+
         test('Test finding an open issue successfully', () => {
             const octokit = new Octokit();
             const github = new GithubUtils(octokit);
@@ -81,16 +86,13 @@ describe('GithubUtils', () => {
     });
 
     describe('getPullRequestNumberFromURL', () => {
-        const octokit = new Octokit();
-        const githubUtils = new GithubUtils(octokit);
-
         describe('valid pull requests', () => {
             test.each([
                 ['https://github.com/Expensify/Expensify/pull/156369', '156369'],
                 ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
                 ['https://github.com/Expensify/expensify-common/pull/346', '346'],
             ])('getPullRequestNumberFromURL("%s")', (input, expected) => {
-                expect(githubUtils.getPullRequestNumberFromURL(input)).toBe(expected);
+                expect(GithubUtils.getPullRequestNumberFromURL(input)).toBe(expected);
             });
         });
 
@@ -100,23 +102,20 @@ describe('GithubUtils', () => {
                 ['https://github.com/Expensify/Expensify/issues/156481'],
                 ['https://docs.google.com/document/d/1mMFh-m1seOES48r3zNqcvfuTvr3qOAsY6n5rP4ejdXE/edit?ts=602420d2#'],
             ])('getPullRequestNumberFromURL("%s")', (input) => {
-                expect(() => githubUtils.getPullRequestNumberFromURL(input))
+                expect(() => GithubUtils.getPullRequestNumberFromURL(input))
                     .toThrow(new Error(`Provided URL ${input} is not a Github Pull Request!`));
             });
         });
     });
 
     describe('getIssueNumberFromURL', () => {
-        const octokit = new Octokit();
-        const githubUtils = new GithubUtils(octokit);
-
         describe('valid issues', () => {
             test.each([
                 ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
                 ['https://github.com/Expensify/Expensify.cash/issues/1644', '1644'],
                 ['https://github.com/Expensify/expensify-common/issues/346', '346'],
             ])('getIssueNumberFromURL("%s")', (input, expected) => {
-                expect(githubUtils.getIssueNumberFromURL(input)).toBe(expected);
+                expect(GithubUtils.getIssueNumberFromURL(input)).toBe(expected);
             });
         });
 
@@ -126,16 +125,13 @@ describe('GithubUtils', () => {
                 ['https://github.com/Expensify/Expensify/pull/156481'],
                 ['https://docs.google.com/document/d/1mMFh-m1seOES48r3zNqcvfuTvr3qOAsY6n5rP4ejdXE/edit?ts=602420d2#'],
             ])('getIssueNumberFromURL("%s")', (input) => {
-                expect(() => githubUtils.getIssueNumberFromURL(input))
+                expect(() => GithubUtils.getIssueNumberFromURL(input))
                     .toThrow(new Error(`Provided URL ${input} is not a Github Issue!`));
             });
         });
     });
 
     describe('getIssueOrPullRequestNumberFromURL', () => {
-        const octokit = new Octokit();
-        const githubUtils = new GithubUtils(octokit);
-
         describe('valid issues and pull requests', () => {
             test.each([
                 ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
@@ -145,7 +141,7 @@ describe('GithubUtils', () => {
                 ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
                 ['https://github.com/Expensify/expensify-common/pull/346', '346'],
             ])('getIssueOrPullRequestNumberFromURL("%s")', (input, expected) => {
-                expect(githubUtils.getIssueOrPullRequestNumberFromURL(input)).toBe(expected);
+                expect(GithubUtils.getIssueOrPullRequestNumberFromURL(input)).toBe(expected);
             });
         });
 
@@ -154,8 +150,8 @@ describe('GithubUtils', () => {
                 ['https://www.google.com/'],
                 ['https://docs.google.com/document/d/1mMFh-m1seOES48r3zNqcvfuTvr3qOAsY6n5rP4ejdXE/edit?ts=602420d2#'],
             ])('getIssueOrPullRequestNumberFromURL("%s")', (input) => {
-                expect(() => githubUtils.getIssueOrPullRequestNumberFromURL(input))
-                    .toThrow(new Error(`Provided URL ${input} is not a Github Issue or Pull Request!`));
+                expect(() => GithubUtils.getIssueOrPullRequestNumberFromURL(input))
+                    .toThrow(new Error(`Provided URL ${input} is not a valid Github Issue or Pull Request!`));
             });
         });
     });
@@ -181,7 +177,7 @@ describe('GithubUtils', () => {
 
         // eslint-disable-next-line max-len
         // TODO: Add comparison URL to base expected output
-        const baseExpectedOutput = `**Release Version:** ${tag}\r\n**Compare Changes:** \r\n**This release contains changes from the following PRs:**\r\n`;
+        const baseExpectedOutput = `**Release Version:** ${tag}\r\n**Compare Changes:** \r\n**This release contains changes from the following pull requests:**\r\n`;
         const openCheckbox = '- [ ]';
         const closedCheckbox = '- [x]';
 
