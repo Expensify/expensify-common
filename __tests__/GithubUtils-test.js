@@ -157,7 +157,16 @@ describe('GithubUtils', () => {
     });
 
     describe('generateStagingDeployCashBody', () => {
-        const octokit = new Octokit();
+        const mockTags = [{name: '1.0.2'}, {name: '1.0.2-123'}];
+        const mockGithub = jest.fn(() => ({
+            getOctokit: () => ({
+                repos: {
+                    listTags: jest.fn().mockResolvedValue({data: mockTags}),
+                },
+            }),
+        }));
+
+        const octokit = mockGithub().getOctokit();
         const githubUtils = new GithubUtils(octokit);
 
         // TODO: mock octokit w/ tag so comparison URL is consistent.
@@ -176,45 +185,60 @@ describe('GithubUtils', () => {
         ];
 
         // eslint-disable-next-line max-len
-        // TODO: Add comparison URL to base expected output
-        const baseExpectedOutput = `**Release Version:** ${tag}\r\n**Compare Changes:** \r\n**This release contains changes from the following pull requests:**\r\n`;
+        const baseExpectedOutput = `**Release Version:** ${tag}\r\n**Compare Changes:** ${comparisonURL}\r\n**This release contains changes from the following pull requests:**\r\n`;
         const openCheckbox = '- [ ]';
         const closedCheckbox = '- [x]';
 
         test('Test no verified PRs', () => {
-            // eslint-disable-next-line max-len
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList)).toBe(`${baseExpectedOutput}${openCheckbox} ${basePRList[3]}\r\n${openCheckbox} ${basePRList[0]}\r\n${openCheckbox} ${basePRList[1]}\r\n`);
+            githubUtils.generateStagingDeployCashBody(tag, basePRList)
+                .then((issueBody) => {
+                    // eslint-disable-next-line max-len
+                    expect(issueBody).toBe(`${baseExpectedOutput}${openCheckbox} ${basePRList[3]}\r\n${openCheckbox} ${basePRList[0]}\r\n${openCheckbox} ${basePRList[1]}\r\n`);
+                });
         });
 
         test('Test some verified PRs', () => {
-            // eslint-disable-next-line max-len
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList, [basePRList[0]])).toBe(`${baseExpectedOutput}${openCheckbox} ${basePRList[3]}\r\n${closedCheckbox} ${basePRList[0]}\r\n${openCheckbox} ${basePRList[1]}\r\n`);
+            githubUtils.generateStagingDeployCashBody(tag, basePRList, [basePRList[0]])
+                .then((issueBody) => {
+                    // eslint-disable-next-line max-len
+                    expect(issueBody).toBe(`${baseExpectedOutput}${openCheckbox} ${basePRList[3]}\r\n${closedCheckbox} ${basePRList[0]}\r\n${openCheckbox} ${basePRList[1]}\r\n`);
+                });
         });
 
         // eslint-disable-next-line max-len
         const allVerifiedExpectedOutput = `${baseExpectedOutput}${closedCheckbox} ${basePRList[3]}\r\n${closedCheckbox} ${basePRList[0]}\r\n${closedCheckbox} ${basePRList[1]}\r\n`;
         test('Test all verified PRs', () => {
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList))
-                .toBe(allVerifiedExpectedOutput);
+            githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList)
+                .then((issueBody) => {
+                    expect(issueBody).toBe(allVerifiedExpectedOutput);
+                });
         });
 
         const deployBlockerHeader = '\r\n**Deploy Blockers:**\r\n';
         test('Test no resolved deploy blockers', () => {
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList))
-                .toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${openCheckbox} ${baseDeployBlockerList[0]}\r\n${openCheckbox} ${baseDeployBlockerList[1]}\r\n`);
+            githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList)
+                .then((issueBody) => {
+                    // eslint-disable-next-line max-len
+                    expect(issueBody).toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${openCheckbox} ${baseDeployBlockerList[0]}\r\n${openCheckbox} ${baseDeployBlockerList[1]}\r\n`);
+                });
         });
 
         test('Test some resolved deploy blockers', () => {
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList, [baseDeployBlockerList[0]]))
-                .toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${closedCheckbox} ${baseDeployBlockerList[0]}\r\n${openCheckbox} ${baseDeployBlockerList[1]}\r\n`);
+            githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList, [baseDeployBlockerList[0]])
+                .then((issueBody) => {
+                    // eslint-disable-next-line max-len
+                    expect(issueBody).toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${closedCheckbox} ${baseDeployBlockerList[0]}\r\n${openCheckbox} ${baseDeployBlockerList[1]}\r\n`);
+                });
         });
 
         test('Test all resolved deploy blockers', () => {
-            expect(githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList, baseDeployBlockerList))
-                .toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${closedCheckbox} ${baseDeployBlockerList[0]}\r\n${closedCheckbox} ${baseDeployBlockerList[1]}\r\n`)
+            githubUtils.generateStagingDeployCashBody(tag, basePRList, basePRList, baseDeployBlockerList, baseDeployBlockerList)
+                .then((issueBody) => {
+                    // eslint-disable-next-line max-len
+                    expect(issueBody).toBe(`${allVerifiedExpectedOutput}${deployBlockerHeader}${closedCheckbox} ${baseDeployBlockerList[0]}\r\n${closedCheckbox} ${baseDeployBlockerList[1]}\r\n`)
+                });
         });
     })
-})
 
     describe('generateVersionComparisonURL', () => {
         const REPO_SLUG = 'test-owner/test-repo';
