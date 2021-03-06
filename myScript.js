@@ -1,4 +1,4 @@
-import GitUtils from './lib/GitUtils';
+const GitUtils = require('./lib/GitUtils');
 
 // Then hard-code your test usages here and console.log the results
 const fromRef = '9254b614399175a6a85745a99a6fb5bb9789915d';
