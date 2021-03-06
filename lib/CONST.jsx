@@ -351,7 +351,7 @@ export const CONST = {
         CLOUDFRONT: 'https://d2k5nsl2zxldvw.cloudfront.net',
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
-        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_19012129.exe',
+        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_190091923.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
         ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions'
     },
@@ -728,6 +728,9 @@ export const CONST = {
             INDIVIDUAL_CARD_RAPID_INCREASE_INVESTIGATION: 5,
             INDIVIDUAL_CARD_RAPID_INCREASE_CLEARED: 6,
             INDIVIDUAL_CARD_RAPID_INCREASE_CONFIRMED: 7,
+            SUSPICIOUS_PAN_ENTRY: 8,
+            SUSPICIOUS_PAN_ENTRY_CLEARED: 9,
+            SUSPICIOUS_PAN_ENTRY_CONFIRMED: 10,
         }
     },
 
