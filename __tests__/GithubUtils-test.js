@@ -23,14 +23,38 @@ describe('GithubUtils', () => {
 
         const expectedResponse = {
             PRList: [
-                'https://github.com/Expensify/Expensify.cash/pull/21',
-                'https://github.com/Expensify/Expensify.cash/pull/22',
-                'https://github.com/Expensify/Expensify.cash/pull/23'
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/21',
+                    number: 21,
+                    isVerified: false,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/22',
+                    number: 22,
+                    isVerified: true,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/23',
+                    number: 23,
+                    isVerified: false,
+                }
             ],
             deployBlockers: [
-                'https://github.com/Expensify/Expensify.cash/issues/1',
-                'https://github.com/Expensify/Expensify.cash/issues/2',
-                'https://github.com/Expensify/Expensify.cash/pull/1234',
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/issues/1',
+                    number: 1,
+                    isResolved: false,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/issues/2',
+                    number: 2,
+                    isResolved: true,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/1234',
+                    number: 1234,
+                    isResolved: false,
+                },
             ],
             comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401',
             labels: [
@@ -88,9 +112,9 @@ describe('GithubUtils', () => {
     describe('getPullRequestNumberFromURL', () => {
         describe('valid pull requests', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/pull/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/pull/346', '346'],
+                ['https://github.com/Expensify/Expensify/pull/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/pull/346', 346],
             ])('getPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getPullRequestNumberFromURL(input)).toBe(expected);
             });
@@ -111,9 +135,9 @@ describe('GithubUtils', () => {
     describe('getIssueNumberFromURL', () => {
         describe('valid issues', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/issues/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/issues/346', '346'],
+                ['https://github.com/Expensify/Expensify/issues/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/issues/346', 346],
             ])('getIssueNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueNumberFromURL(input)).toBe(expected);
             });
@@ -134,12 +158,12 @@ describe('GithubUtils', () => {
     describe('getIssueOrPullRequestNumberFromURL', () => {
         describe('valid issues and pull requests', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/issues/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/issues/346', '346'],
-                ['https://github.com/Expensify/Expensify/pull/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/pull/346', '346'],
+                ['https://github.com/Expensify/Expensify/issues/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/issues/346', 346],
+                ['https://github.com/Expensify/Expensify/pull/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/pull/346', 346],
             ])('getIssueOrPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueOrPullRequestNumberFromURL(input)).toBe(expected);
             });
