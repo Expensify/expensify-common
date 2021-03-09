@@ -109,12 +109,67 @@ describe('GithubUtils', () => {
         });
     });
 
+    describe('updateStagingDeployCash', () => {
+        test('successfully updates issue', () => {
+            const issueBefore = {
+                url: 'https://api.github.com/repos/Expensify/Expensify/issues/29',
+                title: 'Test StagingDeployCash',
+                labels: [
+                    {
+                        id: 2783847782,
+                        node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
+                        url: 'https://api.github.com/repos/Expensify/Expensify/labels/StagingDeployCash',
+                        name: 'StagingDeployCash',
+                        color: '6FC269',
+                        default: false,
+                        description: ''
+                    }
+                ],
+                // eslint-disable-next-line max-len
+                body: '**Release Version:** `1.0.1-472`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1...1.0.1-472\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n',
+            };
+
+            const octokit = new Octokit();
+            octokit.repos.listTags = jest.fn().mockResolvedValue({data: [
+                {name: '1.0.1'},
+                {name: '1.0.1-472'},
+                {name: '1.0.1-473'},
+            ]});
+            octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [issueBefore]});
+            octokit.issues.update = jest.fn().mockImplementation(arg => Promise.resolve(arg));
+            const githubUtils = new GithubUtils(octokit);
+
+            return githubUtils.updateStagingDeployCash(
+                '1.0.1-473',
+                [
+                    'https://github.com/Expensify/Expensify.cash/pull/24',
+                    'https://github.com/Expensify/Expensify.cash/pull/25'
+                ],
+                [
+                    'https://github.com/Expensify/Expensify.cash/issues/3',
+                    'https://github.com/Expensify/Expensify.cash/pull/4321',
+                ],
+            ).then((result) => {
+                expect(result).toStrictEqual({
+                    owner: 'Expensify',
+                    repo: 'Expensify',
+                    issue_number: 29,
+                    // eslint-disable-next-line max-len
+                    body: '**Release Version:** `1.0.1-473`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1...1.0.1-473\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/24\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/25\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/3\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/4321\r\n',
+                });
+            });
+        });
+    });
+
     describe('getPullRequestNumberFromURL', () => {
         describe('valid pull requests', () => {
             test.each([
                 ['https://github.com/Expensify/Expensify/pull/156369', 156369],
                 ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
                 ['https://github.com/Expensify/expensify-common/pull/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/pull/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/pull/346', 346],
             ])('getPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getPullRequestNumberFromURL(input)).toBe(expected);
             });
@@ -138,6 +193,9 @@ describe('GithubUtils', () => {
                 ['https://github.com/Expensify/Expensify/issues/156369', 156369],
                 ['https://github.com/Expensify/Expensify.cash/issues/1644', 1644],
                 ['https://github.com/Expensify/expensify-common/issues/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/issues/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/issues/346', 346],
             ])('getIssueNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueNumberFromURL(input)).toBe(expected);
             });
@@ -164,6 +222,12 @@ describe('GithubUtils', () => {
                 ['https://github.com/Expensify/Expensify/pull/156369', 156369],
                 ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
                 ['https://github.com/Expensify/expensify-common/pull/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/issues/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/issues/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/pull/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/pull/346', 346],
             ])('getIssueOrPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueOrPullRequestNumberFromURL(input)).toBe(expected);
             });
