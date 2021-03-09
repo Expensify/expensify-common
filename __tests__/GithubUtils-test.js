@@ -88,9 +88,12 @@ describe('GithubUtils', () => {
     describe('getPullRequestNumberFromURL', () => {
         describe('valid pull requests', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/pull/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/pull/346', '346'],
+                ['https://github.com/Expensify/Expensify/pull/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/pull/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/pull/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/pull/346', 346],
             ])('getPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getPullRequestNumberFromURL(input)).toBe(expected);
             });
@@ -111,9 +114,12 @@ describe('GithubUtils', () => {
     describe('getIssueNumberFromURL', () => {
         describe('valid issues', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/issues/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/issues/346', '346'],
+                ['https://github.com/Expensify/Expensify/issues/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/issues/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/issues/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/issues/346', 346],
             ])('getIssueNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueNumberFromURL(input)).toBe(expected);
             });
@@ -134,12 +140,18 @@ describe('GithubUtils', () => {
     describe('getIssueOrPullRequestNumberFromURL', () => {
         describe('valid issues and pull requests', () => {
             test.each([
-                ['https://github.com/Expensify/Expensify/issues/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/issues/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/issues/346', '346'],
-                ['https://github.com/Expensify/Expensify/pull/156369', '156369'],
-                ['https://github.com/Expensify/Expensify.cash/pull/1644', '1644'],
-                ['https://github.com/Expensify/expensify-common/pull/346', '346'],
+                ['https://github.com/Expensify/Expensify/issues/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/issues/346', 346],
+                ['https://github.com/Expensify/Expensify/pull/156369', 156369],
+                ['https://github.com/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://github.com/Expensify/expensify-common/pull/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/issues/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/issues/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/issues/346', 346],
+                ['https://api.github.com/repos/Expensify/Expensify/pull/156369', 156369],
+                ['https://api.github.com/repos/Expensify/Expensify.cash/pull/1644', 1644],
+                ['https://api.github.com/repos/Expensify/expensify-common/pull/346', 346],
             ])('getIssueOrPullRequestNumberFromURL("%s")', (input, expected) => {
                 expect(GithubUtils.getIssueOrPullRequestNumberFromURL(input)).toBe(expected);
             });
