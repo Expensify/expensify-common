@@ -1,5 +1,5 @@
 import {Octokit} from '@octokit/rest';
-import GithubUtils from '../lib/GithubUtils';
+import GithubUtils, {EXPENSIFY_ISSUE_REPO, GITHUB_OWNER} from '../lib/GithubUtils';
 
 describe('GithubUtils', () => {
     describe('getStagingDeployCash', () => {
@@ -244,6 +244,36 @@ describe('GithubUtils', () => {
         });
     });
 
+    describe('createNewStagingDeployCash', () => {
+        const octokit = new Octokit();
+        octokit.repos.listTags = jest.fn().mockResolvedValue({data: [{name: '1.0.2'}]});
+        octokit.issues.create = jest.fn().mockImplementation(arg => Promise.resolve(arg));
+        const githubUtils = new GithubUtils(octokit);
+
+        const title = 'Test StagingDeployCash title';
+        const tag = '1.0.2-123';
+        const PRList = [
+            'https://github.com/Expensify/Expensify/pull/2',
+            'https://github.com/Expensify/Expensify/pull/3',
+            'https://github.com/Expensify/Expensify/pull/3',
+            'https://github.com/Expensify/Expensify/pull/1',
+        ];
+
+        test('Issue is successfully created', () => {
+            githubUtils.createNewStagingDeployCash(title, tag, PRList)
+                .then(newIssue => {
+                    expect(newIssue).toStrictEqual({
+                        owner: GITHUB_OWNER,
+                        repo: EXPENSIFY_ISSUE_REPO,
+                        labels: 'StagingDeployCash',
+                        assignee: 'applausebot',
+                        title,
+                        body: `**Release Version:** ${tag}\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-123\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify/pull/1\r\n- [ ] https://github.com/Expensify/Expensify/pull/2\r\n- [ ] https://github.com/Expensify/Expensify/pull/3\r\n`
+                    })
+                })
+        })
+    })
+
     describe('generateStagingDeployCashBody', () => {
         const mockTags = [{name: '1.0.2'}, {name: '1.0.2-123'}];
         const mockGithub = jest.fn(() => ({
@@ -257,7 +287,6 @@ describe('GithubUtils', () => {
         const octokit = mockGithub().getOctokit();
         const githubUtils = new GithubUtils(octokit);
 
-        // TODO: mock octokit w/ tag so comparison URL is consistent.
         const tag = '1.0.2-123';
         const comparisonURL = 'https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-123';
         const basePRList = [
