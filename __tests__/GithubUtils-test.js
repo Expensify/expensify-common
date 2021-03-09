@@ -283,7 +283,7 @@ describe('GithubUtils', () => {
 
     describe('generateVersionComparisonURL', () => {
         const REPO_SLUG = 'test-owner/test-repo';
-        const MOCK_TAGS = [{name: '2.2.2'},{name: '2.2.1'},{name: '2.1.0-1'},{name: '2.1.0'},{name: '2.0.0-1'},{name: '2.0.0'},{name: '1.2.2-2'},{name: '1.2.2-1'},{name: '1.2.2'},{name: '1.2.1'},{name: '1.2.0'},{name: '1.1.0'},{name: '1.0.4'},{name: '1.0.3'},{name: '1.0.2'},{name: '1.0.1'},{name: '1.0.0'},{name: '0.0.1'}];
+        const MOCK_TAGS = [{name: '3.1.0-0'},{name: '3.0.0'},{name: '2.2.2-0'},{name: '2.2.1-0'},{name: '2.1.0-1'},{name: '2.1.0-0'},{name: '2.0.0-1'},{name: '2.0.0-0'},{name: '1.2.2-2'},{name: '1.2.2-1'},{name: '1.2.2-0'},{name: '1.2.1-0'},{name: '1.2.0-0'},{name: '1.1.0-0'},{name: '1.0.4-0'},{name: '1.0.3-1'},{name: '1.0.3'},{name: '1.0.2-0'},{name: '1.0.1-0'},{name: '1.0.0-0'},{name: '0.0.1-0'}];
 
         const mockGithub = jest.fn(() => ({
             getOctokit: () => ({
@@ -297,66 +297,87 @@ describe('GithubUtils', () => {
         const githubUtils = new GithubUtils(octokit);
 
         describe('MAJOR comparison', () => {
-            test('should return a comparison url between 2.2.2 and 1.2.2', () => {
+            test('should return a comparison url between 2.2.2-0 and 1.2.2-2', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2', 'MAJOR').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.2.2...2.2.2')
+                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2-0', 'MAJOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.2.2-2...2.2.2-0')
                     );
 
             });
 
-            test('should return a comparison url between 1.2.0 and 0.0.1', () => {
+            test('should return a comparison url between 1.2.0-0 and 0.0.1-0', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '1.2.0', 'MAJOR').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/0.0.1...1.2.0')
+                    .generateVersionComparisonURL(REPO_SLUG, '1.2.0-0', 'MAJOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/0.0.1-0...1.2.0-0')
+                    );
+            });
+
+            test('should return a comparison url between 3.0.0 and 2.2.2-0', () => {
+                return githubUtils
+                    .generateVersionComparisonURL(REPO_SLUG, '3.0.0', 'MAJOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.2.2-0...3.0.0')
                     );
             });
         });
 
         describe('MINOR comparison', () => {
-            test('should return a comparison url between 2.2.2 and 2.1.0', () => {
+            test('should return a comparison url between 2.2.2-0 and 2.1.0-1', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2', 'MINOR').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.1.0...2.2.2')
+                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2-0', 'MINOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.1.0-1...2.2.2-0')
                     );
             });
 
-            test('should return a comparison url between 1.1.0 and 1.0.4', () => {
+            test('should return a comparison url between 1.1.0-0 and 1.0.4-0', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '1.1.0', 'MINOR').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.0.4...1.1.0')
+                    .generateVersionComparisonURL(REPO_SLUG, '1.1.0-0', 'MINOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.0.4-0...1.1.0-0')
+                    );
+            });
+
+            test('should return a comparison url between 3.1.0-0 and 3.0.0', () => {
+                return githubUtils
+                    .generateVersionComparisonURL(REPO_SLUG, '3.1.0-0', 'MINOR').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/3.0.0...3.1.0-0')
                     );
             });
         });
 
         describe('PATCH comparison', () => {
-            test('should return a comparison url between 2.2.2 and 2.2.1', () => {
+            test('should return a comparison url between 2.2.2-0 and 2.2.1-0', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2', 'PATCH').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.2.1...2.2.2')
+                    .generateVersionComparisonURL(REPO_SLUG, '2.2.2-0', 'PATCH').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.2.1-0...2.2.2-0')
                     );
             });
 
-            test('should return a comparison url between 1.0.0 and 0.0.1', () => {
+            test('should return a comparison url between 1.0.0-0 and 0.0.1-0', () => {
                 return githubUtils
-                    .generateVersionComparisonURL(REPO_SLUG, '1.0.0', 'PATCH').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/0.0.1...1.0.0')
+                    .generateVersionComparisonURL(REPO_SLUG, '1.0.0-0', 'PATCH').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/0.0.1-0...1.0.0-0')
                     );
             });
         });
 
         describe('BUILD comparison', () => {
-            test('should return a comparison url between 2.1.0-1 and 2.1.0', () => {
+            test('should return a comparison url between 2.1.0-1 and 2.1.0-0', () => {
                 return githubUtils
                     .generateVersionComparisonURL(REPO_SLUG, '2.1.0-1', 'BUILD').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.1.0...2.1.0-1')
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/2.1.0-0...2.1.0-1')
                     );
             });
 
-            test('should return a comparison url between 1.2.2-2 and 1.2.2', () => {
+            test('should return a comparison url between 1.2.2-2 and 1.2.2-1', () => {
                 return githubUtils
                     .generateVersionComparisonURL(REPO_SLUG, '1.2.2-2', 'BUILD').then((url) =>
-                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.2.2...1.2.2-2')
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.2.2-1...1.2.2-2')
+                    );
+            });
+
+            test('should return a comparison url between 1.0.3-1 and 1.0.3', () => {
+                return githubUtils
+                    .generateVersionComparisonURL(REPO_SLUG, '1.0.3-1', 'BUILD').then((url) =>
+                        expect(url).toBe('https://github.com/Expensify/Expensify.cash/compare/1.0.3...1.0.3-1')
                     );
             });
         });
