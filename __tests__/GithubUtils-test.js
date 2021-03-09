@@ -283,7 +283,29 @@ describe('GithubUtils', () => {
 
     describe('generateVersionComparisonURL', () => {
         const REPO_SLUG = 'test-owner/test-repo';
-        const MOCK_TAGS = [{name: '3.1.0-0'},{name: '3.0.0'},{name: '2.2.2-0'},{name: '2.2.1-0'},{name: '2.1.0-1'},{name: '2.1.0-0'},{name: '2.0.0-1'},{name: '2.0.0-0'},{name: '1.2.2-2'},{name: '1.2.2-1'},{name: '1.2.2-0'},{name: '1.2.1-0'},{name: '1.2.0-0'},{name: '1.1.0-0'},{name: '1.0.4-0'},{name: '1.0.3-1'},{name: '1.0.3'},{name: '1.0.2-0'},{name: '1.0.1-0'},{name: '1.0.0-0'},{name: '0.0.1-0'}];
+        const MOCK_TAGS = [
+            {name: '3.1.0-0'},
+            {name: '3.0.0'},
+            {name: '2.2.2-0'},
+            {name: '2.2.1-0'},
+            {name: '2.1.0-1'},
+            {name: '2.1.0-0'},
+            {name: '2.0.0-1'},
+            {name: '2.0.0-0'},
+            {name: '1.2.2-2'},
+            {name: '1.2.2-1'},
+            {name: '1.2.2-0'},
+            {name: '1.2.1-0'},
+            {name: '1.2.0-0'},
+            {name: '1.1.0-0'},
+            {name: '1.0.4-0'},
+            {name: '1.0.3-1'},
+            {name: '1.0.3'},
+            {name: '1.0.2-0'},
+            {name: '1.0.1-0'},
+            {name: '1.0.0-0'},
+            {name: '0.0.1-0'}
+        ];
 
         const mockGithub = jest.fn(() => ({
             getOctokit: () => ({
