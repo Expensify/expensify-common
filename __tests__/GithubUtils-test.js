@@ -18,21 +18,45 @@ describe('GithubUtils', () => {
                 }
             ],
             // eslint-disable-next-line max-len
-            body: '**Release Version:** `1.0.1-472`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n',
+            body: '**Release Version:** `1.0.1-47`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1-0...1.0.1-47\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n',
         };
 
         const expectedResponse = {
             PRList: [
-                'https://github.com/Expensify/Expensify.cash/pull/21',
-                'https://github.com/Expensify/Expensify.cash/pull/22',
-                'https://github.com/Expensify/Expensify.cash/pull/23'
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/21',
+                    number: 21,
+                    isVerified: false,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/22',
+                    number: 22,
+                    isVerified: true,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/23',
+                    number: 23,
+                    isVerified: false,
+                }
             ],
             deployBlockers: [
-                'https://github.com/Expensify/Expensify.cash/issues/1',
-                'https://github.com/Expensify/Expensify.cash/issues/2',
-                'https://github.com/Expensify/Expensify.cash/pull/1234',
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/issues/1',
+                    number: 1,
+                    isResolved: false,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/issues/2',
+                    number: 2,
+                    isResolved: true,
+                },
+                {
+                    url: 'https://github.com/Expensify/Expensify.cash/pull/1234',
+                    number: 1234,
+                    isResolved: false,
+                },
             ],
-            comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-400...1.0.1-401',
+            comparisonURL: 'https://github.com/Expensify/Expensify.cash/compare/1.0.1-0...1.0.1-47',
             labels: [
                 {
                     color: '6FC269',
@@ -44,7 +68,7 @@ describe('GithubUtils', () => {
                     url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/labels/StagingDeployCash'
                 }
             ],
-            tag: '1.0.1-472',
+            tag: '1.0.1-47',
             title: 'Andrew Test Issue',
             url: 'https://api.github.com/repos/Andrew-Test-Org/Public-Test-Repo/issues/29'
         };
@@ -82,6 +106,58 @@ describe('GithubUtils', () => {
             octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: []});
             return github.getStagingDeployCash()
                 .catch(e => expect(e).toEqual(new Error('Unable to find StagingDeployCash issue.')));
+        });
+    });
+
+    describe('updateStagingDeployCash', () => {
+        test('successfully updates issue', () => {
+            const issueBefore = {
+                url: 'https://api.github.com/repos/Expensify/Expensify/issues/29',
+                title: 'Test StagingDeployCash',
+                labels: [
+                    {
+                        id: 2783847782,
+                        node_id: 'MDU6TGFiZWwyNzgzODQ3Nzgy',
+                        url: 'https://api.github.com/repos/Expensify/Expensify/labels/StagingDeployCash',
+                        name: 'StagingDeployCash',
+                        color: '6FC269',
+                        default: false,
+                        description: ''
+                    }
+                ],
+                // eslint-disable-next-line max-len
+                body: '**Release Version:** `1.0.1-47`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1...1.0.1-47\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n',
+            };
+
+            const octokit = new Octokit();
+            octokit.repos.listTags = jest.fn().mockResolvedValue({data: [
+                {name: '1.0.1-0'},
+                {name: '1.0.1-47'},
+                {name: '1.0.1-48'},
+            ]});
+            octokit.issues.listForRepo = jest.fn().mockResolvedValue({data: [issueBefore]});
+            octokit.issues.update = jest.fn().mockImplementation(arg => Promise.resolve(arg));
+            const githubUtils = new GithubUtils(octokit);
+
+            return githubUtils.updateStagingDeployCash(
+                '1.0.1-48',
+                [
+                    'https://github.com/Expensify/Expensify.cash/pull/24',
+                    'https://github.com/Expensify/Expensify.cash/pull/25'
+                ],
+                [
+                    'https://github.com/Expensify/Expensify.cash/issues/3',
+                    'https://github.com/Expensify/Expensify.cash/pull/4321',
+                ],
+            ).then((result) => {
+                expect(result).toStrictEqual({
+                    owner: 'Expensify',
+                    repo: 'Expensify',
+                    issue_number: 29,
+                    // eslint-disable-next-line max-len
+                    body: '**Release Version:** `1.0.1-48`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.1-0...1.0.1-48\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/21\r\n- [x] https://github.com/Expensify/Expensify.cash/pull/22\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/23\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/24\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/25\r\n\r\n**Deploy Blockers:**\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/1\r\n- [x] https://github.com/Expensify/Expensify.cash/issues/2\r\n- [ ] https://github.com/Expensify/Expensify.cash/issues/3\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/1234\r\n- [ ] https://github.com/Expensify/Expensify.cash/pull/4321\r\n',
+                });
+            });
         });
     });
 
@@ -175,7 +251,7 @@ describe('GithubUtils', () => {
         const githubUtils = new GithubUtils(octokit);
 
         const title = 'Test StagingDeployCash title';
-        const tag = '1.0.2-123';
+        const tag = '1.0.2-12';
         const PRList = [
             'https://github.com/Expensify/Expensify/pull/2',
             'https://github.com/Expensify/Expensify/pull/3',
@@ -192,14 +268,14 @@ describe('GithubUtils', () => {
                         labels: 'StagingDeployCash',
                         assignee: 'applausebot',
                         title,
-                        body: `**Release Version:** ${tag}\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-123\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify/pull/1\r\n- [ ] https://github.com/Expensify/Expensify/pull/2\r\n- [ ] https://github.com/Expensify/Expensify/pull/3\r\n`
+                        body: `**Release Version:** \`${tag}\`\r\n**Compare Changes:** https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-12\r\n**This release contains changes from the following pull requests:**\r\n- [ ] https://github.com/Expensify/Expensify/pull/1\r\n- [ ] https://github.com/Expensify/Expensify/pull/2\r\n- [ ] https://github.com/Expensify/Expensify/pull/3\r\n`
                     })
                 })
         })
     })
 
     describe('generateStagingDeployCashBody', () => {
-        const mockTags = [{name: '1.0.2'}, {name: '1.0.2-123'}];
+        const mockTags = [{name: '1.0.2'}, {name: '1.0.2-12'}];
         const mockGithub = jest.fn(() => ({
             getOctokit: () => ({
                 repos: {
@@ -211,8 +287,8 @@ describe('GithubUtils', () => {
         const octokit = mockGithub().getOctokit();
         const githubUtils = new GithubUtils(octokit);
 
-        const tag = '1.0.2-123';
-        const comparisonURL = 'https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-123';
+        const tag = '1.0.2-12';
+        const comparisonURL = 'https://github.com/Expensify/Expensify.cash/compare/1.0.2...1.0.2-12';
         const basePRList = [
             'https://github.com/Expensify/Expensify/pull/2',
             'https://github.com/Expensify/Expensify/pull/3',
@@ -226,7 +302,7 @@ describe('GithubUtils', () => {
         ];
 
         // eslint-disable-next-line max-len
-        const baseExpectedOutput = `**Release Version:** ${tag}\r\n**Compare Changes:** ${comparisonURL}\r\n**This release contains changes from the following pull requests:**\r\n`;
+        const baseExpectedOutput = `**Release Version:** \`${tag}\`\r\n**Compare Changes:** ${comparisonURL}\r\n**This release contains changes from the following pull requests:**\r\n`;
         const openCheckbox = '- [ ]';
         const closedCheckbox = '- [x]';
 
