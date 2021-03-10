@@ -11,7 +11,7 @@
     "test": "jest",
     "lint": "eslint lib/",
     "patch": "npm --no-git-tag-version version patch",
-    "update-tlds": "curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
+    "update-tlds": "echo \"$(curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- )|SJC|RNO|LAX\" | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
   },
   "repository": {
     "type": "git",
@@ -26,17 +26,19 @@
     "prop-types": "15.7.2",
     "react": "16.12.0",
     "react-dom": "16.12.0",
+    "semver": "^7.3.4",
     "simply-deferred": "git+https://github.com/Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
     "underscore": "1.9.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.0.0",
     "babel-jest": "^26.3.0",
     "eslint-config-expensify": "2.0.7",
+    "eslint-plugin-jest": "^24.1.5",
     "grunt": "*",
-    "grunt-eslint": "22.0.0",
     "grunt-chokidar": "1.0.2",
     "babelify": "10.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "grunt-eslint": "22.0.0",
     "jest": "^26.4.2",
     "jit-grunt": "^0.10.0"
   },
