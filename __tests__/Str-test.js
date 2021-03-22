@@ -31,3 +31,14 @@ describe('Str.isPDF', () => {
         expect(Str.isPDF(buildTestURLForType('PDF'))).toBeTruthy();
     });
 });
+
+describe('Str.isValidURL', () => {
+    it('Correctly identifies valid urls', () => {
+        expect(Str.isValidURL('http://expensify.com')).toBeTruthy();
+        expect(Str.isValidURL('https://www.expensify.com/')).toBeTruthy();
+        expect(Str.isValidURL('expensify.com ')).toBeFalsy();
+        expect(Str.isValidURL(' expensify.com')).toBeFalsy();
+        expect(Str.isValidURL('expensify .com')).toBeFalsy();
+        expect(Str.isValidURL('test')).toBeFalsy();
+    });
+});
