@@ -841,6 +841,7 @@ export const PUBLIC_DOMAINS = [
     'outlook.com',
     'privaterelay.appleid.com',
     'qq.com',
+    'sasktel.net',
     'sbcglobal.net',
     'verizon.net',
     'yahoo.ca',
