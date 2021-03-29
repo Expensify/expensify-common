@@ -51,7 +51,8 @@ test('Test critical markdown style links', () => {
     + '[second no http://](necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled) '
     + '[third](https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash) '
     + '[third no https://](github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash) '
-    + '[link `[inside another link](https://google.com)`](https://google.com)';
+    + '[link `[inside another link](https://google.com)`](https://google.com) '
+    + '[link with an @ in it](https://google.com)';
     const resultString = 'Testing '
     + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first</a> '
     + '<a href="http://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first no https://</a> '
@@ -59,7 +60,8 @@ test('Test critical markdown style links', () => {
     + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">second no http://</a> '
     + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third</a> '
     + '<a href="http://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third no https://</a> '
-    + '<a href="https://google.com" target="_blank">link <code>[inside another link](https://google.com)</code></a>';
+    + '<a href="https://google.com" target="_blank">link <code>[inside another link](https://google.com)</code></a> '
+    + '<a href="https://google.com" target="_blank">link with an @ in it</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -101,6 +103,16 @@ test('Test inline code blocks', () => {
 test('Test inline code blocks with ExpensiMark syntax inside', () => {
     const inlineCodeStartString = '`This is how you can write ~strikethrough~, *bold*, and _italics_`';
     expect(parser.replace(inlineCodeStartString)).toBe('<code>This is how you can write ~strikethrough~, *bold*, and _italics_</code>');
+});
+
+test('Test inline code blocks inside ExpensiMark', () => {
+   const testString = '_`test`_'
+   + '*`test`*'
+   + '~`test`~';
+   const resultString = '<em><code>test</code></em>'
+   + '<strong><code>test</code></strong>'
+   + '<del><code>test</code></del>';
+   expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
