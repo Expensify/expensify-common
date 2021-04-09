@@ -189,7 +189,7 @@ test('Test url replacements', () => {
         + '<a href="http://testRareTLDs.beer" target="_blank">testRareTLDs.beer</a> '
         + '<a href="mailto:test@expensify.com">test@expensify.com</a> '
         + 'test.completelyFakeTLD '
-        + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878)" target="_blank">https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878)</a> '
+        + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878</a>) '
         + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a> '
         + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
         + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
@@ -287,10 +287,18 @@ test('Test general email link with various styles', () => {
 test('Test link with brackets', () => {
     const testString = '[google](http://google.com/(something)?after=parens) '
         + '([google](http://google.com/(something)?after=parens)) '
-        + '([google](https://google.com/)) ';
+        + '([google](https://google.com/)) '
+        + '([google](http://google.com/(something)?after=parens)))) '
+        + '(http://foo.com/(something)?after=parens) '
+        + '(((http://foo.com/(something)?after=parens))) '
+        + 'http://foo.com/(something)?after=parens))) ';
 
     const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
     + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
-    + '(<a href="https://google.com/" target="_blank">google</a>) ';
+    + '(<a href="https://google.com/" target="_blank">google</a>) '
+    + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>))) '
+    + '(<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>) '
+    + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
+    + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
     expect(parser.replace(testString)).toBe(resultString);
 });
