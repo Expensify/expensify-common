@@ -283,3 +283,14 @@ test('Test general email link with various styles', () => {
 
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test link with brackets', () => {
+    const testString = '[google](http://google.com/(something)?after=parens) '
+        + '([google](http://google.com/(something)?after=parens)) '
+        + '([google](https://google.com/)) ';
+
+    const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
+    + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
+    + '(<a href="https://google.com/" target="_blank">google</a>) ';
+    expect(parser.replace(testString)).toBe(resultString);
+});
