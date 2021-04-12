@@ -296,13 +296,14 @@ test('Test link with brackets', () => {
         + 'http://foo.com/(something)?after=parens))) ';
 
     const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
-    + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
-    + '(<a href="https://google.com/" target="_blank">google</a>) '
-    + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>))) '
-    + '(((<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
-    + '(<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>) '
-    + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
-    + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
-    + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
+        + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
+        + '(<a href="https://google.com/" target="_blank">google</a>) '
+        + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>))) '
+        + '(((<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
+        + '(<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>) '
+        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
+        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
+        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
+    
     expect(parser.replace(testString)).toBe(resultString);
 });
