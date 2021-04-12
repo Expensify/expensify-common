@@ -284,7 +284,7 @@ test('Test general email link with various styles', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test link with brackets', () => {
+test('Test markdown and url links with inconsistent starting and closing parens', () => {
     const testString = '[google](http://google.com/(something)?after=parens) '
         + '([google](http://google.com/(something)?after=parens)) '
         + '([google](https://google.com/)) '
@@ -304,6 +304,6 @@ test('Test link with brackets', () => {
         + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
         + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
         + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
-    
+
     expect(parser.replace(testString)).toBe(resultString);
 });
