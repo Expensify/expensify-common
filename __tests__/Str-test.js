@@ -42,3 +42,12 @@ describe('Str.isValidURL', () => {
         expect(Str.isValidURL('test')).toBeFalsy();
     });
 });
+
+describe('Str.stripHTML', () => {
+    it('Correctly strips HTML/XML tags', () => {
+        expect(Str.stripHTML('<strong>hello</strong>')).toBe('hello');
+        expect(Str.stripHTML('<img onerror=\'alert("could run arbitrary JS here")\' src=bogus>')).toBe('');
+        expect(Str.stripHTML('hello')).toBe('hello');
+        expect(Str.stripHTML(0)).toBe('');
+    });
+});
