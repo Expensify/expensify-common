@@ -817,6 +817,7 @@ export const PUBLIC_DOMAINS = [
     'bellsouth.net',
     'bills.expensify.com',
     'btinternet.com',
+    'cheerful.com',
     'chromeexpensify.com',
     'comcast.net',
     'cox.net',
