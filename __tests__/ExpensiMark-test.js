@@ -53,7 +53,9 @@ test('Test critical markdown style links', () => {
     + '[third no https://](github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash) '
     + '[link `[inside another link](https://google.com)`](https://google.com) '
     + '[link with an @ in it](https://google.com) '
-    + '[link with [brackets] inside of it](https://google.com)';
+    + '[link with [brackets] inside of it](https://google.com) '
+    + '[link with smart quotes ‘’“”](https://google.com) '
+    + '[link with someone@expensify.com email in it](https://google.com)';
     const resultString = 'Testing '
     + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first</a> '
     + '<a href="http://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first no https://</a> '
@@ -63,7 +65,9 @@ test('Test critical markdown style links', () => {
     + '<a href="http://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third no https://</a> '
     + '<a href="https://google.com" target="_blank">link <code>[inside another link](https://google.com)</code></a> '
     + '<a href="https://google.com" target="_blank">link with an @ in it</a> '
-    + '<a href="https://google.com" target="_blank">link with [brackets] inside of it</a>';
+    + '<a href="https://google.com" target="_blank">link with [brackets] inside of it</a> '
+    + '<a href="https://google.com" target="_blank">link with smart quotes ‘’“”</a> '
+    + '<a href="https://google.com" target="_blank">link with someone@expensify.com email in it</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
