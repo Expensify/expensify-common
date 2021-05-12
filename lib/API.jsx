@@ -328,6 +328,21 @@ export default function API(network, args) {
         },
 
         /**
+         * Initiate a screen share request with a user.
+         *
+         * @param {Object} parameters
+         * @param {Number} parameters.accountID
+         * @param {String} parameters.CallSid The external ID of the phone call that both parties using screen share are
+         * on
+         * @returns {APIDeferred}
+         */
+        Inbox_Start_ScreenShare(parameters) {
+            const commandName = 'Inbox_Start_ScreenShare';
+            requireParameters(['accountID', 'CallSid'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.password
