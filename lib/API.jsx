@@ -330,9 +330,10 @@ export default function API(network, args) {
         /**
          * Initiate a screen share request with a user.
          *
-         * @param {object} parameters
+         * @param {Object} parameters
          * @param {Number} parameters.accountID
-         * @param {string} parameters.CallSid
+         * @param {String} parameters.CallSid The external ID of the phone call that both parties using screen share are
+         * on
          * @returns {APIDeferred}
          */
         Inbox_Start_ScreenShare(parameters) {
