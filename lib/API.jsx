@@ -328,6 +328,20 @@ export default function API(network, args) {
         },
 
         /**
+         * Initiate a screen share request with a user.
+         *
+         * @param {object} parameters
+         * @param {Number} parameters.accountID
+         * @param {string} parameters.CallSid
+         * @returns {APIDeferred}
+         */
+        Inbox_Start_ScreenShare(parameters) {
+            const commandName = 'Inbox_Start_ScreenShare';
+            requireParameters(['accountID', 'CallSid'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * @param {Object} parameters
          * @param {String} parameters.email
          * @param {String} parameters.password
