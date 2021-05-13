@@ -821,6 +821,7 @@ export const PUBLIC_DOMAINS = [
     'chromeexpensify.com',
     'comcast.net',
     'cox.net',
+    'claconnect.com',
     'cpa.com',
     'evernote.user',
     'expensify.cash',
