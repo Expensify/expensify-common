@@ -359,3 +359,9 @@ test('Test HTML string with seperate closing tags (<br><br/>) to markdown ', () 
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Test HTML string with seperate closing tags (<br></br>) to markdown ', () => {
+    const testString = 'Hello<br>World,<br></br>Welcome<br/>To<br/>Expensify';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
