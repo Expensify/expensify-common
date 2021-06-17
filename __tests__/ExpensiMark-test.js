@@ -338,3 +338,30 @@ test('Test markdown and url links with inconsistent starting and closing parens'
 
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test HTML string with <br/> tags to markdown ', () => {
+    const testString = 'Hello<br/>World,<br/>Welcome<br/>To<br/>Expensify';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test HTML string with inconsistent <br/> closing tags to markdown ', () => {
+    const testString = 'Hello<br>World,<br/>Welcome<br>To<br/>Expensify';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test HTML string with seperate closing tags (<br><br/>) to markdown ', () => {
+    const testString = 'Hello<br>World,<br><br/>Welcome<br/>To<br/>Expensify';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test HTML string with seperate closing tags (<br></br>) to markdown ', () => {
+    const testString = 'Hello<br>World,<br></br>Welcome<br/>To<br/>Expensify';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
