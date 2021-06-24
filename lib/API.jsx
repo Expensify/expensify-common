@@ -696,6 +696,35 @@ export default function API(network, args) {
                 requireParameters(['chatID', 'details'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
+
+            /**
+             * Get the lounge details for a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatID
+             *
+             * @returns {APIDeferred}
+             */
+             getUserLoungeDetails(parameters) {
+                const commandName = 'GetLoungeDetails';
+                requireParameters(['chatID'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Set the lounge details for a user
+             *
+             * @param {Object} parameters
+             * @param {String} parameters.chatID
+             * @param {String} parameters.details
+             *
+             * @returns {APIDeferred}
+             */
+             setUserLoungeDetails(parameters) {
+                const commandName = 'SetLoungeDetails';
+                requireParameters(['chatID', 'details'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
         },
 
         card: {
