@@ -6,9 +6,9 @@ const parser = new ExpensiMark();
 // Words wrapped in * successfully replaced with <strong></strong>
 test('Test bold markdown replacement', () => {
     const boldTestStartString = 'This is a *sentence,* and it has some *punctuation, words, and spaces*. '
-        + '*test* * testing* test*test*test.';
+        + '*test* * testing* test*test*test. * testing * *testing *';
     const boldTestReplacedString = 'This is a <strong>sentence,</strong> and it has some <strong>punctuation, words, and spaces</strong>. '
-        + '<strong>test</strong> <strong> testing</strong> test*test*test.';
+        + '<strong>test</strong> * testing* test*test*test. * testing * *testing *';
 
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
@@ -23,15 +23,15 @@ test('Test quote markdown replacement', () => {
 
 // Words wrapped in _ successfully replaced with <em></em>
 test('Test italic markdown replacement', () => {
-    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. _test_ _ testing_ test_test_test.';
-    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> <em> testing</em> test_test_test.';
+    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. _test_ _ testing_ test_test_test. _ test _ _test _';
+    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _';
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
 // Words wrapped in ~ successfully replaced with <del></del>
 test('Test strikethrough markdown replacement', () => {
-    const strikethroughTestStartString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test.';
-    const strikethroughTestReplacedString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> <del> testing</del> test~test~test.';
+    const strikethroughTestStartString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
+    const strikethroughTestReplacedString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.replace(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
 });
 
