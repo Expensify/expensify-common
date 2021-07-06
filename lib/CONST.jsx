@@ -466,7 +466,7 @@ export const CONST = {
      * Any changes here should be reflected in the PHP constant,
      * which is located in _constant.php and also named EXPENSIFY_EMAILS
      */
-    EXPENSIFY_EMAILS: ['concierge@expensify.com', 'help@expensify.com', 'receipts@expensify.com', 'chronos@expensify.com'],
+    EXPENSIFY_EMAILS: ['concierge@expensify.com', 'help@expensify.com', 'receipts@expensify.com', 'chronos@expensify.com', 'qa@expensify.com', 'contributors@expensify.com', 'firstresponders@expensify.com', 'qa+travisreceipts@expensify.com'],
 
     /**
      * Smart scan-related constants
