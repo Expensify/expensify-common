@@ -290,13 +290,15 @@ test('Test markdown style email link with various styles', () => {
         + '_[Expensify](concierge@expensify.com)_ '
         + '*[Expensify](concierge@expensify.com)* '
         + '[Expensify!](no-concierge1@expensify.com) '
-        + '[Expensify?](concierge?@expensify.com) ';
+        + '[Expensify?](concierge?@expensify.com) '
+        + '[Applause](applausetester+qaabecciv@applause.expensifail.com) ';
 
     const resultString = 'Go to <del><a href="mailto:concierge@expensify.com">Expensify</a></del> '
         + '<em><a href="mailto:concierge@expensify.com">Expensify</a></em> '
         + '<strong><a href="mailto:concierge@expensify.com">Expensify</a></strong> '
         + '<a href="mailto:no-concierge1@expensify.com">Expensify!</a> '
-        + '<a href="mailto:concierge?@expensify.com">Expensify?</a> ';
+        + '<a href="mailto:concierge?@expensify.com">Expensify?</a> '
+        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> ';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -305,12 +307,14 @@ test('Test general email link with various styles', () => {
     const testString = 'Go to concierge@expensify.com '
         + 'no-concierge@expensify.com '
         + 'concierge!@expensify.com '
-        + 'concierge1?@expensify.com ';
+        + 'concierge1?@expensify.com '
+        + 'applausetester+qaabecciv@applause.expensifail.com ';
 
     const resultString = 'Go to <a href="mailto:concierge@expensify.com">concierge@expensify.com</a> '
         + '<a href="mailto:no-concierge@expensify.com">no-concierge@expensify.com</a> '
         + '<a href="mailto:concierge!@expensify.com">concierge!@expensify.com</a> '
-        + '<a href="mailto:concierge1?@expensify.com">concierge1?@expensify.com</a> ';
+        + '<a href="mailto:concierge1?@expensify.com">concierge1?@expensify.com</a> '
+        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">applausetester+qaabecciv@applause.expensifail.com</a> ';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
