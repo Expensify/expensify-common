@@ -130,13 +130,13 @@ test('Test inline code blocks with ExpensiMark syntax inside', () => {
 });
 
 test('Test inline code blocks inside ExpensiMark', () => {
-   const testString = '_`test`_'
+    const testString = '_`test`_'
    + '*`test`*'
    + '~`test`~';
-   const resultString = '<em><code>test</code></em>'
+    const resultString = '<em><code>test</code></em>'
    + '<strong><code>test</code></strong>'
    + '<del><code>test</code></del>';
-   expect(parser.replace(testString)).toBe(resultString);
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
@@ -341,33 +341,6 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
 
     expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test HTML string with <br/> tags to markdown ', () => {
-    const testString = 'Hello<br/>World,<br/>Welcome<br/>To<br/>Expensify';
-    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
-
-    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
-});
-
-test('Test HTML string with inconsistent <br/> closing tags to markdown ', () => {
-    const testString = 'Hello<br>World,<br/>Welcome<br>To<br/>Expensify';
-    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
-
-    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
-});
-
-test('Test HTML string with seperate closing tags (<br><br/>) to markdown ', () => {
-    const testString = 'Hello<br>World,<br><br/>Welcome<br/>To<br/>Expensify';
-    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
-
-    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
-});
-
-test('Test HTML string with seperate closing tags (<br></br>) to markdown ', () => {
-    const testString = 'Hello<br>World,<br></br>Welcome<br/>To<br/>Expensify';
-    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
-    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
