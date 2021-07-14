@@ -38,8 +38,8 @@ test('Test Mixed HTML strings', () => {
 });
 
 test('Test HTML string with <br/> tags to markdown ', () => {
-    const testString = 'Hello<br/>World,<br/>Welcome<br/>To<br/>Expensify';
-    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify';
+    const testString = 'Hello<br/>World,<br/>Welcome<br/>To<br/>\nExpensify<br/>\n\nTwo new lines preceded by br';
+    const resultString = 'Hello\nWorld,\nWelcome\nTo\nExpensify\n\nTwo new lines preceded by br';
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
