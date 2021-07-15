@@ -59,8 +59,8 @@ test('Test HTML string with seperate closing tags (<br><br/>) to markdown ', () 
 });
 
 test('Test HTML string with attributes', () => {
-    const testString = '<em style="color:red;">This is</em> a <button disabled>test</button>. None of <strong data-link=\'bad\'>these strings</strong>.';
-    const resultString = '_This is_ a test. None of *these strings*.';
+    const testString = '<em style="color:red;">This is</em><br style="border-color:red;"> a <button disabled>test</button>. None of <strong data-link=\'bad\'>these strings</strong>.';
+    const resultString = '_This is_\n a test. None of *these strings*.';
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
