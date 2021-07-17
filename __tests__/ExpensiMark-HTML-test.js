@@ -374,3 +374,9 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Single char matching', () => {
+    const testString = ' *1* char _1_ char ~1~ char';
+    const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
+    expect(parser.replace(testString)).toBe(resultString);
+});
