@@ -9,42 +9,53 @@ const Log = new Logger({
 });
 
 test('Test Log.info()', () => {
-    Log.info('Test', true);
+    Log.info('Test1', true);
+    Log.info('Test2', true);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        parameters: {},
         api_setCookie: false,
-        message: '[info] Test',
+        logPacket: [
+            {parameters: {}, message: '[info] Test1'},
+            {parameters: {}, message: '[info] Test2'},
+        ],
     });
 });
 
 test('Test Log.alert()', () => {
-    Log.alert('Test', 0, {}, false);
+    Log.alert('Test1', true);
+    Log.alert('Test2', {}, false);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        parameters: {},
         api_setCookie: false,
-        message: '[alrt] Test',
+        logPacket: [
+            {parameters: {}, message: '[alrt] Test1'},
+            {parameters: {}, message: '[alrt] Test2'},
+        ],
     });
 });
 
 test('Test Log.warn()', () => {
-    Log.warn('Test', 0);
+    Log.warn('Test1', true);
+    Log.warn('Test2');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        parameters: {},
         api_setCookie: false,
-        message: '[warn] Test',
+        logPacket: [
+            {parameters: {}, message: '[warn] Test1'},
+            {parameters: {}, message: '[warn] Test2'},
+        ],
     });
 });
 
 test('Test Log.hmmm()', () => {
-    Log.hmmm('Test', 0);
+    Log.hmmm('Test');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        parameters: {},
         api_setCookie: false,
-        message: '[hmmm] Test',
+        logPacket: [
+            {parameters: {}, message: '[hmmm] Test1'},
+            {parameters: {}, message: '[hmmm] Test2'},
+        ],
     });
 });
 
