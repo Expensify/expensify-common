@@ -82,7 +82,7 @@ export default class Logger {
      * @param {Boolean} sendNow if true, the message will be sent right away.
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    info(message, sendNow, parameters) {
+    info(message, sendNow = false, parameters= '') {
         if (sendNow) {
             const msg = `[info] ${message}`;
             this.logToServer(msg, 0, parameters);
@@ -99,7 +99,7 @@ export default class Logger {
      * @param {Object|String} parameters The parameters to send along with the message
      * @param {Boolean} includeStackTrace Must be disabled for testing
      */
-    alert(message, recentMessages, parameters = {}, includeStackTrace = true) {
+    alert(message, recentMessages = 0, parameters = {}, includeStackTrace = true) {
         const msg = `[alrt] ${message}`;
         const params = parameters;
 
@@ -118,7 +118,7 @@ export default class Logger {
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    warn(message, recentMessages, parameters) {
+    warn(message, recentMessages = 0, parameters = '') {
         const msg = `[warn] ${message}`;
         this.logToServer(msg, recentMessages, parameters);
         this.add(msg, parameters);
@@ -131,7 +131,7 @@ export default class Logger {
      * @param {Number} recentMessages A number of recent messages to append as context
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    hmmm(message, recentMessages, parameters) {
+    hmmm(message, recentMessages = 0, parameters= '') {
         const msg = `[hmmm] ${message}`;
         this.logToServer(msg, recentMessages, parameters);
         this.add(msg, parameters);
