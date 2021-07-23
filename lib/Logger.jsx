@@ -23,8 +23,8 @@ export default class Logger {
     * Ask the server to write the log message
     */
     logToServer() {
-        // Since we will always have the previous requestID log line, we want to skip sending logs if that's the only line
-        if (this.logLines.length <= 1) {
+        // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=false
+        if (!_.any(this.logLines, l => !l.onlyFlushWithOthers)) {
             return;
         }
 
@@ -36,7 +36,7 @@ export default class Logger {
         }
         promise.then((response) => {
             if (response.requestID) {
-                this.add('Previous log requestID', {requestID: response.requestID}, false);
+                this.info('Previous log requestID', false, {requestID: response.requestID}, true);
             }
         });
     }
@@ -46,11 +46,13 @@ export default class Logger {
      * @param {String} message
      * @param {Object|String} parameters The parameters associated with the message
      * @param {Boolean} forceFlushToServer Should we force flushing all logs to server?
+     * @param {Boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    add(message, parameters, forceFlushToServer) {
+    add(message, parameters, forceFlushToServer, onlyFlushWithOthers = false) {
         const length = this.logLines.push({
             message,
             parameters,
+            onlyFlushWithOthers,
             timestamp: (new Date())
         });
 
@@ -71,10 +73,11 @@ export default class Logger {
      * @param {String} message The message to log.
      * @param {Boolean} sendNow if true, the message will be sent right away.
      * @param {Object|String} parameters The parameters to send along with the message
+     * @param {Boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    info(message, sendNow = false, parameters= '') {
+    info(message, sendNow = false, parameters= '', onlyFlushWithOthers = false) {
         const msg = `[info] ${message}`;
-        this.add(msg, parameters, sendNow);
+        this.add(msg, parameters, sendNow, onlyFlushWithOthers);
     }
 
     /**
