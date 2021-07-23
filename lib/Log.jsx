@@ -9,9 +9,10 @@ import Logger from './Logger';
  * @param {Object} params
  * @param {Object} params.parameters
  * @param {String} params.message
+ * @return {Promise}
  */
 function serverLoggingCallback(params) {
-    API(Network('/api.php')).logToServer(params);
+    return API(Network('/api.php')).logToServer(params);
 }
 
 /**

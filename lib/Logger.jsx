@@ -1,8 +1,8 @@
 import _ from 'underscore';
 
+const TEMP_LOG_LINES_TO_KEEP = 50;
 export default class Logger {
     constructor({serverLoggingCallback, isDebug, clientLoggingCallback}) {
-        this.TEMP_LOG_LINES_TO_KEEP = 50;
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
         this.logLines = [];
         this.serverLoggingCallback = serverLoggingCallback;
@@ -26,52 +26,41 @@ export default class Logger {
     * @param {Number} recentMessages A number of recent messages to append as context
     * @param {Object|String} parameters The parameters to send along with the message
     */
-    logToServer(message, recentMessages, parameters = {}) {
-        // Optionally append recent log lines as context
-        let msg = message;
-        if (recentMessages > 0) {
-            msg += ' | Context:  ';
-            msg += JSON.stringify(this.get(recentMessages));
-        }
-
-        // Output the message to the console too.
-        if (this.isDebug) {
-            this.client(`${msg} - ${JSON.stringify(parameters)}`);
-        }
-
+    logToServer() {
         // We don't care about log setting web cookies so let's define it as false
-        const params = {parameters, message, api_setCookie: false};
-        this.serverLoggingCallback(params);
+        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(this.logLines)});
+        if (!promise) {
+            return;
+        }
+        promise.then((response) => {
+            if (response.requestID) {
+                this.add('Previous log requestID', {requestID: response.requestID}, false);
+            }
+        });
     }
 
     /**
      * Add a message to the list
      * @param {String} message
      * @param {Object|String} parameters The parameters associated with the message
+     * @param {Boolean} forceFlushToServer Should we force flushing all logs to server?
      */
-    add(message, parameters) {
+    add(message, parameters, forceFlushToServer) {
         const length = this.logLines.push({
             message,
             parameters,
             timestamp: (new Date())
         });
 
-        // If we're over the limit, remove one line.
-        if (length > this.TEMP_LOG_LINES_TO_KEEP) {
-            this.logLines.shift();
+        if (this.isDebug) {
+            this.client(`${message} - ${JSON.stringify(parameters)}`);
         }
-    }
 
-    /**
-     * Get the last messageCount lines
-     * @param {Number} messageCount Number of messages to get (optional,
-     *              defaults to 1)
-     * @return {array} an array of messages (oldest first)
-     */
-    get(messageCount = 1) {
-        // Don't get more than we have
-        const count = Math.min(this.TEMP_LOG_LINES_TO_KEEP, messageCount);
-        return this.logLines.slice(this.logLines.length - count);
+        // If we're over the limit, flush the logs
+        if (length > TEMP_LOG_LINES_TO_KEEP || forceFlushToServer) {
+            this.logToServer()
+            this.logLines = [];
+        }
     }
 
     /**
@@ -83,23 +72,18 @@ export default class Logger {
      * @param {Object|String} parameters The parameters to send along with the message
      */
     info(message, sendNow = false, parameters= '') {
-        if (sendNow) {
-            const msg = `[info] ${message}`;
-            this.logToServer(msg, 0, parameters);
-        } else {
-            this.add(message, parameters);
-        }
+        const msg = `[info] ${message}`;
+        this.add(msg, parameters, sendNow);
     }
 
     /**
      * Logs an alert.
      *
      * @param {String} message The message to alert.
-     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {Object|String} parameters The parameters to send along with the message
      * @param {Boolean} includeStackTrace Must be disabled for testing
      */
-    alert(message, recentMessages = 0, parameters = {}, includeStackTrace = true) {
+    alert(message, parameters = {}, includeStackTrace = true) {
         const msg = `[alrt] ${message}`;
         const params = parameters;
 
@@ -107,34 +91,29 @@ export default class Logger {
             params.stack = JSON.stringify(new Error().stack);
         }
 
-        this.logToServer(msg, recentMessages, params);
-        this.add(msg, params);
+        this.add(msg, params, true);
     }
 
     /**
      * Logs a warn.
      *
      * @param {String} message The message to warn.
-     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    warn(message, recentMessages = 0, parameters = '') {
+    warn(message, parameters = '') {
         const msg = `[warn] ${message}`;
-        this.logToServer(msg, recentMessages, parameters);
-        this.add(msg, parameters);
+        this.add(msg, parameters, true);
     }
 
     /**
      * Logs a hmmm.
      *
      * @param {String} message The message to hmmm.
-     * @param {Number} recentMessages A number of recent messages to append as context
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    hmmm(message, recentMessages = 0, parameters= '') {
+    hmmm(message, parameters= '') {
         const msg = `[hmmm] ${message}`;
-        this.logToServer(msg, recentMessages, parameters);
-        this.add(msg, parameters);
+        this.add(msg, parameters, false);
     }
 
     /**
@@ -143,8 +122,6 @@ export default class Logger {
      * @param {String} message The message to log.
      */
     client(message) {
-        this.add(message);
-
         if (!this.clientLoggingCallback) {
             return;
         }
