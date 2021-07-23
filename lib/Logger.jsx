@@ -27,6 +27,11 @@ export default class Logger {
     * @param {Object|String} parameters The parameters to send along with the message
     */
     logToServer() {
+        // Since we will always have the previous requestID log line, we want to skip sending logs if that's the only line
+        if (this.logLines.length <= 1) {
+            return;
+        }
+
         // We don't care about log setting web cookies so let's define it as false
         const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(this.logLines)});
         if (!promise) {
