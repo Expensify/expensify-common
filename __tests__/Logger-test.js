@@ -9,54 +9,49 @@ const Log = new Logger({
 });
 
 test('Test Log.info()', () => {
-    Log.info('Test1', true);
+    Log.info('Test1', false);
+    expect(mockServerLoggingCallback).toHaveBeenCalledTimes(0);
     Log.info('Test2', true);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
-    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        api_setCookie: false,
-        logPacket: [
-            {parameters: {}, message: '[info] Test1'},
-            {parameters: {}, message: '[info] Test2'},
-        ],
-    });
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+            api_setCookie: false,
+            logPacket: expect.any(String),
+        })
+    );
 });
 
 test('Test Log.alert()', () => {
-    Log.alert('Test1', true);
     Log.alert('Test2', {}, false);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
-    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        api_setCookie: false,
-        logPacket: [
-            {parameters: {}, message: '[alrt] Test1'},
-            {parameters: {}, message: '[alrt] Test2'},
-        ],
-    });
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+            api_setCookie: false,
+            logPacket: expect.any(String),
+        })
+    );
 });
 
 test('Test Log.warn()', () => {
-    Log.warn('Test1', true);
     Log.warn('Test2');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
-    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        api_setCookie: false,
-        logPacket: [
-            {parameters: {}, message: '[warn] Test1'},
-            {parameters: {}, message: '[warn] Test2'},
-        ],
-    });
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+            api_setCookie: false,
+            logPacket: expect.any(String),
+        })
+    );
 });
 
 test('Test Log.hmmm()', () => {
     Log.hmmm('Test');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
-    expect(mockServerLoggingCallback).toHaveBeenCalledWith({
-        api_setCookie: false,
-        logPacket: [
-            {parameters: {}, message: '[hmmm] Test1'},
-            {parameters: {}, message: '[hmmm] Test2'},
-        ],
-    });
+    expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+            api_setCookie: false,
+            logPacket: expect.any(String),
+        })
+    );
 });
 
 test('Test Log.client()', () => {

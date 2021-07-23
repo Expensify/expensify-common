@@ -1,6 +1,6 @@
 import _ from 'underscore';
 
-const TEMP_LOG_LINES_TO_KEEP = 50;
+const MAX_LOG_LINES_BEFORE_FLUSH = 50;
 export default class Logger {
     constructor({serverLoggingCallback, isDebug, clientLoggingCallback}) {
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
@@ -21,10 +21,6 @@ export default class Logger {
 
     /**
     * Ask the server to write the log message
-    *
-    * @param {String} message The message to write
-    * @param {Number} recentMessages A number of recent messages to append as context
-    * @param {Object|String} parameters The parameters to send along with the message
     */
     logToServer() {
         // Since we will always have the previous requestID log line, we want to skip sending logs if that's the only line
@@ -34,6 +30,7 @@ export default class Logger {
 
         // We don't care about log setting web cookies so let's define it as false
         const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(this.logLines)});
+        this.logLines = [];
         if (!promise) {
             return;
         }
@@ -62,9 +59,8 @@ export default class Logger {
         }
 
         // If we're over the limit, flush the logs
-        if (length > TEMP_LOG_LINES_TO_KEEP || forceFlushToServer) {
+        if (length > MAX_LOG_LINES_BEFORE_FLUSH || forceFlushToServer) {
             this.logToServer()
-            this.logLines = [];
         }
     }
 
