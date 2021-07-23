@@ -112,7 +112,7 @@ export default class Logger {
      * @param {String} message The message to hmmm.
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    hmmm(message, parameters= '') {
+    hmmm(message, parameters = '') {
         const msg = `[hmmm] ${message}`;
         this.add(msg, parameters, false);
     }
