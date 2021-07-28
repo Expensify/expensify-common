@@ -334,7 +334,12 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         + '(http://foo.com/(something)?after=parens) '
         + '(((http://foo.com/(something)?after=parens '
         + '(((http://foo.com/(something)?after=parens))) '
-        + 'http://foo.com/(something)?after=parens))) ';
+        + 'http://foo.com/(something)?after=parens))) '
+        + '[Yo (click here to see a cool cat)](https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg) '
+        + '[Yo click here to see a cool cat)](https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg) '
+        + '[Yo (click here to see a cool cat](https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg) '
+        + '[Yo click * $ & here to see a cool cat](https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg) ';
+
 
     const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
         + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
@@ -344,7 +349,12 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         + '(<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>) '
         + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
         + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
-        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) ';
+        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo (click here to see a cool cat)</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo click here to see a cool cat)</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo (click here to see a cool cat</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo click * $ &amp; here to see a cool cat</a> ';
+
 
     expect(parser.replace(testString)).toBe(resultString);
 });
