@@ -19,9 +19,17 @@ test('Test Log.info()', () => {
             logPacket: expect.any(String),
         })
     );
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    delete packet[0].timestamp;
+    delete packet[1].timestamp;
+    expect(packet).toEqual([
+        {message: "[info] Test1", parameters: "", },
+        {message: "[info] Test2", parameters: "", },
+    ]);
 });
 
 test('Test Log.alert()', () => {
+    mockServerLoggingCallback.mockClear();
     Log.alert('Test2', {}, false);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
@@ -30,9 +38,13 @@ test('Test Log.alert()', () => {
             logPacket: expect.any(String),
         })
     );
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    delete packet[0].timestamp;
+    expect(packet).toEqual([{message: "[alrt] Test2", parameters: {}}]);
 });
 
 test('Test Log.warn()', () => {
+    mockServerLoggingCallback.mockClear();
     Log.warn('Test2');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
@@ -41,10 +53,15 @@ test('Test Log.warn()', () => {
             logPacket: expect.any(String),
         })
     );
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    delete packet[0].timestamp;
+    expect(packet).toEqual([{message: "[warn] Test2", parameters: ''}]);
 });
 
 test('Test Log.hmmm()', () => {
+    mockServerLoggingCallback.mockClear();
     Log.hmmm('Test');
+    Log.info('Test', true);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -52,6 +69,13 @@ test('Test Log.hmmm()', () => {
             logPacket: expect.any(String),
         })
     );
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    delete packet[0].timestamp;
+    delete packet[1].timestamp;
+    expect(packet).toEqual([
+        {message: "[hmmm] Test", parameters: ''},
+        {message: "[info] Test", parameters: ''}
+    ]);
 });
 
 test('Test Log.client()', () => {

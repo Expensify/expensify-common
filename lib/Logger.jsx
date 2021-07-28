@@ -23,13 +23,17 @@ export default class Logger {
     * Ask the server to write the log message
     */
     logToServer() {
-        // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=false
-        if (!_.any(this.logLines, l => !l.onlyFlushWithOthers)) {
+        // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=true
+        if (!this.logLines.length || _.all(this.logLines, l => l.onlyFlushWithOthers)) {
             return;
         }
 
         // We don't care about log setting web cookies so let's define it as false
-        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(this.logLines)});
+        const linesToLog = _.map(this.logLines, l => {
+            delete l.onlyFlushWithOthers;
+            return l;
+        });
+        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
         this.logLines = [];
         if (!promise) {
             return;
