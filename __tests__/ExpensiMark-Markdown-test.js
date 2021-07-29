@@ -127,3 +127,11 @@ test('Test HTML string with blockquote', () => {
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Test HTML string with InlineCodeBlock', () => {
+    const testString = 'This is a <code>InlineCodeBlock</code> text';
+
+    const resultString = 'This is a `InlineCodeBlock` text';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
