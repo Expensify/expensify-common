@@ -33,8 +33,8 @@ export default class Logger {
             delete l.onlyFlushWithOthers;
             return l;
         });
-        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
         this.logLines = [];
+        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
         if (!promise) {
             return;
         }
