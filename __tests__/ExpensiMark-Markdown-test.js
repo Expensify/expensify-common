@@ -114,3 +114,40 @@ test('Test HTML string with encoded entities', () => {
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Test HTML string with hyperlinks', () => {
+    const testString = 'Test Hyperlinks '
+        + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first</a> '
+    + '<a href="www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first no https://</a> '
+    + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">second</a> '
+    + '<a href="necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">second no http://</a> '
+    + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third</a> '
+    + '<a href="github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third no https://</a> '
+    + '<a href="https://google.com" target="_blank">link [inside another link](https://google.com)</a> '
+    + '<a href="https://google.com" target="_blank">link with an @ in it</a> '
+    + '<a href="https://google.com" target="_blank">link with [brackets] inside of it</a> '
+    + '<a href="https://google.com" target="_blank">link with smart quotes ‘’“”</a> '
+    + '<a href="https://google.com" target="_blank">link with someone@expensify.com email in it</a>'
+    + '<a href="testemail@example.com">email example</a>'
+    + '<a href="mailto:testemail@example.com">email example with mailto</a>'
+    + '<a href="defaultemailonly@example.com">defaultemailonly@example.com</a>'
+    + '<a href="https://google.com">https://google.com</a>';
+    const resultString = 'Test Hyperlinks '
+        + '[first](https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) '
+    + '[first no https://](www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) '
+    + '[second](http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled) '
+    + '[second no http://](necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled) '
+    + '[third](https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash) '
+    + '[third no https://](github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash) '
+    + '[link [inside another link](https://google.com)](https://google.com) '
+    + '[link with an @ in it](https://google.com) '
+    + '[link with [brackets] inside of it](https://google.com) '
+    + '[link with smart quotes ‘’“”](https://google.com) '
+    + '[link with someone@expensify.com email in it](https://google.com)'
+    + '[email example](testemail@example.com)'
+    + '[email example with mailto](mailto:testemail@example.com)'
+    + 'defaultemailonly@example.com'
+    + 'https://google.com';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
