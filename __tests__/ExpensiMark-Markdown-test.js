@@ -135,3 +135,9 @@ test('Test HTML string with InlineCodeBlock', () => {
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Test HTML string with code fence', () => {
+    const testString = '<pre id="code1">class Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}</pre>';
+    const resultString = '```\nclass Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}\n```';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
