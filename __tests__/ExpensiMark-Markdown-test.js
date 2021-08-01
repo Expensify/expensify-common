@@ -140,4 +140,8 @@ test('Test HTML string with code fence', () => {
     const testString = '<pre id="code1">class Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}</pre>';
     const resultString = '```\nclass Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}\n```';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+
+    const testStringWithBrTag = '<pre id="code1">class Expensify extends PureComponent {<br />    constructor(props) {<br />        super(props);<br />    }<br />}</pre>';
+    const resultStringForBrTag = '```\nclass Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}\n```';
+    expect(parser.htmlToMarkdown(testStringWithBrTag)).toBe(resultStringForBrTag);
 });
