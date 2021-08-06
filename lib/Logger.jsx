@@ -34,7 +34,7 @@ export default class Logger {
             return l;
         });
         this.logLines = [];
-        const promise = this.serverLoggingCallback({api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
+        const promise = this.serverLoggingCallback(this, {api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
         if (!promise) {
             return;
         }
