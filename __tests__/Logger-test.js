@@ -14,12 +14,13 @@ test('Test Log.info()', () => {
     Log.info('Test2', true);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.any(Object),
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
         })
     );
-    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
@@ -33,12 +34,13 @@ test('Test Log.alert()', () => {
     Log.alert('Test2', {}, false);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.any(Object),
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
         })
     );
-    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     expect(packet).toEqual([{message: "[alrt] Test2", parameters: {}}]);
 });
@@ -48,12 +50,13 @@ test('Test Log.warn()', () => {
     Log.warn('Test2');
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.any(Object),
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
         })
     );
-    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     expect(packet).toEqual([{message: "[warn] Test2", parameters: ''}]);
 });
@@ -64,12 +67,13 @@ test('Test Log.hmmm()', () => {
     Log.info('Test', true);
     expect(mockServerLoggingCallback).toHaveBeenCalled();
     expect(mockServerLoggingCallback).toHaveBeenCalledWith(
+        expect.any(Object),
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
         })
     );
-    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][0].logPacket);
+    const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
