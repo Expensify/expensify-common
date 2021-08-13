@@ -6,12 +6,13 @@ import Logger from './Logger';
 /**
  * Network interface for logger.
  *
+ * @param {Logger} logger
  * @param {Object} params
  * @param {Object} params.parameters
  * @param {String} params.message
  * @return {Promise}
  */
-function serverLoggingCallback(params) {
+function serverLoggingCallback(logger, params) {
     return API(Network('/api.php')).logToServer(params);
 }
 
