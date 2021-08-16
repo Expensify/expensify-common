@@ -725,6 +725,20 @@ export default function API(network, args) {
                 requireParameters(['chatID', 'details'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
+
+            /**
+             * Checks if the domain is public
+             * 
+             * @param {Object} parameters
+             * @param {String} parameters.email
+             * 
+             * @returns {APIDeferred}
+             */
+            isFromPublicDomain(parameters) {
+                const commandName = 'User_IsFromPublicDomain';
+                requireParameters(['email'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
         },
 
         card: {
