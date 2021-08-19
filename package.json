@@ -30,10 +30,12 @@
     "simply-deferred": "git+https://github.com/Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
     "underscore": "1.13.1"
   },
+  "peerDependencies": {
+    "eslint-config-expensify": "^2.0"
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.0.0",
     "babel-jest": "^26.3.0",
-    "eslint-config-expensify": "2.0.7",
     "eslint-plugin-jest": "^24.1.5",
     "grunt": "*",
     "grunt-chokidar": "1.0.2",
