@@ -342,3 +342,10 @@ test('Test HTML string with code fence', () => {
     const resultStringWithNewLinesFromSlack = '```\nline1\n\nline3\n\n\nline6\n```';
     expect(parser.htmlToMarkdown(testStringWithNewLinesFromSlack)).toBe(resultStringWithNewLinesFromSlack);
 });
+
+
+test('HTML Entities', () => {
+    const testString = '&nbsp; &amp; &dollar; &colon; &gt; &quot;';
+    const resultString = `${String.fromCharCode(160)} & $ : > "`;
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
