@@ -466,7 +466,39 @@ export const CONST = {
      * Any changes here should be reflected in the PHP constant,
      * which is located in _constant.php and also named EXPENSIFY_EMAILS
      */
-    EXPENSIFY_EMAILS: ['concierge@expensify.com', 'help@expensify.com', 'receipts@expensify.com', 'chronos@expensify.com', 'qa@expensify.com', 'contributors@expensify.com', 'firstresponders@expensify.com', 'qa+travisreceipts@expensify.com', 'bills@expensify.com', 'studentambassadors@expensify.com'],
+    EXPENSIFY_EMAILS: [
+        'concierge@expensify.com',
+        'help@expensify.com',
+        'receipts@expensify.com',
+        'chronos@expensify.com',
+        'qa@expensify.com',
+        'contributors@expensify.com',
+        'firstresponders@expensify.com',
+        'qa+travisreceipts@expensify.com',
+        'bills@expensify.com',
+        'studentambassadors@expensify.com',
+        'accounting@expensify.com',
+        'payroll@expensify.com',
+        'svfg@expensify.com',
+    ],
+
+     /**
+     * Emails that the user shouldn't submit reports to
+     * Any changes here should be reflected in the PHP constant,
+     * which is located in _constant.php and also named INVALID_SUBMIT_EMAILS
+     */
+    INVALID_SUBMIT_EMAILS: [
+        'concierge@expensify.com',
+        'help@expensify.com',
+        'receipts@expensify.com',
+        'chronos@expensify.com',
+        'qa@expensify.com',
+        'contributors@expensify.com',
+        'firstresponders@expensify.com',
+        'qa+travisreceipts@expensify.com',
+        'bills@expensify.com',
+        'svfg@expensify.com',
+    ],
 
     /**
      * Smart scan-related constants
