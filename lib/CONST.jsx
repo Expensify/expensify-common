@@ -483,11 +483,11 @@ export const CONST = {
     ],
 
      /**
-     * Emails that the user shouldn't submit reports to
+     * Emails that the user shouldn't submit reports to nor share reports with
      * Any changes here should be reflected in the PHP constant,
-     * which is located in _constant.php and also named INVALID_SUBMIT_EMAILS
+     * which is located in _constant.php and also named INVALID_APPROVER_AND_SHAREE_EMAILS
      */
-    INVALID_SUBMIT_EMAILS: [
+    INVALID_APPROVER_AND_SHAREE_EMAILS: [
         'concierge@expensify.com',
         'help@expensify.com',
         'receipts@expensify.com',
@@ -497,7 +497,6 @@ export const CONST = {
         'firstresponders@expensify.com',
         'qa+travisreceipts@expensify.com',
         'bills@expensify.com',
-        'svfg@expensify.com',
     ],
 
     /**
