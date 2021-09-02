@@ -38,7 +38,7 @@ test('Test strikethrough markdown replacement', () => {
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
     const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
-    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank">Expensify</a> to learn more. <a href="http://www.expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">Expensify</a> <a href="http://expensify.com" target="_blank">It&#x27;s really the coolest</a> <a href="http://expensify.com/some?query=par|am" target="_blank"><code>Some</code> Special cases - + . = , &#x27;</a>';
+    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> to learn more. <a href="http://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="http://expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="http://expensify.com" target="_blank" rel="noreferrer noopener">It&#x27;s really the coolest</a> <a href="http://expensify.com/some?query=par|am" target="_blank" rel="noreferrer noopener"><code>Some</code> Special cases - + . = , &#x27;</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -57,17 +57,17 @@ test('Test critical markdown style links', () => {
     + '[link with smart quotes ‘’“”](https://google.com) '
     + '[link with someone@expensify.com email in it](https://google.com)';
     const resultString = 'Testing '
-    + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first</a> '
-    + '<a href="http://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">first no https://</a> '
-    + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">second</a> '
-    + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">second no http://</a> '
-    + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third</a> '
-    + '<a href="http://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">third no https://</a> '
-    + '<a href="https://google.com" target="_blank">link <code>[inside another link](https://google.com)</code></a> '
-    + '<a href="https://google.com" target="_blank">link with an @ in it</a> '
-    + '<a href="https://google.com" target="_blank">link with [brackets] inside of it</a> '
-    + '<a href="https://google.com" target="_blank">link with smart quotes ‘’“”</a> '
-    + '<a href="https://google.com" target="_blank">link with someone@expensify.com email in it</a>';
+    + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">first</a> '
+    + '<a href="http://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">first no https://</a> '
+    + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">second</a> '
+    + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">second no http://</a> '
+    + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">third</a> '
+    + '<a href="http://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">third no https://</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link <code>[inside another link](https://google.com)</code></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with an @ in it</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with [brackets] inside of it</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with smart quotes ‘’“”</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with someone@expensify.com email in it</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -155,15 +155,15 @@ test('Test code fencing with ExpensiMark syntax inside', () => {
 
 test('Test combination replacements', () => {
     const urlTestStartString = '<em>Here</em> is a _combination test_ that <marquee>sees</marquee> if ~https://www.example.com~ https://otherexample.com links get rendered first followed by *other markup* or if _*two work together*_ as well. This sentence also has a newline \n Yep just had one.';
-    const urlTestReplacedString = '&lt;em&gt;Here&lt;/em&gt; is a <em>combination test</em> that &lt;marquee&gt;sees&lt;/marquee&gt; if <del><a href="https://www.example.com" target="_blank">https://www.example.com</a></del> <a href="https://otherexample.com"'
-        + ' target="_blank">https://otherexample.com</a> links get rendered first followed by <strong>other markup</strong> or if <em><strong>two work together</strong></em> as well. This sentence also has a newline <br> Yep just had one.';
+    const urlTestReplacedString = '&lt;em&gt;Here&lt;/em&gt; is a <em>combination test</em> that &lt;marquee&gt;sees&lt;/marquee&gt; if <del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <a href="https://otherexample.com"'
+        + ' target="_blank" rel="noreferrer noopener">https://otherexample.com</a> links get rendered first followed by <strong>other markup</strong> or if <em><strong>two work together</strong></em> as well. This sentence also has a newline <br> Yep just had one.';
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
 
 test('Test wrapped URLs', () => {
     const wrappedUrlTestStartString = '~https://www.example.com~ _http://www.test.com_ *http://www.asdf.com/_test*';
-    const wrappedUrlTestReplacedString = '<del><a href="https://www.example.com" target="_blank">https://www.example.com</a></del> <em><a href="http://www.test.com" target="_blank">http://www.test.com</a></em>'
-    + ' <strong><a href="http://www.asdf.com/_test" target="_blank">http://www.asdf.com/_test</a></strong>';
+    const wrappedUrlTestReplacedString = '<del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <em><a href="http://www.test.com" target="_blank" rel="noreferrer noopener">http://www.test.com</a></em>'
+    + ' <strong><a href="http://www.asdf.com/_test" target="_blank" rel="noreferrer noopener">http://www.asdf.com/_test</a></strong>';
     expect(parser.replace(wrappedUrlTestStartString)).toBe(wrappedUrlTestReplacedString);
 });
 
@@ -202,37 +202,37 @@ test('Test url replacements', () => {
         + 'https://www.google.com/maps/place/Taj+Mahal+@is~"Awesome"/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422';
 
     const urlTestReplacedString = 'Testing '
-        + '<a href="http://foo.com" target="_blank">foo.com</a> '
-        + '<a href="http://www.foo.com" target="_blank">www.foo.com</a> '
-        + '<a href="http://www.foo.com" target="_blank">http://www.foo.com</a> '
-        + '<a href="http://foo.com/blah_blah" target="_blank">http://foo.com/blah_blah</a> '
-        + '<a href="http://foo.com/blah_blah/" target="_blank">http://foo.com/blah_blah/</a> '
-        + '<a href="http://foo.com/blah_blah_(wikipedia)" target="_blank">http://foo.com/blah_blah_(wikipedia)</a> '
-        + '<a href="http://www.example.com/wpstyle/?p=364" target="_blank">http://www.example.com/wpstyle/?p=364</a> '
-        + '<a href="https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux" target="_blank">https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux</a> '
-        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
-        + '<a href="http://code.google.com/events/#&amp;product=browser" target="_blank">http://code.google.com/events/#&amp;product=browser</a> '
-        + '<a href="http://foo.bar/?q=Test%20URL-encoded%20stuff" target="_blank">http://foo.bar/?q=Test%20URL-encoded%20stuff</a> '
-        + '<a href="http://www.test.com/path?param=123#123" target="_blank">http://www.test.com/path?param=123#123</a> '
-        + '<a href="http://1337.net" target="_blank">http://1337.net</a> '
-        + '<a href="http://a.b-c.de/" target="_blank">http://a.b-c.de/</a> '
-        + '<a href="https://sd1.sd2.docs.google.com/" target="_blank">https://sd1.sd2.docs.google.com/</a> '
-        + '<a href="https://expensify.cash/#/r/1234" target="_blank">https://expensify.cash/#/r/1234</a> '
-        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/6.45</a> '
-        + '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank">https://github.com/Expensify/Expensify/issues/143,231</a> '
-        + '<a href="http://testRareTLDs.beer" target="_blank">testRareTLDs.beer</a> '
+        + '<a href="http://foo.com" target="_blank" rel="noreferrer noopener">foo.com</a> '
+        + '<a href="http://www.foo.com" target="_blank" rel="noreferrer noopener">www.foo.com</a> '
+        + '<a href="http://www.foo.com" target="_blank" rel="noreferrer noopener">http://www.foo.com</a> '
+        + '<a href="http://foo.com/blah_blah" target="_blank" rel="noreferrer noopener">http://foo.com/blah_blah</a> '
+        + '<a href="http://foo.com/blah_blah/" target="_blank" rel="noreferrer noopener">http://foo.com/blah_blah/</a> '
+        + '<a href="http://foo.com/blah_blah_(wikipedia)" target="_blank" rel="noreferrer noopener">http://foo.com/blah_blah_(wikipedia)</a> '
+        + '<a href="http://www.example.com/wpstyle/?p=364" target="_blank" rel="noreferrer noopener">http://www.example.com/wpstyle/?p=364</a> '
+        + '<a href="https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux" target="_blank" rel="noreferrer noopener">https://www.example.com/foo/?bar=baz&amp;inga=42&amp;quux</a> '
+        + '<a href="http://foo.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">http://foo.com/(something)?after=parens</a> '
+        + '<a href="http://code.google.com/events/#&amp;product=browser" target="_blank" rel="noreferrer noopener">http://code.google.com/events/#&amp;product=browser</a> '
+        + '<a href="http://foo.bar/?q=Test%20URL-encoded%20stuff" target="_blank" rel="noreferrer noopener">http://foo.bar/?q=Test%20URL-encoded%20stuff</a> '
+        + '<a href="http://www.test.com/path?param=123#123" target="_blank" rel="noreferrer noopener">http://www.test.com/path?param=123#123</a> '
+        + '<a href="http://1337.net" target="_blank" rel="noreferrer noopener">http://1337.net</a> '
+        + '<a href="http://a.b-c.de/" target="_blank" rel="noreferrer noopener">http://a.b-c.de/</a> '
+        + '<a href="https://sd1.sd2.docs.google.com/" target="_blank" rel="noreferrer noopener">https://sd1.sd2.docs.google.com/</a> '
+        + '<a href="https://expensify.cash/#/r/1234" target="_blank" rel="noreferrer noopener">https://expensify.cash/#/r/1234</a> '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/6.45</a> '
+        + '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/Expensify/issues/143,231</a> '
+        + '<a href="http://testRareTLDs.beer" target="_blank" rel="noreferrer noopener">testRareTLDs.beer</a> '
         + '<a href="mailto:test@expensify.com">test@expensify.com</a> '
         + 'test.completelyFakeTLD '
-        + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank">https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878</a>) '
-        + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a> '
-        + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
-        + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
+        + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878</a>) '
+        + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a> '
+        + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
+        + '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash</a> '
         + 'mm..food '
-        + '<a href="http://upwork.com/jobs/~016781e062ce860b84" target="_blank">upwork.com/jobs/~016781e062ce860b84</a> '
-        + '<a href="https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))" target="_blank">https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))</a> '
-        + '<a href="http://google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121" target="_blank">google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121</a> '
-        + '<a href="http://google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843" target="_blank">google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843</a> '
-        + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank">https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a>';
+        + '<a href="http://upwork.com/jobs/~016781e062ce860b84" target="_blank" rel="noreferrer noopener">upwork.com/jobs/~016781e062ce860b84</a> '
+        + '<a href="https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))" target="_blank" rel="noreferrer noopener">https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))</a> '
+        + '<a href="http://google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121" target="_blank" rel="noreferrer noopener">google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121</a> '
+        + '<a href="http://google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843" target="_blank" rel="noreferrer noopener">google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843</a> '
+        + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a>';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
@@ -248,22 +248,22 @@ test('Test markdown style link with various styles', () => {
         + '[Expensify](https://www.expensify.com/settings?param=(%22section%22+%22account%22)) '
         + '[Expensify](https://www.expensify.com/settings?param=[%22section%22:%22account%22])';
 
-    const resultString = 'Go to <del><a href="https://www.expensify.com" target="_blank">Expensify</a></del> '
-        + '<em><a href="https://www.expensify.com" target="_blank">Expensify</a></em> '
-        + '<strong><a href="https://www.expensify.com" target="_blank">Expensify</a></strong> '
-        + '<a href="https://www.expensify.com" target="_blank">Expensify!</a> '
-        + '<a href="https://www.expensify.com" target="_blank">Expensify?</a> '
-        + '<a href="https://www.expensify-test.com" target="_blank">Expensify</a> '
-        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a> '
-        + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank">Expensify</a> '
-        + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank">Expensify</a>';
+    const resultString = 'Go to <del><a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a></del> '
+        + '<em><a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a></em> '
+        + '<strong><a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a></strong> '
+        + '<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify!</a> '
+        + '<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify?</a> '
+        + '<a href="https://www.expensify-test.com" target="_blank" rel="noreferrer noopener">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank" rel="noreferrer noopener">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank" rel="noreferrer noopener">Expensify</a> '
+        + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank" rel="noreferrer noopener">Expensify</a>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test links that end in a comma autolink correctly', () => {
     const testString = 'https://github.com/Expensify/Expensify/issues/143231,';
-    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank">https://github.com/Expensify/Expensify/issues/143231</a>,';
+    const resultString = '<a href="https://github.com/Expensify/Expensify/issues/143231" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/Expensify/issues/143231</a>,';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -275,19 +275,19 @@ test('Test links inside two backticks are not autolinked', () => {
 
 test('Test a period at the end of a link autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>.';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test a url ending with a question mark autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test a url ending with a closing parentheses autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645)';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -349,27 +349,27 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         + '[Text text] more text ([link here](www.google.com))[Text text] more text ([link here](www.google.com))';
 
 
-    const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
-        + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>) '
-        + '(<a href="https://google.com/" target="_blank">google</a>) '
-        + '(<a href="http://google.com/(something)?after=parens" target="_blank">google</a>))) '
-        + '(((<a href="http://google.com/(something)?after=parens" target="_blank">google</a> '
-        + '(<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>) '
-        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a> '
-        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
-        + '<a href="http://foo.com/(something)?after=parens" target="_blank">http://foo.com/(something)?after=parens</a>))) '
-        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo (click here to see a cool cat)</a> '
-        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo click here to see a cool cat)</a> '
-        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo (click here to see a cool cat</a> '
-        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank">Yo click * $ &amp; here to see a cool cat</a> '
-        + '[Text text] more text (<a href="http://www.google.com" target="_blank">link here</a>)'
-        + '[Text text] more text (<a href="http://www.google.com" target="_blank">link [square brackets within] here</a>)'
-        + '[Text text] more text (<a href="http://www.google.com" target="_blank">link (parenthesis within) here</a>)'
-        + '[Text text] more text <a href="http://www.google.com" target="_blank">link here</a>'
-        + '[Text text] more text (<a href="http://www.google.com" target="_blank">link here  </a>)'
-        + '[Text text] more text ((<a href="http://www.google.com" target="_blank">link here</a>))'
-        + '[Text text] more text [(<a href="http://www.google.com" target="_blank">link here</a>)]'
-        + '[Text text] more text (<a href="http://www.google.com" target="_blank">link here</a>)[Text text] more text (<a href="http://www.google.com" target="_blank">link here</a>)'
+    const resultString = '<a href="http://google.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">google</a> '
+        + '(<a href="http://google.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">google</a>) '
+        + '(<a href="https://google.com/" target="_blank" rel="noreferrer noopener">google</a>) '
+        + '(<a href="http://google.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">google</a>))) '
+        + '(((<a href="http://google.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">google</a> '
+        + '(<a href="http://foo.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">http://foo.com/(something)?after=parens</a>) '
+        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">http://foo.com/(something)?after=parens</a> '
+        + '(((<a href="http://foo.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">http://foo.com/(something)?after=parens</a>))) '
+        + '<a href="http://foo.com/(something)?after=parens" target="_blank" rel="noreferrer noopener">http://foo.com/(something)?after=parens</a>))) '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank" rel="noreferrer noopener">Yo (click here to see a cool cat)</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank" rel="noreferrer noopener">Yo click here to see a cool cat)</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank" rel="noreferrer noopener">Yo (click here to see a cool cat</a> '
+        + '<a href="https://c8.alamy.com/compes/ha11pc/cookie-cat-con-sombrero-de-cowboy-y-sun-glass-ha11pc.jpg" target="_blank" rel="noreferrer noopener">Yo click * $ &amp; here to see a cool cat</a> '
+        + '[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)'
+        + '[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link [square brackets within] here</a>)'
+        + '[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link (parenthesis within) here</a>)'
+        + '[Text text] more text <a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>'
+        + '[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here  </a>)'
+        + '[Text text] more text ((<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>))'
+        + '[Text text] more text [(<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)]'
+        + '[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)[Text text] more text (<a href="http://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)';
 
 
     expect(parser.replace(testString)).toBe(resultString);
