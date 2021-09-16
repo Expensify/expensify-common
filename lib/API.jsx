@@ -716,7 +716,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-             getUserLoungeDetails(parameters) {
+            getUserLoungeDetails(parameters) {
                 const commandName = 'GetLoungeDetails';
                 requireParameters(['chatID'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
@@ -731,7 +731,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-             setUserLoungeDetails(parameters) {
+            setUserLoungeDetails(parameters) {
                 const commandName = 'SetLoungeDetails';
                 requireParameters(['chatID', 'details'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
