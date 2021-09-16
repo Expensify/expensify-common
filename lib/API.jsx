@@ -596,6 +596,17 @@ export default function API(network, args) {
 
         expensiworks: {
             /**
+             * Get the logged in agent's accuracy fields
+             *
+             * @returns {APIDeferred}
+             */
+            getAgentAccuracy() {
+                const commandName = 'Expensiworks_GetAgentAccuracy';
+
+                return performPOSTRequest(commandName);
+            },
+
+            /**
              * Get a job to work on
              *
              * @param {Object} parameters
@@ -705,7 +716,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-             getUserLoungeDetails(parameters) {
+            getUserLoungeDetails(parameters) {
                 const commandName = 'GetLoungeDetails';
                 requireParameters(['chatID'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
@@ -720,7 +731,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-             setUserLoungeDetails(parameters) {
+            setUserLoungeDetails(parameters) {
                 const commandName = 'SetLoungeDetails';
                 requireParameters(['chatID', 'details'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
@@ -728,10 +739,10 @@ export default function API(network, args) {
 
             /**
              * Checks if the domain is public
-             * 
+             *
              * @param {Object} parameters
              * @param {String} parameters.email
-             * 
+             *
              * @returns {APIDeferred}
              */
             isFromPublicDomain(parameters) {
