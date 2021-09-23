@@ -469,6 +469,16 @@ export default function API(network, args) {
         },
 
         /**
+         * Retrieves a short lived auth token for transitions to NewDot
+         *
+         * @returns {APIDeferred}
+         */
+        getShortLivedAuthToken: function () {
+            var commandName = 'GetShortLivedAuthToken';
+            return performPOSTRequest(commandName);
+        },
+
+        /**
          * Sets the value of an NVP
          *
          * @param {Object} parameters
