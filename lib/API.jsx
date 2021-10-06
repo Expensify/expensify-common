@@ -473,8 +473,8 @@ export default function API(network, args) {
          *
          * @returns {APIDeferred}
          */
-        getShortLivedAuthToken: function () {
-            var commandName = 'GetShortLivedAuthToken';
+        getShortLivedAuthToken() {
+            const commandName = 'GetShortLivedAuthToken';
             return performPOSTRequest(commandName);
         },
 
@@ -672,17 +672,6 @@ export default function API(network, args) {
              */
             getCurrencyList() {
                 const commandName = 'SSDos_GetCurrencyList';
-                return performPOSTRequest(commandName);
-            },
-
-            /**
-             * Get the logged in agent's accuracy fields
-             *
-             * @returns {APIDeferred}
-             */
-            getAgentAccuracy() {
-                const commandName = 'SSDos_GetAgentAccuracy';
-
                 return performPOSTRequest(commandName);
             },
         },
