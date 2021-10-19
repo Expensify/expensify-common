@@ -328,6 +328,19 @@ export default function API(network, args) {
         },
 
         /**
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.email
+         * @param {String} [parameters.password]
+         * @returns {ExpensifyAPIDeferred}
+         */
+        User_SecondaryLogin_Send(parameters) {
+            const commandName = 'User_SecondaryLogin_Send';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Initiate a screen share request with a user.
          *
          * @param {Object} parameters
