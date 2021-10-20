@@ -328,6 +328,18 @@ export default function API(network, args) {
         },
 
         /**
+         * Gets the oldest Expensiworks job of the given type.
+         * 
+         * @param {string} parameters.jobName
+         * @returns {APIDeferred}
+         */
+         Expensiworks_GetJob(parameters) {
+            const commandName = 'Expensiworks_GetJob';
+            requireParameters(['jobName'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Initiate a screen share request with a user.
          *
          * @param {Object} parameters
