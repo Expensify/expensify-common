@@ -335,7 +335,6 @@ export default function API(network, args) {
          */
          Expensiworks_GetJob(parameters) {
             const commandName = 'Expensiworks_GetJob';
-            requireParameters(['jobName'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
