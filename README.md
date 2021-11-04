@@ -26,4 +26,4 @@ Alternatively, you can edit files directly in a project's `node_modules` then ap
 1. They will review and accept your changes, merge them, then deploy a new version
 
 # Deploying a Change (Expensify Only)
-1. Once the PR has been merged update the `package.json` commit hash in any repos with a dependency on `expensify-common`
+1. Once the PR has been merged update the `package.json` commit hash in any repos with a dependency on `expensify-common`. Even if your change is only required in one repo, it is important to update `package.json` in all repos that use expensify-common to prevent somebody from deploying changes they don't know about.
