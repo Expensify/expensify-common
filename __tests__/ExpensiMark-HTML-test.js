@@ -412,3 +412,9 @@ test('Single char matching', () => {
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test autolink with . before a slash', () => {
+    const testString = 'https://www.google.com/maps/place/Poster+Auctions+International,+Inc./@40.7384572,-73.9942151,20.17z/data=!4m13!1m7!3m6!1s0x89c259a2c5fdee77:0x1439488db9133bae!2s26+W+17th+St,+New+York,+NY+10011!3b1!8m2!3d40.7383679!4d-73.993907!3m4!1s0x89c259a2c438eb63:0x115ba65a3675338b!8m2!3d40.7384793!4d-73.9937764';
+    const resultString = '<a href="https://www.google.com/maps/place/Poster+Auctions+International,+Inc./@40.7384572,-73.9942151,20.17z/data=!4m13!1m7!3m6!1s0x89c259a2c5fdee77:0x1439488db9133bae!2s26+W+17th+St,+New+York,+NY+10011!3b1!8m2!3d40.7383679!4d-73.993907!3m4!1s0x89c259a2c438eb63:0x115ba65a3675338b!8m2!3d40.7384793!4d-73.9937764" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Poster+Auctions+International,+Inc./@40.7384572,-73.9942151,20.17z/data=!4m13!1m7!3m6!1s0x89c259a2c5fdee77:0x1439488db9133bae!2s26+W+17th+St,+New+York,+NY+10011!3b1!8m2!3d40.7383679!4d-73.993907!3m4!1s0x89c259a2c438eb63:0x115ba65a3675338b!8m2!3d40.7384793!4d-73.9937764</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
