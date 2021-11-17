@@ -463,8 +463,10 @@ export const CONST = {
     /**
      * Emails that the user shouldn't be interacting with from the front-end interface
      * Trying to add these emails as a delegate, onto a policy, or as an approver is considered invalid
-     * Any changes here should be reflected in the PHP constant,
-     * which is located in _constant.php and also named EXPENSIFY_EMAILS
+     * Any changes here should be reflected in the PHP constant in web-expensify,
+     * which is located in _constant.php and also named EXPENSIFY_EMAILS.
+     * And should also be reflected in the constant in expensify/app,
+     * which is located in src/CONST.js and also named EXPENSIFY_EMAILS.
      */
     EXPENSIFY_EMAILS: [
         'concierge@expensify.com',
