@@ -92,6 +92,7 @@ class OnOffSwitch extends Component {
         this.lock = this.lock.bind(this);
         this.unlock = this.unlock.bind(this);
         this.getValue = this.getValue.bind(this);
+        this.toggle = this.toggle.bind(this);
 
         this.state = {
             checked: this.props.checked,
@@ -118,6 +119,17 @@ class OnOffSwitch extends Component {
      */
     getValue() {
         return this.state.checked;
+    }
+
+    /**
+     * Toggle the state of this switch.
+     *
+     * Note: this is used via refs, so please don't delete it unless you know what you're doing :D
+     */
+    toggle() {
+        this.setState(prevState => ({
+            checked: !prevState.checked
+        }));
     }
 
     /**
