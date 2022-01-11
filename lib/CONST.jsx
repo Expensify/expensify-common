@@ -348,6 +348,10 @@ export const CONST = {
             DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
             PROD: 'https://s3.amazonaws.com/receipts.expensify.com/'
         },
+        RECEIPTS: {
+            DEV: 'https://www.expensify.com.dev/receipts/',
+            PROD: 'https://www.expensify.com/receipts/',
+        },
         CLOUDFRONT: 'https://d2k5nsl2zxldvw.cloudfront.net',
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
