@@ -344,10 +344,6 @@ export const CONST = {
      */
     URL: {
         FORUM_ROOT: 'https://community.expensify.com/',
-        BUCKET_RECEIPT: {
-            DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
-            PROD: 'https://s3.amazonaws.com/receipts.expensify.com/'
-        },
         RECEIPTS: {
             DEVELOPMENT: 'https://www.expensify.com.dev/receipts/',
             STAGING: 'https://staging.expensify.com/receipts/',
