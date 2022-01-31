@@ -344,10 +344,6 @@ export const CONST = {
      */
     URL: {
         FORUM_ROOT: 'https://community.expensify.com/',
-        BUCKET_RECEIPT: {
-            DEV: 'https://s3.amazonaws.com/dev-receipts-expensify-com/',
-            PROD: 'https://s3.amazonaws.com/receipts.expensify.com/'
-        },
         RECEIPTS: {
             DEVELOPMENT: 'https://www.expensify.com.dev/receipts/',
             STAGING: 'https://staging.expensify.com/receipts/',
@@ -731,12 +727,6 @@ export const CONST = {
     },
 
     NVP: {
-        // Should we show receipts on the report page?
-        REPORT_SHOW_RECEIPTS: 'expensify_report_showThumbnailReceipts',
-
-        // Should we show attachments on the report page?
-        REPORT_SHOW_ATTACHMENTS: 'expensify_report_showAttachments',
-
         // Dismissed Violations
         DISMISSED_VIOLATIONS: 'dismissedViolations'
     },
