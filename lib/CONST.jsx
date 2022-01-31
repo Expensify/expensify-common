@@ -727,12 +727,6 @@ export const CONST = {
     },
 
     NVP: {
-        // Should we show receipts on the report page?
-        REPORT_SHOW_RECEIPTS: 'expensify_report_showThumbnailReceipts',
-
-        // Should we show attachments on the report page?
-        REPORT_SHOW_ATTACHMENTS: 'expensify_report_showAttachments',
-
         // Dismissed Violations
         DISMISSED_VIOLATIONS: 'dismissedViolations'
     },
