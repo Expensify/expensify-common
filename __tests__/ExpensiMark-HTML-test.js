@@ -16,7 +16,7 @@ test('Test bold markdown replacement', () => {
 // Words wrapped in * successfully replaced with <strong></strong>
 test('Test quote markdown replacement', () => {
     const quoteTestStartString = '&gt;This is a *quote* that started on a new line.\nHere is a &gt;quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-    const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br>&gt;it&#32;should&#32;not&#32;be&#32;quoted</pre>';
+    const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br /><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted</pre>';
 
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
@@ -81,7 +81,7 @@ test('Test HTML encoded strings', () => {
 // New lines characters \\n were successfully replaced with <br>
 test('Test newline markdown replacement', () => {
     const newLineTestStartString = 'This sentence has a newline \n Yep just had one \n Oh there it is another one';
-    const newLineReplacedString = 'This sentence has a newline <br> Yep just had one <br> Oh there it is another one';
+    const newLineReplacedString = 'This sentence has a newline <br /> Yep just had one <br /> Oh there it is another one';
     expect(parser.replace(newLineTestStartString)).toBe(newLineReplacedString);
 });
 
@@ -107,16 +107,16 @@ test('Test code fencing', () => {
 
 test('Test code fencing with spaces and new lines', () => {
     let codeFenceExample = '```\nconst javaScript = \'javaScript\'\n    const php = \'php\'\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br>&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 
     codeFenceExample = '```const javaScript = \'javaScript\'\n    const php = \'php\'\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br>&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 
     codeFenceExample = '```\nconst javaScript = \'javaScript\'\n    const php = \'php\'```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br>&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 
     codeFenceExample = '```const javaScript = \'javaScript\'\n    const php = \'php\'```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br>&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
+    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 });
 
 test('Test inline code blocks', () => {
@@ -156,7 +156,7 @@ test('Test code fencing with ExpensiMark syntax inside', () => {
 test('Test combination replacements', () => {
     const urlTestStartString = '<em>Here</em> is a _combination test_ that <marquee>sees</marquee> if ~https://www.example.com~ https://otherexample.com links get rendered first followed by *other markup* or if _*two work together*_ as well. This sentence also has a newline \n Yep just had one.';
     const urlTestReplacedString = '&lt;em&gt;Here&lt;/em&gt; is a <em>combination test</em> that &lt;marquee&gt;sees&lt;/marquee&gt; if <del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <a href="https://otherexample.com"'
-        + ' target="_blank" rel="noreferrer noopener">https://otherexample.com</a> links get rendered first followed by <strong>other markup</strong> or if <em><strong>two work together</strong></em> as well. This sentence also has a newline <br> Yep just had one.';
+        + ' target="_blank" rel="noreferrer noopener">https://otherexample.com</a> links get rendered first followed by <strong>other markup</strong> or if <em><strong>two work together</strong></em> as well. This sentence also has a newline <br /> Yep just had one.';
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
 
@@ -378,7 +378,7 @@ test('Test markdown and url links with inconsistent starting and closing parens'
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
     const testString = 'The next line should be quoted\n&gt;Hello,I’mtext\n```\nThe next line should not be quoted\n&gt;Hello,I’mtext\nsince its inside a codefence```';
 
-    const resultString = 'The next line should be quoted<br><blockquote>Hello,I’mtext</blockquote><pre>The&#32;next&#32;line&#32;should&#32;not&#32;be&#32;quoted<br>&gt;Hello,I’mtext<br>since&#32;its&#32;inside&#32;a&#32;codefence</pre>';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote><pre>The&#32;next&#32;line&#32;should&#32;not&#32;be&#32;quoted<br />&gt;Hello,I’mtext<br />since&#32;its&#32;inside&#32;a&#32;codefence</pre>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -386,7 +386,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 test('Test quotes markdown replacement with text matching inside and outside codefence at the same line', () => {
     const testString = 'The next line should be quoted\n&gt;Hello,I’mtext\nThe next line should not be quoted\n```&gt;Hello,I’mtext```\nsince its inside a codefence';
 
-    const resultString = 'The next line should be quoted<br><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br><pre>&gt;Hello,I’mtext</pre><br>since its inside a codefence';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre><br />since its inside a codefence';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -394,7 +394,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 test('Test quotes markdown replacement with text matching inside and outside codefence at the end of the text', () => {
     const testString = 'The next line should be quoted\n&gt;Hello,I’mtext\nThe next line should not be quoted\n```&gt;Hello,I’mtext```';
 
-    const resultString = 'The next line should be quoted<br><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br><pre>&gt;Hello,I’mtext</pre>';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -402,7 +402,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 test('Test quotes markdown replacement with text matching inside and outside codefence with quotes at the end of the text', () => {
     const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted\n&gt;Hello,I’mtext';
 
-    const resultString = 'The next line should be quoted<br><pre>&gt;Hello,I’mtext</pre><br>The next line should not be quoted<br><blockquote>Hello,I’mtext</blockquote>';
+    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext</pre><br />The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
