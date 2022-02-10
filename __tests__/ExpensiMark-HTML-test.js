@@ -386,7 +386,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 test('Test quotes markdown replacement with text matching inside and outside codefence at the same line', () => {
     const testString = 'The next line should be quoted\n&gt;Hello,I’mtext\nThe next line should not be quoted\n```&gt;Hello,I’mtext```\nsince its inside a codefence';
 
-    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre><br />since its inside a codefence';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>since its inside a codefence';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -402,7 +402,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 test('Test quotes markdown replacement with text matching inside and outside codefence with quotes at the end of the text', () => {
     const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted\n&gt;Hello,I’mtext';
 
-    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext</pre><br />The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
+    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext</pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
