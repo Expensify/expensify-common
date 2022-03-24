@@ -346,3 +346,64 @@ test('HTML Entities', () => {
     const resultString = `${String.fromCharCode(160)} & $ : > "`;
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Map div to newline', () => {
+    const testString = '<div>line 1 <div>line 2</div></div>';
+    const resultString = 'line 1 \nline 2';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map div to newline with empty div', () => {
+    const testString = '<div>line 1 <div></div></div>';
+    const resultString = 'line 1 ';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map div to newline with empty div between words', () => {
+    const testString = '<div>line 1 <div></div>line 2</div>';
+    const resultString = 'line 1 \nline 2';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map div to newline with empty div before words', () => {
+    const testString = '<div><div></div>line 1</div>';
+    const resultString = 'line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map div to newline with empty div between before words', () => {
+    const testString = '<div><div></div>line 1</div>';
+    const resultString = 'line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('test map div with bold and italics', () => {
+    const testString = '<div><strong>line 1</strong><div></div><em>line 2</em></div>';
+    const resultString = '*line 1*\n_line 2_';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('test map div with mixed html strings', () => {
+    const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
+    const resultString = '_This is_ a *test*. None of these strings should display ~as~\nHTML\n_line 3_';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('test map div with br', () => {
+    const testString = '<div>line 1<br/></div>line 2</div>';
+    const resultString = 'line 1\nline 2';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('test map div with br', () => {
+    const testString = '<div>Text Entity &amp; &quot;</div>line 2</div>';
+    const resultString = 'Text Entity & "\nline 2';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+
+test('test map div with quotes', () => {
+    const testString = '<div><blockquote>line 1</blockquote></div>line 2</div>';
+    const resultString = '\n> line 1\nline 2';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
