@@ -33,7 +33,7 @@ test('Test strikethrough HTML replacement', () => {
 
 test('Test Mixed HTML strings', () => {
     const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del> <div>HTML</div>.';
-    const rawHTMLTestReplacedString = '_This is_ a *test*. None of these strings should display ~as~ HTML\n.';
+    const rawHTMLTestReplacedString = '_This is_ a *test*. None of these strings should display ~as~ \nHTML\n.';
     expect(parser.htmlToMarkdown(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
 
