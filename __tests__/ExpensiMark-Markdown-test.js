@@ -33,7 +33,7 @@ test('Test strikethrough HTML replacement', () => {
 
 test('Test Mixed HTML strings', () => {
     const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del> <div>HTML</div>.';
-    const rawHTMLTestReplacedString = '_This is_ a *test*. None of these strings should display ~as~ HTML.';
+    const rawHTMLTestReplacedString = '_This is_ a *test*. None of these strings should display ~as~ HTML\n.';
     expect(parser.htmlToMarkdown(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
 
@@ -71,7 +71,6 @@ test('Test HTML string with spcial Tags', () => {
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
-
 
 test('Test HTML string with Internal Tags', () => {
     const testString = `<style>
@@ -114,7 +113,6 @@ test('Test HTML string with encoded entities', () => {
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
-
 
 test('Test HTML string with blockquote', () => {
     const testString = '<blockquote><p>This GH seems to assume that there will be something in the paste\nbuffer when you copy block-quoted text out of slack. But when I dump\nsome <em>lorem ipsum</em> into a blockquote in Slack, copy it to the\nbuffer, then dump it into terminal, there\'s nothing. And if I dump it </blockquote>'
