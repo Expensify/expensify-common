@@ -419,3 +419,9 @@ test('map real message from app', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
+test('map real message with quotes', () => {
+    const testString = '<div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div><div><div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div></div></div></div></div></div></div></div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div></div></div></div></div></div></div>';
+    const resultString = '\n> hi\n\n\n> hi\n\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
