@@ -413,3 +413,9 @@ test('map table to newline', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
+test('map real message from app', () => {
+    const testString = '<div><div><div><div><div><div><div><div><div><div><div><div><comment><div><em>hhh</em><span> ddd</span></div><br></comment></div></div></div></div></div></div><div><div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div></div></div></div></div></div></div></div><div><div><div><div><div><div><div><div><div><div>ddd</div></div></div></div></div><div></div></div></div></div></div></div><div><div><div><div><div><div><div><div><div><div>dd</div></div></div></div></div></div></div></div></div></div></div>';
+    const resultString = '_hhh_ ddd\nddd\ndd';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
