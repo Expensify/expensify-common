@@ -399,6 +399,22 @@ test('Test quotes markdown replacement with text matching inside and outside cod
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test quotes markdown replacement with text matching inside and outside codefence with quotes at the end of the text', () => {
+    const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted\n&gt;Hello,I’mtext';
+
+    const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </pre><br/>', () => {
+  const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted';
+
+  const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
+
+  expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Single char matching', () => {
     const testString = ' *1* char _1_ char ~1~ char';
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
