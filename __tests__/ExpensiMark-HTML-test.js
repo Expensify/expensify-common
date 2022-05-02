@@ -431,3 +431,9 @@ test('Test for backticks with suffix', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+// Backticks with no content are not replaced with <code>
+test('Test for backticks with no content', () => {
+    const testString = '`   `';
+    const resultString = '&#x60;   &#x60;';
+    expect(parser.replace(testString)).toBe(resultString);
+});
