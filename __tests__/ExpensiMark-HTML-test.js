@@ -452,3 +452,10 @@ test('Test for codefence with no content', () => {
     const resultString = '<code>&#x60;</code>   <code>&#x60;</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+// link brackets with no content is not replaced with <a>
+test('Test for link with no content', () => {
+    const testString = '[  ](www.link.com)';
+    const resultString = '[  ](<a href="http://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
