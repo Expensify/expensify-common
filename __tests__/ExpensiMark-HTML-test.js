@@ -439,3 +439,23 @@ test('Test for backticks with suffix', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+// Backticks with no content are not replaced with <code>
+test('Test for backticks with no content', () => {
+    const testString = '`   `';
+    const resultString = '&#x60;   &#x60;';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Code-fence with no content is not replaced with <pre>
+test('Test for codefence with no content', () => {
+    const testString = '```   ```';
+    const resultString = '<code>&#x60;</code>   <code>&#x60;</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// link brackets with no content is not replaced with <a>
+test('Test for link with no content', () => {
+    const testString = '[  ](www.link.com)';
+    const resultString = '[  ](<a href="http://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
