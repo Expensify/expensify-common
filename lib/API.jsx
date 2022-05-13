@@ -201,6 +201,15 @@ export default function API(network, args) {
         },
 
         /**
+         * Forces an update of the stored latest code version without firing off an additional POST request
+         *
+         * @returns {exports.Deferred}
+         */
+        updateCodeVersion() {
+            return isRunningLatestVersionOfCode();
+        },
+
+        /**
          * Used to extend an API instance with new methods.
          *
          * @example
