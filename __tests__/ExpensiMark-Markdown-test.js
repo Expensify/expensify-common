@@ -148,6 +148,9 @@ test('Test acnchor tags convesion to markdown style link with various styles', (
         + '<a href="https://www.expensify.com" target="_blank">Expensify!</a> '
         + '<a href="https://www.expensify.com" target="_blank">Expensify?</a> '
         + '<a href="https://www.expensify-test.com" target="_blank">Expensify</a> '
+        + '<a href="https://www.expensify-test.com" target="_blank"><strong>Expensify</strong></a> '
+        + '<a href="https://www.expensify-test.com" target="_blank">test.com</a> '
+        + '<a href="https://www.expensify-test.com" target="_blank"><em>italic</em> <del>strikethrough</del> test.com</a> '
         + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank">Expensify</a> '
         + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank">Expensify</a> '
         + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank">Expensify</a>';
@@ -158,6 +161,9 @@ test('Test acnchor tags convesion to markdown style link with various styles', (
         + '[Expensify!](https://www.expensify.com) '
         + '[Expensify?](https://www.expensify.com) '
         + '[Expensify](https://www.expensify-test.com) '
+        + '[*Expensify*](https://www.expensify-test.com) '
+        + '[test.com](https://www.expensify-test.com) '
+        + '[_italic_ ~strikethrough~ test.com](https://www.expensify-test.com) '
         + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22}) '
         + '[Expensify](https://www.expensify.com/settings?param=(%22section%22+%22account%22)) '
         + '[Expensify](https://www.expensify.com/settings?param=[%22section%22:%22account%22])';
