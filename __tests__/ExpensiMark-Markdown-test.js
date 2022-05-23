@@ -424,4 +424,3 @@ test('map real message with quotes', () => {
     const resultString = '\n> hi\n\n\n> hi\n\n';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
-

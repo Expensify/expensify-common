@@ -408,11 +408,11 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 });
 
 test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </pre><br/>', () => {
-  const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted';
+    const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted';
 
-  const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
+    const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
 
-  expect(parser.replace(testString)).toBe(resultString);
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Single char matching', () => {
