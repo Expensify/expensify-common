@@ -45,6 +45,10 @@ test('Test markdown style links', () => {
 // Critical Markdown style links replaced successfully
 test('Test critical markdown style links', () => {
     const testString = 'Testing '
+    + '[~strikethrough~ *bold* _italic_](expensify.com) '
+    + '[~strikethrough~ *bold* _italic_ test.com](expensify.com) '
+    + '[~strikethrough~ *bold* _italic_ https://test.com](https://expensify.com) '
+    + '[https://www.text.com/_root_folder/1](https://www.text.com/_root_folder/1) '
     + '[first](https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) '
     + '[first no https://](www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) '
     + '[second](http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled) '
@@ -57,6 +61,10 @@ test('Test critical markdown style links', () => {
     + '[link with smart quotes ‘’“”](https://google.com) '
     + '[link with someone@expensify.com email in it](https://google.com)';
     const resultString = 'Testing '
+    + '<a href="http://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em></a> '
+    + '<a href="http://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> test.com</a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> https://test.com</a> '
+    + '<a href="https://www.text.com/_root_folder/1" target="_blank" rel="noreferrer noopener">https://www.text.com/_root_folder/1</a> '
     + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">first</a> '
     + '<a href="http://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">first no https://</a> '
     + '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">second</a> '
@@ -408,11 +416,11 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 });
 
 test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </pre><br/>', () => {
-  const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted';
+    const testString = 'The next line should be quoted\n```&gt;Hello,I’mtext```\nThe next line should not be quoted';
 
-  const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
+    const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
 
-  expect(parser.replace(testString)).toBe(resultString);
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Single char matching', () => {
