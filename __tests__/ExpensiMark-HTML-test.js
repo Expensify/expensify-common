@@ -61,8 +61,8 @@ test('Test critical markdown style links', () => {
     + '[link with smart quotes ‘’“”](https://google.com) '
     + '[link with someone@expensify.com email in it](https://google.com)';
     const resultString = 'Testing '
-    + '<a href="http://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em></a> '
-    + '<a href="http://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> test.com</a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> test.com</a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> https://test.com</a> '
     + '<a href="https://www.text.com/_root_folder/1" target="_blank" rel="noreferrer noopener">https://www.text.com/_root_folder/1</a> '
     + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">first</a> '
