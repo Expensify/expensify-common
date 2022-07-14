@@ -28,7 +28,7 @@ const generateID = (eventName) => {
 * @param {string} eventID
 * @return {String}
 */
-const extractEventName = eventID => eventID.substr(0, eventID.indexOf('@#@'));
+const extractEventName = (eventID = '') => eventID.substring(0, eventID.indexOf('@#@'));
 
 const PubSubModule = {
     ERROR: 'ev_error',
