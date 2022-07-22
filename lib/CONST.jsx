@@ -932,4 +932,7 @@ export const PUBLIC_DOMAINS = [
     'yahoo.com.br',
     'yahoo.com',
     'ymail.com',
+    'protonmail.com',
+    'proton.me',
+    'pm.me',
 ];
