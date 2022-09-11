@@ -203,14 +203,34 @@ test('Test anchor tags where links are markdown style email link with various st
         + '<strong><a href="mailto:concierge@expensify.com">Expensify</a></strong> '
         + '<a href="mailto:no-concierge1@expensify.com">Expensify!</a> '
         + '<a href="mailto:concierge?@expensify.com">Expensify?</a> '
-        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> ';
+        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> '
+        + '<a href="mailto:concierge@expensify.com"></a>'
+        + '<a href="mailto:concierge@expensify.com">   </a>'
+        + '<a href="mailto:concierge@expensify.com"> Expensify </a>'
+        + '<a href="mailto:concierge@expensify.com"> Expensify Email </a>'
+        + '<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">concierge-other@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">(Expensify)</a>'
+        + '[Expensify <a href="mailto:test@expensify.com">Test</a> Test](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
+        + '[Expensify <a href="mailto:concierge@expensify.com">Test</a>'
+        + '[Expensify ]Test](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)';
 
     const resultString = 'Go to ~[Expensify](concierge@expensify.com)~ '
         + '_[Expensify](concierge@expensify.com)_ '
         + '*[Expensify](concierge@expensify.com)* '
         + '[Expensify!](no-concierge1@expensify.com) '
         + '[Expensify?](concierge?@expensify.com) '
-        + '[Applause](applausetester+qaabecciv@applause.expensifail.com) ';
+        + '[Applause](applausetester+qaabecciv@applause.expensifail.com) '
+        + '[](concierge@expensify.com)'
+        + '[   ](concierge@expensify.com)'
+        + '[ Expensify ](concierge@expensify.com)'
+        + '[ Expensify Email ](concierge@expensify.com)'
+        + 'concierge@expensify.com'
+        + '[concierge-other@expensify.com](concierge@expensify.com)'
+        + '[(Expensify)](concierge@expensify.com)'
+        + '[Expensify [Test](test@expensify.com) Test](concierge@expensify.com)'
+        + '[Expensify [Test](concierge@expensify.com)'
+        + '[Expensify ]Test](concierge@expensify.com)';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
