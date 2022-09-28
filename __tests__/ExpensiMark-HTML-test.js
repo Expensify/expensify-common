@@ -305,14 +305,34 @@ test('Test markdown style email link with various styles', () => {
         + '*[Expensify](concierge@expensify.com)* '
         + '[Expensify!](no-concierge1@expensify.com) '
         + '[Expensify?](concierge?@expensify.com) '
-        + '[Applause](applausetester+qaabecciv@applause.expensifail.com) ';
+        + '[Applause](applausetester+qaabecciv@applause.expensifail.com) '
+        + '[](concierge@expensify.com)' // empty in []
+        + '[   ](concierge@expensify.com)' // only spaces in []
+        + '[ Expensify ](concierge@expensify.com)' // edge spaces in []
+        + '[ Expensify Email ](concierge@expensify.com)' // space between words in []
+        + '[concierge@expensify.com](concierge@expensify.com)' // same email between [] and ()
+        + '[concierge-other@expensify.com](concierge@expensify.com)' // different emails between [] and ()
+        + '[(Expensify)](concierge@expensify.com)' // () in []
+        + '[Expensify [Test](test@expensify.com) Test](concierge@expensify.com)' // []() in []
+        + '[Expensify [Test](concierge@expensify.com)' // [ in []
+        + '[Expensify ]Test](concierge@expensify.com)'; // ] in []
 
     const resultString = 'Go to <del><a href="mailto:concierge@expensify.com">Expensify</a></del> '
         + '<em><a href="mailto:concierge@expensify.com">Expensify</a></em> '
         + '<strong><a href="mailto:concierge@expensify.com">Expensify</a></strong> '
         + '<a href="mailto:no-concierge1@expensify.com">Expensify!</a> '
         + '<a href="mailto:concierge?@expensify.com">Expensify?</a> '
-        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> ';
+        + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> '
+        + '<a href="mailto:concierge@expensify.com"></a>'
+        + '<a href="mailto:concierge@expensify.com"></a>'
+        + '<a href="mailto:concierge@expensify.com">Expensify</a>'
+        + '<a href="mailto:concierge@expensify.com">Expensify Email</a>'
+        + '<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">concierge-other@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">(Expensify)</a>'
+        + '[Expensify <a href="mailto:test@expensify.com">Test</a> Test](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
+        + '[Expensify <a href="mailto:concierge@expensify.com">Test</a>'
+        + '[Expensify ]Test](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
