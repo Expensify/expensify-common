@@ -935,4 +935,7 @@ export const PUBLIC_DOMAINS = [
     'protonmail.com',
     'proton.me',
     'pm.me',
+    'protonmail.ch',
+    'afis.ch',
+    'rigl.ch',
 ];
