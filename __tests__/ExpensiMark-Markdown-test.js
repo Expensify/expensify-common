@@ -32,7 +32,7 @@ test('Test strikethrough HTML replacement', () => {
 });
 
 test('Test Mixed HTML strings', () => {
-    const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del> <div>HTML</div>.';
+    const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del> <div>HTML</div>.';
     const rawHTMLTestReplacedString = '_This is_ a *test*. None of \nthese strings\n should display ~as~ \nHTML\n.';
     expect(parser.htmlToMarkdown(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
@@ -412,7 +412,7 @@ test('map div with bold and italics', () => {
 });
 
 test('map div with mixed html strings', () => {
-    const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
+    const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
     const resultString = '_This is_ a *test*. None of \nthese strings\n should display ~as~\nHTML\n_line 3_';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
