@@ -478,18 +478,20 @@ test('Test heading1 markdown when # is in the middle of the line', () => {
 });
 
 test('Test html string to heading1 markdown', () => {
-    const testString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />'
-    + '<h1>This is also a heading1 because starts with # followed by a space</h1><br />'
-    + 'this is not a <strong>heading1</strong> because does not start with #<br />'
-    + '#This is not a <em>heading1</em> either because starts with a # but has no space after it<br />'
-    + 'this line has no special therefore it cannot be a heading1<br />'
-    + 'this line has a <h1>heading1</h1> in the middle of the line';
-    const resultString = '\n# This is a heading1 because starts with # followed by a space\n'
-    + '\n# This is also a heading1 because starts with # followed by a space\n'
-    + 'this is not a *heading1* because does not start with #\n'
-    + '#This is not a _heading1_ either because starts with a # but has no space after it\n'
-    + 'this line has no special therefore it cannot be a heading1\n'
-    + 'this line has a\n'
+    const testString = '<h1>This is a heading1</h1><br />';
+    const resultString = '\n# This is a heading1\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when there are other tags inside h1 tag', () => {
+    const testString = '<h1>This is a <strong>heading1</strong></h1>';
+    const resultString = '\n# This is a *heading1*\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when h1 tags are in the middle of the line', () => {
+    const testString = 'this line has a <h1>heading1</h1> in the middle of the line';
+    const resultString = 'this line has a\n'
     + '# heading1\n'
     + 'in the middle of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
