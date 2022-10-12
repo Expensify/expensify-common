@@ -32,7 +32,7 @@ test('Test strikethrough HTML replacement', () => {
 });
 
 test('Test Mixed HTML strings', () => {
-    const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del> <div>HTML</div>.';
+    const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del> <div>HTML</div>.';
     const rawHTMLTestReplacedString = '_This is_ a *test*. None of \nthese strings\n should display ~as~ \nHTML\n.';
     expect(parser.htmlToMarkdown(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
@@ -412,7 +412,7 @@ test('map div with bold and italics', () => {
 });
 
 test('map div with mixed html strings', () => {
-    const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h1>these strings</h1> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
+    const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
     const resultString = '_This is_ a *test*. None of \nthese strings\n should display ~as~\nHTML\n_line 3_';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
@@ -450,5 +450,49 @@ test('map real message from app', () => {
 test('map real message with quotes', () => {
     const testString = '<div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div><div><div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div></div></div></div></div></div></div></div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div></div></div></div></div></div></div>';
     const resultString = '\n> hi\n\n\n> hi\n\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown replacement', () => {
+    const testString = '# This is a heading1 because starts with # followed by a space\n';
+    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown replacement when # is followed by multiple spaces', () => {
+    const testString = '#    This is also a heading1 because starts with # followed by a space\n';
+    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1><br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown when # is not followed by a space', () => {
+    const testString = '#This is not a heading1 because starts with a # but has no space after it\n';
+    const resultString = '#This is not a heading1 because starts with a # but has no space after it<br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown when # is in the middle of the line', () => {
+    const testString = 'This is not # a heading1\n';
+    const resultString = 'This is not # a heading1<br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test html string to heading1 markdown', () => {
+    const testString = '<h1>This is a heading1</h1><br />';
+    const resultString = '\n# This is a heading1\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when there are other tags inside h1 tag', () => {
+    const testString = '<h1>This is a <strong>heading1</strong></h1>';
+    const resultString = '\n# This is a *heading1*\n';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when h1 tags are in the middle of the line', () => {
+    const testString = 'this line has a <h1>heading1</h1> in the middle of the line';
+    const resultString = 'this line has a\n'
+    + '# heading1\n'
+    + 'in the middle of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
