@@ -454,16 +454,26 @@ test('map real message with quotes', () => {
 });
 
 test('Test heading1 markdown replacement', () => {
-    const testString = '# This is a heading1 because starts with # followed by a space\n'
-    + '#    This is also a heading1 because starts with # followed by a space\n'
-        + 'this is not a heading1 because does not start with #\n'
-        + '#This is not a heading1 either because starts with a # but has no space after it\n'
-        + 'this line has no special therefore it cannot be a heading1';
-    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />'
-    + '<h1>This is also a heading1 because starts with # followed by a space</h1><br />'
-    + 'this is not a heading1 because does not start with #<br />'
-    + '#This is not a heading1 either because starts with a # but has no space after it<br />'
-    + 'this line has no special therefore it cannot be a heading1';
+    const testString = '# This is a heading1 because starts with # followed by a space\n';
+    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown replacement when # is followed by multiple spaces', () => {
+    const testString = '#    This is also a heading1 because starts with # followed by a space\n';
+    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1><br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown when # is not followed by a space', () => {
+    const testString = '#This is not a heading1 because starts with a # but has no space after it\n';
+    const resultString = '#This is not a heading1 because starts with a # but has no space after it<br />';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test heading1 markdown when # is in the middle of the line', () => {
+    const testString = 'This is not # a heading1\n';
+    const resultString = 'This is not # a heading1<br />';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
