@@ -762,10 +762,12 @@ export default function API(network, args) {
 
         card: {
             /**
-             * Set the limit of an expensify card
+             * Set the limit of an expensify card. We need to pass either `email` or `cardUserEmail`.
+             * `cardUserEmail` is correct, but email is still supported across the rollout to `cardUserEmail`.
              *
              * @param {Object} parameters
-             * @param {String} parameters.email who the card is assigned to
+             * @param {String} [parameters.email] who the card is assigned to
+             * @param {String} [parameters.cardUserEmail] who the card is assigned to
              * @param {Boolean} parameters.hasCustomLimit whether or not the card has a custom limit
              * @param {Number} [parameters.cardID]
              * @param {Number} [parameters.limit] should be in positive cents
@@ -775,7 +777,7 @@ export default function API(network, args) {
              */
             setLimit(parameters) {
                 const commandName = 'Card_setLimit';
-                requireParameters(['email', 'hasCustomLimit', 'domainName'], parameters, commandName);
+                requireParameters(['hasCustomLimit', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
         },
