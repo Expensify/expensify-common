@@ -938,4 +938,5 @@ export const PUBLIC_DOMAINS = [
     'protonmail.ch',
     'protonmail.com',
     'proton.me',
+    'spacehotline.com',
 ];
