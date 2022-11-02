@@ -893,6 +893,7 @@ export const UI = {
 
 // List of most frequently used public domains
 export const PUBLIC_DOMAINS = [
+    'afis.ch',
     'aol.com',
     'att.net',
     'bellsouth.net',
@@ -923,6 +924,7 @@ export const PUBLIC_DOMAINS = [
     'outlook.com',
     'privaterelay.appleid.com',
     'qq.com',
+    'rigl.ch',
     'sasktel.net',
     'sbcglobal.net',
     'verizon.net',
@@ -932,10 +934,8 @@ export const PUBLIC_DOMAINS = [
     'yahoo.com.br',
     'yahoo.com',
     'ymail.com',
-    'protonmail.com',
-    'proton.me',
     'pm.me',
     'protonmail.ch',
-    'afis.ch',
-    'rigl.ch',
+    'protonmail.com',
+    'proton.me',
 ];
