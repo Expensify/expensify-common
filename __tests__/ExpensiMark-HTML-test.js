@@ -394,7 +394,7 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         + '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link [square brackets within] here</a>)'
         + '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link (parenthesis within) here</a>)'
         + '[Text text] more text <a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>'
-        + '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here  </a>)'
+        + '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)'
         + '[Text text] more text ((<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>))'
         + '[Text text] more text [(<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)]'
         + '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)';
