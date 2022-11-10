@@ -939,4 +939,9 @@ export const PUBLIC_DOMAINS = [
     'protonmail.com',
     'proton.me',
     'spacehotline.com',
+    'tafmail.com',
+    'jeeviess.com',
+    'wolfandcranebar.tech',
+    'cryptohistoryprice.com',
+    'vomoto.com',
 ];
