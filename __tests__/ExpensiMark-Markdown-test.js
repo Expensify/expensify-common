@@ -455,13 +455,13 @@ test('map real message with quotes', () => {
 
 test('Test heading1 markdown replacement', () => {
     const testString = '# This is a heading1 because starts with # followed by a space\n';
-    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />';
+    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test heading1 markdown replacement when # is followed by multiple spaces', () => {
     const testString = '#    This is also a heading1 because starts with # followed by a space\n';
-    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1><br />';
+    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -478,7 +478,7 @@ test('Test heading1 markdown when # is in the middle of the line', () => {
 });
 
 test('Test html string to heading1 markdown', () => {
-    const testString = '<h1>This is a heading1</h1><br />';
+    const testString = '<h1>This is a heading1</h1>';
     const resultString = '\n# This is a heading1\n';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
