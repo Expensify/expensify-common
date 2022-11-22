@@ -10,6 +10,13 @@ test('Test space replacement on breakline', () => {
     expect(parser.htmlToText(html)).toBe(text);
 });
 
+test('Test space replacement on consecutive breaklines', () => {
+    const html = '1 <br /><br /><br />2<br />3';
+    const text = '1    2 3';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
 test('Test space replacement on blockquote close tag', () => {
     const html = '<blockquote>Confusing stuff</blockquote>Tell me about it';
     const text = 'Confusing stuff Tell me about it';
