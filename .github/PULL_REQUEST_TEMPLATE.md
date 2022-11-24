@@ -1,6 +1,4 @@
-TAG_REVIEWER will you please review this?
-
-[Explanation of the change or anything fishy that is going on]
+<!-- Add an explanation of the change or anything fishy that is going on -->
 
 ### Fixed Issues
 $ GH_LINK
