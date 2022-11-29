@@ -52,3 +52,12 @@ test('Test replacement on mixed html', () => {
 
     expect(parser.htmlToText(html)).toBe(text);
 });
+
+test('Test strip unhandled tags', () => {
+    const html = 'First Line<br /><div>Quoted line <code>code</code></div>3<br /><span>4</span>Five';
+
+    // A new line should be added for <blockquote> because there is content before it
+    const text = 'First Line\nQuoted line code3\n4Five';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
