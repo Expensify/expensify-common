@@ -35,6 +35,15 @@ test('Test new line replacement on blockquote with content before blockquote', (
     expect(parser.htmlToText(html)).toBe(text);
 });
 
+test('Test new line replacement on blockquote without content after closing blockquote', () => {
+    const html = 'content before<blockquote>Confusing stuff</blockquote>';
+
+    // No new line should be added after </blockquote> because there is no content after it
+    const text = 'content before\nConfusing stuff';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
 test('Test replacement on mixed html', () => {
     const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote>Five';
 
