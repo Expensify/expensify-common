@@ -56,7 +56,7 @@ test('Test replacement on mixed html', () => {
 test('Test strip unhandled tags', () => {
     const html = 'First Line<br /><div>Quoted line <code>code</code></div>3<br /><span>4</span>Five';
 
-    // A new line should be added for <blockquote> because there is content before it
+    // Unhandled tags like <div> and <span> should be stripped without loosing the text content
     const text = 'First Line\nQuoted line code3\n4Five';
 
     expect(parser.htmlToText(html)).toBe(text);
