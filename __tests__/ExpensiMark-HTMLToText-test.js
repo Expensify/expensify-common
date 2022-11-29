@@ -44,20 +44,18 @@ test('Test new line replacement on blockquote without content after closing bloc
     expect(parser.htmlToText(html)).toBe(text);
 });
 
-test('Test replacement on mixed html', () => {
-    const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote>Five';
-
-    // A new line should be added for <blockquote> because there is content before it
-    const text = 'First Line\n\nQuoted line code\n3\n\n4\nFive';
-
-    expect(parser.htmlToText(html)).toBe(text);
-});
-
 test('Test strip unhandled tags', () => {
     const html = 'First Line<br /><div>Quoted line <code>code</code></div>3<br /><span>4</span>Five';
 
     // Unhandled tags like <div> and <span> should be stripped without loosing the text content
     const text = 'First Line\nQuoted line code3\n4Five';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test replacement on mixed html', () => {
+    const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote><span>Five</span>';
+    const text = 'First Line\n\nQuoted line code\n3\n\n4\nFive';
 
     expect(parser.htmlToText(html)).toBe(text);
 });
