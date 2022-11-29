@@ -5,14 +5,14 @@ const parser = new ExpensiMark();
 
 test('Test space replacement on breakline', () => {
     const html = '1<br />2<br />3';
-    const text = '1 2 3';
+    const text = '1\n2\n3';
 
     expect(parser.htmlToText(html)).toBe(text);
 });
 
 test('Test space replacement on consecutive breaklines', () => {
     const html = '1 <br /><br /><br />2<br />3';
-    const text = '1    2 3';
+    const text = '1 \n\n\n2\n3';
 
     expect(parser.htmlToText(html)).toBe(text);
 });
@@ -26,7 +26,7 @@ test('Test space replacement on blockquote close tag', () => {
 
 test('Test replacement on html', () => {
     const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote>Five';
-    const text = 'First Line Quoted line code 3 4 Five';
+    const text = 'First Line\nQuoted line code 3\n4 Five';
 
     expect(parser.htmlToText(html)).toBe(text);
 });
