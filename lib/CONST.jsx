@@ -807,22 +807,17 @@ export const CONST = {
         TOO_LIMITED: {
             id: 'tooLimited',
             label: 'Functionality needs improvement or is confusing',
-            prompt: 'What features would you like to see added or improved?',
+            prompt: 'What software are you migrating to and what led to this decision?',
         },
         TOO_EXPENSIVE: {
             id: 'tooExpensive',
             label: 'Too expensive',
-            prompt: 'What is the main reason you think Expensify is too expensive, and what do you think is a fair price?',
+            prompt: 'What software are you migrating to and what do you think is a fair price?',
         },
         INADEQUATE_SUPPORT: {
             id: 'inadequateSupport',
             label: 'Inadequate customer support',
-            prompt: 'What about our customer support didn\'t work well for you?',
-        },
-        BILLING_CONFUSING: {
-            id: 'billingIsConfusing',
-            label: 'Billing is confusing',
-            prompt: 'What do you think is confusing about our billing?',
+            prompt: 'What software are you migrating to and what led to this decision?',
         },
         PREFER_MANUAL_RENEW: {
             id: 'preferManualRenew',
@@ -832,22 +827,12 @@ export const CONST = {
         BUSINESS_CLOSING: {
             id: 'businessClosing',
             label: 'Company closing, downsizing, or acquired',
-            prompt: 'Would you have liked to continue using Expensify, or would you recommend it in your network?',
-        },
-        NO_LONGER_NEEDED: {
-            id: 'noLongerNeeded',
-            label: 'Change in personal circumstances',
-            prompt: 'What changed in your circumstances so that you no longer need it?',
-        },
-        SWITCHING_TO_COMPETITOR: {
-            id: 'switchingToCompetitor',
-            label: 'Switching to another method or system',
-            prompt: 'What software are you migrating to, and what led to this decision?',
+            prompt: 'What software are you migrating to and what led to this decision?',
         },
         DUPLICATE_OR_ACCIDENTAL_SUBSCRIPTION: {
             id: 'accidentalSubscription',
             label: 'Duplicate or accidental subscription',
-            prompt: 'Why do you think that happened?',
+            prompt: 'What were you trying to accomplish that led to this?',
         },
     },
 };
