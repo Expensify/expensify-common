@@ -337,6 +337,12 @@ test('Test markdown style email link with various styles', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test a url with multiple underscores', () => {
+    const testString = '[_example link_](https://www.facebook.com/hashtag/__main/?__eep__=6)';
+    const resultString = '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener"><em>example link</em></a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test general email link with various styles', () => {
     const testString = 'Go to concierge@expensify.com '
         + 'no-concierge@expensify.com '
