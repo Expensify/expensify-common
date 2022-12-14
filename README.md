@@ -17,6 +17,8 @@ The best way to test your code while you are developing changes is via `npm link
 1. `cd` into the project directory that has a dependency on `expensify-common`
 1. Run `npm link expensify-common`
 
+If that does not work, another option is running `npm i expensify-common ../expensify-common --save`.
+
 Alternatively, you can edit files directly in a project's `node_modules` then apply those changes to this repository.
 
 # Proposing a Change (Non-Expensify Contributors)
