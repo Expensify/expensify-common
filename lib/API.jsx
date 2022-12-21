@@ -354,13 +354,14 @@ export default function API(network, args) {
         /**
          * @param {Object} parameters
          * @param {String} parameters.email
-         * @param {String} parameters.password
+         * @param {String} [parameters.password]
          * @param {String} [parameters.promoCode]
+         * @param {String} [parameters.validateCode]
          * @returns {APIDeferred}
          */
         signIn(parameters) {
             const commandName = 'SignIn';
-            requireParameters(['email', 'password'], parameters, commandName);
+            requireParameters(['email'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
