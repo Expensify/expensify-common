@@ -7,10 +7,18 @@ const PARTNER_DETAILS = {
     PARTNER_PASSWORD: 'e21965746fd75f82bb66'
 };
 const CredentialWrapper = {
+    /**
+     *
+     * @returns {Promise} Promise resolves to an object containing partnerUserID and partnerUserSecret
+     */
     getCredentials() {
         return localForage.getItem(PARTNER_DETAILS.CREDENTIALS_KEY);
     },
 
+    /**
+     *
+     * @returns {Object} Object contains randomly generated partnerUserID and partnerUserSecret
+     */
     generateCredentials() {
         return {
             partnerUserID: PARTNER_DETAILS.EXPENSIFY_PARTNER_PREFIX + crypto.randomUUID(),
@@ -18,6 +26,13 @@ const CredentialWrapper = {
         };
     },
 
+    /**
+     * @param {Object} credentials
+     * @param {String} credentials.partnerUserID
+     * @param {String} credentials.partnerUserSecret
+     *
+     * @returns {Promise} Promise resolves to an object containing partnerUserID and partnerUserSecret
+     */
     setCredentials(credentials) {
         if (!credentials.partnerUserID || credentials.partnerUserSecret) {
             return Promise.reject('Invalid credential pair');
@@ -26,6 +41,10 @@ const CredentialWrapper = {
         return localForage.setItem(PARTNER_DETAILS.CREDENTIALS_KEY, credentials);
     },
 
+    /**
+     *
+     * @returns {Promise}
+     */
     clearCredentials() {
         return localForage.removeItem(PARTNER_DETAILS.CREDENTIALS_KEY);
     },
