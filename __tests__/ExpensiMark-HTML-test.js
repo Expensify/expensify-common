@@ -13,7 +13,7 @@ test('Test bold markdown replacement', () => {
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
-// Words wrapped in * successfully replaced with <strong></strong>
+// Sections starting with > are successfully wrapped with <blockquote></blockquote>
 test('Test quote markdown replacement', () => {
     const quoteTestStartString = '&gt;This is a *quote* that started on a new line.\nHere is a &gt;quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
     const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not <pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted</pre>';
