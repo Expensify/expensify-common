@@ -13,6 +13,14 @@ test('Test bold markdown replacement', () => {
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+// Multi-line text wrapped in * is successfully replaced with <strong></strong>
+test('Test multi-line bold markdown replacement', () => {
+    const testString = '*Here is a multi-line\ncomment that should\nbe bold*';
+    const replacedString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 // Sections starting with > are successfully wrapped with <blockquote></blockquote>
 test('Test quote markdown replacement', () => {
     const quoteTestStartString = '&gt;This is a *quote* that started on a new line.\nHere is a &gt;quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
