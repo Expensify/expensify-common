@@ -43,6 +43,15 @@ test('Test strikethrough markdown replacement', () => {
     expect(parser.replace(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
 });
 
+
+// Multi-line text wrapped in ~ is successfully replaced with <del></del>
+test('Test multi-line strikethrough markdown replacement', () => {
+    const testString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+    const replacedString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
     const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
