@@ -38,6 +38,13 @@ test('Test strikethrough HTML replacement', () => {
     expect(parser.htmlToMarkdown(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
 });
 
+test('Test multi-line strikethrough HTML replacement', () => {
+    const testString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+    const replacedString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 test('Test Mixed HTML strings', () => {
     const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del> <div>HTML</div>.';
     const rawHTMLTestReplacedString = '_This is_ a *test*. None of \nthese strings\n should display ~as~ \nHTML\n.';
