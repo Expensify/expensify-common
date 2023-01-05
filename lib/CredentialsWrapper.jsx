@@ -1,6 +1,6 @@
 import localForage from 'localforage';
 
-const PARTNER_DETAILS = {
+const LOGIN_PARTNER_DETAILS = {
     CREDENTIALS_KEY: 'DEVICE_SESSION_CREDENTIALS',
     EXPENSIFY_PARTNER_PREFIX: 'expensify.',
     PARTNER_NAME: 'chat-expensify-com',
@@ -12,7 +12,7 @@ const CredentialWrapper = {
      * @returns {Promise} Promise resolves to an object containing partnerUserID and partnerUserSecret
      */
     getCredentials() {
-        return localForage.getItem(PARTNER_DETAILS.CREDENTIALS_KEY);
+        return localForage.getItem(LOGIN_PARTNER_DETAILS.CREDENTIALS_KEY);
     },
 
     /**
@@ -21,7 +21,7 @@ const CredentialWrapper = {
      */
     generateCredentials() {
         return {
-            partnerUserID: PARTNER_DETAILS.EXPENSIFY_PARTNER_PREFIX + crypto.randomUUID(),
+            partnerUserID: LOGIN_PARTNER_DETAILS.EXPENSIFY_PARTNER_PREFIX + crypto.randomUUID(),
             partnerUserSecret: crypto.randomUUID(),
         };
     },
@@ -38,7 +38,7 @@ const CredentialWrapper = {
             return Promise.reject('Invalid credential pair');
         }
 
-        return localForage.setItem(PARTNER_DETAILS.CREDENTIALS_KEY, credentials);
+        return localForage.setItem(LOGIN_PARTNER_DETAILS.CREDENTIALS_KEY, credentials);
     },
 
     /**
@@ -46,7 +46,7 @@ const CredentialWrapper = {
      * @returns {Promise}
      */
     clearCredentials() {
-        return localForage.removeItem(PARTNER_DETAILS.CREDENTIALS_KEY);
+        return localForage.removeItem(LOGIN_PARTNER_DETAILS.CREDENTIALS_KEY);
     },
 };
 
