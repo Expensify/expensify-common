@@ -16,6 +16,13 @@ test('Test bold HTML replacement', () => {
     expect(parser.htmlToMarkdown(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+test('Test multi-line bold HTML replacement', () => {
+    const testString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
+    const replacedString = '*Here is a multi-line\ncomment that should\nbe bold*';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 test('Test italic HTML replacement', () => {
     const italicTestStartString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _ '
         + 'This is a <i>sentence,</i> and it has some <i>punctuation, words, and spaces</i>. <i>test</i> _ testing_ test_test_test. _ test _ _test _';
@@ -29,6 +36,13 @@ test('Test strikethrough HTML replacement', () => {
     const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     const strikethroughTestReplacedString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.htmlToMarkdown(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
+});
+
+test('Test multi-line strikethrough HTML replacement', () => {
+    const testString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+    const replacedString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
 test('Test Mixed HTML strings', () => {
