@@ -626,7 +626,7 @@ export default function API(network, args) {
          *
          * @returns {APIDeferred}
          */
-        Create_Login(parameters) {
+        createLogin(parameters) {
             const commandName = 'CreateLogin';
             requireParameters(['partnerName', 'partnerPassword', 'partnerUserID', 'partnerUserSecret'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);

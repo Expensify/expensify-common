@@ -8,7 +8,6 @@ export const LOGIN_PARTNER_DETAILS = {
 };
 const CredentialWrapper = {
     /**
-     *
      * @returns {Promise} Promise resolves to an object containing partnerUserID and partnerUserSecret
      */
     getCredentials() {
@@ -16,7 +15,6 @@ const CredentialWrapper = {
     },
 
     /**
-     *
      * @returns {Object} Object contains randomly generated partnerUserID and partnerUserSecret
      */
     generateCredentials() {
@@ -42,7 +40,6 @@ const CredentialWrapper = {
     },
 
     /**
-     *
      * @returns {Promise}
      */
     clearCredentials() {
