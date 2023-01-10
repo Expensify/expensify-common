@@ -188,6 +188,9 @@ test('Test code fencing with additional backticks inside', () => {
     nestedBackticks = '````````';
     expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;</pre>');
 
+    nestedBackticks = '````\n````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />&#x60;</pre>');
+
     nestedBackticks = '```````````';
     expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>');
 

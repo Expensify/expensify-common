@@ -383,6 +383,26 @@ test('Test HTML string with code fence', () => {
     expect(parser.htmlToMarkdown(testStringWithNewLinesFromSlack)).toBe(resultStringWithNewLinesFromSlack);
 });
 
+test('Test code fence and extra backticks', () => {
+    let nestedBackticks = '<pre>&#x60;test&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`test`\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />test<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\ntest\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n``\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`````\n```');
+
+    nestedBackticks = '<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)`\n```');
+});
+
 test('HTML Entities', () => {
     const testString = '&nbsp; &amp; &dollar; &colon; &gt; &quot;';
     const resultString = `${String.fromCharCode(160)} & $ : > "`;
