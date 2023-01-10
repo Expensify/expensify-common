@@ -178,6 +178,23 @@ test('Test code fencing with ExpensiMark syntax inside', () => {
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
 });
 
+test('Test code fencing with additional backticks inside', () => {
+    let nestedBackticks = '````test````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;</pre>');
+
+    nestedBackticks = '````\ntest\n````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />test<br />&#x60;</pre>');
+
+    nestedBackticks = '````````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;</pre>');
+
+    nestedBackticks = '```````````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>');
+
+    nestedBackticks = '````This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>');
+});
+
 test('Test combination replacements', () => {
     const urlTestStartString = '<em>Here</em> is a _combination test_ that <marquee>sees</marquee> if ~https://www.example.com~ https://otherexample.com links get rendered first followed by *other markup* or if _*two work together*_ as well. This sentence also has a newline \n Yep just had one.';
     const urlTestReplacedString = '&lt;em&gt;Here&lt;/em&gt; is a <em>combination test</em> that &lt;marquee&gt;sees&lt;/marquee&gt; if <del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <a href="https://otherexample.com"'
