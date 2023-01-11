@@ -16,6 +16,13 @@ test('Test bold HTML replacement', () => {
     expect(parser.htmlToMarkdown(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+test('Test multi-line bold HTML replacement', () => {
+    const testString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
+    const replacedString = '*Here is a multi-line\ncomment that should\nbe bold*';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 test('Test italic HTML replacement', () => {
     const italicTestStartString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _ '
         + 'This is a <i>sentence,</i> and it has some <i>punctuation, words, and spaces</i>. <i>test</i> _ testing_ test_test_test. _ test _ _test _';
@@ -29,6 +36,13 @@ test('Test strikethrough HTML replacement', () => {
     const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     const strikethroughTestReplacedString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.htmlToMarkdown(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
+});
+
+test('Test multi-line strikethrough HTML replacement', () => {
+    const testString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+    const replacedString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
 test('Test Mixed HTML strings', () => {
@@ -367,6 +381,26 @@ test('Test HTML string with code fence', () => {
     + '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>line6</pre>';
     const resultStringWithNewLinesFromSlack = '```\nline1\n\nline3\n\n\nline6\n```';
     expect(parser.htmlToMarkdown(testStringWithNewLinesFromSlack)).toBe(resultStringWithNewLinesFromSlack);
+});
+
+test('Test code fence and extra backticks', () => {
+    let nestedBackticks = '<pre>&#x60;test&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`test`\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />test<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\ntest\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n``\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`````\n```');
+
+    nestedBackticks = '<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)`\n```');
 });
 
 test('HTML Entities', () => {

@@ -13,7 +13,15 @@ test('Test bold markdown replacement', () => {
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
-// Words wrapped in * successfully replaced with <strong></strong>
+// Multi-line text wrapped in * is successfully replaced with <strong></strong>
+test('Test multi-line bold markdown replacement', () => {
+    const testString = '*Here is a multi-line\ncomment that should\nbe bold*';
+    const replacedString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
+// Sections starting with > are successfully wrapped with <blockquote></blockquote>
 test('Test quote markdown replacement', () => {
     const quoteTestStartString = '&gt;This is a *quote* that started on a new line.\nHere is a &gt;quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
     const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not <pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted</pre>';
@@ -33,6 +41,15 @@ test('Test strikethrough markdown replacement', () => {
     const strikethroughTestStartString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     const strikethroughTestReplacedString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.replace(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
+});
+
+
+// Multi-line text wrapped in ~ is successfully replaced with <del></del>
+test('Test multi-line strikethrough markdown replacement', () => {
+    const testString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+    const replacedString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
 });
 
 // Markdown style links replaced successfully
@@ -159,6 +176,26 @@ test('Test code fencing with ExpensiMark syntax inside', () => {
 
     codeFenceExample = '```This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
+});
+
+test('Test code fencing with additional backticks inside', () => {
+    let nestedBackticks = '````test````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;</pre>');
+
+    nestedBackticks = '````\ntest\n````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />test<br />&#x60;</pre>');
+
+    nestedBackticks = '````````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;</pre>');
+
+    nestedBackticks = '````\n````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />&#x60;</pre>');
+
+    nestedBackticks = '```````````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>');
+
+    nestedBackticks = '````This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)````';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>');
 });
 
 test('Test combination replacements', () => {
