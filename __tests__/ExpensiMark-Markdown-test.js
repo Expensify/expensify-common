@@ -530,3 +530,9 @@ test('Test html to heading1 markdown when h1 tags are in the middle of the line'
     + 'in the middle of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Test link with multiline text do not loses markdown', () => {
+    const testString = '<a href="https://google.com/">multiline\ntext</a>';
+    const resultString = '[multiline\ntext](https://google.com/)'
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
