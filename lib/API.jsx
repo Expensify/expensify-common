@@ -614,6 +614,43 @@ export default function API(network, args) {
             return performPOSTRequest(commandName, parameters);
         },
 
+        /**
+         * Performs API command CreateLogin
+         * This method gets called to add a new login method to the Logins table
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.partnerName
+         * @param {String} parameters.partnerPassword
+         * @param {String} parameters.partnerUserID
+         * @param {String} parameters.partnerUserSecret
+         *
+         * @returns {APIDeferred}
+         */
+        createLogin(parameters) {
+            const commandName = 'CreateLogin';
+            requireParameters(['partnerName', 'partnerPassword', 'partnerUserID', 'partnerUserSecret'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * Performs API command Authenticate
+         * This method gets called when existing token are expired
+         * which helps in having an infinite session
+         *
+         * @param {Object} parameters
+         * @param {String} parameters.partnerName
+         * @param {String} parameters.partnerPassword
+         * @param {String} parameters.partnerUserID
+         * @param {String} parameters.partnerUserSecret
+         *
+         * @returns {APIDeferred}
+         */
+        authenticate(parameters) {
+            const commandName = 'Authenticate';
+            requireParameters(['partnerName', 'partnerPassword', 'partnerUserID', 'partnerUserSecret'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
         expensiworks: {
             /**
              * Get the logged in agent's accuracy fields
