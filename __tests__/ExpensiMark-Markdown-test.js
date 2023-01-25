@@ -536,3 +536,27 @@ test('Test link with multiline text do not loses markdown', () => {
     const resultString = '[multiline\ntext](https://google.com/)'
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
+
+test('Map html paragraph to newline', () => {
+    const testString = '<p>This is a HTML paragraph</p><p>This is an another HTML paragraph</p>';
+    const resultString = 'This is a HTML paragraph\nThis is an another HTML paragraph';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map html paragraph with <br/> to newline', () => {
+    const testString = '<p>This is a HTML paragraph</p><br/><p>This is an another HTML paragraph</p>';
+    const resultString = 'This is a HTML paragraph\n\nThis is an another HTML paragraph';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map html list item to newline with two prefix spaces', () => {
+    const testString = '<ul><li>This is a HTML list item</li><li>This is an another HTML list item</li></ul>';
+    const resultString = '  This is a HTML list item\n  This is an another HTML list item';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test list item replacement when there is an anchor tag inside <li> tag', () => {
+    const testString = '<ul><li><a href="https://example.com">Coffee</a> -- Coffee</li><li><a href="https://example.com">Tea</a> -- Tea</li><li><a href="https://example.com">Milk</a> -- Milk</li></ul>';
+    const resultString = '  [Coffee](https://example.com) -- Coffee\n  [Tea](https://example.com) -- Tea\n  [Milk](https://example.com) -- Milk';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
