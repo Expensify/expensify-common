@@ -16,6 +16,13 @@ test('Test bold HTML replacement', () => {
     expect(parser.htmlToMarkdown(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+test('Test multi-line bold HTML replacement', () => {
+    const testString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
+    const replacedString = '*Here is a multi-line\ncomment that should\nbe bold*';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 test('Test italic HTML replacement', () => {
     const italicTestStartString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _ '
         + 'This is a <i>sentence,</i> and it has some <i>punctuation, words, and spaces</i>. <i>test</i> _ testing_ test_test_test. _ test _ _test _';
@@ -29,6 +36,13 @@ test('Test strikethrough HTML replacement', () => {
     const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     const strikethroughTestReplacedString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.htmlToMarkdown(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
+});
+
+test('Test multi-line strikethrough HTML replacement', () => {
+    const testString = '<del>Here is a multi-line<br />comment that should<br />have strikethrough applied</del>';
+    const replacedString = '~Here is a multi-line\ncomment that should\nhave strikethrough applied~';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
 test('Test Mixed HTML strings', () => {
@@ -369,6 +383,26 @@ test('Test HTML string with code fence', () => {
     expect(parser.htmlToMarkdown(testStringWithNewLinesFromSlack)).toBe(resultStringWithNewLinesFromSlack);
 });
 
+test('Test code fence and extra backticks', () => {
+    let nestedBackticks = '<pre>&#x60;test&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`test`\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />test<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\ntest\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n``\n```');
+
+    nestedBackticks = '<pre>&#x60;<br />&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`\n`\n```');
+
+    nestedBackticks = '<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`````\n```');
+
+    nestedBackticks = '<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>';
+    expect(parser.htmlToMarkdown(nestedBackticks)).toBe('```\n`This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)`\n```');
+});
+
 test('HTML Entities', () => {
     const testString = '&nbsp; &amp; &dollar; &colon; &gt; &quot;';
     const resultString = `${String.fromCharCode(160)} & $ : > "`;
@@ -455,13 +489,13 @@ test('map real message with quotes', () => {
 
 test('Test heading1 markdown replacement', () => {
     const testString = '# This is a heading1 because starts with # followed by a space\n';
-    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1><br />';
+    const resultString = '<h1>This is a heading1 because starts with # followed by a space</h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test heading1 markdown replacement when # is followed by multiple spaces', () => {
     const testString = '#    This is also a heading1 because starts with # followed by a space\n';
-    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1><br />';
+    const resultString = '<h1>This is also a heading1 because starts with # followed by a space</h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -478,7 +512,7 @@ test('Test heading1 markdown when # is in the middle of the line', () => {
 });
 
 test('Test html string to heading1 markdown', () => {
-    const testString = '<h1>This is a heading1</h1><br />';
+    const testString = '<h1>This is a heading1</h1>';
     const resultString = '\n# This is a heading1\n';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
@@ -494,5 +528,35 @@ test('Test html to heading1 markdown when h1 tags are in the middle of the line'
     const resultString = 'this line has a\n'
     + '# heading1\n'
     + 'in the middle of the line';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test link with multiline text do not loses markdown', () => {
+    const testString = '<a href="https://google.com/">multiline\ntext</a>';
+    const resultString = '[multiline\ntext](https://google.com/)'
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map html paragraph to newline', () => {
+    const testString = '<p>This is a HTML paragraph</p><p>This is an another HTML paragraph</p>';
+    const resultString = 'This is a HTML paragraph\nThis is an another HTML paragraph';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map html paragraph with <br/> to newline', () => {
+    const testString = '<p>This is a HTML paragraph</p><br/><p>This is an another HTML paragraph</p>';
+    const resultString = 'This is a HTML paragraph\n\nThis is an another HTML paragraph';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Map html list item to newline with two prefix spaces', () => {
+    const testString = '<ul><li>This is a HTML list item</li><li>This is an another HTML list item</li></ul>';
+    const resultString = '  This is a HTML list item\n  This is an another HTML list item';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test list item replacement when there is an anchor tag inside <li> tag', () => {
+    const testString = '<ul><li><a href="https://example.com">Coffee</a> -- Coffee</li><li><a href="https://example.com">Tea</a> -- Tea</li><li><a href="https://example.com">Milk</a> -- Milk</li></ul>';
+    const resultString = '  [Coffee](https://example.com) -- Coffee\n  [Tea](https://example.com) -- Tea\n  [Milk](https://example.com) -- Milk';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
