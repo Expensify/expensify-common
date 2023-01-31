@@ -573,6 +573,21 @@ export default function API(network, args) {
         /**
          * Performs API command Expense_Create
          *
+         * @param {Object} parameters
+         * @param {Number} parameters.chatID
+         * @param {String} parameters.file
+         *
+         * @returns {APIDeferred}
+         */
+        forwardTravelDocument(parameters) {
+            const commandName = 'ForwardTravelDocument';
+            requireParameters(['chatID', 'file'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * Performs API command Expense_Create
+         *
          * @param {Object} parameters API parameters. Must contain 'transactionList'
          *
          * @returns {APIDeferred}
