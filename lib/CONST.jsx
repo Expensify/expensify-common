@@ -819,20 +819,10 @@ export const CONST = {
             label: 'Inadequate customer support',
             prompt: 'What software are you migrating to and what led to this decision?',
         },
-        PREFER_MANUAL_RENEW: {
-            id: 'preferManualRenew',
-            label: 'Prefer to manually renew subscription',
-            prompt: 'What makes you consider not renewing with Expensify?',
-        },
         BUSINESS_CLOSING: {
             id: 'businessClosing',
             label: 'Company closing, downsizing, or acquired',
             prompt: 'What software are you migrating to and what led to this decision?',
-        },
-        DUPLICATE_OR_ACCIDENTAL_SUBSCRIPTION: {
-            id: 'accidentalSubscription',
-            label: 'Duplicate or accidental subscription',
-            prompt: 'What were you trying to accomplish that led to this?',
         },
     },
 };
