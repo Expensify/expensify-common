@@ -815,32 +815,22 @@ export const CONST = {
         TOO_LIMITED: {
             id: 'tooLimited',
             label: 'Functionality needs improvement or is confusing',
-            prompt: 'What software are you migrating to and what led to this decision?',
+            prompt: 'What features would you like to see added or improved?',
         },
         TOO_EXPENSIVE: {
             id: 'tooExpensive',
             label: 'Too expensive',
-            prompt: 'What software are you migrating to and what do you think is a fair price?',
+            prompt: 'What is the main reason you think Expensify is too expensive, and what do you think is a fair price?',
         },
         INADEQUATE_SUPPORT: {
             id: 'inadequateSupport',
             label: 'Inadequate customer support',
-            prompt: 'What software are you migrating to and what led to this decision?',
-        },
-        PREFER_MANUAL_RENEW: {
-            id: 'preferManualRenew',
-            label: 'Prefer to manually renew subscription',
-            prompt: 'What makes you consider not renewing with Expensify?',
+            prompt: 'What about our customer support didn\'t work well for you?',
         },
         BUSINESS_CLOSING: {
             id: 'businessClosing',
             label: 'Company closing, downsizing, or acquired',
-            prompt: 'What software are you migrating to and what led to this decision?',
-        },
-        DUPLICATE_OR_ACCIDENTAL_SUBSCRIPTION: {
-            id: 'accidentalSubscription',
-            label: 'Duplicate or accidental subscription',
-            prompt: 'What were you trying to accomplish that led to this?',
+            prompt: 'Would you have liked to continue using Expensify, or would you recommend it in your network?',
         },
     },
 };
