@@ -814,7 +814,7 @@ export const CONST = {
     SUBSCRIPTION_CHANGE_REASONS: {
         TOO_LIMITED: {
             id: 'tooLimited',
-            label: 'Functionality needs improvement or is confusing',
+            label: 'Functionality needs improvement',
             prompt: 'What software are you migrating to and what led to this decision?',
         },
         TOO_EXPENSIVE: {
