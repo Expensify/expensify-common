@@ -533,7 +533,7 @@ test('Test html to heading1 markdown when h1 tags are in the middle of the line'
 
 test('Test link with multiline text do not loses markdown', () => {
     const testString = '<a href="https://google.com/">multiline\ntext</a>';
-    const resultString = '[multiline\ntext](https://google.com/)'
+    const resultString = '[multiline\ntext](https://google.com/)';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -559,4 +559,15 @@ test('Test list item replacement when there is an anchor tag inside <li> tag', (
     const testString = '<ul><li><a href="https://example.com">Coffee</a> -- Coffee</li><li><a href="https://example.com">Tea</a> -- Tea</li><li><a href="https://example.com">Milk</a> -- Milk</li></ul>';
     const resultString = '  [Coffee](https://example.com) -- Coffee\n  [Tea](https://example.com) -- Tea\n  [Milk](https://example.com) -- Milk';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test codeFence backticks occupying a separate line while not introducing redundant lines', () => {
+    let testInput = '<pre>test</pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n```');
+
+    testInput = '<pre>\ntest\n</pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n```');
+
+    testInput = '<pre>test\n\n</pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n\n```');
 });
