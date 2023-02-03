@@ -916,6 +916,7 @@ export const PUBLIC_DOMAINS = [
     'mac.com',
     'mail.com',
     'mail.ru',
+    'mailfence.com',
     'me.com',
     'msn.com',
     'musician.org',
