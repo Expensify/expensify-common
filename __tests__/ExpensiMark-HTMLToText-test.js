@@ -44,6 +44,60 @@ test('Test new line replacement on blockquote without content after closing bloc
     expect(parser.htmlToText(html)).toBe(text);
 });
 
+test('Test new line replacement on heading without content before heading', () => {
+    const html = '<h1>Confusing stuff</h1>Tell me about it';
+
+    // No new line should be added for <h1> if there is no content before it
+    const text = 'Confusing stuff\nTell me about it';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test new line replacement on heading with content before heading', () => {
+    const html = 'content before<h1>Confusing stuff</h1>Tell me about it';
+
+    // A new line should be added for <h1> if there is content before it
+    const text = 'content before\nConfusing stuff\nTell me about it';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test new line replacement on heading without content after closing heading', () => {
+    const html = 'content before<h1>Confusing stuff</h1>';
+
+    // No new line should be added after </h1> because there is no content after it
+    const text = 'content before\nConfusing stuff';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test new line replacement on preformatted text without content before preformatted text', () => {
+    const html = '<pre>Confusing stuff</pre>Tell me about it';
+
+    // No new line should be added for <pre> if there is no content before it
+    const text = 'Confusing stuff\nTell me about it';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test new line replacement on preformatted text with content before preformatted text', () => {
+    const html = 'content before<pre>Confusing stuff</pre>Tell me about it';
+
+    // A new line should be added for <pre> if there is content before it
+    const text = 'content before\nConfusing stuff\nTell me about it';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
+test('Test new line replacement on preformatted text without content after closing preformatted text', () => {
+    const html = 'content before<pre>Confusing stuff</pre>';
+
+    // No new line should be added after </pre> because there is no content after it
+    const text = 'content before\nConfusing stuff';
+
+    expect(parser.htmlToText(html)).toBe(text);
+});
+
 test('Test strip unhandled tags', () => {
     const html = 'First Line<br /><div>Quoted line <code>code</code></div>3<br /><span>4</span>Five';
 
@@ -54,8 +108,8 @@ test('Test strip unhandled tags', () => {
 });
 
 test('Test replacement on mixed html', () => {
-    const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote><span>Five</span>';
-    const text = 'First Line\n\nQuoted line code\n3\n\n4\nFive';
+    const html = 'First Line<br /><blockquote>Quoted line <code>code</code></blockquote>3<br /><blockquote>4</blockquote><span>Five</span><h1>Six</h1>Seven<pre>Eight</pre>';
+    const text = 'First Line\n\nQuoted line code\n3\n\n4\nFive\nSix\nSeven\nEight';
 
     expect(parser.htmlToText(html)).toBe(text);
 });
