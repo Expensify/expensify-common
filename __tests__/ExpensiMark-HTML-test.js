@@ -326,7 +326,7 @@ test('Test a period at the end of a link autolinks correctly', () => {
 
 test('Test a url ending with a question mark autolinks correctly', () => {
     const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>?';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645?" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645?</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -531,8 +531,4 @@ test('Test for link with no content', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a url ending with a question mark works correctly', () => {
-    const testString = 'http://github.com/Expensify/App/issue/123?';
-    const resultString = '<a href="http://github.com/Expensify/App/issue/123?" target="_blank" rel="noreferrer noopener">http://github.com/Expensify/App/issue/123?</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
+
