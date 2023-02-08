@@ -530,5 +530,3 @@ test('Test for link with no content', () => {
     const resultString = '[  ](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
-
-
