@@ -530,3 +530,9 @@ test('Test for link with no content', () => {
     const resultString = '[  ](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test.only('Test a url ending with a question mark works correctly', () => {
+    const testString = 'http://github.com/Expensify/App/issue/123?';
+    const resultString = '<a href="http://github.com/Expensify/App/issue/123?" target="_blank" rel="noreferrer noopener">http://github.com/Expensify/App/issue/123?</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
