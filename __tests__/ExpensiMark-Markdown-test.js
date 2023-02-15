@@ -23,6 +23,13 @@ test('Test multi-line bold HTML replacement', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
+test('Test multi-line italic HTML replacement', () => {
+    const testString = '<em>Here is a multi-line<br />comment that should<br />be italic</em>';
+    const replacedString = '_Here is a multi-line\ncomment that should\nbe italic_';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 test('Test italic HTML replacement', () => {
     const italicTestStartString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _ '
         + 'This is a <i>sentence,</i> and it has some <i>punctuation, words, and spaces</i>. <i>test</i> _ testing_ test_test_test. _ test _ _test _';

@@ -13,6 +13,14 @@ test('Test bold markdown replacement', () => {
     expect(parser.replace(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
+// Multi-line text wrapped in _ is successfully replaced with <em></em>
+test('Test multi-line italic markdown replacement', () => {
+    const testString = '_Here is a multi-line\ncomment that should\nbe italic_';
+    const replacedString = '<em>Here is a multi-line<br />comment that should<br />be italic</em>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 // Multi-line text wrapped in * is successfully replaced with <strong></strong>
 test('Test multi-line bold markdown replacement', () => {
     const testString = '*Here is a multi-line\ncomment that should\nbe bold*';
