@@ -513,13 +513,20 @@ test('Test heading1 markdown when # is in the middle of the line', () => {
 
 test('Test html string to heading1 markdown', () => {
     const testString = '<h1>This is a heading1</h1>';
-    const resultString = '\n# This is a heading1\n';
+    const resultString = '# This is a heading1';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
 test('Test html to heading1 markdown when there are other tags inside h1 tag', () => {
     const testString = '<h1>This is a <strong>heading1</strong></h1>';
-    const resultString = '\n# This is a *heading1*\n';
+    const resultString = '# This is a *heading1*';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when h1 tag is in the beginning of the line', () => {
+    const testString = '<h1>heading1</h1> in the beginning of the line';
+    const resultString = '# heading1\n'
+    + 'in the beginning of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -528,6 +535,29 @@ test('Test html to heading1 markdown when h1 tags are in the middle of the line'
     const resultString = 'this line has a\n'
     + '# heading1\n'
     + 'in the middle of the line';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when h1 tag is in the end of the line', () => {
+    const testString = 'this line has an h1 in the end of the line<h1>heading1</h1>';
+    const resultString = 'this line has an h1 in the end of the line'
+    + '\n# heading1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when there are 2 h1 tags in the line', () => {
+    const testString = 'this is the first heading1<h1>heading1</h1>this is the second heading1<h1>heading1</h1>';
+    const resultString = 'this is the first heading1'
+    + '\n# heading1'
+    + '\nthis is the second heading1'
+    + '\n# heading1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('Test html to heading1 markdown when there are adjacent h1 tags in the line', () => {
+    const testString = '<h1>heading1</h1><h1>heading2</h1>';
+    const resultString = '# heading1'
+    + '\n# heading2';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
