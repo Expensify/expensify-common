@@ -31,6 +31,13 @@ test('Test italic HTML replacement', () => {
     expect(parser.htmlToMarkdown(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
+test('Test multi-line italic HTML replacement', () => {
+    const testString = '<em>Here is a multi-line<br />comment that should<br />be italic</em>';
+    const replacedString = '_Here is a multi-line\ncomment that should\nbe italic_';
+
+    expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
+});
+
 // Words wrapped in ~ successfully replaced with <del></del>
 test('Test strikethrough HTML replacement', () => {
     const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
