@@ -61,7 +61,7 @@ test('Test multi-line strikethrough markdown replacement', () => {
 });
 
 // Emails containing *_~ are successfully wrapped in a mailto anchor tag
-test('Test markdown replacement for emails and linked emails containing bold/strikethrough/italic', () => {
+test('Test markdown replacement for emails and email links containing bold/strikethrough/italic', () => {
     let testInput = 'a~b@gmail.com';
     expect(parser.replace(testInput)).toBe('<a href="mailto:a~b@gmail.com">a~b@gmail.com</a>');
 
