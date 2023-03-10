@@ -61,7 +61,7 @@ test('Test multi-line strikethrough markdown replacement', () => {
 });
 
 // Emails containing *_~ are successfully wrapped in a mailto anchor tag
-test('Test markdown replacement for emails containing bold/strikethrough/italic', () => {
+test('Test markdown replacement for emails and email links containing bold/strikethrough/italic', () => {
     let testInput = 'a~b@gmail.com';
     expect(parser.replace(testInput)).toBe('<a href="mailto:a~b@gmail.com">a~b@gmail.com</a>');
 
@@ -73,6 +73,18 @@ test('Test markdown replacement for emails containing bold/strikethrough/italic'
 
     testInput = 'a~*_b@gmail.com';
     expect(parser.replace(testInput)).toBe('<a href="mailto:a~*_b@gmail.com">a~*_b@gmail.com</a>');
+
+    testInput = '[text](a~b@gmail.com)';
+    expect(parser.replace(testInput)).toBe('<a href="mailto:a~b@gmail.com">text</a>');
+
+    testInput = '[text](a*b@gmail.com)';
+    expect(parser.replace(testInput)).toBe('<a href="mailto:a*b@gmail.com">text</a>');
+
+    testInput = '[text](a_b@gmail.com)';
+    expect(parser.replace(testInput)).toBe('<a href="mailto:a_b@gmail.com">text</a>');
+
+    testInput = '[text](a~*_b@gmail.com)';
+    expect(parser.replace(testInput)).toBe('<a href="mailto:a~*_b@gmail.com">text</a>');
 });
 
 // Single-line emails wrapped in *_~ are successfully wrapped in a mailto anchor tag
@@ -88,6 +100,18 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
 
     testInput = '~*_abc@gmail.com_*~';
     expect(parser.replace(testInput)).toBe('<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em></strong></del>');
+
+    testInput = '[text](~abc@gmail.com~)';
+    expect(parser.replace(testInput)).toBe('[text](<del><a href="mailto:abc@gmail.com">abc@gmail.com</a></del>)');
+
+    testInput = '[text](*abc@gmail.com*)';
+    expect(parser.replace(testInput)).toBe('[text](<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a></strong>)');
+
+    testInput = '[text](_abc@gmail.com_)';
+    expect(parser.replace(testInput)).toBe('[text](<em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em>)');
+
+    testInput = '[text](~*_abc@gmail.com_*~)';
+    expect(parser.replace(testInput)).toBe('[text](<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em></strong></del>)');
 });
 
 // Multi-line emails wrapped in *_~ are successfully wrapped in a mailto anchor tag
@@ -110,6 +134,26 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     testInput = '~*_abc@gmail.com\ndef@gmail.com_*~';
     result = '<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a><br />'
         + '<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[text](~abc@gmail.com)\n[text](def@gmail.com~)';
+    result = '[text](<del><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
+        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></del>)';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[text](*abc@gmail.com)\n[text](def@gmail.com*)';
+    result = '[text](<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
+        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></strong>)';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[text](_abc@gmail.com)\n[text](def@gmail.com_)';
+    result = '[text](<em><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
+        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></em>)';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[text](~*_abc@gmail.com)\n[text](def@gmail.com_*~)';
+    result = '[text](<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
+        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>)';
     expect(parser.replace(testInput)).toBe(result);
 });
 
