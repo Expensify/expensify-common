@@ -248,8 +248,11 @@ test('Test code fencing with spaces and new lines', () => {
     codeFenceExample = '```const javaScript = \'javaScript\'\n    const php = \'php\'```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 
-    codeFenceExample = '```\n\nconst javaScript = \'javaScript\'\n    const php = \'php\'\n\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre><br />const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;<br /><br /></pre>');
+    codeFenceExample = '```\n\n# test\n\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\n\n\n# test\n\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
 });
 
 test('Test inline code blocks', () => {
