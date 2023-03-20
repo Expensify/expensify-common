@@ -43,6 +43,15 @@ describe('Str.isValidURL', () => {
     });
 });
 
+describe('Str.isValidEmailMarkdown', () => {
+    it('Correctly identifies valid mark down emails', () => {
+        expect(Str.isValidEmailMarkdown('abc@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmailMarkdown('$test@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmailMarkdown('~abc@gmail.com~')).toBeFalsy();
+        expect(Str.isValidEmailMarkdown('abc@gmail.com~')).toBeFalsy();
+    });
+});
+
 describe('Str.stripHTML', () => {
     it('Correctly strips HTML/XML tags', () => {
         expect(Str.stripHTML('<strong>hello</strong>')).toBe('hello');
