@@ -602,9 +602,21 @@ test('Test codeFence backticks occupying a separate line while not introducing r
     let testInput = '<pre>test</pre>';
     expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n```');
 
-    testInput = '<pre>\ntest\n</pre>';
+    testInput = '<pre>test\n</pre>';
     expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n```');
+
+    testInput = '<pre>\ntest</pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\n\ntest\n```');
+
+    testInput = '<pre>\ntest\n</pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\n\ntest\n```');
 
     testInput = '<pre>test\n\n</pre>';
     expect(parser.htmlToMarkdown(testInput)).toBe('```\ntest\n\n```');
+
+    testInput = '<pre><br />#&#32;test<br /><br /></pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\n\n# test\n\n```');
+
+    testInput = '<pre><br /><br />#&#32;test<br /><br /></pre>';
+    expect(parser.htmlToMarkdown(testInput)).toBe('```\n\n\n# test\n\n```');
 });
