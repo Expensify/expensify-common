@@ -14,12 +14,12 @@ describe('Str.isImage', () => {
         expect(Str.isImage(buildTestURLForType('JPG'))).toBeTruthy();
         expect(Str.isImage(buildTestURLForType('BMP'))).toBeTruthy();
         expect(Str.isImage(buildTestURLForType('PNG'))).toBeTruthy();
+        expect(Str.isImage(buildTestURLForType('webp'))).toBeTruthy();
     });
 
     it('Does not confirm these types', () => {
         // Note: These are types that React Native does not support as images so attempt to prevent their addition here
         expect(Str.isImage(buildTestURLForType('tiff'))).toBeFalsy();
-        expect(Str.isImage(buildTestURLForType('webp'))).toBeFalsy();
         expect(Str.isImage(buildTestURLForType('psd'))).toBeFalsy();
         expect(Str.isImage(buildTestURLForType('pdf'))).toBeFalsy();
     });
