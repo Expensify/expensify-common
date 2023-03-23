@@ -289,6 +289,11 @@ test('Test code fencing with ExpensiMark syntax inside', () => {
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
 });
 
+test('Test code fencing with ExpensiMark syntax outside', () => {
+    const codeFenceExample = '# Test1 ```code``` Test2';
+    expect(parser.replace(codeFenceExample)).toBe('<h1>Test1 </h1><pre>code</pre> Test2');
+});
+
 test('Test code fencing with additional backticks inside', () => {
     let nestedBackticks = '````test````';
     expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;</pre>');
