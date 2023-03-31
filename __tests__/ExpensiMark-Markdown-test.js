@@ -373,6 +373,19 @@ test('Test anchor tags replacements', () => {
 
     expect(parser.htmlToMarkdown(urlTestStartString)).toBe(urlTestReplacedString);
 });
+
+test('Test link markdown with uppercase letter in https replacement', () => {
+    const testString = '[Https://www.regex101.com](Https://www.regex101.com)';
+    const resultString = '<a href=\"Https://www.regex101.com\" target=\"_blank\" rel=\"noreferrer noopener\">Https://www.regex101.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test autolink with uppercase letter in https replacement', () => {
+    const testString = 'Https://www.regex101.com';
+    const resultString = '<a href=\"Https://www.regex101.com\" target=\"_blank\" rel=\"noreferrer noopener\">Https://www.regex101.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test HTML string with code fence', () => {
     const testString = '<pre id="code1">class Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}</pre>';
     const resultString = '```\nclass Expensify extends PureComponent {\n    constructor(props) {\n        super(props);\n    }\n}\n```';
