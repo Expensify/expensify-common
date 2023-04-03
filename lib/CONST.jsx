@@ -370,6 +370,7 @@ export const CONST = {
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
         EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_220929381.exe',
+        EXPENSIFY_SYNC_MANAGER_AWS: 'https://rightlabs.s3.amazonaws.com/AgentInstallers/Branded/Expensify/Production/ExpensifySyncManager.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
         ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions'
     },
