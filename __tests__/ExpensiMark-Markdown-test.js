@@ -378,13 +378,13 @@ test('Test anchor tags replacements', () => {
 
 test('Test link markdown with uppercase letter in https replacement', () => {
     const testString = '[Https://www.regex101.com](Https://www.regex101.com)';
-    const resultString = '<a href=\"https://www.regex101.com\" target=\"_blank\" rel=\"noreferrer noopener\">Https://www.regex101.com</a>';
+    const resultString = '<a href="https://www.regex101.com" target="_blank" rel="noreferrer noopener">Https://www.regex101.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test autolink with uppercase letter in https replacement', () => {
     const testString = 'Https://www.regex101.com';
-    const resultString = '<a href=\"https://www.regex101.com\" target=\"_blank\" rel=\"noreferrer noopener\">Https://www.regex101.com</a>';
+    const resultString = '<a href="https://www.regex101.com" target="_blank" rel="noreferrer noopener">Https://www.regex101.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
