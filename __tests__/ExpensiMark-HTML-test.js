@@ -294,10 +294,10 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
     expect(parser.replace(codeFenceExample)).toBe('<h1>Test1 </h1><pre>code</pre> Test2');
 
     codeFenceExample = '*Test1 ```code``` Test2*';
-    expect(parser.replace(codeFenceExample)).toBe('*Test1 ```code``` Test2*');
+    expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code</pre> Test2*');
 
     codeFenceExample = '_Test1 ```code``` Test2_';
-    expect(parser.replace(codeFenceExample)).toBe('_Test1 ```code``` Test2_');
+    expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code</pre> Test2_');
 });
 
 test('Test code fencing with additional backticks inside', () => {
