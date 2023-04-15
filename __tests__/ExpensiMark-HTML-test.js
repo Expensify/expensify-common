@@ -420,7 +420,9 @@ test('Test markdown style link with various styles', () => {
         + '[Expensify](https://www.expensify.com/settings?param={%22section%22:%22account%22}) '
         + '[Expensify](https://www.expensify.com/settings?param=(%22section%22+%22account%22)) '
         + '[Expensify](https://www.expensify.com/settings?param=[%22section%22:%22account%22]) '
-        + '[https://www.facebook.com/hashtag/__main/?__eep__=6](https://www.facebook.com/hashtag/__main/?__eep__=6)';
+        + '[https://www.facebook.com/hashtag/__main/?__eep__=6](https://www.facebook.com/hashtag/__main/?__eep__=6) '
+        + '[https://example.com/~username/foo~bar.txt](https://example.com/~username/foo~bar.txt) '
+        + '[http://example.com/foo/*/bar/*/test.txt](http://example.com/foo/*/bar/*/test.txt)';
 
     const resultString = 'Go to <del><a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a></del> '
         + '<em><a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a></em> '
@@ -431,7 +433,9 @@ test('Test markdown style link with various styles', () => {
         + '<a href="https://www.expensify.com/settings?param={%22section%22:%22account%22}" target="_blank" rel="noreferrer noopener">Expensify</a> '
         + '<a href="https://www.expensify.com/settings?param=(%22section%22+%22account%22)" target="_blank" rel="noreferrer noopener">Expensify</a> '
         + '<a href="https://www.expensify.com/settings?param=[%22section%22:%22account%22]" target="_blank" rel="noreferrer noopener">Expensify</a> '
-        + '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener">https://www.facebook.com/hashtag/__main/?__eep__=6</a>';
+        + '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener">https://www.facebook.com/hashtag/__main/?__eep__=6</a> '
+        + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
+        + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
