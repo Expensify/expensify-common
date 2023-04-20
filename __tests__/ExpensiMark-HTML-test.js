@@ -620,6 +620,24 @@ test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test quotes markdown replacement skipping blank quotes ', () => {
+    const testString = '> \n>';
+    const resultString = '&gt; <br />&gt;';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with text starts with blank quote', () => {
+    const testString = '> \ntest';
+    const resultString = '&gt; <br />test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with text includes blank quotes', () => {
+    const testString = '> \n>quote1 line a\n> quote1 line b\ntest\n> \ntest\n>quote2 line a\n> \n> \n>quote2 line b with an empty line above';
+    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br />quote2 line b with an empty line above</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Single char matching', () => {
     const testString = ' *1* char _1_ char ~1~ char';
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
