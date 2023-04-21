@@ -16,6 +16,7 @@ describe('Mandatory protocol for URL', () => {
         expect(regexToTest.test('google.com')).toBeFalsy();
         expect(regexToTest.test('https://google.com:02')).toBeFalsy();
         expect(regexToTest.test('https://google.com:65536')).toBeFalsy();
+        expect(regexToTest.test('smtp://google.com')).toBeFalsy();
     });
 });
 
