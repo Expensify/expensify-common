@@ -651,14 +651,14 @@ test('Test quotes markdown replacement with quotes includes a middle blank quote
 });
 
 test('Test quotes markdown replacement with quotes includes multiple middle blank quote rows', () => {
-    const testString = '>test\n> \n> \n>test';
-    const resultString = '<blockquote>test<br /><br />test</blockquote>';
+    const testString = '>test\n> \n> \n>test\ntest\n>test\n> \n> \n> \n>test';
+    const resultString = '<blockquote>test<br /><br /><br />test</blockquote>test<br /><blockquote>test<br /><br /><br /><br />test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text includes blank quotes', () => {
     const testString = '> \n>quote1 line a\n> quote1 line b\ntest\n> \ntest\n>quote2 line a\n> \n> \n>quote2 line b with an empty line above';
-    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br />quote2 line b with an empty line above</blockquote>';
+    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br /><br />quote2 line b with an empty line above</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
