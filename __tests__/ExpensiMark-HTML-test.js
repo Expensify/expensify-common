@@ -620,7 +620,7 @@ test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test quotes markdown replacement skipping blank quotes ', () => {
+test('Test quotes markdown replacement skipping blank quotes', () => {
     const testString = '> \n>';
     const resultString = '&gt; <br />&gt;';
     expect(parser.replace(testString)).toBe(resultString);
@@ -629,6 +629,30 @@ test('Test quotes markdown replacement skipping blank quotes ', () => {
 test('Test quotes markdown replacement with text starts with blank quote', () => {
     const testString = '> \ntest';
     const resultString = '&gt; <br />test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes starts with blank quote row', () => {
+    const testString = '> \n>test';
+    const resultString = '<blockquote>test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes ends with blank quote rows', () => {
+    const testString = '>test\n> \n>';
+    const resultString = '<blockquote>test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes includes a middle blank quote row', () => {
+    const testString = '>test\n> \n>test';
+    const resultString = '<blockquote>test<br /><br />test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes includes multiple middle blank quote rows', () => {
+    const testString = '>test\n> \n> \n>test';
+    const resultString = '<blockquote>test<br /><br />test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
