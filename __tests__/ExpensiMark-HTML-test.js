@@ -369,7 +369,9 @@ test('Test url replacements', () => {
         + 'https://www.google.com/maps/place/Taj+Mahal+@is~"Awesome"/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422 '
         + 'https://www.facebook.com/hashtag/__main/?__eep__=6 '
         + 'https://example.com/~username/foo~bar.txt '
-        + 'http://example.com/foo/*/bar/*/test.txt';
+        + 'http://example.com/foo/*/bar/*/test.txt '
+        + 'test-.com '
+        + '-test.com ';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="https://foo.com" target="_blank" rel="noreferrer noopener">foo.com</a> '
@@ -405,7 +407,9 @@ test('Test url replacements', () => {
         + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a> '
         + '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener">https://www.facebook.com/hashtag/__main/?__eep__=6</a> '
         + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
-        + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a>';
+        + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> '
+        + 'test-.com '
+        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
@@ -617,6 +621,48 @@ test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </
 
     const resultString = 'The next line should be quoted <pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
 
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement skipping blank quotes', () => {
+    const testString = '> \n>';
+    const resultString = '&gt; <br />&gt;';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with text starts with blank quote', () => {
+    const testString = '> \ntest';
+    const resultString = '&gt; <br />test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes starts with blank quote row', () => {
+    const testString = '> \n>test';
+    const resultString = '<blockquote>test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes ends with blank quote rows', () => {
+    const testString = '>test\n> \n>';
+    const resultString = '<blockquote>test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes includes a middle blank quote row', () => {
+    const testString = '>test\n> \n>test';
+    const resultString = '<blockquote>test<br /><br />test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with quotes includes multiple middle blank quote rows', () => {
+    const testString = '>test\n> \n> \n>test\ntest\n>test\n> \n> \n> \n>test';
+    const resultString = '<blockquote>test<br /><br /><br />test</blockquote>test<br /><blockquote>test<br /><br /><br /><br />test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test quotes markdown replacement with text includes blank quotes', () => {
+    const testString = '> \n>quote1 line a\n> quote1 line b\ntest\n> \ntest\n>quote2 line a\n> \n> \n>quote2 line b with an empty line above';
+    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br /><br />quote2 line b with an empty line above</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
