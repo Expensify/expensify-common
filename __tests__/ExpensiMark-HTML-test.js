@@ -666,12 +666,6 @@ test('Test for link with no content', () => {
 });
 
 // Valid text that should match for user mentions
-test('Test for user mention with single username', () => {
-    const testString = '@username';
-    const resultString = '<mention-user>@username</mention-user>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
 test('Test for user mention with @username@domain.com', () => {
     const testString = '@username@expensify.com';
     const resultString = '<mention-user>@username@expensify.com</mention-user>';
@@ -685,28 +679,62 @@ test('Test for user mention with @phoneNumber@domain.sms', () => {
 });
 
 test('Test for user mention with bold style', () => {
-    const testString = '*@username*';
-    const resultString = '<strong><mention-user>@username</mention-user></strong>';
+    const testString = '*@username@expensify.com*';
+    const resultString = '<strong><mention-user>@username@expensify.com</mention-user></strong>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with italic style', () => {
-    const testString = '_@username_';
-    const resultString = '<em><mention-user>@username</mention-user></em>';
+    const testString = '_@username@expensify.com_';
+    const resultString = '<em><mention-user>@username@expensify.com</mention-user></em>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with heading1 style', () => {
-    const testString = '# @username';
-    const resultString = '<h1><mention-user>@username</mention-user></h1>';
+    const testString = '# @username@expensify.com';
+    const resultString = '<h1><mention-user>@username@expensify.com</mention-user></h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with strikethrough style', () => {
-    const testString = '~@username~';
-    const resultString = '<del><mention-user>@username</mention-user></del>';
+    const testString = '~@username@expensify.com~';
+    const resultString = '<del><mention-user>@username@expensify.com</mention-user></del>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+/**
+ * Uncomment this tests if @username became supported for user mention
+ * 
+    test('Test for user mention with single username', () => {
+        const testString = '@username';
+        const resultString = '<mention-user>@username</mention-user>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Test for user mention with bold style', () => {
+        const testString = '*@username*';
+        const resultString = '<strong><mention-user>@username</mention-user></strong>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Test for user mention with italic style', () => {
+        const testString = '_@username_';
+        const resultString = '<em><mention-user>@username</mention-user></em>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Test for user mention with heading1 style', () => {
+        const testString = '# @username';
+        const resultString = '<h1><mention-user>@username</mention-user></h1>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Test for user mention with strikethrough style', () => {
+        const testString = '~@username~';
+        const resultString = '<del><mention-user>@username</mention-user></del>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+*/
 
 // Invalid text should not match for user mentions:
 test('Test for user mention without leading whitespace', () => {
