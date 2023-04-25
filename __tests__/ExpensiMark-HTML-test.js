@@ -664,3 +664,91 @@ test('Test for link with no content', () => {
     const resultString = '[  ](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+// Valid text that should match for user mentions
+test('Test for user mention with single username', () => {
+    const testString = '@username';
+    const resultString = '<mention-user>@username</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @username@domain.com', () => {
+    const testString = '@username@expensify.com';
+    const resultString = '<mention-user>@username@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @phoneNumber@domain.sms', () => {
+    const testString = '@+19728974297@expensify.sms';
+    const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with bold style', () => {
+    const testString = '*@username*';
+    const resultString = '<strong><mention-user>@username</mention-user></strong>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with italic style', () => {
+    const testString = '_@username_';
+    const resultString = '<em><mention-user>@username</mention-user></em>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with heading1 style', () => {
+    const testString = '# @username';
+    const resultString = '<h1><mention-user>@username</mention-user></h1>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with strikethrough style', () => {
+    const testString = '~@username~';
+    const resultString = '<del><mention-user>@username</mention-user></del>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Invalid text should not match for user mentions:
+test('Test for user mention without leading whitespace', () => {
+    const testString = 'hi...@username@expensify.com';
+    const resultString = 'hi...@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with valid email in the middle of a word', () => {
+    const testString = 'hello username@expensify.com is my email';
+    const resultString = 'hello <a href=\"mailto:username@expensify.com\">username@expensify.com</a> is my email';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with invalid username', () => {
+    const testString = '@ +19728974297 hey';
+    const resultString = '@ +19728974297 hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should match for here mentions:
+test('Test for here mention with @here', () => {
+    const testString = '@here';
+    const resultString = '<mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with @here in the middle of a word', () => {
+    const testString = '@here how are you guys?';
+    const resultString = '<mention-here>@here</mention-here> how are you guys?';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should not match for here mentions:
+test('Test for here mention without leading whitespace', () => {
+    const testString = 'hi...@here';
+    const resultString = 'hi...@here';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with invalid username', () => {
+    const testString = '@ here hey';
+    const resultString = '@ here hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
