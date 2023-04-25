@@ -369,7 +369,9 @@ test('Test url replacements', () => {
         + 'https://www.google.com/maps/place/Taj+Mahal+@is~"Awesome"/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422 '
         + 'https://www.facebook.com/hashtag/__main/?__eep__=6 '
         + 'https://example.com/~username/foo~bar.txt '
-        + 'http://example.com/foo/*/bar/*/test.txt';
+        + 'http://example.com/foo/*/bar/*/test.txt '
+        + 'test-.com '
+        + '-test.com ';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="https://foo.com" target="_blank" rel="noreferrer noopener">foo.com</a> '
@@ -405,7 +407,9 @@ test('Test url replacements', () => {
         + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a> '
         + '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener">https://www.facebook.com/hashtag/__main/?__eep__=6</a> '
         + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
-        + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a>';
+        + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> '
+        + 'test-.com '
+        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
