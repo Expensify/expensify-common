@@ -710,3 +710,14 @@ test('Test for link with no content', () => {
     const resultString = '[  ](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test quotes markdown replacement with heading inside', () => {
+    let testString = '> # heading';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1></blockquote>');
+
+    testString = '> # heading\n> test';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1>test</blockquote>');
+
+    testString = '> test\n> # heading\n> test';
+    expect(parser.replace(testString)).toBe('<blockquote>test<br /><h1>heading</h1>test</blockquote>');
+});
