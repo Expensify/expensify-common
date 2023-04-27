@@ -702,6 +702,12 @@ test('Test for user mention with strikethrough style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for user mention with @here', () => {
+    const testString = '@here say hello to @newuser@expensify.com';
+    const resultString = '<mention-here>@here</mention-here> say hello to <mention-user>@newuser@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 /**
  * Uncomment this tests if @username became supported for user mention
  * 
@@ -752,6 +758,18 @@ test('Test for user mention with valid email in the middle of a word', () => {
 test('Test for user mention with invalid username', () => {
     const testString = '@ +19728974297 hey';
     const resultString = '@ +19728974297 hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with codefence style', () => {
+    const testString = '```@username@expensify.com```';
+    const resultString = '<pre>@username@expensify.com</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with codefence style', () => {
+    const testString = '```@here```';
+    const resultString = '<pre>@here</pre>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
