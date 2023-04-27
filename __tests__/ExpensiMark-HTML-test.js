@@ -720,4 +720,7 @@ test('Test quotes markdown replacement with heading inside', () => {
 
     testString = '> test\n> # heading\n> test';
     expect(parser.replace(testString)).toBe('<blockquote>test<br /><h1>heading</h1>test</blockquote>');
+
+    testString = '> # heading A\n> # heading B';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>');
 });
