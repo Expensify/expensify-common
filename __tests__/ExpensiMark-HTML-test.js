@@ -749,6 +749,12 @@ test('Test for user mention without leading whitespace', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for user mention with @username@expensify', () => {
+    const testString = '@username@expensify';
+    const resultString = '@username@expensify';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for user mention with valid email in the middle of a word', () => {
     const testString = 'hello username@expensify.com is my email';
     const resultString = 'hello <a href=\"mailto:username@expensify.com\">username@expensify.com</a> is my email';
@@ -767,9 +773,21 @@ test('Test for user mention with codefence style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for user mention with inlineCodeBlock style', () => {
+    const testString = '`@username@expensify.com`';
+    const resultString = '<code>@username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for @here mention with codefence style', () => {
     const testString = '```@here```';
     const resultString = '<pre>@here</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with inlineCodeBlock style', () => {
+    const testString = '`@here`';
+    const resultString = '<code>@here</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
