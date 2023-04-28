@@ -60,3 +60,21 @@ describe('Str.stripHTML', () => {
         expect(Str.stripHTML(0)).toBe('');
     });
 });
+
+describe('Str.removeSMSDomain', () => {
+    it('Correctly strips SMS domains', () => {
+        expect(Str.removeSMSDomain('1234567890@expensify.sms')).toBe('1234567890');
+        expect(Str.removeSMSDomain('')).toBe('');
+        expect(Str.removeSMSDomain('hello')).toBe('hello');
+        expect(Str.removeSMSDomain(undefined)).toBe(undefined);
+    });
+});
+
+describe('Str.isSMSLogin', () => {
+    it('Correctly checks SMS logins', () => {
+        expect(Str.removeSMSDomain('1234567890@expensify.sms')).toBe(true);
+        expect(Str.removeSMSDomain('1234567890')).toBe(true);
+        expect(Str.removeSMSDomain('hello')).toBe(false);
+        expect(Str.removeSMSDomain(undefined)).toBe(false);
+    });
+});
