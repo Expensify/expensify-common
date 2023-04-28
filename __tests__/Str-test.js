@@ -78,3 +78,13 @@ describe('Str.isSMSLogin', () => {
         expect(Str.removeSMSDomain(undefined)).toBe(false);
     });
 });
+
+describe('Str.toBool', () => {
+    it('Correctly converts value to boolean, case-insensitive', () => {
+        expect(Str.toBool('true')).toBeTruthy();
+        expect(Str.toBool('True')).toBeTruthy();
+        expect(Str.toBool('hello')).toBeFalsy();
+        expect(Str.toBool(5)).toBeTruthy();
+        expect(Str.toBool(undefined)).toBeFalsy();
+    });
+});
