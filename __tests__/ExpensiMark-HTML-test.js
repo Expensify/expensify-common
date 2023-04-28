@@ -798,6 +798,12 @@ test('Test for here mention with @here', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for here mention with leading word and space', () => {
+    const testString = 'hi all @here';
+    const resultString = 'hi all <mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for here mention with @here in the middle of a word', () => {
     const testString = '@here how are you guys?';
     const resultString = '<mention-here>@here</mention-here> how are you guys?';
