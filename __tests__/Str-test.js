@@ -70,3 +70,17 @@ describe('Str.toBool', () => {
         expect(Str.toBool(undefined)).toBeFalsy();
     });
 });
+
+describe('Str.isValidMention', () => {
+    it('Correctly detects a valid mentions ', () => {
+        expect(Str.isValidMention('@username@expensify.com')).toBeTruthy();
+        expect(Str.isValidMention('*@username@expensify.com*')).toBeTruthy();
+        expect(Str.isValidMention(' @username@expensify.com')).toBeTruthy();
+        expect(Str.isValidMention('~@username@expensify.com~')).toBeTruthy();
+        expect(Str.isValidMention('#@username@expensify.com')).toBeTruthy();
+        expect(Str.isValidMention('_@username@expensify.com_')).toBeTruthy();
+        expect(Str.isValidMention('`@username@expensify.com`')).toBeFalsy();
+        expect(Str.isValidMention('\'@username@expensify.com\'')).toBeTruthy();
+        expect(Str.isValidMention('"@username@expensify.com"')).toBeTruthy();
+    });
+});
