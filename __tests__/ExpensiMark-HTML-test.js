@@ -708,40 +708,6 @@ test('Test for user mention with @here', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-/**
- * Uncomment this tests if @username became supported for user mention
- * 
-    test('Test for user mention with single username', () => {
-        const testString = '@username';
-        const resultString = '<mention-user>@username</mention-user>';
-        expect(parser.replace(testString)).toBe(resultString);
-    });
-
-    test('Test for user mention with bold style', () => {
-        const testString = '*@username*';
-        const resultString = '<strong><mention-user>@username</mention-user></strong>';
-        expect(parser.replace(testString)).toBe(resultString);
-    });
-
-    test('Test for user mention with italic style', () => {
-        const testString = '_@username_';
-        const resultString = '<em><mention-user>@username</mention-user></em>';
-        expect(parser.replace(testString)).toBe(resultString);
-    });
-
-    test('Test for user mention with heading1 style', () => {
-        const testString = '# @username';
-        const resultString = '<h1><mention-user>@username</mention-user></h1>';
-        expect(parser.replace(testString)).toBe(resultString);
-    });
-
-    test('Test for user mention with strikethrough style', () => {
-        const testString = '~@username~';
-        const resultString = '<del><mention-user>@username</mention-user></del>';
-        expect(parser.replace(testString)).toBe(resultString);
-    });
-*/
-
 // Invalid text should not match for user mentions:
 test('Test for user mention without leading whitespace', () => {
     const testString = 'hi...@username@expensify.com';
@@ -776,6 +742,18 @@ test('Test for user mention with codefence style', () => {
 test('Test for user mention with inlineCodeBlock style', () => {
     const testString = '`@username@expensify.com`';
     const resultString = '<code>@username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@here';
+    const resultString = 'hi@here';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -820,5 +798,11 @@ test('Test for here mention without leading whitespace', () => {
 test('Test for here mention with invalid username', () => {
     const testString = '@ here hey';
     const resultString = '@ here hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention without space or supported styling character', () => {
+    const testString = 'hi@getusha@gmail.com';
+    const resultString = 'hi@<a href=\"mailto:getusha@gmail.com\">getusha@gmail.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
