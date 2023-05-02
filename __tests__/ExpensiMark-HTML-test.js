@@ -802,7 +802,7 @@ test('Test for here mention with invalid username', () => {
 });
 
 test('Test for @here mention without space or supported styling character', () => {
-    const testString = 'hi@getusha@gmail.com';
-    const resultString = 'hi@<a href=\"mailto:getusha@gmail.com\">getusha@gmail.com</a>';
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
