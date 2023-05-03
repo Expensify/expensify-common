@@ -558,7 +558,9 @@ export const CONST = {
             REPORT_SUBMITTED: 'REPORT_SUBMITTED'
         },
 
-        XERO_HQ_CONNECTION_NAME: 'xerohq'
+        XERO_HQ_CONNECTION_NAME: 'xerohq',
+
+        EXPENSIFY_SYNC_MANAGER_VERSION: '23.0.403.124',
     },
 
     INTEGRATION_TYPES: {
