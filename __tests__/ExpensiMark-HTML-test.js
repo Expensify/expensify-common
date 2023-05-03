@@ -31,15 +31,15 @@ test('Test quote markdown replacement', () => {
 
 // Words wrapped in _ successfully replaced with <em></em>
 test('Test italic markdown replacement', () => {
-    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. _test_ _ testing_ test_test_test. _ test _ _test _';
-    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _';
+    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. ___ _italic__ _test_ _ testing_ test_test_test. _ test _ _test _';
+    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. ___ <em>italic</em>_ <em>test</em> _ testing_ test_test_test. _ test _ _test _';
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
 // Multi-line text wrapped in _ is successfully replaced with <em></em>
 test('Test multi-line italic markdown replacement', () => {
-    const testString = '_Here is a multi-line\ncomment that should\nbe italic_';
-    const replacedString = '<em>Here is a multi-line<br />comment that should<br />be italic</em>';
+    const testString = '_Here is a multi-line\ncomment that should\nbe italic_ \n_\n_test\n_';
+    const replacedString = '<em>Here is a multi-line<br />comment that should<br />be italic</em> <br />_<br />_test<br />_';
 
     expect(parser.replace(testString)).toBe(replacedString);
 });
