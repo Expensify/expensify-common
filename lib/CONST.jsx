@@ -369,7 +369,7 @@ export const CONST = {
         CLOUDFRONT: 'https://d2k5nsl2zxldvw.cloudfront.net',
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
-        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_220929381.exe',
+        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_230403124.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
         ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions'
     },
@@ -558,7 +558,9 @@ export const CONST = {
             REPORT_SUBMITTED: 'REPORT_SUBMITTED'
         },
 
-        XERO_HQ_CONNECTION_NAME: 'xerohq'
+        XERO_HQ_CONNECTION_NAME: 'xerohq',
+
+        EXPENSIFY_SYNC_MANAGER_VERSION: '23.0.403.124',
     },
 
     INTEGRATION_TYPES: {
