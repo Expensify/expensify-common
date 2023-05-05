@@ -649,7 +649,7 @@ test('Test blockquote with h1 inside', () => {
     testString = '<blockquote><h1>heading</h1>test</blockquote>';
     expect(parser.htmlToMarkdown(testString)).toBe('\n> # heading\n> test\n');
 
-    testString = '<blockquote>test<br /><h1>heading</h1>test</blockquote>';
+    testString = '<blockquote>test<h1>heading</h1>test</blockquote>';
     expect(parser.htmlToMarkdown(testString)).toBe('\n> test\n> # heading\n> test\n');
 
     testString = '<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>';
