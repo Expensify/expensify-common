@@ -584,6 +584,30 @@ test('Test markdown and url links with inconsistent starting and closing parens'
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test autolink replacement to avoid parsing nested links', () => {
+    const testString = '[click google.com *here*](google.com) '
+        + '[click google.com ~here~](google.com) '
+        + '[click google.com _here_](google.com) '
+        + '[click google.com `here`](google.com) '
+        + '[*click* google.com here](google.com) '
+        + '[~click~ google.com here](google.com) '
+        + '[_click_ google.com here](google.com) '
+        + '[`click` google.com here](google.com) '
+        + '[`click` google.com *here*](google.com)';
+
+    const resultString = '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <strong>here</strong></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <del>here</del></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <em>here</em></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <code>here</code></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><strong>click</strong> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><del>click</del> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><em>click</em> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><code>click</code> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><code>click</code> google.com <strong>here</strong></a>';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
     const testString = 'The next line should be quoted\n>Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence```';
 
