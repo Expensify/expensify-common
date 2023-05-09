@@ -724,3 +724,145 @@ test('Test quotes markdown replacement with heading inside', () => {
     testString = '> # heading A\n> # heading B';
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>');
 });
+
+// Valid text that should match for user mentions
+test('Test for user mention with @username@domain.com', () => {
+    const testString = '@username@expensify.com';
+    const resultString = '<mention-user>@username@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @phoneNumber@domain.sms', () => {
+    const testString = '@+19728974297@expensify.sms';
+    const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with bold style', () => {
+    const testString = '*@username@expensify.com*';
+    const resultString = '<strong><mention-user>@username@expensify.com</mention-user></strong>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with italic style', () => {
+    const testString = '_@username@expensify.com_';
+    const resultString = '<em><mention-user>@username@expensify.com</mention-user></em>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with heading1 style', () => {
+    const testString = '# @username@expensify.com';
+    const resultString = '<h1><mention-user>@username@expensify.com</mention-user></h1>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with strikethrough style', () => {
+    const testString = '~@username@expensify.com~';
+    const resultString = '<del><mention-user>@username@expensify.com</mention-user></del>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @here', () => {
+    const testString = '@here say hello to @newuser@expensify.com';
+    const resultString = '<mention-here>@here</mention-here> say hello to <mention-user>@newuser@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Invalid text should not match for user mentions:
+test('Test for user mention without leading whitespace', () => {
+    const testString = 'hi...@username@expensify.com';
+    const resultString = 'hi...@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @username@expensify', () => {
+    const testString = '@username@expensify';
+    const resultString = '@username@expensify';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with valid email in the middle of a word', () => {
+    const testString = 'hello username@expensify.com is my email';
+    const resultString = 'hello <a href=\"mailto:username@expensify.com\">username@expensify.com</a> is my email';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with invalid username', () => {
+    const testString = '@ +19728974297 hey';
+    const resultString = '@ +19728974297 hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with codefence style', () => {
+    const testString = '```@username@expensify.com```';
+    const resultString = '<pre>@username@expensify.com</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with inlineCodeBlock style', () => {
+    const testString = '`@username@expensify.com`';
+    const resultString = '<code>@username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@here';
+    const resultString = 'hi@here';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with codefence style', () => {
+    const testString = '```@here```';
+    const resultString = '<pre>@here</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with inlineCodeBlock style', () => {
+    const testString = '`@here`';
+    const resultString = '<code>@here</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should match for here mentions:
+test('Test for here mention with @here', () => {
+    const testString = '@here';
+    const resultString = '<mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with leading word and space', () => {
+    const testString = 'hi all @here';
+    const resultString = 'hi all <mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with @here in the middle of a word', () => {
+    const testString = '@here how are you guys?';
+    const resultString = '<mention-here>@here</mention-here> how are you guys?';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should not match for here mentions:
+test('Test for here mention without leading whitespace', () => {
+    const testString = 'hi...@here';
+    const resultString = 'hi...@here';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with invalid username', () => {
+    const testString = '@ here hey';
+    const resultString = '@ here hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention without space or supported styling character', () => {
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
