@@ -719,8 +719,16 @@ test('Test quotes markdown replacement with heading inside', () => {
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1>test</blockquote>');
 
     testString = '> test\n> # heading\n> test';
-    expect(parser.replace(testString)).toBe('<blockquote>test<h1>heading</h1>test</blockquote>');
+    expect(parser.replace(testString)).toBe('<blockquote>test<br /><h1>heading</h1>test</blockquote>');
 
     testString = '> # heading A\n> # heading B';
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>');
+
+    testString = '> test\n>\n> # heading\n>\n>test';
+    expect(parser.replace(testString)).toBe('<blockquote>test<br /><br /><h1>heading</h1><br />test</blockquote>');
+});
+
+test('Test heading1 markdown replacement with line break before or after the heading1', () => {
+    const testString = 'test\n\n# heading\n\ntest';
+    expect(parser.replace(testString)).toBe('test<br /><br /><h1>heading</h1><br />test');
 });
