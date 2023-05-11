@@ -371,7 +371,10 @@ test('Test url replacements', () => {
         + 'https://example.com/~username/foo~bar.txt '
         + 'http://example.com/foo/*/bar/*/test.txt '
         + 'test-.com '
-        + '-test.com ';
+        + '-test.com '
+        + '@test.com '
+        + '@test.com test.com '
+        + '@test.com @test.com ';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="https://foo.com" target="_blank" rel="noreferrer noopener">foo.com</a> '
@@ -409,7 +412,10 @@ test('Test url replacements', () => {
         + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
         + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> '
         + 'test-.com '
-        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ';
+        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> '
+        + '@test.com '
+        + '@test.com <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> '
+        + '@test.com @test.com ';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
