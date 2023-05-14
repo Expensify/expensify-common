@@ -590,8 +590,11 @@ test('Test html to heading1 markdown when there are adjacent h1 tags in the line
 });
 
 test('Test link with multiline text do not loses markdown', () => {
-    const testString = '<a href="https://google.com/">multiline\ntext</a>';
-    const resultString = '[multiline\ntext](https://google.com/)';
+    let testString = '<a href="https://google.com/">multiline\ntext</a>';
+    let resultString = '[multiline\ntext](https://google.com/)';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    testString = '<a href="http://localhost:3000/">multiline\ntext</a>';
+    resultString = '[multiline\ntext](http://localhost:3000/)';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -614,8 +617,12 @@ test('Map html list item to newline with two prefix spaces', () => {
 });
 
 test('Test list item replacement when there is an anchor tag inside <li> tag', () => {
-    const testString = '<ul><li><a href="https://example.com">Coffee</a> -- Coffee</li><li><a href="https://example.com">Tea</a> -- Tea</li><li><a href="https://example.com">Milk</a> -- Milk</li></ul>';
-    const resultString = '  [Coffee](https://example.com) -- Coffee\n  [Tea](https://example.com) -- Tea\n  [Milk](https://example.com) -- Milk';
+    let testString = '<ul><li><a href="https://example.com">Coffee</a> -- Coffee</li><li><a href="https://example.com">Tea</a> -- Tea</li><li><a href="https://example.com">Milk</a> -- Milk</li></ul>';
+    let resultString = '  [Coffee](https://example.com) -- Coffee\n  [Tea](https://example.com) -- Tea\n  [Milk](https://example.com) -- Milk';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+
+    testString = '<ul><li><a href="http://localhost">Coffee</a> -- Coffee</li><li><a href="http://localhost/">Tea</a> -- Tea</li><li><a href="http://localhost/">Milk</a> -- Milk</li></ul>';
+    resultString = '  [Coffee](http://localhost) -- Coffee\n  [Tea](http://localhost/) -- Tea\n  [Milk](http://localhost/) -- Milk';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 

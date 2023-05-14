@@ -159,8 +159,12 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
-    const testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
-    const resultString = 'Go to <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> to learn more. <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">It&#x27;s really the coolest</a> <a href="https://expensify.com/some?query=par|am" target="_blank" rel="noreferrer noopener"><code>Some</code> Special cases - + . = , &#x27;</a>';
+    let testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
+    let resultString = 'Go to <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> to learn more. <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">It&#x27;s really the coolest</a> <a href="https://expensify.com/some?query=par|am" target="_blank" rel="noreferrer noopener"><code>Some</code> Special cases - + . = , &#x27;</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = 'Go to [Localhost](http://localhost:3000) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
+    resultString = 'Go to <a href="http://localhost:3000" target="_blank" rel="noreferrer noopener">Localhost</a> to learn more. <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">Expensify</a> <a href="https://expensify.com" target="_blank" rel="noreferrer noopener">It&#x27;s really the coolest</a> <a href="https://expensify.com/some?query=par|am" target="_blank" rel="noreferrer noopener"><code>Some</code> Special cases - + . = , &#x27;</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -181,7 +185,8 @@ test('Test critical markdown style links', () => {
     + '[link with an @ in it](https://google.com) '
     + '[link with [brackets] inside of it](https://google.com) '
     + '[link with smart quotes ‘’“”](https://google.com) '
-    + '[link with someone@expensify.com email in it](https://google.com)';
+    + '[link with someone@expensify.com email in it](https://google.com)'
+    + '[Localhost](http://a:3030)';
     const resultString = 'Testing '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em> test.com</a> '
@@ -197,7 +202,8 @@ test('Test critical markdown style links', () => {
     + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with an @ in it</a> '
     + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with [brackets] inside of it</a> '
     + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with smart quotes ‘’“”</a> '
-    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with someone@expensify.com email in it</a>';
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with someone@expensify.com email in it</a>'
+    + '<a href="http://a:3030" target="_blank" rel="noreferrer noopener">Localhost</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
