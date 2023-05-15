@@ -904,3 +904,14 @@ test('Test for @here mention without space or supported styling character', () =
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Skip rendering invalid markdown',() => {
+    let testString = '_*test_*';
+    expect(parser.replace(testString)).toBe('<em>*test</em>*');
+
+    testString = '*_test*_';
+    expect(parser.replace(testString)).toBe('*<em>test*</em>');
+
+    testString = '~*test~*';
+    expect(parser.replace(testString)).toBe('~<strong>test~</strong>');
+});
