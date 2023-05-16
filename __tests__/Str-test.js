@@ -86,7 +86,7 @@ describe('Str.isValidMention', () => {
 });
 
 describe('Str.normalizeWebsiteOfUrl', () => {
-    it('Normalize website of url to lower case and add missing https:// protocol', () => {
+    it('Normalize domain name to lower case and add missing https:// protocol', () => {
         expect(Str.normalizeWebsiteOfUrl('https://google.com')).toBe('https://google.com');
         expect(Str.normalizeWebsiteOfUrl('google.com')).toBe('https://google.com');
         expect(Str.normalizeWebsiteOfUrl('Https://google.com')).toBe('https://google.com');
