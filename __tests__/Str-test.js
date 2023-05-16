@@ -85,14 +85,14 @@ describe('Str.isValidMention', () => {
     });
 });
 
-describe('Str.normalizeWebsiteOfUrl', () => {
+describe('Str.sanitizeURL', () => {
     it('Normalize domain name to lower case and add missing https:// protocol', () => {
-        expect(Str.normalizeWebsiteOfUrl('https://google.com')).toBe('https://google.com');
-        expect(Str.normalizeWebsiteOfUrl('google.com')).toBe('https://google.com');
-        expect(Str.normalizeWebsiteOfUrl('Https://google.com')).toBe('https://google.com');
-        expect(Str.normalizeWebsiteOfUrl('https://GOOgle.com')).toBe('https://google.com');
-        expect(Str.normalizeWebsiteOfUrl('FOO.com/blah_BLAH')).toBe('https://foo.com/blah_BLAH');
-        expect(Str.normalizeWebsiteOfUrl('http://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
-        expect(Str.normalizeWebsiteOfUrl('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('https://google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('Https://google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('https://GOOgle.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('FOO.com/blah_BLAH')).toBe('https://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('http://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
     });
 });
