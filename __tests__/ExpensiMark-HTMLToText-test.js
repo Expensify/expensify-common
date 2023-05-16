@@ -113,3 +113,17 @@ test('Test replacement on mixed html', () => {
 
     expect(parser.htmlToText(html)).toBe(text);
 });
+
+test('Test new line replacement on blockquote with heading inside', () => {
+    let testString = '<blockquote><h1>heading</h1></blockquote>';
+    expect(parser.htmlToText(testString)).toBe('heading');
+
+    testString = '<blockquote><h1>heading</h1>test</blockquote>';
+    expect(parser.htmlToText(testString)).toBe('heading\ntest');
+
+    testString = '<blockquote>test<br /><h1>heading</h1>test</blockquote>';
+    expect(parser.htmlToText(testString)).toBe('test\n\nheading\ntest');
+
+    testString = '<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>';
+    expect(parser.htmlToText(testString)).toBe('heading A\n\nheading B');
+});

@@ -31,15 +31,15 @@ test('Test quote markdown replacement', () => {
 
 // Words wrapped in _ successfully replaced with <em></em>
 test('Test italic markdown replacement', () => {
-    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. _test_ _ testing_ test_test_test. _ test _ _test _';
-    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _';
+    const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. ___ _italic__ _test_ _ testing_ test_test_test. _ test _ _test _';
+    const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. ___ <em>italic</em>_ <em>test</em> _ testing_ test_test_test. _ test _ _test _';
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
 // Multi-line text wrapped in _ is successfully replaced with <em></em>
 test('Test multi-line italic markdown replacement', () => {
-    const testString = '_Here is a multi-line\ncomment that should\nbe italic_';
-    const replacedString = '<em>Here is a multi-line<br />comment that should<br />be italic</em>';
+    const testString = '_Here is a multi-line\ncomment that should\nbe italic_ \n_\n_test\n_';
+    const replacedString = '<em>Here is a multi-line<br />comment that should<br />be italic</em> <br />_<br />_test<br />_';
 
     expect(parser.replace(testString)).toBe(replacedString);
 });
@@ -371,7 +371,10 @@ test('Test url replacements', () => {
         + 'https://example.com/~username/foo~bar.txt '
         + 'http://example.com/foo/*/bar/*/test.txt '
         + 'test-.com '
-        + '-test.com ';
+        + '-test.com '
+        + '@test.com '
+        + '@test.com test.com '
+        + '@test.com @test.com ';
 
     const urlTestReplacedString = 'Testing '
         + '<a href="https://foo.com" target="_blank" rel="noreferrer noopener">foo.com</a> '
@@ -409,7 +412,10 @@ test('Test url replacements', () => {
         + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
         + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> '
         + 'test-.com '
-        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ';
+        + '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> '
+        + '@test.com '
+        + '@test.com <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> '
+        + '@test.com @test.com ';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
@@ -584,6 +590,30 @@ test('Test markdown and url links with inconsistent starting and closing parens'
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test autolink replacement to avoid parsing nested links', () => {
+    const testString = '[click google.com *here*](google.com) '
+        + '[click google.com ~here~](google.com) '
+        + '[click google.com _here_](google.com) '
+        + '[click google.com `here`](google.com) '
+        + '[*click* google.com here](google.com) '
+        + '[~click~ google.com here](google.com) '
+        + '[_click_ google.com here](google.com) '
+        + '[`click` google.com here](google.com) '
+        + '[`click` google.com *here*](google.com)';
+
+    const resultString = '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <strong>here</strong></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <del>here</del></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <em>here</em></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <code>here</code></a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><strong>click</strong> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><del>click</del> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><em>click</em> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><code>click</code> google.com here</a> '
+    + '<a href="https://google.com" target="_blank" rel="noreferrer noopener"><code>click</code> google.com <strong>here</strong></a>';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
     const testString = 'The next line should be quoted\n>Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence```';
 
@@ -715,4 +745,178 @@ test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
     const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
+});
+test('Test quotes markdown replacement with heading inside', () => {
+    let testString = '> # heading';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1></blockquote>');
+
+    testString = '> # heading\n> test';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1>test</blockquote>');
+
+    testString = '> test\n> # heading\n> test';
+    expect(parser.replace(testString)).toBe('<blockquote>test<br /><h1>heading</h1>test</blockquote>');
+
+    testString = '> # heading A\n> # heading B';
+    expect(parser.replace(testString)).toBe('<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>');
+
+    testString = '> test\n>\n> # heading\n>\n>test';
+    expect(parser.replace(testString)).toBe('<blockquote>test<br /><br /><h1>heading</h1><br />test</blockquote>');
+});
+
+test('Test heading1 markdown replacement with line break before or after the heading1', () => {
+    const testString = 'test\n\n# heading\n\ntest';
+    expect(parser.replace(testString)).toBe('test<br /><br /><h1>heading</h1><br />test');
+});
+
+// Valid text that should match for user mentions
+test('Test for user mention with @username@domain.com', () => {
+    const testString = '@username@expensify.com';
+    const resultString = '<mention-user>@username@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @phoneNumber@domain.sms', () => {
+    const testString = '@+19728974297@expensify.sms';
+    const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with bold style', () => {
+    const testString = '*@username@expensify.com*';
+    const resultString = '<strong><mention-user>@username@expensify.com</mention-user></strong>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with italic style', () => {
+    const testString = '_@username@expensify.com_';
+    const resultString = '<em><mention-user>@username@expensify.com</mention-user></em>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with heading1 style', () => {
+    const testString = '# @username@expensify.com';
+    const resultString = '<h1><mention-user>@username@expensify.com</mention-user></h1>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with strikethrough style', () => {
+    const testString = '~@username@expensify.com~';
+    const resultString = '<del><mention-user>@username@expensify.com</mention-user></del>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @here', () => {
+    const testString = '@here say hello to @newuser@expensify.com';
+    const resultString = '<mention-here>@here</mention-here> say hello to <mention-user>@newuser@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Invalid text should not match for user mentions:
+test('Test for user mention without leading whitespace', () => {
+    const testString = 'hi...@username@expensify.com';
+    const resultString = 'hi...@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with @username@expensify', () => {
+    const testString = '@username@expensify';
+    const resultString = '@username@expensify';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with valid email in the middle of a word', () => {
+    const testString = 'hello username@expensify.com is my email';
+    const resultString = 'hello <a href=\"mailto:username@expensify.com\">username@expensify.com</a> is my email';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with invalid username', () => {
+    const testString = '@ +19728974297 hey';
+    const resultString = '@ +19728974297 hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with codefence style', () => {
+    const testString = '```@username@expensify.com```';
+    const resultString = '<pre>@username@expensify.com</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with inlineCodeBlock style', () => {
+    const testString = '`@username@expensify.com`';
+    const resultString = '<code>@username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention without space or supported styling character', () => {
+    const testString = 'hi@here';
+    const resultString = 'hi@here';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with codefence style', () => {
+    const testString = '```@here```';
+    const resultString = '<pre>@here</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention with inlineCodeBlock style', () => {
+    const testString = '`@here`';
+    const resultString = '<code>@here</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should match for here mentions:
+test('Test for here mention with @here', () => {
+    const testString = '@here';
+    const resultString = '<mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with leading word and space', () => {
+    const testString = 'hi all @here';
+    const resultString = 'hi all <mention-here>@here</mention-here>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with @here in the middle of a word', () => {
+    const testString = '@here how are you guys?';
+    const resultString = '<mention-here>@here</mention-here> how are you guys?';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Examples that should not match for here mentions:
+test('Test for here mention without leading whitespace', () => {
+    const testString = 'hi...@here';
+    const resultString = 'hi...@here';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for here mention with invalid username', () => {
+    const testString = '@ here hey';
+    const resultString = '@ here hey';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for @here mention without space or supported styling character', () => {
+    const testString = 'hi@username@expensify.com';
+    const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Skip rendering invalid markdown',() => {
+    let testString = '_*test_*';
+    expect(parser.replace(testString)).toBe('<em>*test</em>*');
+
+    testString = '*_test*_';
+    expect(parser.replace(testString)).toBe('*<em>test*</em>');
+
+    testString = '~*test~*';
+    expect(parser.replace(testString)).toBe('~<strong>test~</strong>');
 });
