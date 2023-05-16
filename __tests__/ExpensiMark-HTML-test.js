@@ -741,6 +741,11 @@ test('Test for link with no content', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for link with emoji', () => {
+    const testString = '[😀](www.link.com)';
+    const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
 test('Test quotes markdown replacement with heading inside', () => {
     let testString = '> # heading';
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1></blockquote>');
