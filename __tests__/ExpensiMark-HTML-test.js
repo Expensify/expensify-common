@@ -401,7 +401,7 @@ test('Test url replacements', () => {
         + '<a href="https://expensify.cash/#/r/1234" target="_blank" rel="noreferrer noopener">https://expensify.cash/#/r/1234</a> '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/6.45" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/6.45</a> '
         + '<a href="https://github.com/Expensify/Expensify/issues/143,231" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/Expensify/issues/143,231</a> '
-        + '<a href="https://testRareTLDs.beer" target="_blank" rel="noreferrer noopener">testRareTLDs.beer</a> '
+        + '<a href="https://testraretlds.beer" target="_blank" rel="noreferrer noopener">testRareTLDs.beer</a> '
         + '<a href="mailto:test@expensify.com">test@expensify.com</a> '
         + 'test.completelyFakeTLD '
         + '<a href="https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878" target="_blank" rel="noreferrer noopener">https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&amp;index=logs_expensify-008878</a>) '
@@ -747,6 +747,11 @@ test('Test for link with no content', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for link with emoji', () => {
+    const testString = '[😀](www.link.com)';
+    const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
 test('Test quotes markdown replacement with heading inside', () => {
     let testString = '> # heading';
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1></blockquote>');
@@ -909,4 +914,15 @@ test('Test for @here mention without space or supported styling character', () =
     const testString = 'hi@username@expensify.com';
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Skip rendering invalid markdown',() => {
+    let testString = '_*test_*';
+    expect(parser.replace(testString)).toBe('<em>*test</em>*');
+
+    testString = '*_test*_';
+    expect(parser.replace(testString)).toBe('*<em>test*</em>');
+
+    testString = '~*test~*';
+    expect(parser.replace(testString)).toBe('~<strong>test~</strong>');
 });

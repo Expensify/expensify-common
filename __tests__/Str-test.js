@@ -84,3 +84,15 @@ describe('Str.isValidMention', () => {
         expect(Str.isValidMention('"@username@expensify.com"')).toBeTruthy();
     });
 });
+
+describe('Str.sanitizeURL', () => {
+    it('Normalize domain name to lower case and add missing https:// protocol', () => {
+        expect(Str.sanitizeURL('https://google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('Https://google.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('https://GOOgle.com')).toBe('https://google.com');
+        expect(Str.sanitizeURL('FOO.com/blah_BLAH')).toBe('https://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('http://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
+    });
+});
