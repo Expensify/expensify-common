@@ -8,3 +8,9 @@ test('Test text is escaped', () => {
     const resultString = '&amp; &amp;amp; &amp;lt; &lt;';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test text is unescaped', () => {
+    const htmlString = '&amp; &amp;amp; &amp;lt; &lt;';
+    const resultString = '& &amp; &lt; <';
+    expect(parser.htmlToText(htmlString)).toBe(resultString);
+});
