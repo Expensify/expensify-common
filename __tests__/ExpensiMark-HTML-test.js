@@ -837,14 +837,26 @@ test('Test for user mention with invalid username', () => {
 });
 
 test('Test for user mention with codefence style', () => {
-    const testString = '```@username@expensify.com```';
+    const testString = '```hi @username@expensify.com```';
     const resultString = '<pre>@username@expensify.com</pre>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with inlineCodeBlock style', () => {
-    const testString = '`@username@expensify.com`';
+    const testString = '`hi @username@expensify.com`';
     const resultString = '<code>@username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention inside link markdown', () => {
+    const testString = '[@username@expensify.com](expensify.com)';
+    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">@username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention inside email markdown', () => {
+    const testString = '[@username@expensify.com](username@expensify.com)';
+    const resultString = '<a href="mailto:username@expensify.com">@username@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
