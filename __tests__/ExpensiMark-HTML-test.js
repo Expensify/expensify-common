@@ -854,6 +854,30 @@ test('Test for user mention with inlineCodeBlock style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for user mention with text with codefence style', () => {
+    const testString = '```hi @username@expensify.com```';
+    const resultString = '<pre>hi&#32;@username@expensify.com</pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with text with inlineCodeBlock style', () => {
+    const testString = '`hi @username@expensify.com`';
+    const resultString = '<code>hi @username@expensify.com</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention inside link markdown', () => {
+    const testString = '[@username@expensify.com](expensify.com)';
+    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">@username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention inside email markdown', () => {
+    const testString = '[@username@expensify.com](username@expensify.com)';
+    const resultString = '<a href="mailto:username@expensify.com">@username@expensify.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for user mention without space or supported styling character', () => {
     const testString = 'hi@username@expensify.com';
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
