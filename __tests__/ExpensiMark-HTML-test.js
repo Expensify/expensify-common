@@ -949,4 +949,7 @@ test('Skip rendering invalid markdown',() => {
 
     testString = '~*test~*';
     expect(parser.replace(testString)).toBe('~<strong>test~</strong>');
+
+    testString = '> *This is multiline\nbold text*';
+    expect(parser.replace(testString)).toBe('<blockquote>*This is multiline</blockquote>bold text*');
 });
