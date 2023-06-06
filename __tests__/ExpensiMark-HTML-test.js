@@ -934,6 +934,12 @@ test('Test for here mention with invalid username', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for @here mention with italic style', () => {
+    const testString = '_@here_ @here_123 @here_abc @here123 @hereabc';
+    const resultString = '<em><mention-here>@here</mention-here></em> @here_123 @here_abc @here123 @hereabc';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for @here mention without space or supported styling character', () => {
     const testString = 'hi@username@expensify.com';
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
