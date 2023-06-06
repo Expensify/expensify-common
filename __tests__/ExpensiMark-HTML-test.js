@@ -935,8 +935,37 @@ test('Test for here mention with invalid username', () => {
 });
 
 test('Test for @here mention with italic style', () => {
-    const testString = '_@here_ @here_123 @here_abc @here123 @hereabc';
-    const resultString = '<em><mention-here>@here</mention-here></em> @here_123 @here_abc @here123 @hereabc';
+    const testString = '@here'
+    + ' _@here_'
+    + ' [@here](google.com)'
+    + ' @here_123'
+    + ' @here_abc'
+    + ' @here123'
+    + ' @hereabc'
+    + ' @here abc'
+    + ' @here*'
+    + ' @here~'
+    + ' @here#'
+    + ' @here@'
+    + ' @here$'
+    + ' @here^'
+    + ' @here(';
+
+    const resultString = '<mention-here>@here</mention-here>'
+    + ' <em><mention-here>@here</mention-here></em>'
+    + ' <a href="https://google.com" target="_blank" rel="noreferrer noopener">@here</a>'
+    + ' @here_123'
+    + ' @here_abc'
+    + ' @here123'
+    + ' @hereabc'
+    + ' <mention-here>@here</mention-here> abc'
+    + ' <mention-here>@here</mention-here>*'
+    + ' <mention-here>@here</mention-here>~'
+    + ' <mention-here>@here</mention-here>#'
+    + ' <mention-here>@here</mention-here>@'
+    + ' <mention-here>@here</mention-here>$'
+    + ' <mention-here>@here</mention-here>^'
+    + ' <mention-here>@here</mention-here>(';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
