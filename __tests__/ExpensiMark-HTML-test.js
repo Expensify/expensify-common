@@ -934,6 +934,45 @@ test('Test for here mention with invalid username', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for @here mention with italic, bold and strikethrough styles', () => {
+    const testString = '@here'
+    + ' _@here_'
+    + ' *@here*'
+    + ' ~@here~'
+    + ' [@here](google.com)'
+    + ' @here_123'
+    + ' @here_abc'
+    + ' @here123'
+    + ' @hereabc'
+    + ' @here abc'
+    + ' @here*'
+    + ' @here~'
+    + ' @here#'
+    + ' @here@'
+    + ' @here$'
+    + ' @here^'
+    + ' @here(';
+
+    const resultString = '<mention-here>@here</mention-here>'
+    + ' <em><mention-here>@here</mention-here></em>'
+    + ' <strong><mention-here>@here</mention-here></strong>'
+    + ' <del><mention-here>@here</mention-here></del>'
+    + ' <a href="https://google.com" target="_blank" rel="noreferrer noopener">@here</a>'
+    + ' @here_123'
+    + ' @here_abc'
+    + ' @here123'
+    + ' @hereabc'
+    + ' <mention-here>@here</mention-here> abc'
+    + ' <mention-here>@here</mention-here>*'
+    + ' <mention-here>@here</mention-here>~'
+    + ' <mention-here>@here</mention-here>#'
+    + ' <mention-here>@here</mention-here>@'
+    + ' <mention-here>@here</mention-here>$'
+    + ' <mention-here>@here</mention-here>^'
+    + ' <mention-here>@here</mention-here>(';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for @here mention without space or supported styling character', () => {
     const testString = 'hi@username@expensify.com';
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
