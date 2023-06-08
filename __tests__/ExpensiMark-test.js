@@ -10,7 +10,7 @@ test('Test text is escaped', () => {
 });
 
 test('Test text is unescaped', () => {
-    const htmlString = '&amp; &amp;amp; &amp;lt; &lt;';
+    const htmlString = '&amp;&#32;&amp;amp;&#32;&amp;lt;&#32;&lt;';
     const resultString = '& &amp; &lt; <';
     expect(parser.htmlToText(htmlString)).toBe(resultString);
 });
