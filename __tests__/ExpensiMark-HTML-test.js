@@ -47,11 +47,13 @@ test('Test multi-line italic markdown replacement', () => {
 test('Test italic markdown replacement with word boundary and undercores', () => {
     const testString = 'hello_world '
         + 'hello__world '
+        + 'h_ello_ '
         + '_hello_ '
         + '___hello_ '
         + '___hello______';
     const replacedString = 'hello_world '
         + 'hello__world '
+        + 'h_ello_ '
         + '<em>hello</em> '
         + '__<em>hello</em> '
         + '__<em>hello</em>_____';
