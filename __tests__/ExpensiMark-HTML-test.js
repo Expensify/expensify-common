@@ -890,6 +890,12 @@ test('Test for user mention without space or supported styling character', () =>
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for user mention with user email includes underscores', () => {
+    const testString = '@_concierge_@expensify.com';
+    const resultString = '<mention-user>@_concierge_@expensify.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for @here mention with codefence style', () => {
     const testString = '```@here```';
     const resultString = '<pre>@here</pre>';
