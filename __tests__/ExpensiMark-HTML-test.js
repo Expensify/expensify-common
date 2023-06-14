@@ -866,18 +866,6 @@ test('Test for user mention with text with inlineCodeBlock style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test for user mention inside link markdown', () => {
-    const testString = '[@username@expensify.com](expensify.com)';
-    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">@username@expensify.com</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test for user mention inside email markdown', () => {
-    const testString = '[@username@expensify.com](username@expensify.com)';
-    const resultString = '<a href="mailto:username@expensify.com">@username@expensify.com</a>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
 test('Test for user mention without space or supported styling character', () => {
     const testString = 'hi@username@expensify.com';
     const resultString = 'hi@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
@@ -985,23 +973,49 @@ test('Test for @here mention without space or supported styling character', () =
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test for mention inside link and wrapped by styles like italic, bold, strikethrough or code', () => {
-    const testString = '[_@username@expensify.com_](expensify.com) '
+test('Test for mention inside link and email markdown', () => {
+    const testString = '[@username@expensify.com](expensify.com) '
+    + '[_@username@expensify.com_](expensify.com) '
     + '[*@username@expensify.com*](expensify.com) '
     + '[~@username@expensify.com~](expensify.com) '
     + '[`@username@expensify.com`](expensify.com) '
+    + '[@here](expensify.com) '
     + '[_@here_](expensify.com) '
     + '[*@here*](expensify.com) '
     + '[~@here~](expensify.com) '
-    + '[`@here`](expensify.com)';
-    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><em>@username@expensify.com</em></a> '
+    + '[`@here`](expensify.com) '
+    + '[@username@expensify.com](username@expensify.com) '
+    + '[_@username@expensify.com_](username@expensify.com) '
+    + '[*@username@expensify.com*](username@expensify.com) '
+    + '[~@username@expensify.com~](username@expensify.com) '
+    + '[`@username@expensify.com`](username@expensify.com) '
+    + '[@here](username@expensify.com) '
+    + '[_@here_](username@expensify.com) '
+    + '[*@here*](username@expensify.com) '
+    + '[~@here~](username@expensify.com) '
+    + '[`@here`](username@expensify.com)';
+
+    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">@username@expensify.com</a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><em>@username@expensify.com</em></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><strong>@username@expensify.com</strong></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>@username@expensify.com</del></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><code>@username@expensify.com</code></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">@here</a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><em>@here</em></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><strong>@here</strong></a> '
     + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>@here</del></a> '
-    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><code>@here</code></a>';
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><code>@here</code></a> '
+    + '<a href="mailto:username@expensify.com">@username@expensify.com</a> '
+    + '<a href="mailto:username@expensify.com"><em>@username@expensify.com</em></a> '
+    + '<a href="mailto:username@expensify.com"><strong>@username@expensify.com</strong></a> '
+    + '<a href="mailto:username@expensify.com"><del>@username@expensify.com</del></a> '
+    + '<a href="mailto:username@expensify.com"><code>@username@expensify.com</code></a> '
+    + '<a href="mailto:username@expensify.com">@here</a> '
+    + '<a href="mailto:username@expensify.com"><em>@here</em></a> '
+    + '<a href="mailto:username@expensify.com"><strong>@here</strong></a> '
+    + '<a href="mailto:username@expensify.com"><del>@here</del></a> '
+    + '<a href="mailto:username@expensify.com"><code>@here</code></a>';
+
     expect(parser.replace(testString)).toBe(resultString);
 });
 
