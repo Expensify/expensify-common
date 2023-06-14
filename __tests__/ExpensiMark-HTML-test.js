@@ -44,6 +44,22 @@ test('Test multi-line italic markdown replacement', () => {
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+test('Test italic markdown replacement with word boundary and undercores', () => {
+    const testString = 'hello_world '
+        + 'hello__world '
+        + 'h_ello_ '
+        + '_hello_ '
+        + '___hello_ '
+        + '___hello______';
+    const replacedString = 'hello_world '
+        + 'hello__world '
+        + 'h_ello_ '
+        + '<em>hello</em> '
+        + '__<em>hello</em> '
+        + '__<em>hello</em>_____';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 // Words wrapped in ~ successfully replaced with <del></del>
 test('Test strikethrough markdown replacement', () => {
     const strikethroughTestStartString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
