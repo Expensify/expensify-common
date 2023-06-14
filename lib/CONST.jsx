@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-escape */
 
-const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
-
+const COMMON_EMAIL_REGEX = (param) => `([a-zA-Z0-9.!#$%&'+/=?^\`{|}${param}-][a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)`;
+const EMAIL_BASE_REGEX = COMMON_EMAIL_REGEX('_');
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 
 /**
@@ -330,7 +330,7 @@ export const CONST = {
          *
          * @type String
          */
-        MARKDOWN_EMAIL: "([a-zA-Z0-9.!#$%&'+/=?^`{|}-][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)",
+        MARKDOWN_EMAIL: COMMON_EMAIL_REGEX(''),
 
         /**
          * Regex matching an text containing an Emoji
@@ -511,7 +511,7 @@ export const CONST = {
         'admin@expensify.com',
     ],
 
-     /**
+    /**
      * Emails that the user shouldn't submit reports to nor share reports with
      * Any changes here should be reflected in the PHP constant,
      * which is located in _constant.php and also named INVALID_APPROVER_AND_SHAREE_EMAILS

@@ -43,6 +43,15 @@ describe('Str.isValidURL', () => {
     });
 });
 
+describe('Str.isValidEmail', () => {
+    it('Correctly identifies valid email', () => {
+        expect(Str.isValidEmail('Jaj@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjeJajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfisjksksjsjssskssjskskssksksksksskdkddkddkdksskskdkdkdksskskskdkdkdkdkekeekdkddenejeodxkdndekkdjddkeemdjxkdenendkdjddekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjeJajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdi.cdjd')).toBeTruthy();
+
+        // Multiple Domains
+        expect(Str.isValidEmail('__sadjkfasdjasdflaajdfghadkf@kasdfljasdkfajlsdf-sad-fasdf-a-sdf-asd.io.com.ee')).toBeTruthy();
+    });
+});
+
 describe('Str.isValidEmailMarkdown', () => {
     it('Correctly identifies valid mark down emails', () => {
         expect(Str.isValidEmailMarkdown('abc@gmail.com')).toBeTruthy();
