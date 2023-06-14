@@ -985,6 +985,26 @@ test('Test for @here mention without space or supported styling character', () =
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for mention inside link and wrapped by styles like italic, bold, strikethrough or code', () => {
+    const testString = '[_@username@expensify.com_](expensify.com) '
+    + '[*@username@expensify.com*](expensify.com) '
+    + '[~@username@expensify.com~](expensify.com) '
+    + '[`@username@expensify.com`](expensify.com) '
+    + '[_@here_](expensify.com) '
+    + '[*@here*](expensify.com) '
+    + '[~@here~](expensify.com) '
+    + '[`@here`](expensify.com)';
+    const resultString = '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><em>@username@expensify.com</em></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><strong>@username@expensify.com</strong></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>@username@expensify.com</del></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><code>@username@expensify.com</code></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><em>@here</em></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><strong>@here</strong></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>@here</del></a> '
+    + '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><code>@here</code></a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Skip rendering invalid markdown',() => {
     let testString = '_*test_*';
     expect(parser.replace(testString)).toBe('<em>*test</em>*');
