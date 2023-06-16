@@ -793,43 +793,43 @@ test('Test heading1 markdown replacement with line break before or after the hea
 // Valid text that should match for user mentions
 test('Test for user mention with @username@domain.com', () => {
     const testString = '@username@expensify.com';
-    const resultString = '<mention-user>@username@expensify.com</mention-user>';
+    const resultString = '@<a href=\"mailto:username@expensify.com\">username@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with @phoneNumber@domain.sms', () => {
     const testString = '@+19728974297@expensify.sms';
-    const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
+    const resultString = '@<a href=\"mailto:+19728974297@expensify.sms\">+19728974297@expensify.sms</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with bold style', () => {
     const testString = '*@username@expensify.com*';
-    const resultString = '<strong><mention-user>@username@expensify.com</mention-user></strong>';
+    const resultString = '<strong>@<a href=\"mailto:username@expensify.com\">username@expensify.com</a></strong>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with italic style', () => {
     const testString = '_@username@expensify.com_';
-    const resultString = '<em><mention-user>@username@expensify.com</mention-user></em>';
+    const resultString = '<em>@<a href=\"mailto:username@expensify.com\">username@expensify.com</a></em>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with heading1 style', () => {
     const testString = '# @username@expensify.com';
-    const resultString = '<h1><mention-user>@username@expensify.com</mention-user></h1>';
+    const resultString = '<h1>@<a href=\"mailto:username@expensify.com\">username@expensify.com</a></h1>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with strikethrough style', () => {
     const testString = '~@username@expensify.com~';
-    const resultString = '<del><mention-user>@username@expensify.com</mention-user></del>';
+    const resultString = '<del>@<a href=\"mailto:username@expensify.com\">username@expensify.com</a></del>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for user mention with @here', () => {
     const testString = '@here say hello to @newuser@expensify.com';
-    const resultString = '<mention-here>@here</mention-here> say hello to <mention-user>@newuser@expensify.com</mention-user>';
+    const resultString = '<mention-here>@here</mention-here> say hello to @<a href=\"mailto:newuser@expensify.com\">newuser@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -896,7 +896,7 @@ test('Test for user mention without space or supported styling character', () =>
 
 test('Test for user mention with user email includes underscores', () => {
     const testString = '@_concierge_@expensify.com';
-    const resultString = '<mention-user>@_concierge_@expensify.com</mention-user>';
+    const resultString = '@_<a href=\"mailto:concierge_@expensify.com\">concierge_@expensify.com</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1047,4 +1047,28 @@ test('Skip rendering invalid markdown',() => {
 
     testString = '> *This is multiline\nbold text*';
     expect(parser.replace(testString)).toBe('<blockquote>*This is multiline</blockquote>bold text*');
+});
+
+test('Test for user mention with test+1@gmail.com@gmail.com', () => {
+    const testString = 'test+1@gmail.com@gmail.com';
+    const resultString = '<a href=\"mailto:test+1@gmail.com\">test+1@gmail.com</a>@gmail.com';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with test@gmail.com@gmail.com', () => {
+    const testString = 'test@gmail.com@gmail.com';
+    const resultString = '<a href=\"mailto:test@gmail.com\">test@gmail.com</a>@gmail.com';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with test@here@gmail.com', () => {
+    const testString = 'test@here@gmail.com';
+    const resultString = 'test@<a href=\"mailto:here@gmail.com\">here@gmail.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for user mention with test+1@here@gmail.com', () => {
+    const testString = 'test+1@here@gmail.com';
+    const resultString = 'test+1@<a href=\"mailto:here@gmail.com\">here@gmail.com</a>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
