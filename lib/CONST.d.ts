@@ -318,7 +318,7 @@ export declare const CONST: {
         readonly ACH_LIMIT: 2000000;
         readonly ACH_DEFAULT_DAYS: 4;
         /**
-         * This is the string that a user can enter in a formula to refer to the repot title field
+         * This is the string that a user can enter in a formula to refer to the report title field
          *
          * @type {String}
          */
