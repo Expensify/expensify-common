@@ -4,7 +4,6 @@ declare const Str: {
      *
      * @param str String ot search in
      * @param suffix What to look for
-     *
      */
     endsWith(str: string, suffix: string): boolean;
     /**
@@ -78,21 +77,18 @@ declare const Str: {
      * rest lowercased.
      *
      * @param val The string to modify
-     *
      */
     recapitalize(val: string): string;
     /**
      * Replace all the non alphanumerical character by _
      *
      * @param input
-     *
      */
     sanitizeToAlphaNumeric(input: string): string;
     /**
      * Strip out all the non numerical characters
      *
      * @param input
-     *
      */
     stripNonNumeric(input: string): string;
     /**
@@ -227,7 +223,6 @@ declare const Str: {
      * Extract the email addresses from a string
      *
      * @param string
-     *
      */
     extractEmail(string: string): RegExpMatchArray | null;
     /**
@@ -261,14 +256,12 @@ declare const Str: {
      * Sanitize phone number to return only numbers. Return null if non valid phone number.
      *
      * @param str
-     *
      */
     sanitizePhoneNumber(str: string): string | null;
     /**
      * Sanitize email. Return null if non valid email.
      *
      * @param str
-     *
      */
     sanitizeEmail(str: string): string | null;
     /**
@@ -383,7 +376,6 @@ declare const Str: {
     /**
      * Check if a file extension is supported by SmartReports
      * @param  {String}  filename
-     *
      */
     isFileExtensionSmartReportsValid(filename: string): boolean;
     /**
@@ -396,14 +388,12 @@ declare const Str: {
      * Checks if something is a string
      * Stolen from underscore
      * @param  {Mixed} obj
-     *
      */
     isString(obj: unknown): boolean;
     /**
      * Checks if something is a number
      * Stolen from underscore
      * @param  {Mixed} obj
-     *
      */
     isNumber(obj: unknown): boolean;
     /**
@@ -412,14 +402,12 @@ declare const Str: {
      * @param  {Mixed} obj
      * @param  {String} type one of ['Arguments', 'Function', 'String', 'Number', 'Date',
      *                       'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet']
-     *
      */
     isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean;
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
      * @param  {Mixed} obj
-     *
      */
     isUndefined(obj: unknown): boolean;
     /**
@@ -435,13 +423,11 @@ declare const Str: {
      * Trim a string
      *
      * @param str
-     *
      */
     trim(str: string): string;
     /**
      * Convert a percentage string like '25%' to 25/
      * @param percentageString The percentage as a string
-     *
      */
     percentageStringToNumber(percentageString: string): number;
     /**
@@ -459,8 +445,6 @@ declare const Str: {
      * @param singular form of the phrase
      * @param plural form of the phrase
      * @param n the count which determines the plurality
-     *
-     *
      */
     pluralize(singular: string, plural: string, n: number): string;
     /**
@@ -474,7 +458,6 @@ declare const Str: {
     /**
      * Converts a value to boolean, case-insensitive.
      * @param value
-     *
      */
     toBool(value: unknown): boolean;
     /**
@@ -490,35 +473,29 @@ declare const Str: {
      * Bold any word matching the regexp in the text.
      * @param text, htmlEncoded
      * @param regexp
-     *
      */
     boldify(text: string, regexp: RegExp): string;
     /**
      * Check for whether a phone number is valid.
      * @param phone
-     *
-     *
      */
     isValidPhone(phone: string): boolean;
     /**
      * We validate mentions by checking if it's first character is an allowed character.
      *
      * @param mention
-     *
      */
     isValidMention(mention: string): boolean;
     /**
      * Returns text without our SMS domain
      *
      * @param text
-     *
      */
     removeSMSDomain(text: string): string;
     /**
      * Returns true if the text is a valid phone number with our SMS domain removed
      *
      * @param text
-     *
      */
     isSMSLogin(text: string): boolean;
     /**
@@ -529,10 +506,8 @@ declare const Str: {
      *
      * @param str
      * @param regex
-     *
-     *
      */
-    matchAll(str: string, regex: RegExp): unknown[];
+    matchAll(str: string, regex: RegExp): Array<RegExpMatchArray & {input: string; index: number}>;
     /**
      * A simple GUID generator taken from https://stackoverflow.com/a/32760401/9114791
      *
@@ -560,15 +535,16 @@ declare const Str: {
      * any additional arguments.
      *
      * @param parameter
-     *
      */
-    result<R, A>(parameter: string | ((...args: A[]) => R), ...args: A[]): string | R;
+    result: {
+        <R, A extends unknown[]>(parameter: string): string;
+        <R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
+    };
     /**
      * Get file extension for a given url with or
      * without query parameters
      *
      * @param url
-     *
      */
     getExtension(url: string): string | undefined;
     /**
@@ -587,7 +563,6 @@ declare const Str: {
      * https://reactnative.dev/docs/image#source
      *
      * @param url
-     *
      */
     isImage(url: string): boolean;
     /**
@@ -604,7 +579,6 @@ declare const Str: {
      * @param text
      * @param searchValue
      * @param replaceValue
-     *
      */
     replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => unknown)): string;
 };
