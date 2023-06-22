@@ -330,7 +330,7 @@ export const CONST = {
          *
          * @type String
          */
-        MARKDOWN_EMAIL: "([a-zA-Z0-9.!#$%&'+/=?^_`{|}-][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)",
+        MARKDOWN_EMAIL: "([a-zA-Z0-9.!#$%&'+/=?^`{|}-][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)",
 
         /**
          * Regex matching an text containing an Emoji
