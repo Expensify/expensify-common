@@ -1,5 +1,6 @@
 declare type Parameters = string | Record<string, unknown>;
-declare type ServerLoggingCallback = (logger: Logger, options: Record<string, unknown>) => Promise<void>;
+declare type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
+declare type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 declare type ClientLoggingCallBack = (message: string) => void;
 export default class Logger {
     logLines: Array<Record<string, unknown>>;
