@@ -2,105 +2,103 @@ declare const Str: {
     /**
      * Return true if the string is ending with the provided suffix
      *
-     * @param {String} str String ot search in
-     * @param {String} suffix What to look for
-     * @return {Boolean}
+     * @param str String ot search in
+     * @param suffix What to look for
+     *
      */
     endsWith(str: string, suffix: string): boolean;
     /**
      * Converts a USD string into th number of cents it represents.
      *
-     * @param {String}  amountStr     A string representing a USD value.
-     * @param {Boolean} allowFraction Flag indicating if fractions of cents should be
+     * @param  amountStr     A string representing a USD value.
+     * @param allowFraction Flag indicating if fractions of cents should be
      *                               allowed in the output.
      *
-     * @return {Number} The cent value of the @p amountStr.
+     * @returns The cent value of the @p amountStr.
      */
     fromUSDToNumber(amountStr: string, allowFraction: boolean): number;
     /**
      * Truncates the middle section of a string based on the max allowed length
      *
-     * @param {string} fullStr
-     * @param {int}    maxLength
-     * @returns {string}
+     * @param fullStr
+     * @param    maxLength
      */
     truncateInMiddle(fullStr: string, maxLength: number): string;
     /**
      * Convert new line to <br />
      *
-     * @param {String} str
-     * @returns {string}
+     * @param str
      */
     nl2br(str: string): string;
     /**
      * Decodes the given HTML encoded string.
      *
-     * @param {String} s The string to decode.
-     * @return {String} The decoded string.
+     * @param s The string to decode.
+     * @returns The decoded string.
      */
     htmlDecode(s: string): string;
     /**
      * HTML encodes the given string.
      *
-     * @param {String} s The string to encode.
-     * @return {String} @p s HTML encoded.
+     * @param s The string to encode.
+     * @returns @p s HTML encoded.
      */
     htmlEncode(s: string): string;
     /**
      * Escape text while preventing any sort of double escape, so 'X & Y' -> 'X &amp; Y' and 'X &amp; Y' -> 'X &amp; Y'
      *
-     * @param {String} s the string to escape
-     * @return {String} the escaped string
+     * @param s the string to escape
+     * @returns the escaped string
      */
     safeEscape(s: string): string;
     /**
      * HTML encoding insensitive equals.
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @return {Boolean} true when first === second, ignoring HTML encoding
+     * @param first string to compare
+     * @param second string to compare
+     * @returns true when first === second, ignoring HTML encoding
      */
     htmlEncodingInsensitiveEquals(first: string, second: string): boolean;
     /**
      * Creates an ID that can be used as an HTML attribute from @p str.
      *
-     * @param {String} str A string to create an ID from.
-     * @return {String} The ID string made from @p str.
+     * @param str A string to create an ID from.
+     * @returns The ID string made from @p str.
      */
     makeID(str: string): string;
     /**
      * Extracts an ID made with Str.makeID from a larger string.
      *
-     * @param {String} str A string containing an id made with Str.makeID
-     * @return {String|null} The ID string.
+     * @param str A string containing an id made with Str.makeID
+     * @returns The ID string.
      */
     extractID(str: string): string | null;
     /**
      * Modifies the string so the first letter of each word is capitalized and the
      * rest lowercased.
      *
-     * @param {String} val The string to modify
-     * @return {String}
+     * @param val The string to modify
+     *
      */
     recapitalize(val: string): string;
     /**
      * Replace all the non alphanumerical character by _
      *
-     * @param {String} input
-     * @returns {String}
+     * @param input
+     *
      */
     sanitizeToAlphaNumeric(input: string): string;
     /**
      * Strip out all the non numerical characters
      *
-     * @param {String} input
-     * @returns {String}
+     * @param input
+     *
      */
     stripNonNumeric(input: string): string;
     /**
      * Strips all non ascii characters from a string
-     * @param {String} input
-     * @returns {String} The ascii version of the string.
+     * @param input
+     * @returns The ascii version of the string.
      */
     stripNonASCIICharacters(input: string): string;
     /**
@@ -109,51 +107,51 @@ declare const Str: {
      * The ellipses will only be appended if @p text is longer than the @p length
      * given.
      *
-     * @param {String} val   The string to reduce in size.
-     * @param {Number} length The maximal length desired.
-     * @return {String} The shortened @p text.
+     * @param val   The string to reduce in size.
+     * @param length The maximal length desired.
+     * @returns The shortened @p text.
      */
     shortenText(val: string, length: number): string;
     /**
      * Returns the byte size of a character
-     * @param {String} inputChar You can input more than one character, but it will only return the size of the first
+     * @param inputChar You can input more than one character, but it will only return the size of the first
      * one.
-     * @returns {Number} Byte size of the character
+     * @returns Byte size of the character
      */
     getRawByteSize(inputChar: string): number;
     /**
      * Gets the length of a string in bytes, including non-ASCII characters
-     * @param {String} input
-     * @returns {Number} The number of bytes used by string
+     * @param input
+     * @returns The number of bytes used by string
      */
     getByteLength(input: string): number;
     /**
      * Shortens the input by max byte size instead of by character length
-     * @param {String} input
-     * @param {Number} maxSize The max size in bytes, e.g. 256
-     * @returns {String} Returns a shorted input if the input size exceeds the max
+     * @param input
+     * @param maxSize The max size in bytes, e.g. 256
+     * @returns Returns a shorted input if the input size exceeds the max
      */
     shortenByByte(input: string, maxSize: number): string;
     /**
      * Returns true if the haystack begins with the needle
      *
-     * @param {String} haystack  The full string to be searched
-     * @param {String} needle    The case-sensitive string to search for
-     * @return {Boolean} Retruns true if the haystack starts with the needle.
+     * @param haystack  The full string to be searched
+     * @param needle    The case-sensitive string to search for
+     * @returns Retruns true if the haystack starts with the needle.
      */
     startsWith(haystack: string, needle: string): boolean;
     /**
      * Gets the textual value of the given string.
      *
-     * @param {String} str The string to fetch the text value from.
-     * @return {String} The text from within the HTML string.
+     * @param str The string to fetch the text value from.
+     * @returns The text from within the HTML string.
      */
     stripHTML(str: string): string;
     /**
      * Modifies the string so the first letter of the string is capitalized
      *
-     * @param {String} str The string to modify.
-     * @return {String} The recapitalized string.
+     * @param str The string to modify.
+     * @returns The recapitalized string.
      */
     UCFirst(str: string): string;
     /**
@@ -161,9 +159,9 @@ declare const Str: {
      * of str to the first occurrence of substr.
      * Example: Str.cutAfter( 'hello$%world', '$%' ) // returns 'hello'
      *
-     * @param {String} str The string to modify.
-     * @param {String} substr The substring to search for.
-     * @return {String} The cut/trimmed string.
+     * @param str The string to modify.
+     * @param substr The substring to search for.
+     * @returns The cut/trimmed string.
      */
     cutAfter(str: string, substr: string): string;
     /**
@@ -171,202 +169,194 @@ declare const Str: {
      * occurrence of substr to the end of the string.
      * Example: Str.cutBefore( 'hello$%world', '$%' ) // returns 'world'
      *
-     * @param {String} str The string to modify.
-     * @param {String} substr The substring to search for.
-     * @return {String} The cut/trimmed string.
+     * @param str The string to modify.
+     * @param substr The substring to search for.
+     * @returns The cut/trimmed string.
      */
     cutBefore(str: string, substr: string): string;
     /**
      * Checks that the string is a domain name (e.g. example.com)
      *
-     * @param {String} string The string to check for domainnameness.
+     * @param string The string to check for domainnameness.
      *
-     * @returns {Boolean} True iff the string is a domain name
+     * @returns True iff the string is a domain name
      */
     isValidDomainName(string: string): boolean;
     /**
      * Checks that the string is a valid url
      *
-     * @param {String} string
+     * @param string
      *
-     * @returns {Boolean} True if the string is a valid hyperlink
+     * @returns True if the string is a valid hyperlink
      */
     isValidURL(string: string): boolean;
     /**
      * Checks that the string is an email address.
      * NOTE: TLDs are not just 2-4 characters. Keep this in sync with _inputrules.php
      *
-     * @param {String} string The string to check for email validity.
+     * @param string The string to check for email validity.
      *
-     * @returns {Boolean} True iff the string is an email
+     * @returns True iff the string is an email
      */
     isValidEmail(string: string): boolean;
     /**
      * Checks if the string is an valid email address formed during comment markdown formation.
      *
-     * @param {String} string The string to check for email validity.
+     * @param string The string to check for email validity.
      *
-     * @returns {Boolean} True if the string is an valid email created by comment markdown.
+     * @returns True if the string is an valid email created by comment markdown.
      */
     isValidEmailMarkdown(string: string): boolean;
     /**
      * Remove trailing comma from a string.
      *
-     * @param {String} string The string with any trailing comma to be removed.
+     * @param string The string with any trailing comma to be removed.
      *
-     * @returns {String} string with the trailing comma removed
+     * @returns string with the trailing comma removed
      */
     removeTrailingComma(string: string): string;
     /**
      * Checks that the string is a list of coma separated email addresss.
      *
-     * @param {String} str The string to check for emails validity.
+     * @param str The string to check for emails validity.
      *
-     * @returns {Boolean} True if all emails are valid or if input is empty
+     * @returns True if all emails are valid or if input is empty
      */
     areValidEmails(str: string): boolean;
     /**
      * Extract the email addresses from a string
      *
-     * @param {String} string
-     * @returns {String[]|null}
+     * @param string
+     *
      */
     extractEmail(string: string): RegExpMatchArray | null;
     /**
      * Extracts the domain name from the given email address
      * (e.g. "domain.com" for "joe@domain.com").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String} The domain name in the email address.
+     * @returns The domain name in the email address.
      */
     extractEmailDomain(email: string): string;
     /**
      * Tries to extract the company name from the given email address
      * (e.g. "yelp" for "joe@yelp.co.uk").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String|null} The company name in the email address or null.
+     * @returns The company name in the email address or null.
      */
     extractCompanyNameFromEmailDomain(email: string): string | null;
     /**
      * Extracts the local part from the given email address
      * (e.g. "joe" for "joe@domain.com").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String} The local part in the email address.
+     * @returns The local part in the email address.
      */
     extractEmailLocalPart(email: string): string;
     /**
      * Sanitize phone number to return only numbers. Return null if non valid phone number.
      *
-     * @param {String} str
-     * @returns {String|null}
+     * @param str
+     *
      */
     sanitizePhoneNumber(str: string): string | null;
     /**
      * Sanitize email. Return null if non valid email.
      *
-     * @param {String} str
-     * @returns {String|null}
+     * @param str
+     *
      */
     sanitizeEmail(str: string): string | null;
     /**
      * Escapes all special RegExp characters from a string
      *
-     * @param {String} string The subject
+     * @param string The subject
      *
-     * @returns {String} The escaped string
+     * @returns The escaped string
      */
     escapeForRegExp(string: string): string;
     /**
      * Escapes all special RegExp characters from a string except for the period
      *
-     * @param {String} string The subject
-     * @returns {String} The escaped string
+     * @param string The subject
+     * @returns The escaped string
      */
     escapeForExpenseRule(string: string): string;
     /**
      * Adds a backslash in front of each of colon
      * if they don't already have a backslash in front of them
      *
-     * @param {String} string The subject
-     * @returns {String} The escaped string
+     * @param string The subject
+     * @returns The escaped string
      */
     addBackslashBeforeColonsForTagNamesComingFromQBD(string: string): string;
     /**
      * Removes backslashes from string
      * eg: myString\[\]\* -> myString[]*
      *
-     * @param {String} string
-     * @returns {String}
+     * @param string
+     *
      */
     stripBackslashes(string: string): string;
     /**
      * Checks if a string's length is in the specified range
      *
-     * @param {String} string The subject
-     * @param {Number} minimumLength
-     * @param {Number} [maximumLength]
+     * @param string The subject
+     * @param minimumLength
+     * @param [maximumLength]
      *
-     * @returns {Boolean} true if the length is in the range, false otherwise
+     * @returns true if the length is in the range, false otherwise
      */
-    isOfLength(
-        string: string,
-        minimumLength: number,
-        maximumLength: number
-    ): boolean;
+    isOfLength(string: string, minimumLength: number, maximumLength: number): boolean;
     /**
      * Count the number of occurences of needle in haystack.
      * This is faster than counting the results of haystack.match( /needle/g )
      * via http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string
      *
-     * @param {String} haystack The string to look inside of
-     * @param {String} needle What we're looking for
-     * @param {Boolean} allowOverlapping Defaults to false
+     * @param haystack The string to look inside of
+     * @param needle What we're looking for
+     * @param allowOverlapping Defaults to false
      *
-     * @returns {Integer} The number of times needle is in haystack.
+     * @returns The number of times needle is in haystack.
      */
-    occurences(
-        haystack: string,
-        needle: string,
-        allowOverlapping: boolean
-    ): number;
+    occurences(haystack: string, needle: string, allowOverlapping: boolean): number;
     /**
      * Uppercases the first letter of each word
      * via https://github.com/kvz/phpjs/blob/master/functions/strings/ucwords.js
      *
      * @param   {String}  str to uppercase words
-     * @returns {String}  Uppercase worded string
+     * @returns  Uppercase worded string
      */
     ucwords(str: string): string;
     /**
      * Returns true if the haystack contains the needle
      *
-     * @param {String} haystack The full string to be searched
-     * @param {String} needle The case-sensitive string to search for
+     * @param haystack The full string to be searched
+     * @param needle The case-sensitive string to search for
      *
-     * @return {Boolean} Returns true if the haystack contains the needle
+     * @returns Returns true if the haystack contains the needle
      */
     contains(haystack: string, needle: string): boolean;
     /**
      * Returns true if the haystack contains the needle, ignoring case
      *
-     * @param {String} haystack The full string to be searched
-     * @param {String} needle The case-insensitive string to search for
+     * @param haystack The full string to be searched
+     * @param needle The case-insensitive string to search for
      *
-     * @return {Boolean} Returns true if the haystack contains the needle, ignoring case
+     * @returns Returns true if the haystack contains the needle, ignoring case
      */
     caseInsensitiveContains(haystack: string, needle: string): boolean;
     /**
      * Case insensitive compare function
      *
-     * @param {String} string1 string to compare
-     * @param {String} string2 string to compare
+     * @param string1 string to compare
+     * @param string2 string to compare
      *
-     * @return {Number} -1 if first string < second string
+     * @returns -1 if first string < second string
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
@@ -374,18 +364,18 @@ declare const Str: {
     /**
      * Case insensitive equals
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @return {Boolean} true when first == second except for case
+     * @param first string to compare
+     * @param second string to compare
+     * @returns true when first == second except for case
      */
     caseInsensitiveEquals(first: string, second: string): boolean;
     /**
      * Compare function
      *
-     * @param {String} string1 string to compare
-     * @param {String} string2 string to compare
+     * @param string1 string to compare
+     * @param string2 string to compare
      *
-     * @return {Number} -1 if first string < second string
+     * @returns -1 if first string < second string
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
@@ -393,27 +383,27 @@ declare const Str: {
     /**
      * Check if a file extension is supported by SmartReports
      * @param  {String}  filename
-     * @return {Boolean}
+     *
      */
     isFileExtensionSmartReportsValid(filename: string): boolean;
     /**
      * Mask Permanent Account Number (PAN) the same way Auth does
-     * @param {Number|String} number account number
-     * @return {String} masked account number
+     * @param number account number
+     * @returns masked account number
      */
     maskPAN(number: number | string): string;
     /**
      * Checks if something is a string
      * Stolen from underscore
      * @param  {Mixed} obj
-     * @return {Boolean}
+     *
      */
     isString(obj: unknown): boolean;
     /**
      * Checks if something is a number
      * Stolen from underscore
      * @param  {Mixed} obj
-     * @return {Boolean}
+     *
      */
     isNumber(obj: unknown): boolean;
     /**
@@ -422,57 +412,42 @@ declare const Str: {
      * @param  {Mixed} obj
      * @param  {String} type one of ['Arguments', 'Function', 'String', 'Number', 'Date',
      *                       'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet']
-     * @return {Boolean}
+     *
      */
-    isTypeOf(
-        obj: unknown,
-        type:
-            | "Arguments"
-            | "Function"
-            | "String"
-            | "Number"
-            | "Date"
-            | "RegExp"
-            | "Error"
-            | "Symbol"
-            | "Map"
-            | "WeakMap"
-            | "Set"
-            | "WeakSet"
-    ): boolean;
+    isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean;
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
      * @param  {Mixed} obj
-     * @return {Boolean}
+     *
      */
     isUndefined(obj: unknown): boolean;
     /**
      * Replace first N characters of the string with maskChar
      * eg: maskFirstNCharacters( '1234567890', 6, 'X' ) yields XXXXXX7890
-     * @param {String} str string to mask
-     * @param {Number} n number of characters we want to mask from the string
-     * @param {String} mask string we want replace the first N chars with
-     * @return {String} masked string
+     * @param str string to mask
+     * @param n number of characters we want to mask from the string
+     * @param mask string we want replace the first N chars with
+     * @returns masked string
      */
     maskFirstNCharacters(str: string, n: number, mask: string): string;
     /**
      * Trim a string
      *
-     * @param {String} str
-     * @returns {string}
+     * @param str
+     *
      */
     trim(str: string): string;
     /**
      * Convert a percentage string like '25%' to 25/
-     * @param {String} percentageString The percentage as a string
-     * @returns {Number}
+     * @param percentageString The percentage as a string
+     *
      */
     percentageStringToNumber(percentageString: string): number;
     /**
      * Remoce all the spaces from a string
-     * @param {string} input
-     * @returns {string}
+     * @param input
+     *
      */
     removeSpaces(input: string): string;
     /**
@@ -481,69 +456,69 @@ declare const Str: {
      * console.log(Str.pluralize('puppy', 'puppies', 1)); // puppy
      * console.log(Str.pluralize('puppy', 'puppies', 3)); // puppies
      *
-     * @param {String} singular form of the phrase
-     * @param {String} plural form of the phrase
-     * @param {Number} n the count which determines the plurality
+     * @param singular form of the phrase
+     * @param plural form of the phrase
+     * @param n the count which determines the plurality
      *
-     * @return {String}
+     *
      */
     pluralize(singular: string, plural: string, n: number): string;
     /**
      * Returns whether or not a string is an encrypted number or not.
      *
-     * @param {String} number that we want to see if its encrypted or not
+     * @param number that we want to see if its encrypted or not
      *
-     * @return {Boolean} Whether or not this string is an encrpypted number
+     * @returns Whether or not this string is an encrpypted number
      */
     isEncryptedCardNumber(number: string): boolean;
     /**
      * Converts a value to boolean, case-insensitive.
-     * @param {mixed} value
-     * @return {Boolean}
+     * @param value
+     *
      */
     toBool(value: unknown): boolean;
     /**
      * Checks if a string could be the masked version of another one.
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @param {String} [mask] defaults to X
-     * @return {Boolean} true when first could be the masked version of second
+     * @param first string to compare
+     * @param second string to compare
+     * @param [mask] defaults to X
+     * @returns true when first could be the masked version of second
      */
     maskedEquals(first: string, second: string, mask: string): boolean;
     /**
      * Bold any word matching the regexp in the text.
-     * @param {string} text, htmlEncoded
-     * @param {RegExp} regexp
-     * @return {string}
+     * @param text, htmlEncoded
+     * @param regexp
+     *
      */
     boldify(text: string, regexp: RegExp): string;
     /**
      * Check for whether a phone number is valid.
-     * @param {String} phone
+     * @param phone
      *
-     * @return {bool}
+     *
      */
     isValidPhone(phone: string): boolean;
     /**
      * We validate mentions by checking if it's first character is an allowed character.
      *
-     * @param {String} mention
-     * @returns {bool}
+     * @param mention
+     *
      */
     isValidMention(mention: string): boolean;
     /**
      * Returns text without our SMS domain
      *
-     * @param {String} text
-     * @return {String}
+     * @param text
+     *
      */
     removeSMSDomain(text: string): string;
     /**
      * Returns true if the text is a valid phone number with our SMS domain removed
      *
-     * @param {String} text
-     * @return {bool}
+     * @param text
+     *
      */
     isSMSLogin(text: string): boolean;
     /**
@@ -552,31 +527,31 @@ declare const Str: {
      * https://github.com/airbnb/javascript/issues/1439#issuecomment-306297399 and doesn't get us in trouble with
      * linting rules.
      *
-     * @param {String} str
-     * @param {RegExp} regex
+     * @param str
+     * @param regex
      *
-     * @returns {Array}
+     *
      */
     matchAll(str: string, regex: RegExp): unknown[];
     /**
      * A simple GUID generator taken from https://stackoverflow.com/a/32760401/9114791
      *
-     * @param {String} [prefix] an optional prefix to put in front of the guid
-     * @returns {String}
+     * @param [prefix] an optional prefix to put in front of the guid
+     *
      */
     guid(prefix?: string): string;
     /**
      * Takes in a URL and returns it with a leading '/'
      *
-     * @param {mixed} url The URL to be formatted
-     * @returns {String} The formatted URL
+     * @param url The URL to be formatted
+     * @returns The formatted URL
      */
     normalizeUrl(url: string): string;
     /**
      *  Formats a URL by converting the domain name to lowercase and adding the missing 'https://' protocol.
      *
-     * @param {url} url The URL to be formatted
-     * @returns {String} The formatted URL
+     * @param url The URL to be formatted
+     * @returns The formatted URL
      */
     sanitizeURL(url: string): string;
     /**
@@ -584,26 +559,23 @@ declare const Str: {
      * if it is a function then we will call it with
      * any additional arguments.
      *
-     * @param {String|Function} parameter
-     * @returns {String}
+     * @param parameter
+     *
      */
-    result<R, A>(
-        parameter: string | ((...args: A[]) => R),
-        ...args: A[]
-    ): string | R;
+    result<R, A>(parameter: string | ((...args: A[]) => R), ...args: A[]): string | R;
     /**
      * Get file extension for a given url with or
      * without query parameters
      *
-     * @param {String} url
-     * @returns {String}
+     * @param url
+     *
      */
     getExtension(url: string): string | undefined;
     /**
      * Takes in a URL and checks if the file extension is PDF
      *
-     * @param {String} url The URL to be checked
-     * @returns {Boolean} Whether file path is PDF or not
+     * @param url The URL to be checked
+     * @returns Whether file path is PDF or not
      */
     isPDF(url: string): boolean;
     /**
@@ -614,30 +586,26 @@ declare const Str: {
      *
      * https://reactnative.dev/docs/image#source
      *
-     * @param {String} url
-     * @returns {Boolean}
+     * @param url
+     *
      */
     isImage(url: string): boolean;
     /**
      * Checks whether the given string is a +@ domain email account, such as
      * +@domain.com
      *
-     * @param {String} email
-     * @return {Boolean} True if is a domain account email, otherwise false.
+     * @param email
+     * @returns True if is a domain account email, otherwise false.
      */
     isDomainEmail(email: string): boolean;
     /**
      * Polyfill for String.prototype.replaceAll
      *
-     * @param {String} text
-     * @param {String|RegExp} searchValue
-     * @param {String|Function} replaceValue
-     * @returns {String}
+     * @param text
+     * @param searchValue
+     * @param replaceValue
+     *
      */
-    replaceAll(
-        text: string,
-        searchValue: string | RegExp,
-        replaceValue: string | ((...args: unknown[]) => unknown)
-    ): string;
+    replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => unknown)): string;
 };
 export default Str;

@@ -16,13 +16,11 @@ export default class ExpensiMark {
     /**
      * Replaces markdown with html elements
      *
-     * @param {String} text - Text to parse as markdown
-     * @param {Object} [options] - Options to customize the markdown parser
-     * @param {String[]} [options.filterRules=[]] - An array of name of rules as defined in this class.
+     * @param text - Text to parse as markdown
+     * @param options - Options to customize the markdown parser
+     * @param options.filterRules=[] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied.
-     * @param {Boolean} [options.shouldEscapeText=true] - Whether or not the text should be escaped
-     *
-     * @returns {String}
+     * @param options.shouldEscapeText=true - Whether or not the text should be escaped
      */
     replace(text: string, { filterRules, shouldEscapeText }?: {
         filterRules?: string[];
@@ -31,21 +29,17 @@ export default class ExpensiMark {
     /**
      * Checks matched URLs for validity and replace valid links with html elements
      *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
+     * @param regex
+     * @param textToCheck
+     * @param replacement
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: Replacement): string;
     /**
      * Checks matched Emails for validity and replace valid links with html elements
      *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
+     * @param regex
+     * @param textToCheck
+     * @param replacement
      */
     modifyTextForEmailLinks(regex: RegExp, textToCheck: string, replacement: Replacement): string;
     /**
@@ -55,64 +49,49 @@ export default class ExpensiMark {
      * 3. The text does not have quote mark '>' .
      * 4. It's not the last element in the string.
      *
-     * @param {String} htmlString
-     * @returns {String}
+     * @param htmlString
      */
     replaceBlockElementWithNewLine(htmlString: string): string;
     /**
      * Replaces HTML with markdown
      *
-     * @param {String} htmlString
-     *
-     * @returns {String}
+     * @param htmlString
      */
     htmlToMarkdown(htmlString: string): string;
     /**
      * Convert HTML to text
      *
-     * @param {String} htmlString
-     * @returns {String}
+     * @param htmlString
      */
     htmlToText(htmlString: string): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
+     * @param regex
+     * @param textToCheck
+     * @param replacement
      */
     modifyTextForQuote(regex: RegExp, textToCheck: string, replacement: Replacement): string;
     /**
      * Format the content of blockquote if the text matches the regex or else just return the original text
      *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
+     * @param regex
+     * @param textToCheck
+     * @param replacement
      */
     formatTextForQuote(regex: RegExp, textToCheck: string, replacement: Replacement): string;
     /**
      * Check if the input text includes only the open or the close tag of an element.
      *
-     * @param {String} textToCheck - Text to check
-     *
-     * @returns {Boolean}
+     * @param textToCheck - Text to check
      */
     containsNonPairTag(textToCheck: string): boolean;
-    /**
-     * @param {String} comment
-     * @returns {Array}
-     */
     extractLinksInMarkdownComment(comment: string): string[];
     /**
      * Compares two markdown comments and returns a list of the links removed in a new comment.
      *
-     * @param {String} oldComment
-     * @param {String} newComment
-     * @returns {Array}
+     * @param oldComment
+     * @param newComment
      */
     getRemovedMarkdownLinks(oldComment: string, newComment: string): string[];
 }
