@@ -1,10 +1,10 @@
-declare type Replacement = string | ((...args: string[]) => string);
+declare type Replacement = (...args: string[]) => string;
 declare type Name = "codeFence" | "inlineCodeBlock" | "email" | "link" | "hereMentions" | "userMentions" | "autoEmail" | "autolink" | "quote" | "italic" | "bold" | "strikethrough" | "heading1" | "newline" | "replacepre" | "replacebr" | "listItem" | "exclude" | "anchor" | "breakline" | "blockquoteWrapHeadingOpen" | "blockquoteWrapHeadingClose" | "blockElementOpen" | "blockElementClose" | "stripTag";
 declare type Rule = {
     name: Name;
     process?: (textToProcess: string, replacement: Replacement) => string;
     regex?: RegExp;
-    replacement: Replacement;
+    replacement: Replacement | string;
     pre?: (input: string) => string;
     post?: (input: string) => string;
 };
