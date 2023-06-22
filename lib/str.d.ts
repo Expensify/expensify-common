@@ -580,6 +580,6 @@ declare const Str: {
      * @param searchValue
      * @param replaceValue
      */
-    replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => unknown)): string;
+    replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => string)): string;
 };
 export default Str;
