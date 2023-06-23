@@ -10,15 +10,11 @@ export declare const CONST: {
     readonly CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: readonly ["USD", "GBP", "EUR", "AUD", "CAD"];
     /**
      * Default max ACH limit. It can be overwritten by a private NVP
-     *
-     * @type {Number}
      */
     readonly ACH_DEFAULT_MAX_AMOUNT_LIMIT: 2000000;
     /**
      * IRS remimbursement rate for mileage
      * WARNING ! UPDATE THE PHP CONSTANT VERSION WHEN UPDATING THIS ONE
-     *
-     * @type Number
      */
     readonly MILEAGE_IRS_RATE: 0.545 | 0.58;
     readonly COUNTRY: {
@@ -249,64 +245,44 @@ export declare const CONST: {
     readonly REG_EXP: {
         /**
          * Regular expression to check that a domain is valid
-         *
-         * @type RegExp
          */
         readonly DOMAIN: RegExp;
         /**
          * Regex matching an text containing an email
-         *
-         * @type String
          */
         readonly EMAIL_PART: "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
         /**
          * Regular expression to check that a basic name is valid
-         *
-         * @type RegExp
          */
         readonly FREE_NAME: RegExp;
         /**
          * Regular expression to check that a card is masked
-         *
-         * @type RegExp
          */
         readonly MASKED_CARD: RegExp;
         /**
          * Regular expression to check that an email is valid
-         *
-         * @type RegExp
          */
         readonly EMAIL: RegExp;
         /**
          * Regular expression to extract an email from a text
-         *
-         * @type RegExp
          */
         readonly EXTRACT_EMAIL: RegExp;
         /**
          * Regular expression to search for valid email addresses in a string
-         *
-         * @type RegExp
          */
         readonly EMAIL_SEARCH: RegExp;
         /**
          * Regular expression to detect if something is a hyperlink
          *
          * Adapted from: https://gist.github.com/dperini/729294
-         *
-         * @type RegExp
          */
         readonly HYPERLINK: RegExp;
         /**
          * Regex to match valid emails during markdown transformations
-         *
-         * @type String
          */
         readonly MARKDOWN_EMAIL: "([a-zA-Z0-9.!#$%&'+/=?^`{|}-][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)";
         /**
          * Regex matching an text containing an Emoji
-         *
-         * @type RegExp
          */
         readonly EMOJIS: RegExp;
     };
@@ -319,8 +295,6 @@ export declare const CONST: {
         readonly ACH_DEFAULT_DAYS: 4;
         /**
          * This is the string that a user can enter in a formula to refer to the report title field
-         *
-         * @type {String}
          */
         readonly TITLE_FORMULA: "{report:title}";
         /**
@@ -356,41 +330,29 @@ export declare const CONST: {
         readonly MOMENT_FORMAT_STRING: "YYYY-MM-DD";
         /**
          * This is a typical format of the date plus the time
-         *
-         * @type {String}
          */
         readonly MOMENT_DATE_TIME: "YYYY-MM-DD HH:mm";
         /**
          * Pretty format used for report history items
          *
          * @example Jun 19, 2019 12:38 PM
-         *
-         * @type {String}
          */
         readonly MOMENT_DATE_TIME_PRETTY: "MMM DD YYYY h:mma";
         /**
          * Date-time format, including timezone information, eg "2015-10-14T19:44:35+07:00"
-         *
-         * @type {String}
          */
         readonly MOMENT_DATE_TIME_TIMEZONE: "YYYY-MM-DDTHH:mm:ssZ";
         /**
          * Moment formatting option for a date of this format "Jul 2, 2014"
-         *
-         * @type {string}
          */
         readonly MOMENT_US_DATE: "MMM D, YYYY";
         /**
          * Moment formatting option for a date of this format "July 2, 2014"
          * ie, full month name
-         *
-         * @type {string}
          */
         readonly MOMENT_US_DATE_LONG: "MMMM D, YYYY";
         /**
          * Moment formatting option for full month name and year as in "July 2015"
-         *
-         * @type {string}
          */
         readonly MOMENT_US_MONTH_YEAR_LONG: "MMMM YYYY";
         /**
@@ -404,8 +366,6 @@ export declare const CONST: {
     };
     /**
      * Message used by the Func.die() exception
-     *
-     * @type String
      */
     readonly FUNC_DIE_MESSAGE: "Aborting JavaScript execution";
     /**
@@ -413,8 +373,6 @@ export declare const CONST: {
      * Currently 14 days (14 * 24 * 60 * 60)
      *
      * WARNING ! UPDATE THE PHP CONSTANT VERSION WHEN UPDATING THIS ONE
-     *
-     * @type Integer
      */
     readonly EMAIL_DELIVERY_FAILURE_VALIDITY: 1209600;
     /**
