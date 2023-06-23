@@ -321,7 +321,7 @@ declare const Str: {
      * Uppercases the first letter of each word
      * via https://github.com/kvz/phpjs/blob/master/functions/strings/ucwords.js
      *
-     * @param   {String}  str to uppercase words
+     * @param  str to uppercase words
      * @returns  Uppercase worded string
      */
     ucwords(str: string): string;
@@ -375,7 +375,7 @@ declare const Str: {
     compare(string1: string, string2: string): 1 | 0 | -1;
     /**
      * Check if a file extension is supported by SmartReports
-     * @param  {String}  filename
+     * @param  filename
      */
     isFileExtensionSmartReportsValid(filename: string): boolean;
     /**
@@ -387,27 +387,27 @@ declare const Str: {
     /**
      * Checks if something is a string
      * Stolen from underscore
-     * @param  {Mixed} obj
+     * @param obj
      */
     isString(obj: unknown): boolean;
     /**
      * Checks if something is a number
      * Stolen from underscore
-     * @param  {Mixed} obj
+     * @param obj
      */
     isNumber(obj: unknown): boolean;
     /**
      * Checks if something is a certain type
      * Stolen from underscore
-     * @param  {Mixed} obj
-     * @param  {String} type one of ['Arguments', 'Function', 'String', 'Number', 'Date',
+     * @param  obj
+     * @param  type one of ['Arguments', 'Function', 'String', 'Number', 'Date',
      *                       'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet']
      */
     isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean;
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
-     * @param  {Mixed} obj
+     * @param obj
      */
     isUndefined(obj: unknown): boolean;
     /**
