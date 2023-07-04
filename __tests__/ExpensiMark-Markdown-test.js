@@ -140,9 +140,9 @@ test('Test HTML string with blockquote', () => {
         + '<blockquote>line1\nline2\n\nsome <em>lorem ipsum</em> into a blockquote in Slack, copy it to the\n\n\nbuffer </blockquote>'
         + '<blockquote style="color:red;" data-label="note">line1 <em>lorem ipsum</em></blockquote>';
 
-    const resultString = '\n> This GH seems to assume that there will be something in the paste\n> buffer when you copy block-quoted text out of slack. But when I dump\n> some _lorem ipsum_ into a blockquote in Slack, copy it to the\n> buffer, then dump it into terminal, there\'s nothing. And if I dump it\n'
-        + '\n> line1\n> line2\n> \n> some _lorem ipsum_ into a blockquote in Slack, copy it to the\n> \n> \n> buffer\n'
-        + '\n> line1 _lorem ipsum_\n';
+    const resultString = '> This GH seems to assume that there will be something in the paste\n> buffer when you copy block-quoted text out of slack. But when I dump\n> some _lorem ipsum_ into a blockquote in Slack, copy it to the\n> buffer, then dump it into terminal, there\'s nothing. And if I dump it\n'
+        + '> line1\n> line2\n> \n> some _lorem ipsum_ into a blockquote in Slack, copy it to the\n> \n> \n> buffer\n'
+        + '> line1 _lorem ipsum_';
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
@@ -493,7 +493,7 @@ test('map div with encoded entities', () => {
 
 test('map div with quotes', () => {
     const testString = '<div><blockquote>line 1</blockquote></div>line 2</div>';
-    const resultString = '\n> line 1\nline 2';
+    const resultString = '> line 1\nline 2';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -511,7 +511,7 @@ test('map real message from app', () => {
 
 test('map real message with quotes', () => {
     const testString = '<div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div><div><div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div><div><div><div><svg><path/></svg></div></div></div></div></div></div></div></div></div></div><div><div><div><div><div><div><div><div><div><div><div><comment><blockquote><div>hi</div></blockquote><br></comment></div></div></div></div></div></div></div></div></div></div></div></div>';
-    const resultString = '\n> hi\n\n\n> hi\n\n';
+    const resultString = '> hi\n> hi';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -651,14 +651,31 @@ test('Test codeFence backticks occupying a separate line while not introducing r
 
 test('Test blockquote with h1 inside', () => {
     let testString = '<blockquote><h1>heading</h1></blockquote>';
-    expect(parser.htmlToMarkdown(testString)).toBe('\n> # heading\n');
+    expect(parser.htmlToMarkdown(testString)).toBe('> # heading');
 
     testString = '<blockquote><h1>heading</h1>test</blockquote>';
-    expect(parser.htmlToMarkdown(testString)).toBe('\n> # heading\n> test\n');
+    expect(parser.htmlToMarkdown(testString)).toBe('> # heading\n> test');
 
     testString = '<blockquote>test<h1>heading</h1>test</blockquote>';
-    expect(parser.htmlToMarkdown(testString)).toBe('\n> test\n> # heading\n> test\n');
+    expect(parser.htmlToMarkdown(testString)).toBe('> test\n> # heading\n> test');
 
     testString = '<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>';
-    expect(parser.htmlToMarkdown(testString)).toBe('\n> # heading A\n> # heading B\n');
+    expect(parser.htmlToMarkdown(testString)).toBe('> # heading A\n> # heading B');
+});
+
+test('Test blockquote linebreak handling with text, block and inline elements', () => {
+    const testStringQuotes = '<blockquote>one line quote a</blockquote><br /><blockquote>two line quote b<br />two line quote b</blockquote><br /><blockquote>quote c with internal line break<br /><br />quote c with internal line break</blockquote>';
+    expect(parser.htmlToMarkdown(testStringQuotes)).toBe('> one line quote a\n\n> two line quote b\n> two line quote b\n\n> quote c with internal line break\n> \n> quote c with internal line break');
+
+    const testStringSurroundedByText = 'text a<br /><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote>text b<br /><br />text c<br /><blockquote>quote c</blockquote>text c';
+    expect(parser.htmlToMarkdown(testStringSurroundedByText)).toBe('text a\n> quote a\n\n> quote b\ntext b\n\ntext c\n> quote c\ntext c');
+
+    const testStringSurroundedByInlineElement = '<em>italic a</em><br /><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><strong>bold b</strong><br /><br /><em>italic c</em><br /><blockquote>quote c</blockquote><strong>bold c</strong>';
+    expect(parser.htmlToMarkdown(testStringSurroundedByInlineElement)).toBe('_italic a_\n> quote a\n\n> quote b\n*bold b*\n\n_italic c_\n> quote c\n*bold c*');
+
+    const testStringSurroundedByBlockElementCodeFence = '<pre>code fence a</pre><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><pre>code fence b</pre><br /><pre>code fence c</pre><blockquote>quote c</blockquote><pre>code fence c</pre>';
+    expect(parser.htmlToMarkdown(testStringSurroundedByBlockElementCodeFence)).toBe('```\ncode fence a\n```\n> quote a\n\n> quote b\n```\ncode fence b\n```\n\n```\ncode fence c\n```\n> quote c\n```\ncode fence c\n```');
+
+    const testStringSurroundedByBlockElementHeading = '<h1>h1 a</h1><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><h1>h1 b</h1><br /><h1>h1 c</h1><blockquote>quote c</blockquote><h1>h1 c</h1>';
+    expect(parser.htmlToMarkdown(testStringSurroundedByBlockElementHeading)).toBe('# h1 a\n> quote a\n\n> quote b\n# h1 b\n\n# h1 c\n> quote c\n# h1 c');
 });
