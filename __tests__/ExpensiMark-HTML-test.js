@@ -511,6 +511,7 @@ test('Test markdown style email link with various styles', () => {
         + '[Applause](applausetester+qaabecciv@applause.expensifail.com) '
         + '[](concierge@expensify.com)' // only parse autoEmail in ()
         + '[   ](concierge@expensify.com)' // only parse autoEmail in () and keep spaces in []
+        + '[   \n ](concierge@expensify.com)' // only parse autoEmail in () and keep spaces in []
         + '[ Expensify ](concierge@expensify.com)' // edge spaces in []
         + '[ Expensify Email ](concierge@expensify.com)' // space between words in []
         + '[concierge@expensify.com](concierge@expensify.com)' // same email between [] and ()
@@ -528,6 +529,7 @@ test('Test markdown style email link with various styles', () => {
         + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> '
         + '[](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
         + '[   ](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
+        + '[   <br /> ](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
         + '<a href="mailto:concierge@expensify.com">Expensify</a>'
         + '<a href="mailto:concierge@expensify.com">Expensify Email</a>'
         + '<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>'
