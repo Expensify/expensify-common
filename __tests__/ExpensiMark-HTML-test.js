@@ -1123,3 +1123,12 @@ test('Test here mention with @here@here', () => {
     const resultString = '<mention-here>@here</mention-here><mention-here>@here</mention-here>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test link with code fence inside the alias text part', () => {
+    const testString = '[```code```](google.com) '
+        + '[test ```code``` test](google.com)';
+
+    const resultString = '[<pre>code</pre>](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>) '
+        + '[test <pre>code</pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
