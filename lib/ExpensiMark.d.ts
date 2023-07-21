@@ -86,7 +86,7 @@ export default class ExpensiMark {
      * @param textToCheck - Text to check
      */
     containsNonPairTag(textToCheck: string): boolean;
-    extractLinksInMarkdownComment(comment: string): string[];
+    extractLinksInMarkdownComment(comment: string): string[] | undefined;
     /**
      * Compares two markdown comments and returns a list of the links removed in a new comment.
      *
