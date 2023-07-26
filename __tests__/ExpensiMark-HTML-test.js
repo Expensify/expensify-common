@@ -238,10 +238,14 @@ test('Test HTML encoded strings', () => {
     expect(parser.replace(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
 
-// New lines characters \\n were successfully replaced with <br>
+// New lines characters \n or \r\n were successfully replaced with <br>
 test('Test newline markdown replacement', () => {
-    const newLineTestStartString = 'This sentence has a newline \n Yep just had one \n Oh there it is another one';
-    const newLineReplacedString = 'This sentence has a newline <br /> Yep just had one <br /> Oh there it is another one';
+    let newLineTestStartString = 'This sentence has a newline \n Yep just had one \n Oh there it is another one';
+    let newLineReplacedString = 'This sentence has a newline <br /> Yep just had one <br /> Oh there it is another one';
+    expect(parser.replace(newLineTestStartString)).toBe(newLineReplacedString);
+
+    newLineTestStartString = 'This sentence has a windows-style newline \r\n Yep just had one \r\n Oh there it is another one';
+    newLineReplacedString = 'This sentence has a windows-style newline <br /> Yep just had one <br /> Oh there it is another one';
     expect(parser.replace(newLineTestStartString)).toBe(newLineReplacedString);
 });
 
