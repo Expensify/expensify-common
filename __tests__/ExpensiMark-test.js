@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import ExpensiMark from '../lib/ExpensiMark';
-import Str from '../lib/str';
 import _ from 'underscore';
 
 const parser = new ExpensiMark();
