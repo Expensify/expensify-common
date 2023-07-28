@@ -95,3 +95,9 @@ describe('Str.sanitizeURL', () => {
         expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
     });
 });
+
+describe('Str.fromUSDToNumber', () => {
+    it('Handles currency symbols with a period', () => {
+        expect(Str.fromUSDToNumber('Bs.S2.48')).toBe('248');
+    });
+});
