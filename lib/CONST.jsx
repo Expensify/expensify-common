@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 
-const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]{0,64}(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
+const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]{1,64}(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
 
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 
