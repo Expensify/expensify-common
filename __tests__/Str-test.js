@@ -95,3 +95,11 @@ describe('Str.sanitizeURL', () => {
         expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
     });
 });
+
+describe('Str.isValidEmail', () => {
+    it('Correctly detects a valid email', () => {
+        expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmail('test@gmail')).toBeFalsy();
+        expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
+    });
+});
