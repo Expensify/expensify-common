@@ -127,3 +127,11 @@ describe('Str.fromCurrencyToNumber', () => {
         expect(Str.fromCurrencyToNumber('Bs.S2')).toBe(200);
     });
 });
+      
+describe('Str.isValidEmail', () => {
+    it('Correctly detects a valid email', () => {
+        expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmail('test@gmail')).toBeFalsy();
+        expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
+    });
+});
