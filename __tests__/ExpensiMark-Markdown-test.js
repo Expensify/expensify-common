@@ -679,3 +679,14 @@ test('Test blockquote linebreak handling with text, block and inline elements', 
     const testStringSurroundedByBlockElementHeading = '<h1>h1 a</h1><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><h1>h1 b</h1><br /><h1>h1 c</h1><blockquote>quote c</blockquote><h1>h1 c</h1>';
     expect(parser.htmlToMarkdown(testStringSurroundedByBlockElementHeading)).toBe('# h1 a\n> quote a\n\n> quote b\n# h1 b\n\n# h1 c\n> quote c\n# h1 c');
 });
+
+test('Test codeFence copy from selection does not add extra new line', () => {
+    let testString = '<div><div><comment><pre><div><span>code</span><br></div></pre>text</comment></div></div>';
+    expect(parser.htmlToMarkdown(testString)).toBe('```\ncode\n```\ntext');
+
+    testString = '<pre>code<br></pre>text';
+    expect(parser.htmlToMarkdown(testString)).toBe('```\ncode\n```\ntext');
+
+    testString = '<h3>test heading</h3><div><pre class=\"notranslate\"><code class=\"notranslate\">Code snippet\n</code></pre></div><blockquote><p><a href=\"https://www.example.com\">link</a></p></blockquote>';
+    expect(parser.htmlToMarkdown(testString)).toBe('test heading\n```\nCode snippet\n```\n> [link](https://www.example.com)')
+});
