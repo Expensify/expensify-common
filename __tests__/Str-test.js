@@ -43,15 +43,6 @@ describe('Str.isValidURL', () => {
     });
 });
 
-describe('Str.isValidEmailMarkdown', () => {
-    it('Correctly identifies valid mark down emails', () => {
-        expect(Str.isValidEmailMarkdown('abc@gmail.com')).toBeTruthy();
-        expect(Str.isValidEmailMarkdown('$test@gmail.com')).toBeTruthy();
-        expect(Str.isValidEmailMarkdown('~abc@gmail.com~')).toBeFalsy();
-        expect(Str.isValidEmailMarkdown('abc@gmail.com~')).toBeFalsy();
-    });
-});
-
 describe('Str.stripHTML', () => {
     it('Correctly strips HTML/XML tags', () => {
         expect(Str.stripHTML('<strong>hello</strong>')).toBe('hello');
@@ -129,10 +120,80 @@ describe('Str.fromCurrencyToNumber', () => {
 });
       
 describe('Str.isValidEmail', () => {
-    it('Correctly detects a valid email', () => {
+    it('Correctly identifies valid emails', () => {
         expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
-        expect(Str.isValidEmail('test@gmail')).toBeFalsy();
-        expect(Str.isValidEmail('@gmail.com')).toBeFalsy();
-        expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
+
+        // Domain length (63 chars in each label)
+        expect(Str.isValidEmail('test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com')).toBeTruthy();
+        expect(Str.isValidEmail('abc@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.km')).toBeTruthy();
+        expect(Str.isValidEmail('abc@co.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.km')).toBeTruthy();
+
+        // Address length (64 chars)
+        expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com')).toBeTruthy();
+
+        // Overall length (254 chars)
+        expect(Str.isValidEmail('averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com')).toBeTruthy();
+
+        // Domain with lots of dashes
+        expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee')).toBeTruthy();
+        expect(Str.isValidEmail('abc@g---m--ai-l.com')).toBeTruthy();
+
+        // Domain with repeated labels of 63 chars
+        expect(Str.isValidEmail('test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com')).toBeTruthy();
+
+        // TLD >=2 chars
+        expect(Str.isValidEmail('abc@gmail.co')).toBeTruthy();
+        expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijk')).toBeTruthy();
+
+        // Very short address
+        expect(Str.isValidEmail('a@example.com')).toBeTruthy();
+
+        // xn-- style domain name
+        expect(Str.isValidEmail('test@xn--diseolatinoamericano-76b.com')).toBeTruthy();
+
+        // Unusual but valid prefixes
+        expect(Str.isValidEmail('-test@example.com')).toBeTruthy();
+        expect(Str.isValidEmail('_test@example.com')).toBeTruthy();
+        expect(Str.isValidEmail('#test@example.com')).toBeTruthy();
+        expect(Str.isValidEmail('test.+123@example.com')).toBeTruthy();
+        expect(Str.isValidEmail('-test-@example.com')).toBeTruthy();
+
+        // Invalid chars
+        expect(Str.isValidEmail('$test@gmail.com')).toBeFalsy();
+        expect(Str.isValidEmail('!test@gmail.com')).toBeFalsy();
+        expect(Str.isValidEmail('"test"@gmail.com')).toBeFalsy();
+        expect(Str.isValidEmail('~abc@gmail.com~')).toBeFalsy();
+        expect(Str.isValidEmail('abc@gmail.com~')).toBeFalsy();
+        expect(Str.isValidEmail('test@example_123site.com')).toBeFalsy();
+        expect(Str.isValidEmail('test{@example.com')).toBeFalsy();
+        expect(Str.isValidEmail('test..new@example.com')).toBeFalsy();
+        expect(Str.isValidEmail('test@example-.a.com')).toBeFalsy();
+        expect(Str.isValidEmail('test@example......a.com')).toBeFalsy();
+
+        // Invalid period location
+        expect(Str.isValidEmail('.test@example.com')).toBeFalsy();
+        expect(Str.isValidEmail('.test.new@example.com')).toBeFalsy();
+        expect(Str.isValidEmail('test.@example.com')).toBeFalsy();
+
+        // Domain too long (>63 chars in each label)
+        expect(Str.isValidEmail('test@averylongdomainpartoftheemailthatwillgooverthelimitasitismorethan63chars.com')).toBeFalsy();
+        expect(Str.isValidEmail('abc@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890a.km')).toBeFalsy();
+        expect(Str.isValidEmail('abc@co.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890a.km')).toBeFalsy();
+
+        // Address too long (>64 chars)
+        expect(Str.isValidEmail('averylongaddresspartoftheemailthatwillgovoerthelimitasitismorethan64chars@example.com')).toBeFalsy();
+
+        // Overall length too long
+        expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa')).toBeFalsy();
+
+        // Incorrect domains start/end
+        expect(Str.isValidEmail('test@example-.com')).toBeFalsy();
+        expect(Str.isValidEmail('test@-example-.com')).toBeFalsy();
+
+        // TLD too short
+        expect(Str.isValidEmail('test@example.a')).toBeFalsy();
+
+        // TLD too long
+        expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl')).toBeFalsy();
     });
 });
