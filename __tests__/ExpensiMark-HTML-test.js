@@ -175,11 +175,15 @@ test('Test emails within other markdown', () => {
     + '```test@example.com```\n'
     + '`test@example.com`\n'
     + '_test@example.com_ '
+    + '_test@example.com__ '
+    + '__test@example.com__ '
     + '__test@example.com_';
     const result = '<blockquote><a href="mailto:test@example.com">test@example.com</a></blockquote>'
     + '<pre>test@example.com</pre>'
     + '<code>test@example.com</code><br />'
     + '<em><a href="mailto:test@example.com">test@example.com</a></em> '
+    + '<em><a href="mailto:test@example.com">test@example.com</a></em>_ '
+    + '<em><a href="mailto:_test@example.com">_test@example.com</a></em>_ '
     + '<em><a href="mailto:_test@example.com">_test@example.com</a></em>';
     expect(parser.replace(testString)).toBe(result);
 });
