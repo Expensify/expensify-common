@@ -190,7 +190,7 @@ test('Test emails within other markdown', () => {
 
 // Check email regex's validity at various limits
 test('Test markdown replacement for valid emails', () => {
-    const testString = 'A simple email: abc@gmail.com, '
+    const testString = 'A simple email: abc.new@gmail.com, '
     + 'or a very short one a@example.com '
     + 'hitting the maximum domain length (63 chars) test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com '
     + 'or the maximum address length (64 chars) sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com '
@@ -211,7 +211,7 @@ test('Test markdown replacement for valid emails', () => {
     + 'try a markdown link with a valid max-length email '
     + '[text](sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfff)'
     + '$--test@gmail.com';
-    const result = 'A simple email: <a href="mailto:abc@gmail.com">abc@gmail.com</a>, '
+    const result = 'A simple email: <a href="mailto:abc.new@gmail.com">abc.new@gmail.com</a>, '
     + 'or a very short one <a href="mailto:a@example.com">a@example.com</a> '
     + 'hitting the maximum domain length (63 chars) <a href="mailto:test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com">test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com</a> '
     + 'or the maximum address length (64 chars) <a href="mailto:sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com">sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com</a> '
