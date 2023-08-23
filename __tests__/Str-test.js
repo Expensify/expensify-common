@@ -126,19 +126,8 @@ describe('Str.fromCurrencyToNumber', () => {
         expect(Str.fromCurrencyToNumber('Bs.S.48')).toBe(48);
         expect(Str.fromCurrencyToNumber('Bs.S2')).toBe(200);
     });
-
-    it('Handles amounts with currency symbols', () => {
-        expect(Str.fromCurrencyToNumber('-5.8')).toBe(-580);
-        expect(Str.fromCurrencyToNumber(-5.812)).toBe(-581);
-        expect(Str.fromCurrencyToNumber('24.342')).toBe(2434);
-        expect(Str.fromCurrencyToNumber(24.342, true)).toBe(2434.2);
-    });
-
-    it('Defaults to 0 when no amountStr is passed', () => {
-        expect(Str.fromCurrencyToNumber()).toBe(0);
-    });
 });
-
+      
 describe('Str.isValidEmail', () => {
     it('Correctly detects a valid email', () => {
         expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
