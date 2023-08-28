@@ -90,7 +90,10 @@ describe('Str.sanitizeURL', () => {
 describe('Str.isValidEmail', () => {
     it('Correctly identifies valid emails', () => {
         expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
-
+        expect(Str.isValidEmail('test@gmail')).toBeFalsy();
+        expect(Str.isValidEmail('@gmail.com')).toBeFalsy();
+        expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
+        
         // Domain length (63 chars in each label)
         expect(Str.isValidEmail('test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com')).toBeTruthy();
         expect(Str.isValidEmail('abc@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.km')).toBeTruthy();
