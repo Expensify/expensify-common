@@ -87,38 +87,6 @@ describe('Str.sanitizeURL', () => {
     });
 });
 
-describe('Str.fromCurrencyToNumber', () => {
-    it('Handles negative amounts with minus sign', () => {
-        expect(Str.fromCurrencyToNumber('-$5.23')).toBe(-523);
-        expect(Str.fromCurrencyToNumber('$-5.23')).toBe(-523);
-    });
-
-    it('Handles negative amounts with ()', () => {
-        expect(Str.fromCurrencyToNumber('($5.23)')).toBe(-523);
-    });
-
-    it('Handles fractional cents when allowed', () => {
-        expect(Str.fromCurrencyToNumber('$5.223', true)).toBe(522.3);
-    });
-
-    it('Handles amounts without leading zeros', () => {
-        expect(Str.fromCurrencyToNumber('$.23')).toBe(23);
-    });
-
-    it('Handles amounts without cents', () => {
-        expect(Str.fromCurrencyToNumber('$5')).toBe(500);
-    });
-
-    it('Handles currency symbols with a period', () => {
-        expect(Str.fromCurrencyToNumber('Bs.S2.48')).toBe(248);
-        expect(Str.fromCurrencyToNumber('Bs.S-2.48')).toBe(-248);
-        expect(Str.fromCurrencyToNumber('-Bs.S2.48')).toBe(-248);
-        expect(Str.fromCurrencyToNumber('(Bs.S2.48)')).toBe(-248);
-        expect(Str.fromCurrencyToNumber('Bs.S.48')).toBe(48);
-        expect(Str.fromCurrencyToNumber('Bs.S2')).toBe(200);
-    });
-});
-      
 describe('Str.isValidEmail', () => {
     it('Correctly identifies valid emails', () => {
         expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();

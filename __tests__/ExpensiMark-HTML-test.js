@@ -399,6 +399,11 @@ test('Test inline code blocks inside ExpensiMark', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test inline code blocks with two backticks', () => {
+    const testString = '``JavaScript``';
+    expect(parser.replace(testString)).toBe('<code>&#x60;JavaScript&#x60;</code>');
+});
+
 test('Test code fencing with ExpensiMark syntax inside', () => {
     let codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)<br /></pre>');
