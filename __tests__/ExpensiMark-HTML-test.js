@@ -84,31 +84,13 @@ test('Test multi-line strikethrough markdown replacement', () => {
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
-// Emails containing *_~ are successfully wrapped in a mailto anchor tag
+// Emails containing _ are successfully wrapped in a mailto anchor tag
 test('Test markdown replacement for emails and email links containing bold/strikethrough/italic', () => {
-    let testInput = 'a~b@gmail.com';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a~b@gmail.com">a~b@gmail.com</a>');
-
-    testInput = 'a*b@gmail.com';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a*b@gmail.com">a*b@gmail.com</a>');
-
-    testInput = 'a_b@gmail.com';
+    let testInput = 'a_b@gmail.com';
     expect(parser.replace(testInput)).toBe('<a href="mailto:a_b@gmail.com">a_b@gmail.com</a>');
-
-    testInput = 'a~*_b@gmail.com';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a~*_b@gmail.com">a~*_b@gmail.com</a>');
-
-    testInput = '[text](a~b@gmail.com)';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a~b@gmail.com">text</a>');
-
-    testInput = '[text](a*b@gmail.com)';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a*b@gmail.com">text</a>');
 
     testInput = '[text](a_b@gmail.com)';
     expect(parser.replace(testInput)).toBe('<a href="mailto:a_b@gmail.com">text</a>');
-
-    testInput = '[text](a~*_b@gmail.com)';
-    expect(parser.replace(testInput)).toBe('<a href="mailto:a~*_b@gmail.com">text</a>');
 });
 
 // Single-line emails wrapped in *_~ are successfully wrapped in a mailto anchor tag
@@ -160,6 +142,12 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
         + '<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>';
     expect(parser.replace(testInput)).toBe(result);
 
+    testInput = '_email@test.com\n_email2@test.com\n\nemail3@test.com_';
+    result = '<em><a href="mailto:email@test.com">email@test.com</a><br />'
+        + '<a href="mailto:_email2@test.com">_email2@test.com</a><br /><br />'
+        + '<a href="mailto:email3@test.com">email3@test.com</a></em>';
+    expect(parser.replace(testInput)).toBe(result);
+
     testInput = '[text](~abc@gmail.com)\n[text](def@gmail.com~)';
     result = '[text](<del><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
         + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></del>)';
@@ -171,14 +159,116 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     expect(parser.replace(testInput)).toBe(result);
 
     testInput = '[text](_abc@gmail.com)\n[text](def@gmail.com_)';
-    result = '[text](<em><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
-        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></em>)';
+    result = '<a href="mailto:_abc@gmail.com">text</a><br />'
+        + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a>_)';
     expect(parser.replace(testInput)).toBe(result);
 
     testInput = '[text](~*_abc@gmail.com)\n[text](def@gmail.com_*~)';
     result = '[text](<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />'
         + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>)';
     expect(parser.replace(testInput)).toBe(result);
+});
+
+// Check emails within other markdown
+test('Test emails within other markdown', () => {
+    const testString = '> test@example.com\n'
+    + '```test@example.com```\n'
+    + '`test@example.com`\n'
+    + '_test@example.com_ '
+    + '_test@example.com__ '
+    + '__test@example.com__ '
+    + '__test@example.com_';
+    const result = '<blockquote><a href="mailto:test@example.com">test@example.com</a></blockquote>'
+    + '<pre>test@example.com</pre>'
+    + '<code>test@example.com</code><br />'
+    + '<em><a href="mailto:test@example.com">test@example.com</a></em> '
+    + '<em><a href="mailto:test@example.com">test@example.com</a></em>_ '
+    + '<em><a href="mailto:_test@example.com">_test@example.com</a></em>_ '
+    + '<em><a href="mailto:_test@example.com">_test@example.com</a></em>';
+    expect(parser.replace(testString)).toBe(result);
+});
+
+// Check email regex's validity at various limits
+test('Test markdown replacement for valid emails', () => {
+    const testString = 'A simple email: abc.new@gmail.com, '
+    + 'or a very short one a@example.com '
+    + 'hitting the maximum domain length (63 chars) test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com '
+    + 'or the maximum address length (64 chars) sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com '
+    + 'overall length of 254 averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com '
+    + 'domain with many dashes sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee '
+    + ' how about a domain with repeated labels of 63 chars test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com '
+    + 'max length email with italics '
+    + '_averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com_ '
+    + ' xn-- style domain test@xn--diseolatinoamericano-76b.com '
+    + 'or a more complex case where we need to determine where to apply italics markdown '
+    + '_email@test.com\n_email2@test.com\n\nemail3@test.com_ '
+    + 'some unusual, but valid prefixes -test@example.com '
+    + ' and _test@example.com '
+    + 'a max length email enclosed in brackets '
+    + '(averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com) '
+    + 'max length email with ellipsis ending '
+    + 'averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com... '
+    + 'try a markdown link with a valid max-length email '
+    + '[text](sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfff)'
+    + '$--test@gmail.com';
+    const result = 'A simple email: <a href="mailto:abc.new@gmail.com">abc.new@gmail.com</a>, '
+    + 'or a very short one <a href="mailto:a@example.com">a@example.com</a> '
+    + 'hitting the maximum domain length (63 chars) <a href="mailto:test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com">test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com</a> '
+    + 'or the maximum address length (64 chars) <a href="mailto:sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com">sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com</a> '
+    + 'overall length of 254 <a href="mailto:averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com">averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com</a> '
+    + 'domain with many dashes <a href="mailto:sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee">sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee</a> '
+    + ' how about a domain with repeated labels of 63 chars <a href="mailto:test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com">test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com</a> '
+    + 'max length email with italics '
+    + '<em><a href="mailto:averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com">averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com</a></em> '
+    + ' xn-- style domain <a href="mailto:test@xn--diseolatinoamericano-76b.com">test@xn--diseolatinoamericano-76b.com</a> '
+    + 'or a more complex case where we need to determine where to apply italics markdown '
+    + '<em><a href="mailto:email@test.com">email@test.com</a><br />'
+    + '<a href="mailto:_email2@test.com">_email2@test.com</a><br /><br />'
+    + '<a href="mailto:email3@test.com">email3@test.com</a></em> '
+    + 'some unusual, but valid prefixes <a href="mailto:-test@example.com">-test@example.com</a> '
+    + ' and <a href="mailto:_test@example.com">_test@example.com</a> '
+    + 'a max length email enclosed in brackets '
+    + '(<a href="mailto:averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com">averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com</a>) '
+    + 'max length email with ellipsis ending '
+    + '<a href="mailto:averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com">averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com</a>... '
+    + 'try a markdown link with a valid max-length email '
+    + '<a href="mailto:sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfff">text</a>'
+    + '$<a href=\"mailto:--test@gmail.com\">--test@gmail.com</a>';
+    expect(parser.replace(testString)).toBe(result);
+});
+
+test('Test markdown replacement for invalid emails', () => {
+    const testString = 'Replace the valid email part within a string '
+    + '.test@example.com '
+    + '$test@gmail.com '
+    + 'test..new@example.com '
+    + 'Some chars that are not allowed within emails '
+    + 'test{@example.com '
+    + 'domain length over limit test@averylongdomainpartoftheemailthatwillgooverthelimitasitismorethan63chars.com '
+    + 'address over limit averylongaddresspartoftheemailthatwillgovoerthelimitasitismorethan64chars@example.com '
+    + 'overall length too long '
+    + 'sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa '
+    + 'invalid domain start/end '
+    + 'test@example-.com '
+    + 'test@-example-.com '
+    + 'test@example.a '
+    + '[text](sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa)';
+    const result = 'Replace the valid email part within a string '
+    + '.<a href="mailto:test@example.com">test@example.com</a> '
+    + '$<a href="mailto:test@gmail.com">test@gmail.com</a> '
+    + 'test..<a href="mailto:new@example.com">new@example.com</a> '
+    + 'Some chars that are not allowed within emails '
+    + 'test{@example.com '
+    + 'domain length over limit test@averylongdomainpartoftheemailthatwillgooverthelimitasitismorethan63chars.com '
+    + 'address over limit averylongaddresspartoftheemailthatwillgovoerthelimitasitismorethan64chars@example.com '
+    + 'overall length too long '
+    + 'sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa '
+    + 'invalid domain start/end '
+    + 'test@example-.com '
+    + 'test@-example-.com '
+    + 'test@example.a '
+    + '[text](sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa)';
+    expect(parser.replace(testString)).toBe(result);
 });
 
 // Markdown style links replaced successfully
@@ -524,7 +614,6 @@ test('Test markdown style email link with various styles', () => {
         + '_[Expensify](concierge@expensify.com)_ '
         + '*[Expensify](concierge@expensify.com)* '
         + '[Expensify!](no-concierge1@expensify.com) '
-        + '[Expensify?](concierge?@expensify.com) '
         + '[Applause](applausetester+qaabecciv@applause.expensifail.com) '
         + '[](concierge@expensify.com)' // only parse autoEmail in ()
         + '[   ](concierge@expensify.com)' // only parse autoEmail in () and keep spaces in []
@@ -542,7 +631,6 @@ test('Test markdown style email link with various styles', () => {
         + '<em><a href="mailto:concierge@expensify.com">Expensify</a></em> '
         + '<strong><a href="mailto:concierge@expensify.com">Expensify</a></strong> '
         + '<a href="mailto:no-concierge1@expensify.com">Expensify!</a> '
-        + '<a href="mailto:concierge?@expensify.com">Expensify?</a> '
         + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">Applause</a> '
         + '[](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
         + '[   ](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
@@ -568,14 +656,10 @@ test('Test a url with multiple underscores', () => {
 test('Test general email link with various styles', () => {
     const testString = 'Go to concierge@expensify.com '
         + 'no-concierge@expensify.com '
-        + 'concierge!@expensify.com '
-        + 'concierge1?@expensify.com '
         + 'applausetester+qaabecciv@applause.expensifail.com ';
 
     const resultString = 'Go to <a href="mailto:concierge@expensify.com">concierge@expensify.com</a> '
         + '<a href="mailto:no-concierge@expensify.com">no-concierge@expensify.com</a> '
-        + '<a href="mailto:concierge!@expensify.com">concierge!@expensify.com</a> '
-        + '<a href="mailto:concierge1?@expensify.com">concierge1?@expensify.com</a> '
         + '<a href="mailto:applausetester+qaabecciv@applause.expensifail.com">applausetester+qaabecciv@applause.expensifail.com</a> ';
 
     expect(parser.replace(testString)).toBe(resultString);

@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 
-const EMAIL_BASE_REGEX = "([\\w\\-\\+\\'#]{1,64}(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
+const EMAIL_BASE_REGEX = '(?=((?=[\\w\'#%+-]+(?:\\.[\\w\'#%+-]+)*@)[\\w\\.\'#%+-]{1,64}@(?:(?=[a-z\\d]+(?:-+[a-z\\d]+)*\\.)(?:[a-z\\d-]{1,63}\\.)+[a-z]{2,63})(?= |_|\\b))(?<end>.*))\\S{3,254}(?=\\k<end>$)';
 
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 
@@ -330,7 +330,7 @@ export const CONST = {
          *
          * @type String
          */
-        MARKDOWN_EMAIL: "([a-zA-Z0-9.!#$%&'+/=?^`{|}-][a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]*@[a-zA-Z0-9-]+?(\\.[a-zA-Z]+)+)",
+        MARKDOWN_EMAIL: EMAIL_BASE_REGEX,
 
         /**
          * Regex matching an text containing an Emoji
