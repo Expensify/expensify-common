@@ -1225,3 +1225,11 @@ test('Test link with code fence inside the alias text part', () => {
         + '[test <pre>code</pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test strikethrough with multiple tilde characters', () => {
+    let testString = '~~~hello~~~';
+    expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');
+    
+    testString = '~~~~~~';
+    expect(parser.replace(testString)).toBe('~~~~~~');
+});
