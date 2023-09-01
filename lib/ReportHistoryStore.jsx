@@ -168,6 +168,42 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Gets the history by reportActionID.
+     *
+     * @param {Number} reportID
+     * @param {Boolean} ignoreCache
+     *
+     * @returns {Deferred}
+     */
+    getByActionID(reportID, ignoreCache) {
+        const promise = new Deferred();
+
+        // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
+        if (ignoreCache) {
+            delete this.cache[reportID];
+        }
+
+        // We'll poll the API for the un-cached history
+        const cachedHistory = this.cache[reportID] || [];
+        const lastHistoryItem = _.last(cachedHistory) || {};
+
+        this.API.Report_GetHistory({
+            reportID,
+            reportActionID: lastHistoryItem.reportActionID || 0
+        })
+            .done((recentHistory) => {
+                // Update history with new items fetched
+                this.mergeItemsByTimestamp(reportID, recentHistory);
+
+                // Return history for this report
+                promise.resolve(this.cache[reportID]);
+            })
+            .fail(promise.reject);
+
+        return promise;
+    }
+
+    /**
      * Gets the history from the cache if it exists. Otherwise fully loads the history.
      *
      * @param {Number} reportID
