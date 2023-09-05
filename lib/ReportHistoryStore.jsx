@@ -57,6 +57,25 @@ export default class ReportHistoryStore {
             },
 
             /**
+             * Returns the history for a given report.
+             * Note that we are unable to ask for the cached history.
+             *
+             * @param {Number} reportID
+             * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
+             *
+             * @returns {Deferred}
+             */
+            getByActionID: (reportID, ignoreCache = false) => {
+                const promise = new Deferred();
+                this.getByActionID(reportID, ignoreCache)
+                    .done((reportHistory) => {
+                        promise.resolve(this.filterHiddenActions(reportHistory));
+                    })
+                    .fail(promise.reject);
+                return promise;
+            },
+
+            /**
              * Set a history item directly into the cache. Checks to see if we have the previous item first.
              *
              * @param {Number} reportID
@@ -104,7 +123,6 @@ export default class ReportHistoryStore {
                 const promise = new Deferred();
                 this.getFromCache(reportID)
                     .done((cachedHistory) => {
-                        
                         // Do we have the reportAction immediately before this one?
                         if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
@@ -181,7 +199,7 @@ export default class ReportHistoryStore {
         }, this.cache[reportID] || []);
 
         // Sort items in case they have become out of sync
-        this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp');
+        this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp').reverse();
     }
 
     /**
