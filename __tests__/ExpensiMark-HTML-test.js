@@ -609,6 +609,60 @@ test('Test a url ending with a closing parentheses autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test urls autolinks correctly', () => {
+    let testString = 'test@expensify.com https://www.expensify.com\n' +
+    'test@expensify.com-https://www.expensify.com\n' +
+    'test@expensify.com/https://www.expensify.com\n' +
+    'test@expensify.com?https://www.expensify.com\n' +
+    'test@expensify.com>https://www.expensify.com\n' +
+    'https://staging.new.expensify.com/details/test@expensify.com\n' +
+    'staging.new.expensify.com/details\n\n' +
+    'https://www.expensify.com?name=test&email=test@expensify.com\n' +
+    'https://staging.new.expensify.com/details?login=testing@gmail.com\n' +
+    'staging.new.expensify.com/details?login=testing@gmail.com\n' +
+    'http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled\n' +
+    '-https://www.expensify.com /https://www.expensify.com @https://www.expensify.com\n' +
+    'expensify.com -expensify.com @expensify.com\n' +
+    'https//www.expensify.com\n' +
+    '//www.expensify.com?name=test&email=test@expensify.com\n' +
+    '//staging.new.expensify.com/details?login=testing@gmail.com\n' +
+    '/details?login=testing@gmail.com\n' +
+    '?name=test&email=test@expensify.com\n\n' +
+    'example.com/https://www.expensify.com\n' +
+    'test@gmail.com staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com\n' +
+    'test@gmail.com //staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com\n' +
+    'test@gmail.com-https://staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com\n' +
+    'test@gmail.com/https://example.com/google@email.com?email=asd@email.com\n' +
+    'test@gmail.com/test@gmail.com/https://example.com/google@email.com?email=asd@email.com';
+
+    let resultString = '<a href="mailto:test@expensify.com">test@expensify.com</a> <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a><br />' + 
+    '<a href="mailto:test@expensify.com">test@expensify.com</a>-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a><br />' +
+    '<a href="mailto:test@expensify.com">test@expensify.com</a>/<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a><br />' +
+    '<a href="mailto:test@expensify.com">test@expensify.com</a>?<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a><br />' + 
+    '<a href="mailto:test@expensify.com">test@expensify.com</a>&gt;<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a><br />' +
+    '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a><br />' +
+    '<a href="https://staging.new.expensify.com/details" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details</a><br /><br />'+ 
+    '<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com?name=test&amp;email=test@expensify.com</a><br />' +
+    '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com</a><br />' +
+    '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a><br />' +
+    '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a><br />' +
+    '-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> /<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> @https://www.expensify.com<br />' +
+    '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> -<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> @expensify.com<br />' +
+    'https//<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com</a><br />' +
+    '//<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com?name=test&amp;email=test@expensify.com</a><br />' +
+    '//<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a><br />' +
+    '/details?login=<a href="mailto:testing@gmail.com">testing@gmail.com</a><br />' +
+    '?name=test&amp;email=<a href="mailto:test@expensify.com">test@expensify.com</a><br /><br />' +
+    '<a href="https://example.com/https://www.expensify.com" target="_blank" rel="noreferrer noopener">example.com/https://www.expensify.com</a><br />' +
+    '<a href="mailto:test@gmail.com">test@gmail.com</a> <a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a><br />' +
+    '<a href="mailto:test@gmail.com">test@gmail.com</a> //<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a><br />' +
+    '<a href="mailto:test@gmail.com">test@gmail.com</a>-<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a><br />' +
+    '<a href="mailto:test@gmail.com\">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a><br />' +
+    '<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a>';
+    
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test markdown style email link with various styles', () => {
     const testString = 'Go to ~[Expensify](concierge@expensify.com)~ '
         + '_[Expensify](concierge@expensify.com)_ '
