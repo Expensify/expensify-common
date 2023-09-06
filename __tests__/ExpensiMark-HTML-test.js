@@ -1225,3 +1225,24 @@ test('Test link with code fence inside the alias text part', () => {
         + '[test <pre>code</pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+
+
+test('Test codefence inside strike through', () => {
+    let testString = '```some text```';
+    let  htmlString = parser.replace(testString)
+    let  output = parser.htmlToMarkdown(htmlString)
+
+
+    console.log('htmlString', htmlString, 'output', output)
+    expect(output).toBe('```\nsome text\n```')
+
+
+    // codefence inside strike through
+    testString = '~```some text```~';
+
+    htmlString = parser.replace(testString)
+    output = parser.htmlToMarkdown(htmlString)
+    console.log('htmlString', htmlString, 'output', output)
+    expect(output).toBe('~```\nsome text\n```~\n')
+});
