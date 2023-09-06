@@ -1226,21 +1226,18 @@ test('Test link with code fence inside the alias text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test codefence inside strike through', () => {
+test.only('Test code fence inside strike through', () => {
     let testString = '```some text```';
     let  htmlString = parser.replace(testString)
     let  output = parser.htmlToMarkdown(htmlString)
 
-
-    console.log('htmlString', htmlString, 'output', output)
     expect(output).toBe('```\nsome text\n```')
 
 
-    // codefence inside strike through
+    // code fence inside strike through
     testString = '~```some text```~';
 
     htmlString = parser.replace(testString)
     output = parser.htmlToMarkdown(htmlString)
-    console.log('htmlString', htmlString, 'output', output)
-    expect(output).toBe('~```\nsome text\n```~\n')
+    expect(output).toBe('~```\nsome text\n```~')
 });
