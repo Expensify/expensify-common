@@ -1226,8 +1226,6 @@ test('Test link with code fence inside the alias text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-
-
 test('Test codefence inside strike through', () => {
     let testString = '```some text```';
     let  htmlString = parser.replace(testString)
