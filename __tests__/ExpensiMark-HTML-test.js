@@ -464,7 +464,11 @@ test('Test wrapped URLs', () => {
 });
 
 test('Test Url, where double quote is not allowed', () => {
-    const urlTestStartString = 'https://www.she.com/path?test="123"\n' +
+    const urlTestStartString = '"om https://www.she.com/"\n' +
+        '"om https://www.she.com"\n' +
+        '"https://www.she.com/ end"\n' +
+        '"https://www.she.com end"\n' +
+        'https://www.she.com/path?test="123"\n' +
         'https://www.she.com/path?test="123/"\n' +
         '"https://www.she.com/path?test="123"\n' +
         '"https://www.she.com/path?test="123/"\n' +
@@ -472,7 +476,11 @@ test('Test Url, where double quote is not allowed', () => {
         'https://www.she.com/path?test=123/"\n' +
         'https://www.she.com/path?test=/"123"\n' +
         'https://www.she.com/path?test=/"123/"';
-    const urlTestReplacedString = '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
+    const urlTestReplacedString = '&quot;om <a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a>&quot;<br />' +
+        '&quot;om <a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a>&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a> end&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a> end&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
         '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
         '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
         '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
