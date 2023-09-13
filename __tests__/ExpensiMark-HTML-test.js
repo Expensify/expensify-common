@@ -627,6 +627,111 @@ test('Test urls ending with special characters followed by unmatched closing par
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test urls autolinks correctly', () => {
+    const testCases = [
+        {
+            testString: 'test@expensify.com https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a> <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com-https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com/https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>/<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com?https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>?<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com>https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>&gt;<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'https://staging.new.expensify.com/details/test@expensify.com',
+            resultString: '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a>',
+        },
+        {
+            testString: 'staging.new.expensify.com/details',
+            resultString: '<a href="https://staging.new.expensify.com/details" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details</a>',
+        },
+        {
+            testString: 'https://www.expensify.com?name=test&email=test@expensify.com',
+            resultString: '<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com?name=test&amp;email=test@expensify.com</a>',
+        },
+        {
+            testString: 'https://staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: 'staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: 'http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled',
+            resultString: '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a>',
+        },
+        {
+            testString: '-https://www.expensify.com /https://www.expensify.com @https://www.expensify.com',
+            resultString: '-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> /<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> @https://www.expensify.com',
+        },
+        {
+            testString: 'expensify.com -expensify.com @expensify.com',
+            resultString: '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> -<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> @expensify.com',
+        },
+        {
+            testString: 'https//www.expensify.com',
+            resultString: 'https//<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com</a>',
+        },
+        {
+            testString: '//www.expensify.com?name=test&email=test@expensify.com',
+            resultString: '//<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com?name=test&amp;email=test@expensify.com</a>',
+        },
+        {
+            testString: '//staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '//<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: '/details?login=testing@gmail.com',
+            resultString: '/details?login=<a href="mailto:testing@gmail.com">testing@gmail.com</a>',
+        },
+        {
+            testString: '?name=test&email=test@expensify.com',
+            resultString: '?name=test&amp;email=<a href="mailto:test@expensify.com">test@expensify.com</a>',
+        },
+        {
+            testString: 'example.com/https://www.expensify.com',
+            resultString: '<a href="https://example.com/https://www.expensify.com" target="_blank" rel="noreferrer noopener">example.com/https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@gmail.com staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a> <a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com //staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a> //<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com-https://staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a>-<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com/https://example.com/google@email.com?email=asd@email.com',
+            resultString: '<a href="mailto:test@gmail.com\">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a>',
+        },
+        {
+            testString: 'test@gmail.com/test@gmail.com/https://example.com/google@email.com?email=asd@email.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a>',
+        },
+    ];
+
+    testCases.forEach(testCase => {
+        expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
+    });
+});
+
 test('Test markdown style email link with various styles', () => {
     const testString = 'Go to ~[Expensify](concierge@expensify.com)~ '
         + '_[Expensify](concierge@expensify.com)_ '
