@@ -609,6 +609,24 @@ test('Test a url ending with a closing parentheses autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test urls ending with special characters followed by unmatched closing parentheses autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645$) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645*) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645+) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645!) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645,) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645=) ';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>.) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>$) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>*) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>+) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>!) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>,) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>=) ';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test markdown style email link with various styles', () => {
     const testString = 'Go to ~[Expensify](concierge@expensify.com)~ '
         + '_[Expensify](concierge@expensify.com)_ '
