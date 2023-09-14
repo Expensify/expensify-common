@@ -264,6 +264,13 @@ export const CONST = {
     },
 
     /**
+     * Special characters that need to be removed when there in the end of an url
+     *
+     * @type String
+     */
+    SPECIAL_CHARS_TO_REMOVE: "$*.+!(,=",
+
+    /**
      * Store all the regular expression we are using for matching stuff
      */
     REG_EXP: {
