@@ -264,7 +264,7 @@ export const CONST = {
     },
 
     /**
-     * Special characters that need to be removed when there in the end of an url
+     * Special characters that need to be removed when they are ending an url
      *
      * @type String
      */
