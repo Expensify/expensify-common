@@ -616,14 +616,22 @@ test('Test urls ending with special characters followed by unmatched closing par
         + 'https://github.com/Expensify/ReactNativeChat/pull/645+) '
         + 'https://github.com/Expensify/ReactNativeChat/pull/645!) '
         + 'https://github.com/Expensify/ReactNativeChat/pull/645,) '
-        + 'https://github.com/Expensify/ReactNativeChat/pull/645=) ';
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645=) '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings.. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings..) '
+        + '[https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings] ';
     const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>.) '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>$) '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>*) '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>+) '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>!) '
         + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>,) '
-        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>=) ';
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>=) '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>.. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>..) '
+        + '[<a href=\"https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings\" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>] ';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
