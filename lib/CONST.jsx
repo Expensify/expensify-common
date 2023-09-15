@@ -268,7 +268,7 @@ export const CONST = {
      *
      * @type String
      */
-    SPECIAL_CHARS_TO_REMOVE: "$*.+!(,=",
+    SPECIAL_CHARS_TO_REMOVE: '$*.+!(,=',
 
     /**
      * Store all the regular expression we are using for matching stuff
