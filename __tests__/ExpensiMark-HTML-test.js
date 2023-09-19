@@ -631,9 +631,13 @@ test('Test a url ending with a question mark autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a url ending with a closing parentheses autolinks correctly', () => {
-    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645)';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+test('Test urls with unmatched closing parentheses autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645) '
+    + 'https://github.com/Expensify/ReactNativeChat/pull/test(645)) '
+    + 'google.com/(toto))titi)';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>) '
+    + '<a href="https://github.com/Expensify/ReactNativeChat/pull/test(645)" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/test(645)</a>) '
+    + '<a href="https://google.com/(toto)" target="_blank" rel="noreferrer noopener">google.com/(toto)</a>)titi)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
