@@ -1,4 +1,4 @@
-declare type Parameters = string | Record<string, unknown>;
+declare type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>>;
 declare type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
 declare type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 declare type ClientLoggingCallBack = (message: string) => void;
