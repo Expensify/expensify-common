@@ -316,7 +316,7 @@ export declare const CONST: {
         readonly CLOUDFRONT: "https://d2k5nsl2zxldvw.cloudfront.net";
         readonly CLOUDFRONT_IMG: "https://d2k5nsl2zxldvw.cloudfront.net/images/";
         readonly CLOUDFRONT_FILES: "https://d2k5nsl2zxldvw.cloudfront.net/files/";
-        readonly EXPENSIFY_SYNC_MANAGER: "quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_230403124.exe";
+        readonly EXPENSIFY_SYNC_MANAGER: "quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_2300802.exe";
         readonly USEDOT_ROOT: "https://use.expensify.com/";
         readonly ITUNES_SUBSCRIPTION: "https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions";
     };
@@ -436,7 +436,7 @@ export declare const CONST: {
             readonly REPORT_SUBMITTED: "REPORT_SUBMITTED";
         };
         readonly XERO_HQ_CONNECTION_NAME: "xerohq";
-        readonly EXPENSIFY_SYNC_MANAGER_VERSION: "23.0.403.124";
+        readonly EXPENSIFY_SYNC_MANAGER_VERSION: "23.0.802.0";
     };
     readonly INTEGRATION_TYPES: {
         readonly ACCOUNTING: "accounting";
