@@ -1381,3 +1381,11 @@ test('Test strikethrough with multiple tilde characters', () => {
     testString = '~~~~';
     expect(parser.replace(testString)).toBe('~~~~');
 });
+
+test('Test strikethrough with link with URL that contains tilde', () => {
+    let testString = '~[Example Link](https://example.com/?example=~ex)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?example=~ex" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
+
+    testString = '~[Example Link](https://example.com/?~example=~~~ex~)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?~example=~~~ex~" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
+});
