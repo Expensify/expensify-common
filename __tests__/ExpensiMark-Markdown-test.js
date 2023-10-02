@@ -554,7 +554,7 @@ test('Test html to heading1 markdown when there are other tags inside h1 tag', (
 test('Test html to heading1 markdown when h1 tag is in the beginning of the line', () => {
     const testString = '<h1>heading1</h1> in the beginning of the line';
     const resultString = '# heading1\n'
-    + 'in the beginning of the line';
+    + ' in the beginning of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -562,7 +562,7 @@ test('Test html to heading1 markdown when h1 tags are in the middle of the line'
     const testString = 'this line has a <h1>heading1</h1> in the middle of the line';
     const resultString = 'this line has a\n'
     + '# heading1\n'
-    + 'in the middle of the line';
+    + ' in the middle of the line';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
