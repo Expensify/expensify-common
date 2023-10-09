@@ -38,3 +38,9 @@ test('Test extract link with ending parentheses', () => {
     const links = ['https://staging.new.expensify.com/details', 'https://staging.new.expensify.com/details', 'https://staging.new.expensify.com/details'];
     expect(parser.extractLinksInMarkdownComment(comment)).toStrictEqual(links);
 });
+
+test('Test extract link from Markdown link syntax', () => {
+    const comment = 'www.google.com https://www.google.com [Expensify](https://new.expensify.com/)';
+    const links = ['https://new.expensify.com/'];
+    expect(parser.extractLinksInMarkdownComment(comment)).toStrictEqual(links);
+});
