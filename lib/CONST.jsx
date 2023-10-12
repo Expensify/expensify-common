@@ -38,6 +38,13 @@ export const CONST = {
      */
     MILEAGE_IRS_RATE: (new Date() > new Date(2019, 1, 1)) ? 0.545 : 0.58,
 
+    /**
+     * Display this amount to users to encourage them to book a call
+     * 
+     * @type Number
+     */
+    MAX_TRIAL_BONUS_DAYS: 42,
+    
     COUNTRY: {
         US: 'US',
         AU: 'AU',
