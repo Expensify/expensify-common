@@ -271,6 +271,26 @@ test('Test markdown replacement for invalid emails', () => {
     expect(parser.replace(testString)).toBe(result);
 });
 
+
+test('Test markdown replacement for emojis with emails', () => {
+    const testString = 'Do not replace the emoji with link '
+    + '[😄](abc@gmail.com) '
+    + '[😄]( abc@gmail.com) '
+    + '[😄] abc@gmail.com '
+    + '[😄]((abc@gmail.com)) '
+    + '[😄abc@gmail.com](abc@gmail.com) '
+    + '[😄 abc@gmail.com ](abc@gmail.com) '
+    const result = 'Do not replace the emoji with link '
+    + '[😄](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
+    + '[😄]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
+    + '[😄<a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄 <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    expect(parser.replace(testString)).toBe(result);
+});
+
+
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
     let testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
@@ -1410,4 +1430,12 @@ test('Test strikethrough with multiple tilde characters', () => {
 
     testString = '~~~~';
     expect(parser.replace(testString)).toBe('~~~~');
+});
+
+test('Test strikethrough with link with URL that contains tilde', () => {
+    let testString = '~[Example Link](https://example.com/?example=~ex)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?example=~ex" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
+
+    testString = '~[Example Link](https://example.com/?~example=~~~ex~)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?~example=~~~ex~" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
 });
