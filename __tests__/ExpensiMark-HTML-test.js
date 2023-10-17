@@ -1412,3 +1412,14 @@ test('Test strikethrough with link with URL that contains tilde', () => {
     testString = '~[Example Link](https://example.com/?~example=~~~ex~)~';
     expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?~example=~~~ex~" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
 });
+
+test('Linebreak between end of text and start of code block should be remained', () => {
+    let testString = '```\ncode\n```\ntext\n```\ncode\n```';
+    expect(parser.replace(testString)).toBe('<pre>code<br /></pre>text<br /><pre>code<br /></pre>');
+
+    testString = 'A\n```\ncode\n```';
+    expect(parser.replace(testString)).toBe('A<br /><pre>code<br /></pre>');
+
+    testString = '|\n```\ncode\n```';
+    expect(parser.replace(testString)).toBe('|<br /><pre>code<br /></pre>');
+});

@@ -690,3 +690,14 @@ test('Test codeFence copy from selection does not add extra new line', () => {
     testString = '<h3>test heading</h3><div><pre class=\"notranslate\"><code class=\"notranslate\">Code snippet\n</code></pre></div><blockquote><p><a href=\"https://www.example.com\">link</a></p></blockquote>';
     expect(parser.htmlToMarkdown(testString)).toBe('test heading\n```\nCode snippet\n```\n> [link](https://www.example.com)')
 });
+
+test('Linebreak should be remained for text between code block', () => {
+    let testString = '<pre>code<br></pre>text<br><pre>code<br></pre>';
+    expect(parser.htmlToMarkdown(testString)).toBe('```\ncode\n```\ntext\n```\ncode\n```');
+
+    testString = 'A<br><pre>code<br></pre>';
+    expect(parser.htmlToMarkdown(testString)).toBe('A\n```\ncode\n```');
+
+    testString = '|<br><pre>code<br></pre>';
+    expect(parser.htmlToMarkdown(testString)).toBe('|\n```\ncode\n```');
+});
