@@ -318,6 +318,18 @@ export default function API(network, args) {
         },
 
         /**
+         * @param {Object} parameters
+         * @param {String[]} parameters.emailList
+         *
+         * @returns {ExpensifyAPIDeferred}
+         */
+        getAvatarForEmail(parameters) {
+            const commandName = 'GetAvatarForEmail';
+            requireParameters(['email'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Performs API command "Get"
          *
          * @param {Object} parameters The API call parameters, must contain "returnValueList"
