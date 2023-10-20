@@ -323,9 +323,9 @@ export default function API(network, args) {
          *
          * @returns {ExpensifyAPIDeferred}
          */
-        getAvatarForEmail(parameters) {
-            const commandName = 'GetAvatarForEmail';
-            requireParameters(['email'], parameters, commandName);
+        getAvatarsForEmail(parameters) {
+            const commandName = 'GetAvatarsForEmail';
+            requireParameters(['emailList'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
