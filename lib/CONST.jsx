@@ -38,6 +38,13 @@ export const CONST = {
      */
     MILEAGE_IRS_RATE: (new Date() > new Date(2019, 1, 1)) ? 0.545 : 0.58,
 
+    /**
+     * Display this amount to users to encourage them to book a call
+     * 
+     * @type Number
+     */
+    MAX_TRIAL_BONUS_DAYS: 42,
+    
     COUNTRY: {
         US: 'US',
         AU: 'AU',
@@ -264,6 +271,13 @@ export const CONST = {
     },
 
     /**
+     * Special characters that need to be removed when they are ending an url
+     *
+     * @type String
+     */
+    SPECIAL_CHARS_TO_REMOVE: '$*.+!(,=',
+
+    /**
      * Store all the regular expression we are using for matching stuff
      */
     REG_EXP: {
@@ -376,7 +390,7 @@ export const CONST = {
         CLOUDFRONT: 'https://d2k5nsl2zxldvw.cloudfront.net',
         CLOUDFRONT_IMG: 'https://d2k5nsl2zxldvw.cloudfront.net/images/',
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
-        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_230403124.exe',
+        EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_2300802.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
         ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions'
     },
@@ -567,7 +581,7 @@ export const CONST = {
 
         XERO_HQ_CONNECTION_NAME: 'xerohq',
 
-        EXPENSIFY_SYNC_MANAGER_VERSION: '23.0.403.124',
+        EXPENSIFY_SYNC_MANAGER_VERSION: '23.0.802.0',
     },
 
     INTEGRATION_TYPES: {

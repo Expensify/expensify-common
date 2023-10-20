@@ -271,6 +271,26 @@ test('Test markdown replacement for invalid emails', () => {
     expect(parser.replace(testString)).toBe(result);
 });
 
+
+test('Test markdown replacement for emojis with emails', () => {
+    const testString = 'Do not replace the emoji with link '
+    + '[😄](abc@gmail.com) '
+    + '[😄]( abc@gmail.com) '
+    + '[😄] abc@gmail.com '
+    + '[😄]((abc@gmail.com)) '
+    + '[😄abc@gmail.com](abc@gmail.com) '
+    + '[😄 abc@gmail.com ](abc@gmail.com) '
+    const result = 'Do not replace the emoji with link '
+    + '[😄](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
+    + '[😄]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
+    + '[😄<a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄 <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    expect(parser.replace(testString)).toBe(result);
+});
+
+
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
     let testString = 'Go to [Expensify](https://www.expensify.com) to learn more. [Expensify](www.expensify.com) [Expensify](expensify.com) [It\'s really the coolest](expensify.com) [`Some` Special cases - + . = , \'](expensify.com/some?query=par|am)';
@@ -427,6 +447,9 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
 
     codeFenceExample = '_Test1 ```code``` Test2_';
     expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code</pre> Test2_');
+
+    codeFenceExample = '~Test1 ```code``` Test2~';
+    expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code</pre> Test2~');
 });
 
 test('Test code fencing with additional backticks inside', () => {
@@ -463,6 +486,34 @@ test('Test wrapped URLs', () => {
     expect(parser.replace(wrappedUrlTestStartString)).toBe(wrappedUrlTestReplacedString);
 });
 
+test('Test Url, where double quote is not allowed', () => {
+    const urlTestStartString = '"om https://www.she.com/"\n' +
+        '"om https://www.she.com"\n' +
+        '"https://www.she.com/ end"\n' +
+        '"https://www.she.com end"\n' +
+        'https://www.she.com/path?test="123"\n' +
+        'https://www.she.com/path?test="123/"\n' +
+        '"https://www.she.com/path?test="123"\n' +
+        '"https://www.she.com/path?test="123/"\n' +
+        'https://www.she.com/path?test=123"\n' +
+        'https://www.she.com/path?test=123/"\n' +
+        'https://www.she.com/path?test=/"123"\n' +
+        'https://www.she.com/path?test=/"123/"';
+    const urlTestReplacedString = '&quot;om <a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a>&quot;<br />' +
+        '&quot;om <a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a>&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a> end&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a> end&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
+        '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=123\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123</a>&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=123/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123/</a>&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123&quot;<br />' +
+        '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123/&quot;';
+    expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
+});
+
 test('Test url replacements', () => {
     const urlTestStartString = 'Testing '
         + 'foo.com '
@@ -495,7 +546,7 @@ test('Test url replacements', () => {
         + 'https://bastion1.sjc/logs/app/kibana#/discover?_g=()&_a=(columns:!(_source),index:\'2125cbe0-28a9-11e9-a79c-3de0157ed580\',interval:auto,query:(language:lucene,query:\'\'),sort:!(timestamp,desc)) '
         + 'google.com/maps/place/The+Flying\'+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121 '
         + 'google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843 '
-        + 'https://www.google.com/maps/place/Taj+Mahal+@is~"Awesome"/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422 '
+        + 'https://www.google.com/maps/place/Taj+Mahal+@is~%22Awesome%22/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422 '
         + 'https://www.facebook.com/hashtag/__main/?__eep__=6 '
         + 'https://example.com/~username/foo~bar.txt '
         + 'http://example.com/foo/*/bar/*/test.txt '
@@ -536,7 +587,7 @@ test('Test url replacements', () => {
         + '<a href="https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))" target="_blank" rel="noreferrer noopener">https://bastion1.sjc/logs/app/kibana#/discover?_g=()&amp;_a=(columns:!(_source),index:&#x27;2125cbe0-28a9-11e9-a79c-3de0157ed580&#x27;,interval:auto,query:(language:lucene,query:&#x27;&#x27;),sort:!(timestamp,desc))</a> '
         + '<a href="https://google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121" target="_blank" rel="noreferrer noopener">google.com/maps/place/The+Flying&#x27;+Saucer/@42.4043314,-86.2742418,15z/data=!4m5!3m4!1s0x0:0xe28f6108670216bc!8m2!3d42.4043316!4d-86.2742121</a> '
         + '<a href="https://google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843" target="_blank" rel="noreferrer noopener">google.com/maps/place/%E9%9D%92%E5%B3%B6%E9%80%A3%E7%B5%A1%E8%88%B9%E4%B9%97%E5%A0%B4/@33.7363156,132.4877213,17.78z/data=!4m5!3m4!1s0x3545615c8c65bf7f:0xb89272c1a705a33f!8m2!3d33.7366776!4d132.4878843</a> '
-        + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Taj+Mahal+@is~&quot;Awesome&quot;/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a> '
+        + '<a href="https://www.google.com/maps/place/Taj+Mahal+@is~%22Awesome%22/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422" target="_blank" rel="noreferrer noopener">https://www.google.com/maps/place/Taj+Mahal+@is~%22Awesome%22/@27.1751496,78.0399535,17z/data=!4m12!1m6!3m5!1s0x39747121d702ff6d:0xdd2ae4803f767dde!2sTaj+Mahal!8m2!3d27.1751448!4d78.0421422!3m4!1s0x39747121d702ff6d:0xdd2ae4803f767dde!8m2!3d27.1751448!4d78.0421422</a> '
         + '<a href="https://www.facebook.com/hashtag/__main/?__eep__=6" target="_blank" rel="noreferrer noopener">https://www.facebook.com/hashtag/__main/?__eep__=6</a> '
         + '<a href="https://example.com/~username/foo~bar.txt" target="_blank" rel="noreferrer noopener">https://example.com/~username/foo~bar.txt</a> '
         + '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> '
@@ -603,10 +654,160 @@ test('Test a url ending with a question mark autolinks correctly', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test a url ending with a closing parentheses autolinks correctly', () => {
-    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645)';
-    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>)';
+test('Test urls with unmatched closing parentheses autolinks correctly', () => {
+    const testCases = [
+        {
+            testString: 'https://github.com/Expensify/ReactNativeChat/pull/645)',
+            resultString: '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>)',
+        },
+        {
+            testString: 'https://github.com/Expensify/ReactNativeChat/pull/test(645))',
+            resultString: '<a href="https://github.com/Expensify/ReactNativeChat/pull/test(645)" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/test(645)</a>)',
+        },
+        {
+            testString: 'google.com/(toto))titi)',
+            resultString: '<a href="https://google.com/(toto)" target="_blank" rel="noreferrer noopener">google.com/(toto)</a>)titi)',
+        },
+        
+    ];
+    testCases.forEach(testCase => {
+        expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
+    });
+});
+
+test('Test urls ending with special characters followed by unmatched closing parentheses autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645$) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645*) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645+) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645!) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645,) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645=) '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings.. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings..) '
+        + '[https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings] '
+        + 'https://google.com/path?param=) '
+        + 'https://google.com/path#fragment!) ';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>.) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>$) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>*) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>+) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>!) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>,) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>=) '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>.. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>..) '
+        + '[<a href=\"https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings\" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>] '
+        + '<a href=\"https://google.com/path?param=" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com/path?param=</a>) '
+        + '<a href=\"https://google.com/path#fragment!" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com/path#fragment!</a>) ';
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test urls autolinks correctly', () => {
+    const testCases = [
+        {
+            testString: 'test@expensify.com https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a> <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com-https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com/https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>/<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com?https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>?<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@expensify.com>https://www.expensify.com',
+            resultString: '<a href="mailto:test@expensify.com">test@expensify.com</a>&gt;<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>',
+        },
+        {
+            testString: 'https://staging.new.expensify.com/details/test@expensify.com',
+            resultString: '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a>',
+        },
+        {
+            testString: 'staging.new.expensify.com/details',
+            resultString: '<a href="https://staging.new.expensify.com/details" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details</a>',
+        },
+        {
+            testString: 'https://www.expensify.com?name=test&email=test@expensify.com',
+            resultString: '<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com?name=test&amp;email=test@expensify.com</a>',
+        },
+        {
+            testString: 'https://staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: 'staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: 'http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled',
+            resultString: '<a href="http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">http://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled</a>',
+        },
+        {
+            testString: '-https://www.expensify.com /https://www.expensify.com @https://www.expensify.com',
+            resultString: '-<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> /<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a> @https://www.expensify.com',
+        },
+        {
+            testString: 'expensify.com -expensify.com @expensify.com',
+            resultString: '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> -<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> @expensify.com',
+        },
+        {
+            testString: 'https//www.expensify.com',
+            resultString: 'https//<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com</a>',
+        },
+        {
+            testString: '//www.expensify.com?name=test&email=test@expensify.com',
+            resultString: '//<a href="https://www.expensify.com?name=test&amp;email=test@expensify.com" target="_blank" rel="noreferrer noopener">www.expensify.com?name=test&amp;email=test@expensify.com</a>',
+        },
+        {
+            testString: '//staging.new.expensify.com/details?login=testing@gmail.com',
+            resultString: '//<a href="https://staging.new.expensify.com/details?login=testing@gmail.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com</a>',
+        },
+        {
+            testString: '/details?login=testing@gmail.com',
+            resultString: '/details?login=<a href="mailto:testing@gmail.com">testing@gmail.com</a>',
+        },
+        {
+            testString: '?name=test&email=test@expensify.com',
+            resultString: '?name=test&amp;email=<a href="mailto:test@expensify.com">test@expensify.com</a>',
+        },
+        {
+            testString: 'example.com/https://www.expensify.com',
+            resultString: '<a href="https://example.com/https://www.expensify.com" target="_blank" rel="noreferrer noopener">example.com/https://www.expensify.com</a>',
+        },
+        {
+            testString: 'test@gmail.com staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a> <a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com //staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a> //<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com-https://staging.new.expensify.com/details?login=testing@gmail.com&redirectUrl=https://google.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a>-<a href="https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details?login=testing@gmail.com&amp;redirectUrl=https://google.com</a>',
+        },
+        {
+            testString: 'test@gmail.com/https://example.com/google@email.com?email=asd@email.com',
+            resultString: '<a href="mailto:test@gmail.com\">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a>',
+        },
+        {
+            testString: 'test@gmail.com/test@gmail.com/https://example.com/google@email.com?email=asd@email.com',
+            resultString: '<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="mailto:test@gmail.com">test@gmail.com</a>/<a href="https://example.com/google@email.com?email=asd@email.com" target="_blank" rel="noreferrer noopener">https://example.com/google@email.com?email=asd@email.com</a>',
+        },
+    ];
+
+    testCases.forEach(testCase => {
+        expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
+    });
 });
 
 test('Test markdown style email link with various styles', () => {
@@ -1224,4 +1425,20 @@ test('Test link with code fence inside the alias text part', () => {
     const resultString = '[<pre>code</pre>](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>) '
         + '[test <pre>code</pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test strikethrough with multiple tilde characters', () => {
+    let testString = '~~~hello~~~';
+    expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');
+
+    testString = '~~~~';
+    expect(parser.replace(testString)).toBe('~~~~');
+});
+
+test('Test strikethrough with link with URL that contains tilde', () => {
+    let testString = '~[Example Link](https://example.com/?example=~ex)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?example=~ex" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
+
+    testString = '~[Example Link](https://example.com/?~example=~~~ex~)~';
+    expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?~example=~~~ex~" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
 });
