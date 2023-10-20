@@ -121,19 +121,19 @@ export default class ReportHistoryStore {
              */
             insertIntoCacheByActionID: (reportID, reportAction) => {
                 const promise = new Deferred();
-                this.getFromCache(reportID)
+                this.getFromCacheByActionID(reportID)
                     .done((cachedHistory) => {
                         // Do we have the reportAction immediately before this one?
                         if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
                             // and must merge it into the cache
-                            this.mergeItems(reportID, [reportAction]);
+                            this.mergeHistoryByTimestamp(reportID, [reportAction]);
                             return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
                         }
 
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
-                        this.get(reportID)
+                        this.getByActionID(reportID)
                             .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
                             .fail(promise.reject);
                     })
@@ -293,6 +293,31 @@ export default class ReportHistoryStore {
             this.API.Report_GetHistory({reportID})
                 .done((reportHistory) => {
                     this.mergeItems(reportID, reportHistory);
+                    promise.resolve(this.cache[reportID]);
+                })
+                .fail(promise.reject);
+            return promise;
+        }
+
+        return promise.resolve(cachedHistory);
+    }
+
+    /**
+     * Gets the history from the cache if it exists. Otherwise fully loads the history.
+     *
+     * @param {Number} reportID
+     *
+     * @return {Deferrred}
+     */
+    getFromCacheByActionID(reportID) {
+        const promise = new Deferred();
+        const cachedHistory = this.cache[reportID] || [];
+
+        // First check to see if we even have this history in cache
+        if (_.isEmpty(cachedHistory)) {
+            this.API.Report_GetHistory({reportID})
+                .done((reportHistory) => {
+                    this.mergeHistoryByTimestamp(reportID, reportHistory);
                     promise.resolve(this.cache[reportID]);
                 })
                 .fail(promise.reject);
