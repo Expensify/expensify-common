@@ -306,6 +306,30 @@ export default function API(network, args) {
         },
 
         /**
+         * @param {Object} parameters
+         * @param {String[]} parameters.emailList
+         *
+         * @returns {ExpensifyAPIDeferred}
+         */
+        getKnownPersonalDetailsForEmails(parameters) {
+            const commandName = 'GetKnownPersonalDetailsForEmails';
+            requireParameters(['emailList'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
+         * @param {Object} parameters
+         * @param {String[]} parameters.emailList
+         *
+         * @returns {ExpensifyAPIDeferred}
+         */
+        getAvatarsForEmail(parameters) {
+            const commandName = 'GetAvatarsForEmail';
+            requireParameters(['emailList'], parameters, commandName);
+            return performPOSTRequest(commandName, parameters);
+        },
+
+        /**
          * Performs API command "Get"
          *
          * @param {Object} parameters The API call parameters, must contain "returnValueList"
