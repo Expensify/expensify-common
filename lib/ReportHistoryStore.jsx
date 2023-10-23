@@ -244,11 +244,10 @@ export default class ReportHistoryStore {
      *
      * @param {Number} reportID
      * @param {Boolean} ignoreCache
-     * @param [Number] reportActionsLimit
      *
      * @returns {Deferred}
      */
-    getByActionID(reportID, ignoreCache, reportActionsLimit) {
+    getByActionID(reportID, ignoreCache) {
         const promise = new Deferred();
 
         // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
@@ -263,7 +262,6 @@ export default class ReportHistoryStore {
         this.API.Report_GetHistory({
             reportID,
             reportActionID: lastHistoryItem.reportActionID || 0,
-            reportActionsLimit,
         })
             .done((recentHistory) => {
                 // Update history with new items fetched
