@@ -1442,3 +1442,31 @@ test('Test strikethrough with link with URL that contains tilde', () => {
     testString = '~[Example Link](https://example.com/?~example=~~~ex~)~';
     expect(parser.replace(testString)).toBe('<del><a href="https://example.com/?~example=~~~ex~" target="_blank" rel="noreferrer noopener">Example Link</a></del>');
 });
+
+test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em> tag', () => {
+    const testString = '`code`test@gmail.com '
+        + '```code block```test@gmail.com '
+        + '[Google](https://google.com)test@gmail.com '
+        + '_test@gmail.com_ '
+        + '_test\n\ntest@gmail.com_ '
+        + '`test@expensify.com` '
+        + '```test@expensify.com``` '
+        + '@test@expensify.com '
+        + '_@username@expensify.com_ '
+        + '[https://staging.new.expensify.com/details/test@expensify.com](https://staging.new.expensify.com/details/test@expensify.com) '
+        + '[test italic style wrap email _test@gmail.com_ inside a link](https://google.com) ';
+
+    const resultString = '<code>code</code><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<pre>code&#32;block</pre><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">Google</a><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<em><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
+        + '<em>test<br /><br /><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
+        + '<code>test@expensify.com</code> '
+        + '<pre>test@expensify.com</pre> '
+        + '<mention-user>@test@expensify.com</mention-user> '
+        + '<em><mention-user>@username@expensify.com</mention-user></em> '
+        + '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a> '
+        + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">test italic style wrap email <em>test@gmail.com</em> inside a link</a> ';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
