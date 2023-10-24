@@ -65,9 +65,9 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            getByActionID: (reportID, ignoreCache = false) => {
+            getFlatHistory: (reportID, ignoreCache = false) => {
                 const promise = new Deferred();
-                this.getByActionID(reportID, ignoreCache)
+                this.getFlatHistory(reportID, ignoreCache)
                     .done((reportHistory) => {
                         promise.resolve(this.filterHiddenActions(reportHistory));
                     })
@@ -121,7 +121,7 @@ export default class ReportHistoryStore {
              */
             insertIntoCacheByActionID: (reportID, reportAction) => {
                 const promise = new Deferred();
-                this.getFromCacheByActionID(reportID)
+                this.getFromCache(reportID)
                     .done((cachedHistory) => {
                         // Do we have the reportAction immediately before this one?
                         if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
@@ -240,14 +240,14 @@ export default class ReportHistoryStore {
     }
 
     /**
-     * Gets the history by reportActionID.
+     * Gets the history. This flow does not depend on the deprecated sequence number in report actions.
      *
      * @param {Number} reportID
      * @param {Boolean} ignoreCache
      *
      * @returns {Deferred}
      */
-    getByActionID(reportID, ignoreCache) {
+    getFlatHistory(reportID, ignoreCache) {
         const promise = new Deferred();
 
         // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
@@ -257,11 +257,9 @@ export default class ReportHistoryStore {
 
         // We'll poll the API for the un-cached history
         const cachedHistory = this.cache[reportID] || [];
-        const lastHistoryItem = _.last(cachedHistory) || {};
 
         this.API.Report_GetHistory({
             reportID,
-            reportActionID: lastHistoryItem.reportActionID || 0,
         })
             .done((recentHistory) => {
                 // Update history with new items fetched
@@ -286,34 +284,9 @@ export default class ReportHistoryStore {
         const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
-        // First check to see if we even have this history in cache
-        if (_.isEmpty(cachedHistory)) {
-            this.API.Report_GetHistory({reportID})
-                .done((reportHistory) => {
-                    this.mergeItems(reportID, reportHistory);
-                    promise.resolve(this.cache[reportID]);
-                })
-                .fail(promise.reject);
-            return promise;
-        }
-
-        return promise.resolve(cachedHistory);
-    }
-
-    /**
-     * Gets the history from the cache if it exists. Otherwise fully loads the history.
-     *
-     * @param {Number} reportID
-     *
-     * @return {Deferrred}
-     */
-    getFromCacheByActionID(reportID) {
-        const promise = new Deferred();
-        const cachedHistory = this.cache[reportID] || [];
-
         // If comment is not in cache then fetch it
         if (_.isEmpty(cachedHistory)) {
-            return this.getByActionID(reportID);
+            return this.getFlatHistory(reportID);
         }
 
         return promise.resolve(cachedHistory);
