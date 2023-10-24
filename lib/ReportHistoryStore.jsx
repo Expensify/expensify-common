@@ -311,15 +311,9 @@ export default class ReportHistoryStore {
         const promise = new Deferred();
         const cachedHistory = this.cache[reportID] || [];
 
-        // First check to see if we even have this history in cache
+        // If comment is not in cache then fetch it
         if (_.isEmpty(cachedHistory)) {
-            this.API.Report_GetHistory({reportID})
-                .done((reportHistory) => {
-                    this.mergeHistoryByTimestamp(reportID, reportHistory);
-                    promise.resolve(this.cache[reportID]);
-                })
-                .fail(promise.reject);
-            return promise;
+            return this.getByActionID(reportID);
         }
 
         return promise.resolve(cachedHistory);
