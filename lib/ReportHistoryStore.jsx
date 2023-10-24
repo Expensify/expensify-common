@@ -133,7 +133,7 @@ export default class ReportHistoryStore {
 
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
-                        this.getByActionID(reportID)
+                        this.getFlatHistory(reportID)
                             .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
                             .fail(promise.reject);
                     })
