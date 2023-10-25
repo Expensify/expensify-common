@@ -1427,6 +1427,13 @@ test('Test link with code fence inside the alias text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test link with header before the alias multiline text part', () => {
+    const testString = '# [google\ngoogle\ngoogle](https://google.com)';
+
+    const resultString = '<h1>[google</h1>google<br />google](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
     expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');
