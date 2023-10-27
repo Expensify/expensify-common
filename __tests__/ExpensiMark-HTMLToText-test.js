@@ -127,3 +127,8 @@ test('Test new line replacement on blockquote with heading inside', () => {
     testString = '<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>';
     expect(parser.htmlToText(testString)).toBe('heading A\n\nheading B');
 });
+
+test('Test remove style tag', () => {
+    const testString = '<div><svg><style>.default-avatar_20_svg__st1{fill:#008c59}</style></svg><p>a text</p></div>';
+    expect(parser.htmlToText(testString)).toBe('a text');
+});
