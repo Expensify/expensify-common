@@ -1299,16 +1299,16 @@ test('Test for @here mention without space or supported styling character', () =
 });
 
 test('Test user mention and here mention, which are concatenated without space', () => {
-    let testString = '@aiman.chnaif+2@gmail.com@here';
-    let resultString = '<mention-user>@aiman.chnaif+2@gmail.com</mention-user><mention-here>@here</mention-here>';
+    let testString = '@test.example+2@gmail.com@here';
+    let resultString = '<mention-user>@test.example+2@gmail.com</mention-user><mention-here>@here</mention-here>';
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = '@here@aiman.chnaif+2@gmail.com';
-    resultString = '<mention-here>@here</mention-here><mention-user>@aiman.chnaif+2@gmail.com</mention-user>';
+    testString = '@here@test.example+2@gmail.com';
+    resultString = '<mention-here>@here</mention-here><mention-user>@test.example+2@gmail.com</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = '@aiman.chnaif+2@gmail.com@aiman.chnaif+2@gmail.com';
-    resultString = '<mention-user>@aiman.chnaif+2@gmail.com</mention-user><mention-user>@aiman.chnaif+2@gmail.com</mention-user>';
+    testString = '@test.example+2@gmail.com@test.example+2@gmail.com';
+    resultString = '<mention-user>@test.example+2@gmail.com</mention-user><mention-user>@test.example+2@gmail.com</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 
     testString = '@here@here@gmail.com';
