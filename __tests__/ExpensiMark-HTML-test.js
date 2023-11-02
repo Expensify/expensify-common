@@ -1470,3 +1470,17 @@ test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em
 
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Mention', () => {
+    let testString = '@user@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+
+    testString = '@USER@DOMAIN.COM';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+
+    testString = '@USER@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+
+    testString = '@user@DOMAIN.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+});
