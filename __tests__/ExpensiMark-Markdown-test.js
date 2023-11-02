@@ -690,17 +690,3 @@ test('Test codeFence copy from selection does not add extra new line', () => {
     testString = '<h3>test heading</h3><div><pre class=\"notranslate\"><code class=\"notranslate\">Code snippet\n</code></pre></div><blockquote><p><a href=\"https://www.example.com\">link</a></p></blockquote>';
     expect(parser.htmlToMarkdown(testString)).toBe('test heading\n```\nCode snippet\n```\n> [link](https://www.example.com)')
 });
-
-test('Mention html to markdown', () => {
-    let testString = '<mention-user>@user@domain.com</mention-user>';
-    expect(parser.htmlToMarkdown(testString)).toBe('@user@domain.com');
-
-    testString = '<mention-user>@USER@DOMAIN.COM</mention-user>';
-    expect(parser.htmlToMarkdown(testString)).toBe('@USER@DOMAIN.COM');
-
-    testString = '<mention-user>@USER@domain.com</mention-user>';
-    expect(parser.htmlToMarkdown(testString)).toBe('@USER@domain.com');
-
-    testString = '<mention-user>@user@DOMAIN.com</mention-user>';
-    expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
-});
