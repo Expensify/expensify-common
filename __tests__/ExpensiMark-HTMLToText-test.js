@@ -133,7 +133,7 @@ test('Test remove style tag', () => {
     expect(parser.htmlToText(testString)).toBe('a text');
 });
 
-test('Mention html to markdown', () => {
+test('Mention html to text', () => {
     let testString = '<mention-user>@user@domain.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@domain.com');
 
