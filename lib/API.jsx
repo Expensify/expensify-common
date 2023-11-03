@@ -824,6 +824,42 @@ export default function API(network, args) {
                 requireParameters(['cardUserEmail', 'hasCustomLimit', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
+
+            /**
+             * Create an admin issued virtual card
+             *
+             * @param {Object} parameters
+             * @param {string} parameters.cardName
+             * @param {string} parameters.assigneeEmail
+             * @param {number} parameters.cardLimit
+             * @param {string} parameters.cardLimitType
+             *
+             * @returns {APIDeferred}
+             */
+            createAdminIssuedVirtualCard: function (parameters) {
+                const commandName = 'Card_CreateAdminIssuedVirtualCard';
+                requireParameters(['cardName', 'assigneeEmail', 'cardLimit', 'cardLimitType'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
+
+            /**
+             * Edit an admin issued virtual card
+             *
+             * @param {Object} parameters
+             * @param {string} parameters.domainName
+             * @param {number} parameters.cardID
+             * @param {string} parameters.cardName
+             * @param {string} parameters.assigneeEmail
+             * @param {number} parameters.cardLimit
+             * @param {string} parameters.cardLimitType
+             *
+             * @returns {APIDeferred}
+             */
+            editAdminIssuedVirtualCard: function (parameters) {
+                const commandName = 'Card_EditAdminIssuedVirtualCard';
+                requireParameters(['domainName', 'cardID', 'cardName', 'assigneeEmail', 'cardLimit', 'cardLimitType'], parameters, commandName);
+                return performPOSTRequest(commandName, parameters);
+            },
         },
 
         JSON_CODES: {
