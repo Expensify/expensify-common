@@ -5,9 +5,9 @@ function getOSAndName() {
     const result = parser.getResult();
     return {
         os: result.os.name,
-        os_version: result.os.version,
-        device_name: result.browser.name,
-        device_version: result.browser.version,
+        osVersion: result.os.version,
+        deviceName: result.browser.name,
+        deviceVersion: result.browser.version,
     };
 }
 
