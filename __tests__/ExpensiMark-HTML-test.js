@@ -1473,6 +1473,13 @@ test('Test link with code fence inside the alias text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test link with header before the alias multiline text part', () => {
+    const testString = '# [google\ngoogle\ngoogle](https://google.com)';
+
+    const resultString = '<h1>[google</h1>google<br />google](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
     expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');
@@ -1515,4 +1522,18 @@ test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em
         + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">test italic style wrap email <em>test@gmail.com</em> inside a link</a> ';
 
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Mention', () => {
+    let testString = '@user@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+
+    testString = '@USER@DOMAIN.COM';
+    expect(parser.replace(testString)).toBe('<mention-user>@USER@DOMAIN.COM</mention-user>');
+
+    testString = '@USER@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@USER@domain.com</mention-user>');
+
+    testString = '@user@DOMAIN.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@DOMAIN.com</mention-user>');
 });
