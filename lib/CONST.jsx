@@ -764,6 +764,11 @@ export const CONST = {
             text: 'Per Diem Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
+        attendees: {
+            value: 'attendee_audit_export',
+            text: 'Attendee Audit Export',
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
+        },
     },
 
     NVP: {
