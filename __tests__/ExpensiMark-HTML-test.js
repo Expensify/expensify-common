@@ -1326,6 +1326,22 @@ test('Test user mention and here mention, which are concatenated without space',
     testString = '@here+1@gmail.com@here';
     resultString = '<mention-user>@here+1@gmail.com</mention-user><mention-here>@here</mention-here>';
     expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '@here@gmail.com@here@here@gmail.com';
+    resultString = '<mention-user>@here@gmail.com</mention-user><mention-here>@here</mention-here><mention-user>@here@gmail.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '@here@gmail.com@here@here+1@gmail.com';
+    resultString = '<mention-user>@here@gmail.com</mention-user><mention-here>@here</mention-here><mention-user>@here+1@gmail.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '@here+1@gmail.com@here@here+2@gmail.com';
+    resultString = '<mention-user>@here+1@gmail.com</mention-user><mention-here>@here</mention-here><mention-user>@here+2@gmail.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '@here+1@gmail.com@here@here@here+2@gmail.com@here@here@gmail.com';
+    resultString = '<mention-user>@here+1@gmail.com</mention-user><mention-here>@here</mention-here><mention-here>@here</mention-here><mention-user>@here+2@gmail.com</mention-user><mention-here>@here</mention-here><mention-user>@here@gmail.com</mention-user>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for mention inside link and email markdown', () => {
