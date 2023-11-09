@@ -48,6 +48,7 @@ describe('Loose URL validation', () => {
         expect(regexToTest.test('http://a.b')).toBeTruthy();
         expect(regexToTest.test('http://expensify')).toBeTruthy();
         expect(regexToTest.test('http://google.com/abcd')).toBeTruthy();
+        expect(regexToTest.test('http://my.localhost.local-domain')).toBeTruthy();
     });
 
     it('correctly tests invalid urls', () => {
@@ -55,5 +56,11 @@ describe('Loose URL validation', () => {
         expect(regexToTest.test('localhost:3000')).toBeFalsy();
         expect(regexToTest.test('local.url')).toBeFalsy();
         expect(regexToTest.test('https://otherexample.com links get rendered first')).toBeFalsy();
+        expect(regexToTest.test('http://-localhost')).toBeFalsy();
+        expect(regexToTest.test('http://_')).toBeFalsy();
+        expect(regexToTest.test('http://_localhost')).toBeFalsy();
+        expect(regexToTest.test('http://-77.com')).toBeFalsy();
+        expect(regexToTest.test('http://77-.com')).toBeFalsy();
+        expect(regexToTest.test('http://my.localhost....local-domain:8080')).toBeFalsy();
     });
 });
