@@ -8,6 +8,15 @@ declare type Rule = {
     pre?: (input: string) => string;
     post?: (input: string) => string;
 };
+
+declare type PersonalDetail = {
+    accountID: string;
+    login?: string;
+    displayName?: string
+}
+
+declare type PersonalDetails = Record<string, PersonalDetail> | {}
+
 export default class ExpensiMark {
     rules: Rule[];
     htmlToMarkdownRules: Rule[];
@@ -57,13 +66,14 @@ export default class ExpensiMark {
      *
      * @param htmlString
      */
-    htmlToMarkdown(htmlString: string): string;
+    htmlToMarkdown(htmlString: string, personalDetails: PersonalDetails): string;
     /**
      * Convert HTML to text
      *
      * @param htmlString
+     * @param personalDetails
      */
-    htmlToText(htmlString: string): string;
+    htmlToText(htmlString: string, personalDetails: PersonalDetails): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
