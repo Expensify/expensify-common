@@ -1501,43 +1501,64 @@ describe('edit mode', () => {
     });
 
     test('multiple quotes', () => {
-        const quoteTestStartString = '> Hello my\n> beautiful\n> world\n';
+        const quoteTestStartString = '>Hello my\n>beautiful\n>world\n';
         const quoteTestReplacedString = '<blockquote>Hello my</blockquote><br /><blockquote>beautiful</blockquote><br /><blockquote>world</blockquote><br />';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
     test('mixed blocqoutes', () => {
-        const quoteTestStartString = '> Lorem ipsum\ndolor\n> sit amet';
+        const quoteTestStartString = '>Lorem ipsum\ndolor\n>sit amet';
         const quoteTestReplacedString = '<blockquote>Lorem ipsum</blockquote><br />dolor<br /><blockquote>sit amet</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
     test('nested quote and heading', () => {
-        const quoteTestStartString = '> # Hello world';
+        const quoteTestStartString = '># Hello world';
         const quoteTestReplacedString = '<blockquote><h1>Hello world</h1></blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('quote without space', () => {
+        const quoteTestStartString = '>Hello world';
+        const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('quote with space', () => {
+        const quoteTestStartString = '> Hello world';
+        const quoteTestReplacedString = '<blockquote> Hello world</blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('quote with a lot of spaces', () => {
+        const quoteTestStartString = '>     Hello world';
+        const quoteTestReplacedString = '<blockquote>     Hello world</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
     describe('trailing whitespace', () => {
         test('nothing', () => {
-            const quoteTestStartString = '> Hello world!';
+            const quoteTestStartString = '>Hello world!';
             const quoteTestReplacedString = '<blockquote>Hello world!</blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
         });
 
         test('space', () => {
-            const quoteTestStartString = '> Hello world ';
+            const quoteTestStartString = '>Hello world ';
             const quoteTestReplacedString = '<blockquote>Hello world </blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
         });
 
         test('newline', () => {
-            const quoteTestStartString = '> Hello world\n';
+            const quoteTestStartString = '>Hello world\n';
             const quoteTestReplacedString = '<blockquote>Hello world</blockquote><br />';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
