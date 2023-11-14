@@ -1418,6 +1418,17 @@ test('Test here mention with @here@here', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test here mention with @herex', () => {
+    const testString = '@herex';
+    expect(parser.replace(testString)).toBe(testString);
+});
+
+test('Test here mention with @here!', () => {
+    const testString = '@here!';
+    const resultString = '<mention-here>@here</mention-here>!';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test link with code fence inside the alias text part', () => {
     const testString = '[```code```](google.com) '
         + '[test ```code``` test](google.com)';
