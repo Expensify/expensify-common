@@ -1273,7 +1273,8 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' @here('
     + ' @here.'
     + ' @here!'
-    + ' @here?';
+    + ' @here?'
+    + ' @herex';
 
     const resultString = '<mention-here>@here</mention-here>'
     + ' <em><mention-here>@here</mention-here></em>'
@@ -1294,7 +1295,8 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' <mention-here>@here</mention-here>('
     + ' <mention-here>@here</mention-here>.'
     + ' <mention-here>@here</mention-here>!'
-    + ' <mention-here>@here</mention-here>?';
+    + ' <mention-here>@here</mention-here>?'
+    + ' @herex';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
