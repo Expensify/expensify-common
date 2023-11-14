@@ -1521,6 +1521,13 @@ describe('edit mode', () => {
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
+    test('nested quote and heading with space between', () => {
+        const quoteTestStartString = '> # Hello world';
+        const quoteTestReplacedString = '<blockquote> <h1>Hello world</h1></blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
     test('quote without space', () => {
         const quoteTestStartString = '>Hello world';
         const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
@@ -1565,3 +1572,5 @@ describe('edit mode', () => {
         });
     });
 });
+
+
