@@ -1493,9 +1493,23 @@ test('Mention', () => {
 });
 
 describe('edit mode', () => {
-    test('normal quote', () => {
-        const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote><br />Here is a &gt;quote that did not <pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
+    test('quote without space', () => {
+        const quoteTestStartString = '>Hello world';
+        const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('quote with space', () => {
+        const quoteTestStartString = '> Hello world';
+        const quoteTestReplacedString = '<blockquote> Hello world</blockquote>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('quote with a lot of spaces', () => {
+        const quoteTestStartString = '>     Hello world';
+        const quoteTestReplacedString = '<blockquote>     Hello world</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
@@ -1528,27 +1542,6 @@ describe('edit mode', () => {
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
-    test('quote without space', () => {
-        const quoteTestStartString = '>Hello world';
-        const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
-
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
-    });
-
-    test('quote with space', () => {
-        const quoteTestStartString = '> Hello world';
-        const quoteTestReplacedString = '<blockquote> Hello world</blockquote>';
-
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
-    });
-
-    test('quote with a lot of spaces', () => {
-        const quoteTestStartString = '>     Hello world';
-        const quoteTestReplacedString = '<blockquote>     Hello world</blockquote>';
-
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
-    });
-
     describe('trailing whitespace', () => {
         test('nothing', () => {
             const quoteTestStartString = '>Hello world!';
@@ -1571,6 +1564,11 @@ describe('edit mode', () => {
             expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
         });
     });
+
+    test('quote with other markdowns', () => {
+        const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote><br />Here is a &gt;quote that did not <pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+    });
 });
-
-
