@@ -833,12 +833,13 @@ export default function API(network, args) {
              * @param {string} parameters.assigneeEmail
              * @param {number} parameters.cardLimit
              * @param {string} parameters.cardLimitType
+             * @param {string} parameters.domainName
              *
              * @returns {APIDeferred}
              */
             createAdminIssuedVirtualCard: function (parameters) {
                 const commandName = 'Card_CreateAdminIssuedVirtualCard';
-                requireParameters(['cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType'], parameters, commandName);
+                requireParameters(['cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
             },
 
