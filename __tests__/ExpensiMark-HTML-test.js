@@ -1270,7 +1270,10 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' @here@'
     + ' @here$'
     + ' @here^'
-    + ' @here(';
+    + ' @here('
+    + ' @here.'
+    + ' @here!'
+    + ' @here?';
 
     const resultString = '<mention-here>@here</mention-here>'
     + ' <em><mention-here>@here</mention-here></em>'
@@ -1288,7 +1291,10 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' <mention-here>@here</mention-here>@'
     + ' <mention-here>@here</mention-here>$'
     + ' <mention-here>@here</mention-here>^'
-    + ' <mention-here>@here</mention-here>(';
+    + ' <mention-here>@here</mention-here>('
+    + ' <mention-here>@here</mention-here>.'
+    + ' <mention-here>@here</mention-here>!'
+    + ' <mention-here>@here</mention-here>?';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1415,17 +1421,6 @@ test('Test here mention with @here@', () => {
 test('Test here mention with @here@here', () => {
     const testString = '@here@here';
     const resultString = '<mention-here>@here</mention-here><mention-here>@here</mention-here>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test here mention with @herex', () => {
-    const testString = '@herex';
-    expect(parser.replace(testString)).toBe(testString);
-});
-
-test('Test here mention with @here!', () => {
-    const testString = '@here!';
-    const resultString = '<mention-here>@here</mention-here>!';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
