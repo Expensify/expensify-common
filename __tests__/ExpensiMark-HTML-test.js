@@ -668,7 +668,6 @@ test('Test urls with unmatched closing parentheses autolinks correctly', () => {
             testString: 'google.com/(toto))titi)',
             resultString: '<a href="https://google.com/(toto)" target="_blank" rel="noreferrer noopener">google.com/(toto)</a>)titi)',
         },
-
     ];
     testCases.forEach(testCase => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
