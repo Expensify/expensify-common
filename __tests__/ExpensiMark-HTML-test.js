@@ -822,6 +822,9 @@ test('Test markdown style email link with various styles', () => {
         + '[ Expensify ](concierge@expensify.com)' // edge spaces in []
         + '[ Expensify Email ](concierge@expensify.com)' // space between words in []
         + '[concierge@expensify.com](concierge@expensify.com)' // same email between [] and ()
+        + '[concierge@expensify.com](mailto:concierge@expensify.com)' // same email between [] and () with mailto: in href
+        + '[mailto:concierge@expensify.com](concierge@expensify.com)' // same email between [] and () with mailto: in text
+        + '[mailto:concierge@expensify.com](mailto:concierge@expensify.com)' // same email between [] and () with mailto: in text and href
         + '[concierge-other@expensify.com](concierge@expensify.com)' // different emails between [] and ()
         + '[(Expensify)](concierge@expensify.com)' // () in []
         + '[Expensify [Test](test@expensify.com) Test](concierge@expensify.com)' // []() in []
@@ -839,6 +842,9 @@ test('Test markdown style email link with various styles', () => {
         + '<a href="mailto:concierge@expensify.com">Expensify</a>'
         + '<a href="mailto:concierge@expensify.com">Expensify Email</a>'
         + '<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">mailto:concierge@expensify.com</a>'
+        + '<a href="mailto:concierge@expensify.com">mailto:concierge@expensify.com</a>'
         + '<a href="mailto:concierge@expensify.com">concierge-other@expensify.com</a>'
         + '<a href="mailto:concierge@expensify.com">(Expensify)</a>'
         + '[Expensify <a href="mailto:test@expensify.com">Test</a> Test](<a href="mailto:concierge@expensify.com">concierge@expensify.com</a>)'
