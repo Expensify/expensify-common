@@ -17,6 +17,10 @@ declare type PersonalDetail = {
 
 declare type PersonalDetails = Record<string, PersonalDetail> | {}
 
+declare type Metadata = {
+    personalDetails?: PersonalDetails
+}
+
 export default class ExpensiMark {
     rules: Rule[];
     htmlToMarkdownRules: Rule[];
@@ -65,15 +69,16 @@ export default class ExpensiMark {
      * Replaces HTML with markdown
      *
      * @param htmlString
+     * @param metadata
      */
-    htmlToMarkdown(htmlString: string, personalDetails: PersonalDetails): string;
+    htmlToMarkdown(htmlString: string, metadata?: Metadata): string;
     /**
      * Convert HTML to text
      *
      * @param htmlString
-     * @param personalDetails
+     * @param metadata
      */
-    htmlToText(htmlString: string, personalDetails: PersonalDetails): string;
+    htmlToText(htmlString: string, metadata?: Metadata): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
