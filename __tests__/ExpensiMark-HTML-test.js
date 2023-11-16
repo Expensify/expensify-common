@@ -27,6 +27,12 @@ test('Test heading markdown replacement', () => {
 
     testString = '# Heading should have only one new line after it.\n\n';
     expect(parser.replace(testString)).toBe('<h1>Heading should have only one new line after it.</h1><br />');
+
+    testString = '# hello test.com';
+    expect(parser.replace(testString)).toBe('<h1>hello <a href=\"https://test.com\" target=\"_blank\" rel=\"noreferrer noopener\">test.com</a></h1>');
+
+    testString = '# hello test@gmail.com';
+    expect(parser.replace(testString)).toBe('<h1>hello <a href=\"mailto:test@gmail.com\">test@gmail.com</a></h1>');
 });
 
 // Sections starting with > are successfully wrapped with <blockquote></blockquote>
