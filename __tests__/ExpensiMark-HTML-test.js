@@ -27,6 +27,12 @@ test('Test heading markdown replacement', () => {
 
     testString = '# Heading should have only one new line after it.\n\n';
     expect(parser.replace(testString)).toBe('<h1>Heading should have only one new line after it.</h1><br />');
+
+    testString = '# hello test.com';
+    expect(parser.replace(testString)).toBe('<h1>hello <a href=\"https://test.com\" target=\"_blank\" rel=\"noreferrer noopener\">test.com</a></h1>');
+
+    testString = '# hello test@gmail.com';
+    expect(parser.replace(testString)).toBe('<h1>hello <a href=\"mailto:test@gmail.com\">test@gmail.com</a></h1>');
 });
 
 // Sections starting with > are successfully wrapped with <blockquote></blockquote>
@@ -675,6 +681,36 @@ test('Test urls with unmatched closing parentheses autolinks correctly', () => {
     });
 });
 
+test('Test urls ending with special characters followed by unmatched closing parentheses autolinks correctly', () => {
+    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645.) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645$) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645*) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645+) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645!) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645,) '
+        + 'https://github.com/Expensify/ReactNativeChat/pull/645=) '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings.. '
+        + 'https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings..) '
+        + '[https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings] '
+        + 'https://google.com/path?param=) '
+        + 'https://google.com/path#fragment!) ';
+    const resultString = '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>.) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>$) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>*) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>+) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>!) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>,) '
+        + '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>=) '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>.. '
+        + '<a href="https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>..) '
+        + '[<a href=\"https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings\" target=\"_blank\" rel=\"noreferrer noopener\">https://staging.new.expensify.com/get-assistance/WorkspaceGeneralSettings</a>] '
+        + '<a href=\"https://google.com/path?param=" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com/path?param=</a>) '
+        + '<a href=\"https://google.com/path#fragment!" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com/path#fragment!</a>) ';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test urls autolinks correctly', () => {
     const testCases = [
         {
@@ -1232,6 +1268,7 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' @here_123'
     + ' @here_abc'
     + ' @here123'
+    + ' @herea'
     + ' @hereabc'
     + ' @here abc'
     + ' @here*'
@@ -1240,7 +1277,10 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' @here@'
     + ' @here$'
     + ' @here^'
-    + ' @here(';
+    + ' @here('
+    + ' @here.'
+    + ' @here!'
+    + ' @here?';
 
     const resultString = '<mention-here>@here</mention-here>'
     + ' <em><mention-here>@here</mention-here></em>'
@@ -1250,6 +1290,7 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' @here_123'
     + ' @here_abc'
     + ' @here123'
+    + ' @herea'
     + ' @hereabc'
     + ' <mention-here>@here</mention-here> abc'
     + ' <mention-here>@here</mention-here>*'
@@ -1258,7 +1299,10 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     + ' <mention-here>@here</mention-here>@'
     + ' <mention-here>@here</mention-here>$'
     + ' <mention-here>@here</mention-here>^'
-    + ' <mention-here>@here</mention-here>(';
+    + ' <mention-here>@here</mention-here>('
+    + ' <mention-here>@here</mention-here>.'
+    + ' <mention-here>@here</mention-here>!'
+    + ' <mention-here>@here</mention-here>?';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1397,6 +1441,13 @@ test('Test link with code fence inside the alias text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test link with header before the alias multiline text part', () => {
+    const testString = '# [google\ngoogle\ngoogle](https://google.com)';
+
+    const resultString = '<h1>[google</h1>google<br />google](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://google.com</a>)';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
     expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');
@@ -1422,4 +1473,46 @@ test('Linebreak between end of text and start of code block should be remained',
 
     testString = '|\n```\ncode\n```';
     expect(parser.replace(testString)).toBe('|<br /><pre>code<br /></pre>');
+});
+
+test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em> tag', () => {
+    const testString = '`code`test@gmail.com '
+        + '```code block```test@gmail.com '
+        + '[Google](https://google.com)test@gmail.com '
+        + '_test@gmail.com_ '
+        + '_test\n\ntest@gmail.com_ '
+        + '`test@expensify.com` '
+        + '```test@expensify.com``` '
+        + '@test@expensify.com '
+        + '_@username@expensify.com_ '
+        + '[https://staging.new.expensify.com/details/test@expensify.com](https://staging.new.expensify.com/details/test@expensify.com) '
+        + '[test italic style wrap email _test@gmail.com_ inside a link](https://google.com) ';
+
+    const resultString = '<code>code</code><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<pre>code&#32;block</pre><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">Google</a><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<em><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
+        + '<em>test<br /><br /><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
+        + '<code>test@expensify.com</code> '
+        + '<pre>test@expensify.com</pre> '
+        + '<mention-user>@test@expensify.com</mention-user> '
+        + '<em><mention-user>@username@expensify.com</mention-user></em> '
+        + '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a> '
+        + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">test italic style wrap email <em>test@gmail.com</em> inside a link</a> ';
+
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Mention', () => {
+    let testString = '@user@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@domain.com</mention-user>');
+
+    testString = '@USER@DOMAIN.COM';
+    expect(parser.replace(testString)).toBe('<mention-user>@USER@DOMAIN.COM</mention-user>');
+
+    testString = '@USER@domain.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@USER@domain.com</mention-user>');
+
+    testString = '@user@DOMAIN.com';
+    expect(parser.replace(testString)).toBe('<mention-user>@user@DOMAIN.com</mention-user>');
 });

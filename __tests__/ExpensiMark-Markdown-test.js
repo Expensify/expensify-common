@@ -701,3 +701,17 @@ test('Linebreak should be remained for text between code block', () => {
     testString = '|<br><pre>code<br></pre>';
     expect(parser.htmlToMarkdown(testString)).toBe('|\n```\ncode\n```');
 });
+
+test('Mention html to markdown', () => {
+    let testString = '<mention-user>@user@domain.com</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@user@domain.com');
+
+    testString = '<mention-user>@USER@DOMAIN.COM</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@USER@DOMAIN.COM');
+
+    testString = '<mention-user>@USER@domain.com</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@USER@domain.com');
+
+    testString = '<mention-user>@user@DOMAIN.com</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
+});

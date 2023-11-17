@@ -271,6 +271,13 @@ export const CONST = {
     },
 
     /**
+     * Special characters that need to be removed when they are ending an url
+     *
+     * @type String
+     */
+    SPECIAL_CHARS_TO_REMOVE: '$*.+!(,=',
+
+    /**
      * Store all the regular expression we are using for matching stuff
      */
     REG_EXP: {
@@ -755,6 +762,11 @@ export const CONST = {
         perdiem: {
             value: 'per_diem_export',
             text: 'Per Diem Export',
+            image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
+        },
+        attendees: {
+            value: 'attendee_audit_export',
+            text: 'Attendee Audit Export',
             image: `${g_cloudFrontImg}icons/accounting-other--blue.svg`,
         },
     },

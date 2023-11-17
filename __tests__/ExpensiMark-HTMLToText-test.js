@@ -127,3 +127,22 @@ test('Test new line replacement on blockquote with heading inside', () => {
     testString = '<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>';
     expect(parser.htmlToText(testString)).toBe('heading A\n\nheading B');
 });
+
+test('Test remove style tag', () => {
+    const testString = '<div><svg><style>.default-avatar_20_svg__st1{fill:#008c59}</style></svg><p>a text</p></div>';
+    expect(parser.htmlToText(testString)).toBe('a text');
+});
+
+test('Mention html to text', () => {
+    let testString = '<mention-user>@user@domain.com</mention-user>';
+    expect(parser.htmlToText(testString)).toBe('@user@domain.com');
+
+    testString = '<mention-user>@USER@DOMAIN.COM</mention-user>';
+    expect(parser.htmlToText(testString)).toBe('@USER@DOMAIN.COM');
+
+    testString = '<mention-user>@USER@domain.com</mention-user>';
+    expect(parser.htmlToText(testString)).toBe('@USER@domain.com');
+
+    testString = '<mention-user>@user@DOMAIN.com</mention-user>';
+    expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
+});
