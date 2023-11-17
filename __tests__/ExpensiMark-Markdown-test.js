@@ -692,14 +692,23 @@ test('Test codeFence copy from selection does not add extra new line', () => {
 });
 
 test('Linebreak should be remained for text between code block', () => {
-    let testString = '<pre>code<br></pre>text<br><pre>code<br></pre>';
-    expect(parser.htmlToMarkdown(testString)).toBe('```\ncode\n```\ntext\n```\ncode\n```');
-
-    testString = 'A<br><pre>code<br></pre>';
-    expect(parser.htmlToMarkdown(testString)).toBe('A\n```\ncode\n```');
-
-    testString = '|<br><pre>code<br></pre>';
-    expect(parser.htmlToMarkdown(testString)).toBe('|\n```\ncode\n```');
+    const testCases = [
+        {
+            testString: '<pre>code<br></pre>text<br><pre>code<br></pre>',
+            resultString: '```\ncode\n```\ntext\n```\ncode\n```',
+        },
+        {
+            testString: 'A<br><pre>code<br></pre>',
+            resultString: 'A\n```\ncode\n```',
+        },
+        {
+            testString: '|<br><pre>code<br></pre>',
+            resultString: '|\n```\ncode\n```',
+        },
+    ];
+    testCases.forEach(({testString, resultString}) => {
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
 });
 
 test('Mention html to markdown', () => {

@@ -1465,14 +1465,23 @@ test('Test strikethrough with link with URL that contains tilde', () => {
 });
 
 test('Linebreak between end of text and start of code block should be remained', () => {
-    let testString = '```\ncode\n```\ntext\n```\ncode\n```';
-    expect(parser.replace(testString)).toBe('<pre>code<br /></pre>text<br /><pre>code<br /></pre>');
-
-    testString = 'A\n```\ncode\n```';
-    expect(parser.replace(testString)).toBe('A<br /><pre>code<br /></pre>');
-
-    testString = '|\n```\ncode\n```';
-    expect(parser.replace(testString)).toBe('|<br /><pre>code<br /></pre>');
+    const testCases = [
+        {
+            testString: '```\ncode\n```\ntext\n```\ncode\n```',
+            resultString: '<pre>code<br /></pre>text<br /><pre>code<br /></pre>',
+        },
+        {
+            testString: 'A\n```\ncode\n```',
+            resultString: 'A<br /><pre>code<br /></pre>',
+        },
+        {
+            testString: '|\n```\ncode\n```',
+            resultString: '|<br /><pre>code<br /></pre>',
+        },
+    ];
+    testCases.forEach(({testString, resultString}) => {
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
 
 test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em> tag', () => {
