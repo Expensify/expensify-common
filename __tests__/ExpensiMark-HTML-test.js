@@ -1515,14 +1515,14 @@ describe('when should keep whitespace flag is enabled', () => {
 
     test('multiple quotes', () => {
         const quoteTestStartString = '>Hello my\n>beautiful\n>world\n';
-        const quoteTestReplacedString = '<blockquote>Hello my</blockquote><br /><blockquote>beautiful</blockquote><br /><blockquote>world</blockquote><br />';
+        const quoteTestReplacedString = '<blockquote>Hello my</blockquote>\n<blockquote>beautiful</blockquote>\n<blockquote>world</blockquote>\n';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
 
     test('separate blockqoutes', () => {
         const quoteTestStartString = '>Lorem ipsum\ndolor\n>sit amet';
-        const quoteTestReplacedString = '<blockquote>Lorem ipsum</blockquote><br />dolor<br /><blockquote>sit amet</blockquote>';
+        const quoteTestReplacedString = '<blockquote>Lorem ipsum</blockquote>\ndolor\n<blockquote>sit amet</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
@@ -1567,7 +1567,7 @@ describe('when should keep whitespace flag is enabled', () => {
 
         test('newline', () => {
             const quoteTestStartString = '>Hello world\n';
-            const quoteTestReplacedString = '<blockquote>Hello world</blockquote><br />';
+            const quoteTestReplacedString = '<blockquote>Hello world</blockquote>\n';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
         });
@@ -1575,7 +1575,7 @@ describe('when should keep whitespace flag is enabled', () => {
 
     test('quote with other markdowns', () => {
         const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote><br />Here is a &gt;quote that did not <pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
+        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre>here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
     });
