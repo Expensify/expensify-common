@@ -1467,16 +1467,48 @@ test('Test strikethrough with link with URL that contains tilde', () => {
 test('Linebreak between end of text and start of code block should be remained', () => {
     const testCases = [
         {
-            testString: '```\ncode\n```\ntext\n```\ncode\n```',
-            resultString: '<pre>code<br /></pre>text<br /><pre>code<br /></pre>',
+            testString: '```\ncode1\n```\ntext\n```\ncode2\n```',
+            resultString: '<pre>code1<br /></pre>text<br /><pre>code2<br /></pre>',
         },
         {
-            testString: 'A\n```\ncode\n```',
-            resultString: 'A<br /><pre>code<br /></pre>',
+            testString: 'text\n```\ncode\n```',
+            resultString: 'text<br /><pre>code<br /></pre>',
         },
         {
             testString: '|\n```\ncode\n```',
             resultString: '|<br /><pre>code<br /></pre>',
+        },
+        {
+            testString: 'text1```code```text2',
+            resultString: 'text1<pre>code</pre>text2',
+        },
+        {
+            testString: 'text1 ``` code ``` text2',
+            resultString: 'text1 <pre>&#32;code&#32;</pre> text2',
+        },
+        {
+            testString: 'text1\n```code```\ntext2',
+            resultString: 'text1<br /><pre>code</pre>text2',
+        },
+        {
+            testString: 'text1\n``` code ```\ntext2',
+            resultString: 'text1<br /><pre>&#32;code&#32;</pre>text2',
+        },
+        {
+            testString: 'text1\n```\n\ncode\n```\ntext2',
+            resultString: 'text1<br /><pre><br />code<br /></pre>text2',
+        },
+        {
+            testString: 'text1\n```\n\ncode\n\n```\ntext2',
+            resultString: 'text1<br /><pre><br />code<br /><br /></pre>text2',
+        },
+        {
+            testString: 'text1\n```\n\n\ncode\n\n```\ntext2',
+            resultString: 'text1<br /><pre><br /><br />code<br /><br /></pre>text2',
+        },
+        {
+            testString: 'text1\n```\n\ncode\n\n\n```\ntext2',
+            resultString: 'text1<br /><pre><br />code<br /><br /><br /></pre>text2',
         },
     ];
     testCases.forEach(({testString, resultString}) => {

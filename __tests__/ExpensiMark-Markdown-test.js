@@ -694,16 +694,48 @@ test('Test codeFence copy from selection does not add extra new line', () => {
 test('Linebreak should be remained for text between code block', () => {
     const testCases = [
         {
-            testString: '<pre>code<br></pre>text<br><pre>code<br></pre>',
-            resultString: '```\ncode\n```\ntext\n```\ncode\n```',
+            testString: '<pre>code1<br></pre>text<br><pre>code2<br></pre>',
+            resultString: '```\ncode1\n```\ntext\n```\ncode2\n```',
         },
         {
-            testString: 'A<br><pre>code<br></pre>',
-            resultString: 'A\n```\ncode\n```',
+            testString: 'text<br><pre>code<br></pre>',
+            resultString: 'text\n```\ncode\n```',
         },
         {
             testString: '|<br><pre>code<br></pre>',
             resultString: '|\n```\ncode\n```',
+        },
+        {
+            testString: 'text1<pre>code</pre>text2',
+            resultString: 'text1```\ncode\n```\ntext2',
+        },
+        {
+            testString: 'text1 <pre>&#32;code&#32;</pre> text2',
+            resultString: 'text1 ```\n code \n```\n text2',
+        },
+        {
+            testString: 'text1<br><pre>code</pre>text2',
+            resultString: 'text1\n```\ncode\n```\ntext2',
+        },
+        {
+            testString: 'text1<br><pre>&#32;code&#32;</pre>text2',
+            resultString: 'text1\n```\n code \n```\ntext2',
+        },
+        {
+            testString: 'text1<br><pre><br>code<br></pre>text2',
+            resultString: 'text1\n```\n\ncode\n```\ntext2',
+        },
+        {
+            testString: 'text1<br><pre><br>code<br><br></pre>text2',
+            resultString: 'text1\n```\n\ncode\n\n```\ntext2',
+        },
+        {
+            testString: 'text1<br><pre><br><br>code<br><br></pre>text2',
+            resultString: 'text1\n```\n\n\ncode\n\n```\ntext2',
+        },
+        {
+            testString: 'text1<br><pre><br>code<br><br><br></pre>text2',
+            resultString: 'text1\n```\n\ncode\n\n\n```\ntext2',
         },
     ];
     testCases.forEach(({testString, resultString}) => {
