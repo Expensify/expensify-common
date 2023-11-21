@@ -1,5 +1,5 @@
 declare type Replacement = (...args: string[]) => string;
-declare type Name = "codeFence" | "inlineCodeBlock" | "email" | "link" | "hereMentions" | "userMentions" | "autoEmail" | "autolink" | "quote" | "italic" | "bold" | "strikethrough" | "heading1" | "newline" | "replacepre" | "replacebr" | "listItem" | "exclude" | "anchor" | "breakline" | "blockquoteWrapHeadingOpen" | "blockquoteWrapHeadingClose" | "blockElementOpen" | "blockElementClose" | "stripTag";
+declare type Name = "codeFence" | "inlineCodeBlock" | "email" | "link" | "hereMentions" | "userMentions" | "autoEmail" | "autolink" | "quote" | "italic" | "bold" | "strikethrough" | "heading1" | "newline" | "replacepre" | "listItem" | "exclude" | "anchor" | "breakline" | "blockquoteWrapHeadingOpen" | "blockquoteWrapHeadingClose" | "blockElementOpen" | "blockElementClose" | "stripTag";
 declare type Rule = {
     name: Name;
     process?: (textToProcess: string, replacement: Replacement) => string;
