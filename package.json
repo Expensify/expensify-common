@@ -39,10 +39,10 @@
     "babelify": "10.0.0",
     "eslint-config-expensify": "^2.0.16",
     "eslint-plugin-jest": "^24.1.5",
-    "grunt": "1.4.0",
+    "grunt": "1.6.0",
     "grunt-chokidar": "1.0.2",
     "grunt-eslint": "22.0.0",
-    "jest": "^27.0.0",
+    "jest": "^29.0.0",
     "jit-grunt": "^0.10.0"
   },
   "browserify": {
