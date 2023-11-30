@@ -1702,4 +1702,7 @@ describe('when should keep whitespace flag is enabled', () => {
 test('Test code fence within inline code', () => {
     let testString = '`(```test```)`';
     expect(parser.replace(testString)).toBe('&#x60;(<pre>test</pre>)&#x60;');
+    
+    testString = '`test`space```block```';
+    expect(parser.replace(testString)).toBe('<code>test</code>space<pre>block</pre>');
 });
