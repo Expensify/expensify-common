@@ -1700,9 +1700,18 @@ describe('when should keep whitespace flag is enabled', () => {
 });
     
 test('Test code fence within inline code', () => {
-    let testString = '`(```test```)`';
-    expect(parser.replace(testString)).toBe('&#x60;(<pre>test</pre>)&#x60;');
+    let testString = 'Hello world `(```test```)` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test</pre>)&#x60; Hello world');
     
-    testString = '`test`space```block```';
-    expect(parser.replace(testString)).toBe('<code>test</code>space<pre>block</pre>');
+    testString = 'Hello world `(```test\ntest```)` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br />test</pre>)&#x60; Hello world');
+    
+    testString = 'Hello world ```(`test`)``` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <pre>(&#x60;test&#x60;)</pre> Hello world');
+
+    testString = 'Hello world `test`space```block``` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <code>test</code>space<pre>block</pre> Hello world');
+
+    testString = 'Hello world ```block```space`test` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <pre>block</pre>space<code>test</code> Hello world');
 });
