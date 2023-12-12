@@ -31,7 +31,7 @@
     "simply-deferred": "git+https://github.com/Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
     "string.prototype.replaceall": "^1.0.6",
     "ua-parser-js": "^1.0.35",
-    "underscore": "1.13.1"
+    "underscore": "1.13.6"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.6",
