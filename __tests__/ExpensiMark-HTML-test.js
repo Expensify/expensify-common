@@ -74,6 +74,23 @@ test('Test italic markdown replacement with word boundary and undercores', () =>
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+test('Test quote markdown combined multi-line italic/bold/strikethrough markdown replacement', () => {
+    let testString = '_test\n> test_';
+    let replacedString = '_test<br /><blockquote>test_</blockquote>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+
+    testString = '*test\n> test*';
+    replacedString = '*test<br /><blockquote>test*</blockquote>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+
+    testString = '~test\n> test~';
+    replacedString = '~test<br /><blockquote>test~</blockquote>';
+
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 // Words wrapped in ~ successfully replaced with <del></del>
 test('Test strikethrough markdown replacement', () => {
     const strikethroughTestStartString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
