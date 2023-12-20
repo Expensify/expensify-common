@@ -1632,40 +1632,40 @@ test('Mention', () => {
     expect(parser.replace(testString)).toBe('<mention-user>@user@DOMAIN.com</mention-user>');
 });
 
-describe('when should keep whitespace flag is enabled', () => {
+describe('when should keep raw input flag is enabled', () => {
     test('quote without space', () => {
         const quoteTestStartString = '>Hello world';
         const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('quote with single space', () => {
         const quoteTestStartString = '> Hello world';
         const quoteTestReplacedString = '<blockquote> Hello world</blockquote>';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('quote with multiple spaces', () => {
         const quoteTestStartString = '>     Hello world';
         const quoteTestReplacedString = '<blockquote>     Hello world</blockquote>';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('multiple quotes', () => {
         const quoteTestStartString = '>Hello my\n>beautiful\n>world\n';
         const quoteTestReplacedString = '<blockquote>Hello my</blockquote>\n<blockquote>beautiful</blockquote>\n<blockquote>world</blockquote>\n';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('separate blockqoutes', () => {
         const quoteTestStartString = '>Lorem ipsum\ndolor\n>sit amet';
         const quoteTestReplacedString = '<blockquote>Lorem ipsum</blockquote>\ndolor\n<blockquote>sit amet</blockquote>';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     describe('nested heading in blockquote', () => {
@@ -1673,21 +1673,21 @@ describe('when should keep whitespace flag is enabled', () => {
             const quoteTestStartString = '># Hello world';
             const quoteTestReplacedString = '<blockquote><h1>Hello world</h1></blockquote>';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('with single space', () => {
             const quoteTestStartString = '> # Hello world';
             const quoteTestReplacedString = '<blockquote> <h1>Hello world</h1></blockquote>';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('with multiple spaces after #', () => {
             const quoteTestStartString = '>#    Hello world';
             const quoteTestReplacedString = '<blockquote><h1>   Hello world</h1></blockquote>';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
     });
 
@@ -1696,29 +1696,70 @@ describe('when should keep whitespace flag is enabled', () => {
             const quoteTestStartString = '>Hello world!';
             const quoteTestReplacedString = '<blockquote>Hello world!</blockquote>';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('space', () => {
             const quoteTestStartString = '>Hello world ';
             const quoteTestReplacedString = '<blockquote>Hello world </blockquote>';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('newline', () => {
             const quoteTestStartString = '>Hello world\n';
             const quoteTestReplacedString = '<blockquote>Hello world</blockquote>\n';
 
-            expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+            expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
     });
 
     test('quote with other markdowns', () => {
         const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre>here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
+        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre data-code-raw=\"\nhere is a codefenced quote\n&amp;gt;it should not be quoted\n\">here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
-        expect(parser.replace(quoteTestStartString, {shouldKeepWhitespace: true})).toBe(quoteTestReplacedString);
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
+    });
+
+    test('codeBlock with newlines', () => {
+        const quoteTestStartString = '```\nhello world\n```';
+        const quoteTestReplacedString = '<pre data-code-raw="\nhello world\n">hello&#32;world\n</pre>';
+
+        expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
+    });
+
+    describe('links with raw data attributes', () => {
+        test('autoLink', () => {
+            const testString = 'google.com';
+            const resultString = '<a href="https://google.com" data-raw-href="google.com" data-link-variant="auto" target="_blank" rel="noreferrer noopener">google.com</a>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+
+        test('labeled link', () => {
+            const testString = '[Google](google.com)';
+            const resultString = '<a href="https://google.com" data-raw-href="google.com" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">Google</a>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+    });
+
+    describe('mails with raw data attributes', () => {
+        test('autoMail', () => {
+            const testString = 'mail@mail.com';
+            const resultString = '<a href="mailto:mail@mail.com" data-raw-href="mail@mail.com" data-link-variant="auto">mail@mail.com</a>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+
+        test('labeled mail', () => {
+            const testString = '[mail](mailto:mail@mail.com)';
+            const resultString = '<a href="mailto:mail@mail.com" data-raw-href="mailto:mail@mail.com" data-link-variant="labeled">mail</a>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+
+        test('labeled mail with styled label', () => {
+            const testString = '[*mail*](mailto:mail@mail.com)';
+            const resultString = '<a href="mailto:mail@mail.com" data-raw-href="mailto:mail@mail.com" data-link-variant="labeled"><strong>mail</strong></a>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
     });
 });
     
