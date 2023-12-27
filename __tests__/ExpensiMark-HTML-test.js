@@ -427,6 +427,16 @@ test('Test inline code blocks', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
 });
 
+test('Test inline code with one backtick as content', () => {
+    const inlineCodeStartString = '```';
+    expect(parser.replace(inlineCodeStartString)).toBe('&#x60;&#x60;&#x60;');
+});
+
+test('Test inline code with multiple backtick symbols as content', () => {
+    const inlineCodeStartString = '``````';
+    expect(parser.replace(inlineCodeStartString)).toBe('&#x60;&#x60;&#x60;&#x60;&#x60;&#x60;');
+});
+
 test('Test inline code blocks with ExpensiMark syntax inside', () => {
     const inlineCodeStartString = '`This is how you can write ~strikethrough~, *bold*, and _italics_`';
     expect(parser.replace(inlineCodeStartString)).toBe('<code>This is how you can write ~strikethrough~, *bold*, and _italics_</code>');
@@ -1084,7 +1094,7 @@ test('Test for backticks with no content', () => {
 // Code-fence with no content is not replaced with <pre>
 test('Test for codefence with no content', () => {
     const testString = '```   ```';
-    const resultString = '<code>&#x60;</code>   <code>&#x60;</code>';
+    const resultString = '&#x60;&#x60;&#x60;   &#x60;&#x60;&#x60;';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
