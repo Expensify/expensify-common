@@ -1734,4 +1734,16 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     testString = '~This~is~strikethrough~test~';
     resultString = '<del>This~is~strikethrough~test</del>';
     expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '_This_is_italic_test____';
+    resultString = '<em>This_is_italic_test</em>___';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '*This*is*bold*test****';
+    resultString = '<strong>This*is*bold*test</strong>***';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '~This~is~strikethrough~test~~~~';
+    resultString = '<del>This~is~strikethrough~test</del>~~~';
+    expect(parser.replace(testString)).toBe(resultString);
 });
