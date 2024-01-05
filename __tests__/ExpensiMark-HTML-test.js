@@ -1748,3 +1748,29 @@ test('Test code fence within inline code', () => {
     testString = 'Hello world ```block```space`test` Hello world';
     expect(parser.replace(testString)).toBe('Hello world <pre>block</pre>space<code>test</code> Hello world');
 });
+
+test('Test italic/bold/strikethrough markdown to keep consistency', () => {
+    let testString = '_This_is_italic_test_';
+    let resultString = '<em>This_is_italic_test</em>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '*This*is*bold*test*';
+    resultString = '<strong>This*is*bold*test</strong>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '~This~is~strikethrough~test~';
+    resultString = '<del>This~is~strikethrough~test</del>';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '_This_is_italic_test____';
+    resultString = '<em>This_is_italic_test</em>___';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '*This*is*bold*test****';
+    resultString = '<strong>This*is*bold*test</strong>***';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '~This~is~strikethrough~test~~~~';
+    resultString = '<del>This~is~strikethrough~test</del>~~~';
+    expect(parser.replace(testString)).toBe(resultString);
+});
