@@ -21,10 +21,12 @@ export default class ExpensiMark {
      * @param options.filterRules=[] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied.
      * @param options.shouldEscapeText=true - Whether or not the text should be escaped
+     * @param options.shouldKeepRawInput=false - Whether or not the raw input should be kept and returned
      */
-    replace(text: string, { filterRules, shouldEscapeText }?: {
+    replace(text: string, { filterRules, shouldEscapeText, shouldKeepRawInput }?: {
         filterRules?: string[];
         shouldEscapeText?: boolean;
+        shouldKeepRawInput?: boolean;
     }): string;
     /**
      * Checks matched URLs for validity and replace valid links with html elements
