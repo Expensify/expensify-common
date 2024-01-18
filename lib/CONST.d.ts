@@ -400,13 +400,13 @@ export declare const CONST: {
      * And should also be reflected in the constant in expensify/app,
      * which is located in src/CONST.js and also named EXPENSIFY_EMAILS.
      */
-    readonly EXPENSIFY_EMAILS: readonly ["concierge@expensify.com", "help@expensify.com", "receipts@expensify.com", "chronos@expensify.com", "qa@expensify.com", "contributors@expensify.com", "firstresponders@expensify.com", "qa+travisreceipts@expensify.com", "bills@expensify.com", "studentambassadors@expensify.com", "accounting@expensify.com", "payroll@expensify.com", "svfg@expensify.com", "integrationtestingcreds@expensify.com", "admin@expensify.com"];
+    readonly EXPENSIFY_EMAILS: readonly ["concierge@expensify.com", "help@expensify.com", "receipts@expensify.com", "chronos@expensify.com", "qa@expensify.com", "contributors@expensify.com", "firstresponders@expensify.com", "qa+travisreceipts@expensify.com", "bills@expensify.com", "studentambassadors@expensify.com", "accounting@expensify.com", "payroll@expensify.com", "svfg@expensify.com", "integrationtestingcreds@expensify.com", "admin@expensify.com", "notifications@expensify.com"];
     /**
      * Emails that the user shouldn't submit reports to nor share reports with
      * Any changes here should be reflected in the PHP constant,
      * which is located in _constant.php and also named INVALID_APPROVER_AND_SHAREE_EMAILS
      */
-    readonly INVALID_APPROVER_AND_SHAREE_EMAILS: readonly ["concierge@expensify.com", "help@expensify.com", "receipts@expensify.com", "chronos@expensify.com", "qa@expensify.com", "contributors@expensify.com", "firstresponders@expensify.com", "qa+travisreceipts@expensify.com", "bills@expensify.com", "admin@expensify.com"];
+    readonly INVALID_APPROVER_AND_SHAREE_EMAILS: readonly ["concierge@expensify.com", "help@expensify.com", "receipts@expensify.com", "chronos@expensify.com", "qa@expensify.com", "contributors@expensify.com", "firstresponders@expensify.com", "qa+travisreceipts@expensify.com", "bills@expensify.com", "admin@expensify.com", "notifications@expensify.com"];
     /**
      * Smart scan-related constants
      */
