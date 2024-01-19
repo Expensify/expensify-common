@@ -523,6 +523,7 @@ export const CONST = {
         'svfg@expensify.com',
         'integrationtestingcreds@expensify.com',
         'admin@expensify.com',
+        "unsubscribe@expensify.com"
     ],
 
      /**
@@ -541,6 +542,7 @@ export const CONST = {
         'qa+travisreceipts@expensify.com',
         'bills@expensify.com',
         'admin@expensify.com',
+        "unsubscribe@expensify.com",
     ],
 
     /**
