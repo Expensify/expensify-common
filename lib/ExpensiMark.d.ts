@@ -1,5 +1,5 @@
 declare type Replacement = (...args: string[]) => string;
-declare type Name = "codeFence" | "inlineCodeBlock" | "email" | "link" | "hereMentions" | "userMentions" | "autoEmail" | "autolink" | "quote" | "italic" | "bold" | "strikethrough" | "heading1" | "newline" | "replacepre" | "listItem" | "exclude" | "anchor" | "breakline" | "blockquoteWrapHeadingOpen" | "blockquoteWrapHeadingClose" | "blockElementOpen" | "blockElementClose" | "stripTag";
+declare type Name = "emoji" | "codeFence" | "inlineCodeBlock" | "email" | "link" | "hereMentions" | "userMentions" | "autoEmail" | "autolink" | "quote" | "italic" | "bold" | "strikethrough" | "heading1" | "newline" | "replacepre" | "replacebr" | "listItem" | "exclude" | "anchor" | "breakline" | "blockquoteWrapHeadingOpen" | "blockquoteWrapHeadingClose" | "blockElementOpen" | "blockElementClose" | "stripTag";
 declare type Rule = {
     name: Name;
     process?: (textToProcess: string, replacement: Replacement) => string;
@@ -21,12 +21,10 @@ export default class ExpensiMark {
      * @param options.filterRules=[] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied.
      * @param options.shouldEscapeText=true - Whether or not the text should be escaped
-     * @param options.shouldKeepRawInput=false - Whether or not the raw input should be kept and returned
      */
-    replace(text: string, { filterRules, shouldEscapeText, shouldKeepRawInput }?: {
+    replace(text: string, { filterRules, shouldEscapeText }?: {
         filterRules?: string[];
         shouldEscapeText?: boolean;
-        shouldKeepRawInput?: boolean;
     }): string;
     /**
      * Checks matched URLs for validity and replace valid links with html elements
