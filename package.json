@@ -18,7 +18,7 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "dependencies": {
-    "classnames": "2.3.2",
+    "classnames": "2.4.0",
     "clipboard": "2.0.11",
     "html-entities": "^2.4.0",
     "jquery": "3.6.0",
@@ -29,13 +29,12 @@
     "react-dom": "16.12.0",
     "semver": "^7.5.2",
     "simply-deferred": "git+https://github.com/Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
-    "string.prototype.replaceall": "^1.0.8",
     "ua-parser-js": "^1.0.37",
     "underscore": "1.13.6"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.22.6",
-    "babel-jest": "^27.5.1",
+    "@babel/preset-env": "^7.23.7",
+    "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint-config-expensify": "^2.0.16",
     "eslint-plugin-jest": "^24.7.0",
