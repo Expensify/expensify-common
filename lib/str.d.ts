@@ -566,6 +566,18 @@ declare const Str: {
      */
     isImage(url: string): boolean;
     /**
+    * Takes in a URL and checks if the file extension is a video
+    * that can be rendered by React Native. Do NOT add extensions
+    * to this list unless they are supported by all platforms.
+    *
+    * https://developer.android.com/media/platform/supported-formats#video-formats
+    * https://developer.apple.com/documentation/coremedia/1564239-video_codec_constants
+    * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
+    * 
+    * @param url
+    */
+   isVideo(url: string): boolean;
+    /**
      * Checks whether the given string is a +@ domain email account, such as
      * +@domain.com
      *
