@@ -25,6 +25,27 @@ describe('Str.isImage', () => {
     });
 });
 
+describe('Str.isVideo', () => {
+    it('Correctly identifies all valid video types', () => {
+        expect(Str.isVideo(buildTestURLForType('mov'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('mp4'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('webm'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('mkv'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('MOV'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('MP4'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('WEBM'))).toBeTruthy();
+        expect(Str.isVideo(buildTestURLForType('MKV'))).toBeTruthy();
+    });
+
+    it('Does not confirm these types', () => {
+        // Note: These are types that React Native does not support as images so attempt to prevent their addition here
+        expect(Str.isVideo(buildTestURLForType('tiff'))).toBeFalsy();
+        expect(Str.isVideo(buildTestURLForType('psd'))).toBeFalsy();
+        expect(Str.isVideo(buildTestURLForType('pdf'))).toBeFalsy();
+        expect(Str.isVideo(buildTestURLForType('jpeg'))).toBeFalsy();
+    });
+});
+
 describe('Str.isPDF', () => {
     it('Correctly identifies PDF', () => {
         expect(Str.isPDF(buildTestURLForType('pdf'))).toBeTruthy();
