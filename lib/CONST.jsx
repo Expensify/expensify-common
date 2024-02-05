@@ -656,10 +656,10 @@ export const CONST = {
         },
         financialforce: {
             value: 'financialforce',
-            text: 'FinancialForce',
-            image: `${g_cloudFrontImg}icons/export-icons/financialforce.svg`,
-            gray_image: `${g_cloudFrontImg}icons/export-icons/financialforce_gray.svg`,
-            alert_image: `${g_cloudFrontImg}icons/export-icons/financialforce_alert.svg`,
+            text: 'Certinia',
+            image: `${g_cloudFrontImg}icons/export-icons/certinia.svg`,
+            gray_image: `${g_cloudFrontImg}icons/export-icons/certinia_gray.svg`,
+            alert_image: `${g_cloudFrontImg}icons/export-icons/certinia_alert.svg`,
             types: ['accounting'],
             isCorporateOnly: true,
         }
