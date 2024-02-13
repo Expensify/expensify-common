@@ -512,10 +512,10 @@ export declare const CONST: {
         };
         readonly financialforce: {
             readonly value: "financialforce";
-            readonly text: "FinancialForce";
-            readonly image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/financialforce.svg";
-            readonly gray_image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/financialforce_gray.svg";
-            readonly alert_image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/financialforce_alert.svg";
+            readonly text: "Certinia";
+            readonly image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/certinia.svg";
+            readonly gray_image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/certinia_gray.svg";
+            readonly alert_image: "https://d2k5nsl2zxldvw.cloudfront.net/images/icons/export-icons/certinia_alert.svg";
             readonly types: readonly ["accounting"];
             readonly isCorporateOnly: true;
         };
