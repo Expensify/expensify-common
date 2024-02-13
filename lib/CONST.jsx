@@ -296,6 +296,11 @@ export const CONST = {
         EMAIL_PART: EMAIL_BASE_REGEX,
 
         /**
+        * Regex matching a text containing an E.164 format phone number
+        */
+        PHONE_PART: '\\+?[1-9]\\d{1,14}',
+
+        /**
          * Regular expression to check that a basic name is valid
          *
          * @type RegExp
@@ -556,7 +561,7 @@ export const CONST = {
         // Domain used for accounts that sign up with phone numbers
         DOMAIN: 'expensify.sms',
 
-        // Regex that matches on a E.164 phone number starting with a '+'
+        // Regex that matches on an E.164 phone number starting with a '+'
         E164_REGEX: /^\+?[1-9]\d{1,14}$/,
     },
 
