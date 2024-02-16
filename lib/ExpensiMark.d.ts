@@ -22,11 +22,15 @@ export default class ExpensiMark {
      * If not provided, all available rules will be applied.
      * @param options.shouldEscapeText=true - Whether or not the text should be escaped
      * @param options.shouldKeepRawInput=false - Whether or not the raw input should be kept and returned
+     * @param options.currentUserPrivateDomain - Private domain of the current user.
+     * @param options.allPersonalDetailLogins - List of personal detail login
      */
-    replace(text: string, { filterRules, shouldEscapeText, shouldKeepRawInput }?: {
+    replace(text: string, { filterRules, shouldEscapeText, shouldKeepRawInput, currentUserPrivateDomain, allPersonalDetailLogins}?: {
         filterRules?: string[];
         shouldEscapeText?: boolean;
         shouldKeepRawInput?: boolean;
+        currentUserPrivateDomain?: string;
+        allPersonalDetailLogins?: string[]
     }): string;
     /**
      * Checks matched URLs for validity and replace valid links with html elements
