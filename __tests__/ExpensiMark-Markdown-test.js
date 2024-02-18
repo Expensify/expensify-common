@@ -38,9 +38,9 @@ test('Test multi-line italic HTML replacement', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
-// Words wrapped in ~ successfully replaced with <del></del>
+// Words wrapped in <del></del> or <s></s> successfully replaced with ~
 test('Test strikethrough HTML replacement', () => {
-    const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <del>test</del> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
+    const strikethroughTestStartString = 'This is a <del>sentence,</del> and it has some <del>punctuation, words, and spaces</del>. <s>test</s> ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     const strikethroughTestReplacedString = 'This is a ~sentence,~ and it has some ~punctuation, words, and spaces~. ~test~ ~ testing~ test~test~test. ~ testing ~ ~testing ~';
     expect(parser.htmlToMarkdown(strikethroughTestStartString)).toBe(strikethroughTestReplacedString);
 });
