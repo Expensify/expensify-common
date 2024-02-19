@@ -313,6 +313,20 @@ test('Test markdown replacement for emojis with emails', () => {
     expect(parser.replace(testString)).toBe(result);
 });
 
+test('Test markdown replacement for composite emoji', () => {
+    const testString = 'Replace composite emoji with only one emoji tag '
+    + '😶‍🌫️ '
+    + '🧑‍🔧 '
+    + '👨‍🏫 '
+    + '👨🏾‍❤️‍👨🏽 '
+    const result = 'Replace composite emoji with only one emoji tag '
+    + '<emoji>😶‍🌫️</emoji> '
+    + '<emoji>🧑‍🔧</emoji> '
+    + '<emoji>👨‍🏫</emoji> '
+    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> '
+    expect(parser.replace(testString)).toBe(result);
+})
+
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
