@@ -19,6 +19,12 @@ describe('Strict URL validation', () => {
             expect(regexToTest.test('https://google.com:65536')).toBeFalsy();
             expect(regexToTest.test('smtp://google.com')).toBeFalsy();
         });
+
+        it('should not match urls inside tags', () => {
+            const regexToTest = new RegExp(`^${URL_REGEX_WITH_REQUIRED_PROTOCOL}$`, 'i');
+            expect(regexToTest.test('<code>http://google.com/</code>')).toBeFalsy();
+            expect(regexToTest.test('<pre>http://google.com/</pre>')).toBeFalsy();
+        });
     });
 
     describe('Optional protocol for URL', () => {
