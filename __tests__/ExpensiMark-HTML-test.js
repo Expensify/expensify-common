@@ -1152,7 +1152,7 @@ test('Test for user mention with @@username@domain.com', () => {
 
 test('Test for user mention with @phoneNumber', () => {
     const testString = '@+19728974297';
-    const resultString = '<mention-user>@+19728974297</mention-user>';
+    const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
