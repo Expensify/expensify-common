@@ -296,6 +296,11 @@ export const CONST = {
         EMAIL_PART: EMAIL_BASE_REGEX,
 
         /**
+        * Regex matching a text containing an E.164 format phone number
+        */
+        PHONE_PART: '\\+[1-9]\\d{1,14}',
+
+        /**
          * Regular expression to check that a basic name is valid
          *
          * @type RegExp
@@ -352,6 +357,13 @@ export const CONST = {
          * @type RegExp
          */
         EMOJIS: /[\p{Extended_Pictographic}\u200d\u{1f1e6}-\u{1f1ff}\u{1f3fb}-\u{1f3ff}\u{e0020}-\u{e007f}\u20E3\uFE0F]|[#*0-9]\uFE0F?\u20E3/gu,
+
+        /**
+         * Regex matching an text containing an Emoji that can be a single emoji or made up by some different emojis
+         *
+         * @type RegExp
+         */
+        EMOJI_RULE: /[\p{Extended_Pictographic}](\u200D[\p{Extended_Pictographic}]|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007F}]|\uFE0F|\u20E3)*|[\u{1F1E6}-\u{1F1FF}]{2}|[#*0-9]\uFE0F?\u20E3/gu,
     },
 
     REPORT: {
@@ -556,7 +568,7 @@ export const CONST = {
         // Domain used for accounts that sign up with phone numbers
         DOMAIN: 'expensify.sms',
 
-        // Regex that matches on a E.164 phone number starting with a '+'
+        // Regex that matches on an E.164 phone number starting with a '+'
         E164_REGEX: /^\+?[1-9]\d{1,14}$/,
     },
 

@@ -304,14 +304,28 @@ test('Test markdown replacement for emojis with emails', () => {
     + '[😄abc@gmail.com](abc@gmail.com) '
     + '[😄 abc@gmail.com ](abc@gmail.com) '
     const result = 'Do not replace the emoji with link '
-    + '[😄](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
-    + '[😄]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
-    + '[😄<a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄 <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
+    + '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
+    + '[<emoji>😄</emoji><a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
     expect(parser.replace(testString)).toBe(result);
 });
+
+test('Test markdown replacement for composite emoji', () => {
+    const testString = 'Replace composite emoji with only one emoji tag '
+    + '😶‍🌫️ '
+    + '🧑‍🔧 '
+    + '👨‍🏫 '
+    + '👨🏾‍❤️‍👨🏽 '
+    const result = 'Replace composite emoji with only one emoji tag '
+    + '<emoji>😶‍🌫️</emoji> '
+    + '<emoji>🧑‍🔧</emoji> '
+    + '<emoji>👨‍🏫</emoji> '
+    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> '
+    expect(parser.replace(testString)).toBe(result);
+})
 
 
 // Markdown style links replaced successfully
@@ -1107,7 +1121,7 @@ test('Test for link with no content', () => {
 
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 test('Test quotes markdown replacement with heading inside', () => {
@@ -1150,8 +1164,8 @@ test('Test for user mention with @@username@domain.com', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test for user mention with @phoneNumber@domain.sms', () => {
-    const testString = '@+19728974297@expensify.sms';
+test('Test for user mention with @phoneNumber', () => {
+    const testString = '@+19728974297';
     const resultString = '<mention-user>@+19728974297@expensify.sms</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 });
