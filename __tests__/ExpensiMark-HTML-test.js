@@ -1829,3 +1829,60 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     resultString = '<del>This~is~strikethrough~test</del>~~~';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+
+describe('multi-level blockquote', () => {
+    test('test max level of blockquote (3)', () => {
+        const quoteTestStartString = '>>>>> Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>&gt;&gt; Hello world</blockquote></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+    test('multi-level blockquote with single space', () => {
+        const quoteTestStartString = '> > > Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+    test('multi-level blockquote with multiple spaces', () => {
+        const quoteTestStartString = '>  >   >      Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+
+    test('multi-level blockquote with mixed spaces', () => {
+        const quoteTestStartString = '>  > >   Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+
+    test('multi-level blockquote with diffrent syntax', () => {
+        const quoteTestStartString = '> > _Hello_ *world*';
+        const quoteTestReplacedString = '<blockquote><blockquote><em>Hello</em> <strong>world</strong></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+
+    test('multi-level blockquote with nested heading', () => {
+        const quoteTestStartString = '> > # Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><h1>Hello world</h1></blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+
+    test('multiline multi-level blockquote', () => {
+        const quoteTestStartString = '> > Hello my\n> > beautiful\n> > world\n';
+        const quoteTestReplacedString = '<blockquote><blockquote>Hello my<br />beautiful<br />world</blockquote></blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+
+    test('multiline blockquote with diffrent levels', () => {
+        const quoteTestStartString = '> > > Hello my\n> > beautiful\n> world\n';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello my</blockquote>beautiful</blockquote>world</blockquote>';
+
+        expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+    });
+});
