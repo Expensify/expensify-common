@@ -1899,4 +1899,30 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    // Currently any markdown used inside the square brackets is converted to html string in the alt attribute
+    // The attributes should only contain plain text, but it doesn't seem possible to convert markdown to plain text
+    // or let the parser know not to convert markdown to html for html attributes
+    xtest('Image with alt text containing markdown', () => {
+        const testString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="*bold* _italic_ ~strike~" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing image and autolink', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an autolink: example.com';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Image with raw data attributes', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    });
+
+    test('Image with invalid url should remain unchanged', () => {
+        const testString = '![test](invalid)';
+        expect(parser.replace(testString)).toBe(testString);
+    });
 });
