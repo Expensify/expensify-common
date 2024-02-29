@@ -1886,3 +1886,17 @@ describe('multi-level blockquote', () => {
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 });
+
+describe('Image markdown conversion to html tag', () => {
+    test('Single image', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing images', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image of a developer: ![dev](https://example.com/developer.png)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+});
