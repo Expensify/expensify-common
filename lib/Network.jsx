@@ -63,6 +63,7 @@ export default function Network(endpoint) {
                 url: endpoint,
                 type: 'POST',
                 data: parameters,
+                xhrFields: { withCredentials: true },
             };
             const formData = new FormData();
             let shouldUseFormData = false;
