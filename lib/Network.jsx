@@ -41,6 +41,8 @@ export default function Network(endpoint) {
         isNavigatingAway = true;
     };
 
+    $.ajaxSetup({xhrFields: { withCredentials: true } });
+
     return {
         /**
          * @param {String} url to fetch
