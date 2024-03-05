@@ -32,6 +32,9 @@ export default function Network(endpoint) {
     // A flag that turns true when the user navigates away
     let isNavigatingAway = false;
 
+    // If URL ends in `/` we're using /api/command format.
+    let isNewURLFormat = endpoint[endpoint.length - 1] === '/';
+
     if (!endpoint) {
         throw new Error('Cannot instantiate Network without an url endpoint');
     }
@@ -59,8 +62,17 @@ export default function Network(endpoint) {
          */
         post(parameters) {
             // Build request
+            if (isNewURLFormat) {
+                // Remove command from parameters and use it in the URL
+                const command = parameters.command;
+                delete parameters.command;
+                const newURL = `${endpoint}${command}`;
+            } else {
+                const newURL = endpoint;
+            }
+
             const settings = {
-                url: endpoint,
+                url: newURL,
                 type: 'POST',
                 data: parameters,
                 xhrFields: { withCredentials: true },
