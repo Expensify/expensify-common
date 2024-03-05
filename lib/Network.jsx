@@ -62,13 +62,12 @@ export default function Network(endpoint) {
          */
         post(parameters) {
             // Build request
+            let newURL = endpoint;
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
                 delete parameters.command;
-                const newURL = `${endpoint}${command}`;
-            } else {
-                const newURL = endpoint;
+                newURL = `${endpoint}${command}`;
             }
 
             const settings = {
