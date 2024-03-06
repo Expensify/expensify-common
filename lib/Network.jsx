@@ -63,14 +63,16 @@ export default function Network(endpoint) {
         post(parameters) {
             // Build request
             let newURL = endpoint;
+            let settings = {};
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
+                settings.crossDomain = true;
             }
 
-            const settings = {
+            settings = {...settings,
                 url: newURL,
                 type: 'POST',
                 data: parameters,
