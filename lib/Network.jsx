@@ -69,7 +69,7 @@ export default function Network(endpoint) {
                 const command = parameters.command;
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
-                settings.crossDomain = true;
+                console.log('Using new URL format');
             }
 
             settings = {...settings,
@@ -104,6 +104,8 @@ export default function Network(endpoint) {
                 settings.contentType = false;
                 settings.data = formData;
             }
+
+            console.log(settings, $);
 
             return $.ajax(settings);
         },
