@@ -44,8 +44,6 @@ export default function Network(endpoint) {
         isNavigatingAway = true;
     };
 
-    $.ajaxSetup({xhrFields: { withCredentials: true } });
-
     return {
         /**
          * @param {String} url to fetch
@@ -69,14 +67,12 @@ export default function Network(endpoint) {
                 const command = parameters.command;
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
-                console.log('Using new URL format');
             }
 
             settings = {...settings,
                 url: newURL,
                 type: 'POST',
                 data: parameters,
-                xhrFields: { withCredentials: true },
             };
             const formData = new FormData();
             let shouldUseFormData = false;
@@ -104,8 +100,6 @@ export default function Network(endpoint) {
                 settings.contentType = false;
                 settings.data = formData;
             }
-
-            console.log(settings, $);
 
             return $.ajax(settings);
         },
