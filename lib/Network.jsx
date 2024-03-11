@@ -33,7 +33,7 @@ export default function Network(endpoint) {
     let isNavigatingAway = false;
 
     // If URL ends in `/` we're using /api/command format.
-    let isNewURLFormat = endpoint[endpoint.length - 1] === '/';
+    const isNewURLFormat = endpoint[endpoint.length - 1] === '/';
 
     if (!endpoint) {
         throw new Error('Cannot instantiate Network without an url endpoint');
