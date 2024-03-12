@@ -32,7 +32,7 @@ export default function Network(endpoint) {
     // A flag that turns true when the user navigates away
     let isNavigatingAway = false;
 
-    // If URL ends in `/` we're using /api/command format.
+    // If URL ends in `/` we're using /api/{command} format.
     const isNewURLFormat = endpoint[endpoint.length - 1] === '/';
 
     if (!endpoint) {
@@ -61,7 +61,6 @@ export default function Network(endpoint) {
         post(parameters) {
             // Build request
             let newURL = endpoint;
-            let settings = {};
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
@@ -69,7 +68,7 @@ export default function Network(endpoint) {
                 newURL = `${endpoint}${command}`;
             }
 
-            settings = {...settings,
+            const settings = {
                 url: newURL,
                 type: 'POST',
                 data: parameters,
@@ -78,6 +77,7 @@ export default function Network(endpoint) {
             let shouldUseFormData = false;
 
             // Add the API command to our URL (for console debugging purposes)
+            // Note that parameters.command is empty if we're using the new API format and this will do nothing.
             settings.url = addCommandToUrl(parameters.command, settings.url);
 
             // Check to see if parameters contains a File or Blob object
