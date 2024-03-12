@@ -289,12 +289,6 @@ export declare const CONST: {
          * Regex matching an text containing an Emoji
          */
         readonly EMOJIS: RegExp;
-        /**
-         * Regex matching an text containing an Emoji that can be a single emoji or made up by some different emojis
-         *
-         * @type RegExp
-         */
-        readonly EMOJI_RULE: RegExp;
     };
     readonly REPORT: {
         /**
