@@ -13,7 +13,7 @@ import Logger from './Logger';
  * @return {Promise}
  */
 function serverLoggingCallback(logger, params) {
-    return API(Network('/api.php')).logToServer(params);
+    return API(Network('/api/')).logToServer(params);
 }
 
 /**
