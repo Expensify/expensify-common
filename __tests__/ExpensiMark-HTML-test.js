@@ -477,12 +477,19 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
 
     codeFenceExample = '*Test1 ```code``` Test2*';
     expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code</pre> Test2*');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre data-code-raw=\"code\">code</pre> Test2*');
 
     codeFenceExample = '_Test1 ```code``` Test2_';
     expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code</pre> Test2_');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre data-code-raw=\"code\">code</pre> Test2_');
 
     codeFenceExample = '~Test1 ```code``` Test2~';
     expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code</pre> Test2~');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre data-code-raw=\"code\">code</pre> Test2~');
+
+    codeFenceExample = '[```code```](google.com)';
+    expect(parser.replace(codeFenceExample)).toBe('[<pre>code</pre>](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre data-code-raw=\"code\">code</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
 });
 
 test('Test code fencing with additional backticks inside', () => {
