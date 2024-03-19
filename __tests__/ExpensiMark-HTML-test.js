@@ -304,28 +304,14 @@ test('Test markdown replacement for emojis with emails', () => {
     + '[😄abc@gmail.com](abc@gmail.com) '
     + '[😄 abc@gmail.com ](abc@gmail.com) '
     const result = 'Do not replace the emoji with link '
-    + '[<emoji>😄</emoji>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
-    + '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
-    + '[<emoji>😄</emoji><a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
+    + '[😄]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
+    + '[😄<a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[😄 <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
     expect(parser.replace(testString)).toBe(result);
 });
-
-test('Test markdown replacement for composite emoji', () => {
-    const testString = 'Replace composite emoji with only one emoji tag '
-    + '😶‍🌫️ '
-    + '🧑‍🔧 '
-    + '👨‍🏫 '
-    + '👨🏾‍❤️‍👨🏽 '
-    const result = 'Replace composite emoji with only one emoji tag '
-    + '<emoji>😶‍🌫️</emoji> '
-    + '<emoji>🧑‍🔧</emoji> '
-    + '<emoji>👨‍🏫</emoji> '
-    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> '
-    expect(parser.replace(testString)).toBe(result);
-})
 
 
 // Markdown style links replaced successfully
@@ -491,12 +477,19 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
 
     codeFenceExample = '*Test1 ```code``` Test2*';
     expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code</pre> Test2*');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre data-code-raw=\"code\">code</pre> Test2*');
 
     codeFenceExample = '_Test1 ```code``` Test2_';
     expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code</pre> Test2_');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre data-code-raw=\"code\">code</pre> Test2_');
 
     codeFenceExample = '~Test1 ```code``` Test2~';
     expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code</pre> Test2~');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre data-code-raw=\"code\">code</pre> Test2~');
+
+    codeFenceExample = '[```code```](google.com)';
+    expect(parser.replace(codeFenceExample)).toBe('[<pre>code</pre>](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre data-code-raw=\"code\">code</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
 });
 
 test('Test code fencing with additional backticks inside', () => {
@@ -1121,7 +1114,7 @@ test('Test for link with no content', () => {
 
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 test('Test quotes markdown replacement with heading inside', () => {
