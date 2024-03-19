@@ -1921,10 +1921,10 @@ describe('Image markdown conversion to html tag', () => {
 
     test('Trying to pass additional attributes should not create an <img>', () => {
         const testString = '![test](https://example.com/image.png "title" class="image")';
+
         // It seems the autolink rule is applied. We might need to update this test if the  autolink rule is changed
         // Ideally this test should return the same string as the input, or an <img> tag with the alt attribute set to
         // "test" and no other attributes
-
         const resultString = '![test](<a href=\"https://example.com/image.png\" target=\"_blank\" rel=\"noreferrer noopener\">https://example.com/image.png</a> &quot;title&quot; class=&quot;image&quot;)';
         expect(parser.replace(testString)).toBe(resultString);
     });
