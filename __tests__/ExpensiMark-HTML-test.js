@@ -1931,4 +1931,10 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = '<img src=\"https://example.com/image.png\" alt=\"test&quot; onerror=&quot;alert(&#x27;xss&#x27;)\" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('No html inside the src attribute', () => {
+        const testString = '![`code`](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    })
 });
