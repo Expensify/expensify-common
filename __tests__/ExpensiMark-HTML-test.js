@@ -1879,3 +1879,59 @@ describe('multi-level blockquote', () => {
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 });
+
+describe('Image markdown conversion to html tag', () => {
+    test('Single image', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing images', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image of a developer: ![dev](https://example.com/developer.png)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    // Currently any markdown used inside the square brackets is converted to html string in the alt attribute
+    // The attributes should only contain plain text, but it doesn't seem possible to convert markdown to plain text
+    // or let the parser know not to convert markdown to html for html attributes
+    xtest('Image with alt text containing markdown', () => {
+        const testString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="*bold* _italic_ ~strike~" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing image and autolink', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an autolink: example.com';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Image with raw data attributes', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    });
+
+    test('Image with invalid url should remain unchanged', () => {
+        const testString = '![test](invalid)';
+        expect(parser.replace(testString)).toBe(testString);
+    });
+
+    test('Trying to pass additional attributes should not create an <img>', () => {
+        const testString = '![test](https://example.com/image.png "title" class="image")';
+
+        // It seems the autolink rule is applied. We might need to update this test if the  autolink rule is changed
+        // Ideally this test should return the same string as the input, or an <img> tag with the alt attribute set to
+        // "test" and no other attributes
+        const resultString = '![test](<a href=\"https://example.com/image.png\" target=\"_blank\" rel=\"noreferrer noopener\">https://example.com/image.png</a> &quot;title&quot; class=&quot;image&quot;)';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Trying to inject additional attributes should not work', () => {
+        const testString = '![test" onerror="alert(\'xss\')](https://example.com/image.png)';
+        const resultString = '<img src=\"https://example.com/image.png\" alt=\"test&quot; onerror=&quot;alert(&#x27;xss&#x27;)\" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+});
