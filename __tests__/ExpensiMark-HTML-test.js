@@ -1928,4 +1928,10 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = '![test](<a href=\"https://example.com/image.png\" target=\"_blank\" rel=\"noreferrer noopener\">https://example.com/image.png</a> &quot;title&quot; class=&quot;image&quot;)';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('Trying to inject additional attributes should not work', () => {
+        const testString = '![test" onerror="alert(\'xss\')](https://example.com/image.png)';
+        const resultString = '<img src=\"https://example.com/image.png\" alt=\"test&quot; onerror=&quot;alert(&#x27;xss&#x27;)\" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
