@@ -1779,14 +1779,14 @@ describe('when should keep raw input flag is enabled', () => {
         });
     });
 });
-    
+
 test('Test code fence within inline code', () => {
     let testString = 'Hello world `(```test```)` Hello world';
     expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test</pre>)&#x60; Hello world');
-    
+
     testString = 'Hello world `(```test\ntest```)` Hello world';
     expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br />test</pre>)&#x60; Hello world');
-    
+
     testString = 'Hello world ```(`test`)``` Hello world';
     expect(parser.replace(testString)).toBe('Hello world <pre>(&#x60;test&#x60;)</pre> Hello world');
 
@@ -1893,12 +1893,9 @@ describe('Image markdown conversion to html tag', () => {
         expect(parser.replace(testString)).toBe(resultString);
     });
 
-    // Currently any markdown used inside the square brackets is converted to html string in the alt attribute
-    // The attributes should only contain plain text, but it doesn't seem possible to convert markdown to plain text
-    // or let the parser know not to convert markdown to html for html attributes
-    xtest('Image with alt text containing markdown', () => {
-        const testString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
-        const resultString = '<img src="https://example.com/image.png" alt="*bold* _italic_ ~strike~" />';
+    test('Image with alt text containing markdown', () => {
+        const testString = '![# fake-heading *bold* _italic_ ~strike~ [:-)]](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading &ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126; &lbrack;:-)&rbrack;" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -1934,4 +1931,10 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = '<img src=\"https://example.com/image.png\" alt=\"test&quot; onerror=&quot;alert(&#x27;xss&#x27;)\" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('No html inside the src attribute', () => {
+        const testString = '![`code`](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    })
 });
