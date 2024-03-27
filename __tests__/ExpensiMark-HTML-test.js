@@ -304,14 +304,28 @@ test('Test markdown replacement for emojis with emails', () => {
     + '[😄abc@gmail.com](abc@gmail.com) '
     + '[😄 abc@gmail.com ](abc@gmail.com) '
     const result = 'Do not replace the emoji with link '
-    + '[😄](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
-    + '[😄]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
-    + '[😄<a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[😄 <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
+    + '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
+    + '[<emoji>😄</emoji><a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
     expect(parser.replace(testString)).toBe(result);
 });
+
+test('Test markdown replacement for composite emoji', () => {
+    const testString = 'Replace composite emoji with only one emoji tag '
+    + '😶‍🌫️ '
+    + '🧑‍🔧 '
+    + '👨‍🏫 '
+    + '👨🏾‍❤️‍👨🏽 '
+    const result = 'Replace composite emoji with only one emoji tag '
+    + '<emoji>😶‍🌫️</emoji> '
+    + '<emoji>🧑‍🔧</emoji> '
+    + '<emoji>👨‍🏫</emoji> '
+    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> '
+    expect(parser.replace(testString)).toBe(result);
+})
 
 
 // Markdown style links replaced successfully
@@ -419,6 +433,15 @@ test('Test code fencing with spaces and new lines', () => {
     expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
 
     codeFenceExample = '```\n\n\n# test\n\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\r\n# test\r\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre>#&#32;test<br /></pre>');
+
+    codeFenceExample = '```\r\n\r\n# test\r\n\r\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\r\n\r\n\r\n# test\r\n\r\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
 });
 
@@ -1114,7 +1137,7 @@ test('Test for link with no content', () => {
 
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[😀](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';;
     expect(parser.replace(testString)).toBe(resultString);
 });
 test('Test quotes markdown replacement with heading inside', () => {
@@ -1779,14 +1802,14 @@ describe('when should keep raw input flag is enabled', () => {
         });
     });
 });
-    
+
 test('Test code fence within inline code', () => {
     let testString = 'Hello world `(```test```)` Hello world';
     expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test</pre>)&#x60; Hello world');
-    
+
     testString = 'Hello world `(```test\ntest```)` Hello world';
     expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br />test</pre>)&#x60; Hello world');
-    
+
     testString = 'Hello world ```(`test`)``` Hello world';
     expect(parser.replace(testString)).toBe('Hello world <pre>(&#x60;test&#x60;)</pre> Hello world');
 
@@ -1878,4 +1901,63 @@ describe('multi-level blockquote', () => {
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
+});
+
+describe('Image markdown conversion to html tag', () => {
+    test('Single image', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing images', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image of a developer: ![dev](https://example.com/developer.png)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Image with alt text containing markdown', () => {
+        const testString = '![# fake-heading *bold* _italic_ ~strike~ [:-)]](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading &ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126; &lbrack;:-)&rbrack;" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing image and autolink', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an autolink: example.com';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Image with raw data attributes', () => {
+        const testString = '![test](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="test" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    });
+
+    test('Image with invalid url should remain unchanged', () => {
+        const testString = '![test](invalid)';
+        expect(parser.replace(testString)).toBe(testString);
+    });
+
+    test('Trying to pass additional attributes should not create an <img>', () => {
+        const testString = '![test](https://example.com/image.png "title" class="image")';
+
+        // It seems the autolink rule is applied. We might need to update this test if the  autolink rule is changed
+        // Ideally this test should return the same string as the input, or an <img> tag with the alt attribute set to
+        // "test" and no other attributes
+        const resultString = '![test](<a href=\"https://example.com/image.png\" target=\"_blank\" rel=\"noreferrer noopener\">https://example.com/image.png</a> &quot;title&quot; class=&quot;image&quot;)';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Trying to inject additional attributes should not work', () => {
+        const testString = '![test" onerror="alert(\'xss\')](https://example.com/image.png)';
+        const resultString = '<img src=\"https://example.com/image.png\" alt=\"test&quot; onerror=&quot;alert(&#x27;xss&#x27;)\" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('No html inside the src attribute', () => {
+        const testString = '![`code`](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    })
 });

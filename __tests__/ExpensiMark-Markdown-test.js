@@ -756,3 +756,23 @@ test('Mention html to markdown', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
 });
+
+describe('Image tag conversion to markdown', () => {
+   test('Image with alt attribute', () => {
+         const testString = '<img src="https://example.com/image.png" alt="image" />';
+         const resultString = '![image](https://example.com/image.png)';
+         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+   });
+
+   test('Image without alt attribute', () => {
+        const testString = '<img src="https://example.com/image.png" />';
+        const resultString = '![https://example.com/image.png](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+   });
+
+    test('Image with alt text containing escaped markdown', () => {
+        const testString = '<img src="https://example.com/image.png" alt="&ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126;" />';
+        const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+});

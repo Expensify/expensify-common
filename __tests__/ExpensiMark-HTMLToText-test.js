@@ -146,3 +146,8 @@ test('Mention html to text', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
 });
+
+test('Test replacement for <img> tags', () => {
+    const testString = '<img src="https://example.com/image.png" alt="Image description" />';
+    expect(parser.htmlToText(testString)).toBe('(image of: Image description)');
+});

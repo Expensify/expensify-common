@@ -25,6 +25,7 @@ describe('Strict URL validation', () => {
         it('correctly tests valid urls', () => {
             const regexToTest = new RegExp(`^${URL_REGEX}$`, 'i');
             expect(regexToTest.test('google.com/')).toBeTruthy();
+            expect(regexToTest.test('x.com')).toBeTruthy();
             expect(regexToTest.test('https://google.com/')).toBeTruthy();
             expect(regexToTest.test('ftp://google.com/')).toBeTruthy();
             expect(regexToTest.test('we.are.expensify.com/how-we-got-here')).toBeTruthy();
