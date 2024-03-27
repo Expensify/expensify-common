@@ -476,6 +476,15 @@ declare const Str: {
      */
     boldify(text: string, regexp: RegExp): string;
     /**
+     * Check for whether a phone number is valid in different formats/standards. For example:
+     * significant: 4404589784
+     * international: +1 440-458-9784
+     * e164: +14404589784
+     * national: (440) 458-978
+     * 123.456.7890
+     */
+    isValidPhone(phone: string): boolean;
+    /**
      * Check for whether a phone number is valid according to E.164 standard.
      * @param phone
      */
