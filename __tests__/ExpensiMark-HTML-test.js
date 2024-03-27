@@ -434,6 +434,15 @@ test('Test code fencing with spaces and new lines', () => {
 
     codeFenceExample = '```\n\n\n# test\n\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\r\n# test\r\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre>#&#32;test<br /></pre>');
+
+    codeFenceExample = '```\r\n\r\n# test\r\n\r\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\r\n\r\n\r\n# test\r\n\r\n```';
+    expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
 });
 
 test('Test inline code blocks', () => {
