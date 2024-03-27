@@ -296,9 +296,16 @@ export const CONST = {
         EMAIL_PART: EMAIL_BASE_REGEX,
 
         /**
+        * Regex matching a text containing general phone number
+        * 
+        * @type RegExp
+        */
+        GENERAL_PHONE_PART: /(\+\d{1,2}\s?)?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}/,
+
+        /**
         * Regex matching a text containing an E.164 format phone number
         */
-        PHONE_PART: '\\+[1-9]\\d{1,14}',
+        E164_PHONE_PART: '\\+[1-9]\\d{1,14}',
 
         /**
          * Regular expression to check that a basic name is valid
