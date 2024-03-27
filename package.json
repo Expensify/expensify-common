@@ -39,7 +39,7 @@
     "babelify": "10.0.0",
     "eslint": "^7.15.0",
     "eslint-config-expensify": "^2.0.44",
-    "eslint-config-prettier": "^8.10.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-jest": "^24.7.0",
     "grunt": "1.6.1",
     "grunt-chokidar": "1.0.2",
