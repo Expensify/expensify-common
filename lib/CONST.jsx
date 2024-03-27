@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-escape */
 
-const EMAIL_BASE_REGEX = '(?=((?=[\\w\'#%+-]+(?:\\.[\\w\'#%+-]+)*@)[\\w\\.\'#%+-]{1,64}@(?:(?=[a-z\\d]+(?:-+[a-z\\d]+)*\\.)(?:[a-z\\d-]{1,63}\\.)+[a-z]{2,63})(?= |_|\\b))(?<end>.*))\\S{3,254}(?=\\k<end>$)';
+const EMAIL_BASE_REGEX =
+    "(?=((?=[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*@)[\\w\\.'#%+-]{1,64}@(?:(?=[a-z\\d]+(?:-+[a-z\\d]+)*\\.)(?:[a-z\\d-]{1,63}\\.)+[a-z]{2,63})(?= |_|\\b))(?<end>.*))\\S{3,254}(?=\\k<end>$)";
 
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 
@@ -15,13 +16,7 @@ export const g_cloudFront = 'https://d2k5nsl2zxldvw.cloudfront.net';
 export const g_cloudFrontImg = `${g_cloudFront}/images/`;
 
 export const CONST = {
-    CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: [
-        'USD',
-        'GBP',
-        'EUR',
-        'AUD',
-        'CAD',
-    ],
+    CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: ['USD', 'GBP', 'EUR', 'AUD', 'CAD'],
 
     /**
      * Default max ACH limit. It can be overwritten by a private NVP
@@ -36,238 +31,238 @@ export const CONST = {
      *
      * @type Number
      */
-    MILEAGE_IRS_RATE: (new Date() > new Date(2019, 1, 1)) ? 0.545 : 0.58,
+    MILEAGE_IRS_RATE: new Date() > new Date(2019, 1, 1) ? 0.545 : 0.58,
 
     /**
      * Display this amount to users to encourage them to book a call
-     * 
+     *
      * @type Number
      */
     MAX_TRIAL_BONUS_DAYS: 42,
-    
+
     COUNTRY: {
         US: 'US',
         AU: 'AU',
         UK: 'UK',
-        NZ: 'NZ'
+        NZ: 'NZ',
     },
 
     CURRENCIES: {
         US: 'USD',
         AU: 'AUD',
         UK: 'GBP',
-        NZ: 'NZD'
+        NZ: 'NZD',
     },
 
     STATES: {
         AK: {
             stateISO: 'AK',
-            stateName: 'Alaska'
+            stateName: 'Alaska',
         },
         AL: {
             stateISO: 'AL',
-            stateName: 'Alabama'
+            stateName: 'Alabama',
         },
         AR: {
             stateISO: 'AR',
-            stateName: 'Arkansas'
+            stateName: 'Arkansas',
         },
         AZ: {
             stateISO: 'AZ',
-            stateName: 'Arizona'
+            stateName: 'Arizona',
         },
         CA: {
             stateISO: 'CA',
-            stateName: 'California'
+            stateName: 'California',
         },
         CO: {
             stateISO: 'CO',
-            stateName: 'Colorado'
+            stateName: 'Colorado',
         },
         CT: {
             stateISO: 'CT',
-            stateName: 'Connecticut'
+            stateName: 'Connecticut',
         },
         DE: {
             stateISO: 'DE',
-            stateName: 'Delaware'
+            stateName: 'Delaware',
         },
         FL: {
             stateISO: 'FL',
-            stateName: 'Florida'
+            stateName: 'Florida',
         },
         GA: {
             stateISO: 'GA',
-            stateName: 'Georgia'
+            stateName: 'Georgia',
         },
         HI: {
             stateISO: 'HI',
-            stateName: 'Hawaii'
+            stateName: 'Hawaii',
         },
         IA: {
             stateISO: 'IA',
-            stateName: 'Iowa'
+            stateName: 'Iowa',
         },
         ID: {
             stateISO: 'ID',
-            stateName: 'Idaho'
+            stateName: 'Idaho',
         },
         IL: {
             stateISO: 'IL',
-            stateName: 'Illinois'
+            stateName: 'Illinois',
         },
         IN: {
             stateISO: 'IN',
-            stateName: 'Indiana'
+            stateName: 'Indiana',
         },
         KS: {
             stateISO: 'KS',
-            stateName: 'Kansas'
+            stateName: 'Kansas',
         },
         KY: {
             stateISO: 'KY',
-            stateName: 'Kentucky'
+            stateName: 'Kentucky',
         },
         LA: {
             stateISO: 'LA',
-            stateName: 'Louisiana'
+            stateName: 'Louisiana',
         },
         MA: {
             stateISO: 'MA',
-            stateName: 'Massachusetts'
+            stateName: 'Massachusetts',
         },
         MD: {
             stateISO: 'MD',
-            stateName: 'Maryland'
+            stateName: 'Maryland',
         },
         ME: {
             stateISO: 'ME',
-            stateName: 'Maine'
+            stateName: 'Maine',
         },
         MI: {
             stateISO: 'MI',
-            stateName: 'Michigan'
+            stateName: 'Michigan',
         },
         MN: {
             stateISO: 'MN',
-            stateName: 'Minnesota'
+            stateName: 'Minnesota',
         },
         MO: {
             stateISO: 'MO',
-            stateName: 'Missouri'
+            stateName: 'Missouri',
         },
         MS: {
             stateISO: 'MS',
-            stateName: 'Mississippi'
+            stateName: 'Mississippi',
         },
         MT: {
             stateISO: 'MT',
-            stateName: 'Montana'
+            stateName: 'Montana',
         },
         NC: {
             stateISO: 'NC',
-            stateName: 'North Carolina'
+            stateName: 'North Carolina',
         },
         ND: {
             stateISO: 'ND',
-            stateName: 'North Dakota'
+            stateName: 'North Dakota',
         },
         NE: {
             stateISO: 'NE',
-            stateName: 'Nebraska'
+            stateName: 'Nebraska',
         },
         NH: {
             stateISO: 'NH',
-            stateName: 'New Hampshire'
+            stateName: 'New Hampshire',
         },
         NJ: {
             stateISO: 'NJ',
-            stateName: 'New Jersey'
+            stateName: 'New Jersey',
         },
         NM: {
             stateISO: 'NM',
-            stateName: 'New Mexico'
+            stateName: 'New Mexico',
         },
         NV: {
             stateISO: 'NV',
-            stateName: 'Nevada'
+            stateName: 'Nevada',
         },
         NY: {
             stateISO: 'NY',
-            stateName: 'New York'
+            stateName: 'New York',
         },
         OH: {
             stateISO: 'OH',
-            stateName: 'Ohio'
+            stateName: 'Ohio',
         },
         OK: {
             stateISO: 'OK',
-            stateName: 'Oklahoma'
+            stateName: 'Oklahoma',
         },
         OR: {
             stateISO: 'OR',
-            stateName: 'Oregon'
+            stateName: 'Oregon',
         },
         PA: {
             stateISO: 'PA',
-            stateName: 'Pennsylvania'
+            stateName: 'Pennsylvania',
         },
         PR: {
             stateISO: 'PR',
-            stateName: 'Puerto Rico'
+            stateName: 'Puerto Rico',
         },
         RI: {
             stateISO: 'RI',
-            stateName: 'Rhode Island'
+            stateName: 'Rhode Island',
         },
         SC: {
             stateISO: 'SC',
-            stateName: 'South Carolina'
+            stateName: 'South Carolina',
         },
         SD: {
             stateISO: 'SD',
-            stateName: 'South Dakota'
+            stateName: 'South Dakota',
         },
         TN: {
             stateISO: 'TN',
-            stateName: 'Tennessee'
+            stateName: 'Tennessee',
         },
         TX: {
             stateISO: 'TX',
-            stateName: 'Texas'
+            stateName: 'Texas',
         },
         UT: {
             stateISO: 'UT',
-            stateName: 'Utah'
+            stateName: 'Utah',
         },
         VA: {
             stateISO: 'VA',
-            stateName: 'Virginia'
+            stateName: 'Virginia',
         },
         VT: {
             stateISO: 'VT',
-            stateName: 'Vermont'
+            stateName: 'Vermont',
         },
         WA: {
             stateISO: 'WA',
-            stateName: 'Washington'
+            stateName: 'Washington',
         },
         WI: {
             stateISO: 'WI',
-            stateName: 'Wisconsin'
+            stateName: 'Wisconsin',
         },
         WV: {
             stateISO: 'WV',
-            stateName: 'West Virginia'
+            stateName: 'West Virginia',
         },
         WY: {
             stateISO: 'WY',
-            stateName: 'Wyoming'
+            stateName: 'Wyoming',
         },
         DC: {
             stateISO: 'DC',
-            stateName: 'District Of Columbia'
-        }
+            stateName: 'District Of Columbia',
+        },
     },
 
     /**
@@ -296,8 +291,8 @@ export const CONST = {
         EMAIL_PART: EMAIL_BASE_REGEX,
 
         /**
-        * Regex matching a text containing an E.164 format phone number
-        */
+         * Regex matching a text containing an E.164 format phone number
+         */
         PHONE_PART: '\\+[1-9]\\d{1,14}',
 
         /**
@@ -342,7 +337,10 @@ export const CONST = {
          *
          * @type RegExp
          */
-        HYPERLINK: new RegExp('^(?:(?:(?:https?|ftp):)?\\/\\/)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z0-9\\u00a1-\\uffff][a-z0-9\\u00a1-\\uffff_-]{0,62})?[a-z0-9\\u00a1-\\uffff]\\.)+(?:[a-z\\u00a1-\\uffff]{2,}\\.?))(?::\\d{2,5})?(?:[/?#]\\S*)?$', 'i'),
+        HYPERLINK: new RegExp(
+            '^(?:(?:(?:https?|ftp):)?\\/\\/)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z0-9\\u00a1-\\uffff][a-z0-9\\u00a1-\\uffff_-]{0,62})?[a-z0-9\\u00a1-\\uffff]\\.)+(?:[a-z\\u00a1-\\uffff]{2,}\\.?))(?::\\d{2,5})?(?:[/?#]\\S*)?$',
+            'i',
+        ),
 
         /**
          * Regex to match valid emails during markdown transformations
@@ -397,7 +395,7 @@ export const CONST = {
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
         EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_2300802.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
-        ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions'
+        ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions',
     },
 
     DATE: {
@@ -494,14 +492,14 @@ export const CONST = {
      * Bank Import Logic Constants
      */
     BANK_IMPORT: {
-        BANK_STATUS_BROKEN: 2
+        BANK_STATUS_BROKEN: 2,
     },
 
     /**
      * Bank Account Logic Constants
      */
     BANK_ACCOUNT: {
-        VERIFICATION_MAX_ATTEMPTS: 7
+        VERIFICATION_MAX_ATTEMPTS: 7,
     },
 
     /**
@@ -531,7 +529,7 @@ export const CONST = {
         'notifications@expensify.com',
     ],
 
-     /**
+    /**
      * Emails that the user shouldn't submit reports to nor share reports with
      * Any changes here should be reflected in the PHP constant,
      * which is located in _constant.php and also named INVALID_APPROVER_AND_SHAREE_EMAILS
@@ -554,7 +552,7 @@ export const CONST = {
      */
     SMART_SCAN: {
         COST: 20,
-        FREE_NUMBER: 25
+        FREE_NUMBER: 25,
     },
 
     SMS: {
@@ -576,13 +574,13 @@ export const CONST = {
             NONE: 'NONE',
             TAG: 'TAG',
             REPORT_FIELD: 'REPORT_FIELD',
-            DEFAULT: 'DEFAULT'
+            DEFAULT: 'DEFAULT',
         },
 
         EXPORT_DATE: {
             LAST_EXPENSE: 'LAST_EXPENSE',
             REPORT_EXPORTED: 'REPORT_EXPORTED',
-            REPORT_SUBMITTED: 'REPORT_SUBMITTED'
+            REPORT_SUBMITTED: 'REPORT_SUBMITTED',
         },
 
         XERO_HQ_CONNECTION_NAME: 'xerohq',
@@ -592,7 +590,7 @@ export const CONST = {
 
     INTEGRATION_TYPES: {
         ACCOUNTING: 'accounting',
-        HR: 'hr'
+        HR: 'hr',
     },
 
     DIRECT_INTEGRATIONS: {
@@ -667,7 +665,7 @@ export const CONST = {
             alert_image: `${g_cloudFrontImg}icons/export-icons/certinia_alert.svg`,
             types: ['accounting'],
             isCorporateOnly: true,
-        }
+        },
     },
 
     INDIRECT_INTEGRATIONS: {
@@ -779,11 +777,11 @@ export const CONST = {
 
     NVP: {
         // Dismissed Violations
-        DISMISSED_VIOLATIONS: 'dismissedViolations'
+        DISMISSED_VIOLATIONS: 'dismissedViolations',
     },
     FILESIZE: {
         BYTES_IN_MEGABYTE: 1000000, // Bytes in a Megabyte
-        MAX: 10000000 // Our max filesize allowed is 10MB
+        MAX: 10000000, // Our max filesize allowed is 10MB
     },
 
     PARTNER_NAMES: {
@@ -794,7 +792,7 @@ export const CONST = {
 
     LOGIN_TYPES: {
         WEB: 'login',
-        MOBILE: 'device'
+        MOBILE: 'device',
     },
 
     EXPENSIFY_CARD: {
@@ -813,7 +811,7 @@ export const CONST = {
             SUSPICIOUS_PAN_ENTRY: 8,
             SUSPICIOUS_PAN_ENTRY_CLEARED: 9,
             SUSPICIOUS_PAN_ENTRY_CONFIRMED: 10,
-        }
+        },
     },
 
     TRAVEL_BOOKING: {
@@ -822,35 +820,31 @@ export const CONST = {
                 economy: 'Economy',
                 premiumEconomy: 'Premium Economy',
                 business: 'Business',
-                first: 'First'
+                first: 'First',
             },
             longFlightFare: {
                 economy: 'Economy',
                 premiumEconomy: 'Premium Economy',
                 business: 'Business',
-                first: 'First'
+                first: 'First',
             },
             hotelStar: {
                 oneStar: '1',
                 twoStars: '2',
                 threeStars: '3',
                 fourStars: '4',
-                fiveStars: '5'
+                fiveStars: '5',
             },
         },
         DEFAULT_OPTIONS: {
             shortFlightFare: 'economy',
             longFlightFare: 'economy',
-            hotelStar: 'fourStars'
+            hotelStar: 'fourStars',
         },
     },
 
     // Expensify domains
-    EXPENSIFY_DOMAINS: [
-        'expensify.com',
-        'expensifail.com',
-        'expensicorp.com'
-    ],
+    EXPENSIFY_DOMAINS: ['expensify.com', 'expensifail.com', 'expensicorp.com'],
 
     SUBSCRIPTION_CHANGE_REASONS: {
         TOO_LIMITED: {
@@ -890,7 +884,7 @@ export const UI = {
         PER_DIEM: 'per-diem',
         PENDING_CARD: 'card-transaction-pending',
         CSV_UPLOAD: 'csv-upload',
-        PENDING_CREDIT_CARD: 'credit-card-pending'
+        PENDING_CREDIT_CARD: 'credit-card-pending',
     },
     spinnerDIV: '<div class="spinner"></div>',
     spinnerSmallDIV: '<div class="spinner spinner-small"></div>',
@@ -912,7 +906,7 @@ export const UI = {
     QR_CODE: 'js_qrCode',
 
     // Base z-index for dialogs $zindex-dialog in _vars.scss should take it's value from here!
-    DIALOG_Z_INDEX: 4000
+    DIALOG_Z_INDEX: 4000,
 };
 
 // List of most frequently used public domains

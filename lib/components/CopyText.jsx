@@ -1,5 +1,5 @@
 import React from 'react';
-import Clipboard from 'clipboard'
+import Clipboard from 'clipboard';
 import PropTypes from 'prop-types';
 
 const propTypes = {
@@ -10,7 +10,7 @@ const propTypes = {
     textContent: PropTypes.string,
 
     // Function as a child exposes the copyTextToClipboard fuction
-    children: PropTypes.func.isRequired
+    children: PropTypes.func.isRequired,
 };
 
 const defaultProps = {
@@ -37,7 +37,7 @@ class CopyText extends React.Component {
 
         // Sets up the clipboard instance
         this.clipboard = new Clipboard(this.hiddenLink, {
-            text: () => this.props.textContent
+            text: () => this.props.textContent,
         });
 
         // Fires callback when the clipboard has succesfully copied

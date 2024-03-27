@@ -225,6 +225,6 @@ export default (function () {
          */
         append($target, templatePath, data) {
             $target.append(this.get(templatePath, data));
-        }
+        },
     };
 })();
