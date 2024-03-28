@@ -10,6 +10,7 @@
     "grunt": "grunt",
     "test": "jest",
     "lint": "eslint lib/",
+    "prettier": "prettier --write lib/",
     "patch": "npm --no-git-tag-version version patch",
     "update-tlds": "echo \"$(curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- )|SJC|RNO|LAX\" | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
   },
@@ -34,15 +35,19 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.0",
+    "@lwc/eslint-plugin-lwc": "^1.7.2",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
-    "eslint-config-expensify": "^2.0.16",
+    "eslint": "^7.15.0",
+    "eslint-config-expensify": "^2.0.44",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-jest": "^24.7.0",
     "grunt": "1.6.1",
     "grunt-chokidar": "1.0.2",
     "grunt-eslint": "22.0.0",
     "jest": "^29.0.0",
-    "jit-grunt": "^0.10.0"
+    "jit-grunt": "^0.10.0",
+    "prettier": "^3.2.5"
   },
   "browserify": {
     "transform": [

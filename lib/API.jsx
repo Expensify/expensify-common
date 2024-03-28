@@ -44,7 +44,8 @@ export default function API(network, args) {
     function isRunningLatestVersionOfCode() {
         const promise = new Deferred();
 
-        network.get('/revision.txt')
+        network
+            .get('/revision.txt')
             .done((codeRevision) => {
                 if (codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
@@ -112,9 +113,7 @@ export default function API(network, args) {
         // will be treated the same way regardless of the arguments).
 
         // This promise is to check to see if we are running the latest version of code
-        const codeRevisionPromise = checkCodeRevision
-            ? isRunningLatestVersionOfCode
-            : () => new Deferred().resolve();
+        const codeRevisionPromise = checkCodeRevision ? isRunningLatestVersionOfCode : () => new Deferred().resolve();
 
         // This is a dummy promise that will perform the actions from our network POST. We have to create it here
         // because we need the final APIDeferred object to return immediately, and then have all this async code run.
@@ -128,13 +127,9 @@ export default function API(network, args) {
             // We are done checking the code version, so now we can make our network request. We then use our
             // dummy promise here in done() and fail() because that was the promise attached to our APIDeferred.
             if (keepalive) {
-                network.keepalive(newParameters)
-                    .done(networkRequestPromise.resolve)
-                    .fail(networkRequestPromise.reject);
+                network.keepalive(newParameters).done(networkRequestPromise.resolve).fail(networkRequestPromise.reject);
             } else {
-                network.post(newParameters)
-                    .done(networkRequestPromise.resolve)
-                    .fail(networkRequestPromise.reject);
+                network.post(newParameters).done(networkRequestPromise.resolve).fail(networkRequestPromise.reject);
             }
 
             // Finally, we can attach any JSONCode callbacks to our APIDeferred because we know that at this point
@@ -156,10 +151,7 @@ export default function API(network, args) {
      */
     function requireParameters(parameterNames, parameters, commandName) {
         parameterNames.forEach((parameterName) => {
-            if (!_(parameters).has(parameterName)
-                || parameters[parameterName] === null
-                || parameters[parameterName] === undefined
-            ) {
+            if (!_(parameters).has(parameterName) || parameters[parameterName] === null || parameters[parameterName] === undefined) {
                 const parametersCopy = _.clone(parameters);
                 if (_(parametersCopy).has('authToken')) {
                     parametersCopy.authToken = '<redacted>';
@@ -241,13 +233,7 @@ export default function API(network, args) {
                 }
 
                 requireParameters(data.requireParameters || [], parameters, data.commandName);
-                return performPOSTRequest(
-                    data.commandName,
-                    parameters,
-                    data.returnedPropertyName || false,
-                    keepalive,
-                    data.checkCodeRevision || false
-                );
+                return performPOSTRequest(data.commandName, parameters, data.returnedPropertyName || false, keepalive, data.checkCodeRevision || false);
             };
         },
 
@@ -871,6 +857,6 @@ export default function API(network, args) {
                 411, // AuthToken has insufficient privileges
                 500, // Server Error
             ],
-        }
+        },
     };
 }

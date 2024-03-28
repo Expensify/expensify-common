@@ -31,7 +31,7 @@ export default class ReportHistoryStore {
          *
          * @returns {Object[]}
          */
-        this.filterHiddenActions = historyItems => _.filter(historyItems, historyItem => historyItem.shouldShow);
+        this.filterHiddenActions = (historyItems) => _.filter(historyItems, (historyItem) => historyItem.shouldShow);
 
         /**
          * Public Methods
@@ -103,7 +103,7 @@ export default class ReportHistoryStore {
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
                         this.get(reportID)
-                            .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
+                            .done((reportHistory) => promise.resolve(this.filterHiddenActions(reportHistory)))
                             .fail(promise.reject);
                     })
                     .fail(promise.reject);
@@ -134,7 +134,7 @@ export default class ReportHistoryStore {
                         // If we get here we have an incomplete history and should get
                         // the report history again, but this time do not check the cache first.
                         this.getFlatHistory(reportID)
-                            .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
+                            .done((reportHistory) => promise.resolve(this.filterHiddenActions(reportHistory)))
                             .fail(promise.reject);
                     })
                     .fail(promise.reject);
@@ -149,7 +149,7 @@ export default class ReportHistoryStore {
              * @param {String[]} events
              */
             bindCacheClearingEvents: (events) => {
-                _.each(events, event => this.PubSub.subscribe(event, () => this.cache = {}));
+                _.each(events, (event) => this.PubSub.subscribe(event, () => (this.cache = {})));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -169,12 +169,16 @@ export default class ReportHistoryStore {
             return;
         }
 
-        const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
-            if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
-                prev.unshift(curr);
-            }
-            return prev;
-        }, this.cache[reportID] || []);
+        const newCache = _.reduce(
+            newHistory.reverse(),
+            (prev, curr) => {
+                if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
+                    prev.unshift(curr);
+                }
+                return prev;
+            },
+            this.cache[reportID] || [],
+        );
 
         // Sort items in case they have become out of sync
         this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
@@ -191,12 +195,16 @@ export default class ReportHistoryStore {
             return;
         }
 
-        const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
-            if (!_.findWhere(prev, {reportActionTimestamp: curr.reportActionTimestamp})) {
-                prev.unshift(curr);
-            }
-            return prev;
-        }, this.cache[reportID] || []);
+        const newCache = _.reduce(
+            newHistory.reverse(),
+            (prev, curr) => {
+                if (!_.findWhere(prev, {reportActionTimestamp: curr.reportActionTimestamp})) {
+                    prev.unshift(curr);
+                }
+                return prev;
+            },
+            this.cache[reportID] || [],
+        );
 
         // Sort items in case they have become out of sync
         this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp').reverse();
@@ -225,7 +233,7 @@ export default class ReportHistoryStore {
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
             reportID,
-            offset: firstHistoryItem.sequenceNumber || 0
+            offset: firstHistoryItem.sequenceNumber || 0,
         })
             .done((recentHistory) => {
                 // Update history with new items fetched

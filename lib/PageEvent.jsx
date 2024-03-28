@@ -18,6 +18,6 @@ export default function (eventName, callback) {
         unsubscribe() {
             PubSub.unsubscribe(id);
             id = null;
-        }
+        },
     };
-};
+}

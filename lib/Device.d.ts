@@ -4,4 +4,4 @@ declare function getOSAndName(): {
     deviceName: string | undefined;
     deviceVersion: string | undefined;
 };
-export { getOSAndName };
+export {getOSAndName};

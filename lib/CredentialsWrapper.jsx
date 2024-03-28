@@ -4,7 +4,7 @@ export const LOGIN_PARTNER_DETAILS = {
     CREDENTIALS_KEY: 'DEVICE_SESSION_CREDENTIALS',
     EXPENSIFY_PARTNER_PREFIX: 'expensify.',
     PARTNER_NAME: 'chat-expensify-com',
-    PARTNER_PASSWORD: 'e21965746fd75f82bb66'
+    PARTNER_PASSWORD: 'e21965746fd75f82bb66',
 };
 const CredentialWrapper = {
     /**

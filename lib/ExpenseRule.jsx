@@ -21,9 +21,11 @@ export default class ExpenseRule {
      * @return {Object}
      */
     getApplyWhenByField(field) {
-        return _.find(this.applyWhen, (conditions) => {
-            return conditions.field === field;
-        }) || {};
+        return (
+            _.find(this.applyWhen, (conditions) => {
+                return conditions.field === field;
+            }) || {}
+        );
     }
 
     /**
@@ -75,4 +77,4 @@ export default class ExpenseRule {
                 return false;
         }
     }
-};
+}
