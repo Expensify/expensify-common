@@ -476,10 +476,19 @@ declare const Str: {
      */
     boldify(text: string, regexp: RegExp): string;
     /**
-     * Check for whether a phone number is valid.
-     * @param phone
+     * Check for whether a phone number is valid in different formats/standards. For example:
+     * significant: 4404589784
+     * international: +1 440-458-9784
+     * e164: +14404589784
+     * national: (440) 458-9784
+     * 123.456.7890
      */
     isValidPhone(phone: string): boolean;
+    /**
+     * Check for whether a phone number is valid according to E.164 standard.
+     * @param phone
+     */
+    isValidE164Phone(phone: string): boolean;
     /**
      * We validate mentions by checking if it's first character is an allowed character.
      *
@@ -493,7 +502,7 @@ declare const Str: {
      */
     removeSMSDomain(text: string): string;
     /**
-     * Returns true if the text is a valid phone number with our SMS domain removed
+     * Returns true if the text is a valid E.164 phone number with our SMS domain removed
      *
      * @param text
      */
