@@ -480,7 +480,7 @@ declare const Str: {
      * significant: 4404589784
      * international: +1 440-458-9784
      * e164: +14404589784
-     * national: (440) 458-978
+     * national: (440) 458-9784
      * 123.456.7890
      */
     isValidPhone(phone: string): boolean;
