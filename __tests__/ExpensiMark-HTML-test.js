@@ -1090,6 +1090,13 @@ test('Test quotes markdown replacement with text includes blank quotes', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test quotes markdown replacement with text includes multiple spaces', () => {
+    const quoteTestStartString = '>No indent\n>   Keep both  \n>     Keep leading ';
+    const quoteTestReplacedString = '<blockquote>No indent<br />  Keep both  <br />    Keep leading</blockquote>';
+
+    expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+});
+
 test('Single char matching', () => {
     const testString = ' *1* char _1_ char ~1~ char';
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
@@ -1862,14 +1869,14 @@ describe('multi-level blockquote', () => {
     });
     test('multi-level blockquote with multiple spaces', () => {
         const quoteTestStartString = '>  >   >      Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>     Hello world</blockquote></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multi-level blockquote with mixed spaces', () => {
         const quoteTestStartString = '>  > >   Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>  Hello world</blockquote></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
