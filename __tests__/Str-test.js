@@ -190,7 +190,6 @@ describe('Str.isValidEmail', () => {
     });
 });
 
-
 describe('Str.isValidPhone', () => {
     it('Correctly identifies valid phone numbers', () => {
         // Significant part of phone
