@@ -189,3 +189,24 @@ describe('Str.isValidEmail', () => {
         expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl')).toBeFalsy();
     });
 });
+
+
+describe('Str.isValidPhone', () => {
+    it('Correctly identifies valid phone numbers', () => {
+        // Significant part of phone
+        expect(Str.isValidPhone('4404589784')).toBeTruthy();
+        // International standard
+        expect(Str.isValidPhone('+1 440-458-9784')).toBeTruthy();
+        // E.164 standard
+        expect(Str.isValidPhone('+14404589784')).toBeTruthy();
+        // US national standard
+        expect(Str.isValidPhone('(440) 458-9784')).toBeTruthy();
+        expect(Str.isValidPhone('123.456.7890')).toBeTruthy();
+    });
+});
+
+describe('Str.isValidE164Phone', () => {
+    it('Correctly identifies valid E.164 phone numbers', () => {
+        expect(Str.isValidE164Phone('+14404589784')).toBeTruthy();
+    });
+});
