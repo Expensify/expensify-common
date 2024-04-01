@@ -258,7 +258,7 @@ export declare const CONST: {
         /**
         * Regex matching a text containing an E.164 format phone number
         */
-        readonly E164_PHONE_PART: "\\+[1-9]\\d{1,14}";
+        readonly PHONE_PART: "\\+[1-9]\\d{1,14}";
         /**
          * Regular expression to check that a basic name is valid
          */
