@@ -1091,9 +1091,8 @@ test('Test quotes markdown replacement with text includes blank quotes', () => {
 });
 
 test('Test quotes markdown replacement with text includes multiple spaces', () => {
-    const quoteTestStartString = '>No indent\n>   Keep both  \n>     Keep leading ';
-    const quoteTestReplacedString = '<blockquote>No indent<br />  Keep both  <br />    Keep leading</blockquote>';
-
+    const quoteTestStartString = '>   Indented\n>No indent\n>   Indented  \n> >   Nested indented  \n>     Indented ';
+    const quoteTestReplacedString = '<blockquote>  Indented<br />No indent<br />  Indented  <br /><blockquote>  Nested indented  </blockquote>    Indented </blockquote>';
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
 
@@ -1171,7 +1170,7 @@ test('Test heading1 markdown replacement with line break before or after the hea
 
 test('Test heading1 markdown replacement when heading appear after the quote', () => {
     const testString = '> quote \n# heading 1 after the quote.\nHere is a multi-line\ncomment that contains *bold* string.';
-    expect(parser.replace(testString)).toBe('<blockquote>quote</blockquote><h1>heading 1 after the quote.</h1>Here is a multi-line<br />comment that contains <strong>bold</strong> string.');
+    expect(parser.replace(testString)).toBe('<blockquote>quote </blockquote><h1>heading 1 after the quote.</h1>Here is a multi-line<br />comment that contains <strong>bold</strong> string.');
 });
 
 // Valid text that should match for user mentions
