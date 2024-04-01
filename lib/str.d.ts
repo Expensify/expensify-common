@@ -478,7 +478,7 @@ declare const Str: {
     /**
      * Check for whether a phone number is valid.
      * @param phone
-     * @deprecated use isValidE164Phone instead
+     * @deprecated use isValidE164Phone to validate E.164 phone numbers or isValidPhoneFormat to validate phone numbers in general
      */
     isValidPhone(phone: string): boolean;
     /**
