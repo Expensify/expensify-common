@@ -252,6 +252,10 @@ export declare const CONST: {
          */
         readonly EMAIL_PART: "([\\w\\-\\+\\'#]+(?:\\.[\\w\\-\\'\\+]+)*@(?:[\\w\\-]+\\.)+[a-z]{2,})";
         /**
+         * Regex matching a text containing general phone number
+         */
+        readonly GENERAL_PHONE_PART: RegExp,
+        /**
         * Regex matching a text containing an E.164 format phone number
         */
         readonly PHONE_PART: "\\+[1-9]\\d{1,14}";
