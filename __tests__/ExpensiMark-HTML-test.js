@@ -1936,7 +1936,7 @@ describe('Image markdown conversion to html tag', () => {
 
     test('Image with alt text containing markdown', () => {
         const testString = '![# fake-heading *bold* _italic_ ~strike~ [:-)]](https://example.com/image.png)';
-        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading &ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126; &lbrack;:-)&rbrack;" />';
+        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading *bold* _italic_ ~strike~ [:-)]" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -1975,7 +1975,7 @@ describe('Image markdown conversion to html tag', () => {
 
     test('No html inside the src attribute', () => {
         const testString = '![`code`](https://example.com/image.png)';
-        const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
+        const resultString = '<img src="https://example.com/image.png" alt="&#x60;code&#x60;" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 });
