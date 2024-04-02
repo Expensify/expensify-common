@@ -775,4 +775,10 @@ describe('Image tag conversion to markdown', () => {
         const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
+
+    test('Image with alt text containing unescaped markdown', () => {
+        const testString = '<img src="https://example.com/image.png" alt="*bold* _italic_ ~strike~" />';
+        const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
 });
