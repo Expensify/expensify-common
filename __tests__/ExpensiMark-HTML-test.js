@@ -1910,15 +1910,27 @@ describe('multi-level blockquote', () => {
 });
 
 describe('Image markdown conversion to html tag', () => {
-    test('Single image', () => {
+    test('Single image with alt text', () => {
         const testString = '![test](https://example.com/image.png)';
         const resultString = '<img src="https://example.com/image.png" alt="test" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
+    test('Single image with empty alt text', () => {
+        const testString = '![](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Single image short syntax without alt text', () => {
+        const testString = '!(https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
     test('Text containing images', () => {
-        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image of a developer: ![dev](https://example.com/developer.png)';
-        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image without alt: !(https://example.com/developer.png)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image without alt: <img src="https://example.com/developer.png" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -1965,5 +1977,5 @@ describe('Image markdown conversion to html tag', () => {
         const testString = '![`code`](https://example.com/image.png)';
         const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
         expect(parser.replace(testString)).toBe(resultString);
-    })
+    });
 });
