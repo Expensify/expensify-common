@@ -4,47 +4,56 @@ const BROWSERS = {
     SAFARI: 'Safari',
     OPERA: 'Opera',
     EXPLORER: 'Explorer',
-    MOZILLA: 'Mozilla'
+    MOZILLA: 'Mozilla',
 };
 
 const MOBILE_PLATFORMS = {
     iOS: 'iOS',
-    android: 'android'
+    android: 'android',
 };
 
 function searchString() {
-    const data = [{
-        string: navigator.userAgent,
-        subString: 'Edge',
-        identity: BROWSERS.EDGE
-    }, {
-        string: navigator.userAgent,
-        subString: 'Chrome',
-        identity: BROWSERS.CHROME
-    }, {
-        string: navigator.vendor,
-        subString: 'Apple',
-        identity: BROWSERS.SAFARI,
-    }, {
-        prop: window.opera,
-        identity: BROWSERS.OPERA,
-    }, {
-        string: navigator.userAgent,
-        subString: 'Edge',
-        identity: BROWSERS.EDGE
-    }, {
-        string: navigator.userAgent,
-        subString: 'MSIE',
-        identity: BROWSERS.EXPLORER
-    }, {
-        string: navigator.userAgent,
-        subString: '.NET',
-        identity: BROWSERS.EXPLORER
-    }, {
-        string: navigator.userAgent,
-        subString: 'Gecko',
-        identity: BROWSERS.MOZILLA
-    }];
+    const data = [
+        {
+            string: navigator.userAgent,
+            subString: 'Edge',
+            identity: BROWSERS.EDGE,
+        },
+        {
+            string: navigator.userAgent,
+            subString: 'Chrome',
+            identity: BROWSERS.CHROME,
+        },
+        {
+            string: navigator.vendor,
+            subString: 'Apple',
+            identity: BROWSERS.SAFARI,
+        },
+        {
+            prop: window.opera,
+            identity: BROWSERS.OPERA,
+        },
+        {
+            string: navigator.userAgent,
+            subString: 'Edge',
+            identity: BROWSERS.EDGE,
+        },
+        {
+            string: navigator.userAgent,
+            subString: 'MSIE',
+            identity: BROWSERS.EXPLORER,
+        },
+        {
+            string: navigator.userAgent,
+            subString: '.NET',
+            identity: BROWSERS.EXPLORER,
+        },
+        {
+            string: navigator.userAgent,
+            subString: 'Gecko',
+            identity: BROWSERS.MOZILLA,
+        },
+    ];
     let dataString;
     let dataProp;
 
@@ -63,13 +72,16 @@ function searchString() {
 }
 
 function getMobileDevice() {
-    const data = [{
-        devices: ['iPhone', 'iPad', 'iPod'],
-        identity: MOBILE_PLATFORMS.iOS
-    }, {
-        devices: ['Android'],
-        identity: MOBILE_PLATFORMS.android
-    }];
+    const data = [
+        {
+            devices: ['iPhone', 'iPad', 'iPod'],
+            identity: MOBILE_PLATFORMS.iOS,
+        },
+        {
+            devices: ['Android'],
+            identity: MOBILE_PLATFORMS.android,
+        },
+    ];
     const dataString = navigator.userAgent;
 
     for (let i = 0; i < data.length; i++) {
@@ -87,5 +99,5 @@ export default {
     BROWSERS,
     MOBILE_PLATFORMS,
     browser: searchString(),
-    mobileDevice: getMobileDevice()
+    mobileDevice: getMobileDevice(),
 };

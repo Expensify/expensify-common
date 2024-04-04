@@ -56,7 +56,7 @@ export default {
         let i = null;
         let j = null;
 
-        a = Math.round(a * (10 ** b)) / (10 ** b);
+        a = Math.round(a * 10 ** b) / 10 ** b;
 
         if (a < 0) {
             a *= -1;
@@ -86,10 +86,10 @@ export default {
                 i = h.slice(h.length - j, h.length - j + 3);
                 f[0] = `${d}${i}${f[0]}`;
             }
-            j = h.substr(0, (h.length % 3 === 0) ? 3 : (h.length % 3));
+            j = h.substr(0, h.length % 3 === 0 ? 3 : h.length % 3);
             f[0] = j + f[0];
         }
-        c = (b <= 0) ? '' : c;
+        c = b <= 0 ? '' : c;
         return `${sign}${f[0]}${c}${f[1]}`;
     },
 
@@ -149,7 +149,7 @@ export default {
      * @returns {boolean}
      */
     isNumberBetween(number, a, b) {
-        return number >= (Math.min(a, b)) && number <= (Math.max(a, b));
+        return number >= Math.min(a, b) && number <= Math.max(a, b);
     },
 
     /**
@@ -163,7 +163,7 @@ export default {
             return 2;
         }
 
-        if (rate * 10 % 1 === 0) {
+        if ((rate * 10) % 1 === 0) {
             return 3;
         }
 
@@ -171,7 +171,6 @@ export default {
     },
 
     tax: {
-
         /**
          * Calculate the pre-tax, or net amount
          *
@@ -193,7 +192,7 @@ export default {
          * @returns {number} The amount of tax
          */
         calculateTaxFromPercentage(total, percentage) {
-            const divisor = percentage ? (Str.percentageStringToNumber(percentage) / 100) + 1 : 1;
+            const divisor = percentage ? Str.percentageStringToNumber(percentage) / 100 + 1 : 1;
             return this.calculateTaxFromDivisor(total, divisor);
         },
 
@@ -206,7 +205,7 @@ export default {
          * @returns {number} The amount of tax
          */
         calculateTaxFromDivisor(total, divisor) {
-            return parseInt(Math.round(total - (total / divisor)), 10);
-        }
-    }
+            return parseInt(Math.round(total - total / divisor), 10);
+        },
+    },
 };

@@ -50,7 +50,7 @@ function invokeAsync(callback, args, scope) {
  * @param {Array} [args]
  */
 function bulkInvoke(callbacks, args) {
-    callbacks.forEach(callback => invoke(callback, args));
+    callbacks.forEach((callback) => invoke(callback, args));
 }
 
 /**
@@ -68,13 +68,7 @@ function die() {
  * @returns {Array}
  */
 function mapByName(list, methodName) {
-    return _.map(list, item => item[methodName].call(item));
+    return _.map(list, (item) => item[methodName].call(item));
 }
 
-export {
-    invoke,
-    invokeAsync,
-    bulkInvoke,
-    die,
-    mapByName,
-};
+export {invoke, invokeAsync, bulkInvoke, die, mapByName};
