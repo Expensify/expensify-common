@@ -295,7 +295,7 @@ export const CONST = {
         *
         * @type RegExp
         */
-        GENERAL_PHONE_PART: /(\+\d{1,2}\s?)?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}/,
+        GENERAL_PHONE_PART: /^(\+\d{1,2}\s?)?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/,
 
         /**
         * Regex matching a text containing an E.164 format phone number
