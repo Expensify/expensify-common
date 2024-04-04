@@ -1,6 +1,6 @@
 import Str from '../lib/str';
 
-const buildTestURLForType = (type) => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
+const buildTestURLForType = type => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
 
 describe('Str.isImage', () => {
     it('Correctly identifies all valid image types', () => {
@@ -114,7 +114,7 @@ describe('Str.isValidEmail', () => {
         expect(Str.isValidEmail('test@gmail')).toBeFalsy();
         expect(Str.isValidEmail('@gmail.com')).toBeFalsy();
         expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
-        
+
         // Domain length (63 chars in each label)
         expect(Str.isValidEmail('test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com')).toBeTruthy();
         expect(Str.isValidEmail('abc@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890.km')).toBeTruthy();
@@ -187,5 +187,28 @@ describe('Str.isValidEmail', () => {
 
         // TLD too long
         expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl')).toBeFalsy();
+    });
+});
+
+describe('Str.isValidPhoneFormat', () => {
+    it('Correctly identifies valid phone numbers', () => {
+        // Significant part of phone
+        expect(Str.isValidPhoneFormat('4404589784')).toBeTruthy();
+
+        // International standard
+        expect(Str.isValidPhoneFormat('+1 440-458-9784')).toBeTruthy();
+
+        // E.164 standard
+        expect(Str.isValidPhoneFormat('+14404589784')).toBeTruthy();
+
+        // US national standard
+        expect(Str.isValidPhoneFormat('(440) 458-9784')).toBeTruthy();
+        expect(Str.isValidPhoneFormat('123.456.7890')).toBeTruthy();
+    });
+});
+
+describe('Str.isValidE164Phone', () => {
+    it('Correctly identifies valid E.164 phone numbers', () => {
+        expect(Str.isValidE164Phone('+14404589784')).toBeTruthy();
     });
 });
