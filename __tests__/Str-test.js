@@ -204,6 +204,9 @@ describe('Str.isValidPhoneFormat', () => {
         // US national standard
         expect(Str.isValidPhoneFormat('(440) 458-9784')).toBeTruthy();
         expect(Str.isValidPhoneFormat('123.456.7890')).toBeTruthy();
+
+        // Invalid numbers
+        expect(Str.isValidPhoneFormat('=15123456789')).toBeFalsy();
     });
 });
 
