@@ -1978,4 +1978,10 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = '<img src="https://example.com/image.png" alt="&#x60;code&#x60;" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('No html inside the alt attribute - pre tag', () => {
+        const testString = '![```code```](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="&#x60;&#x60;&#x60;code&#x60;&#x60;&#x60;" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    });
 });

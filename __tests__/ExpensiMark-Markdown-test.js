@@ -781,4 +781,10 @@ describe('Image tag conversion to markdown', () => {
         const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
+
+    test('Alt attribute with complex/escaped content', () => {
+        const testString = '<img src="https://example.com/image.png" alt="&#x60;&#x60;&#x60;code&#x60;&#x60;&#x60;" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        const resultString = '![```code```](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
 });
