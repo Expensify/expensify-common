@@ -1952,6 +1952,12 @@ describe('Image markdown conversion to html tag', () => {
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
 
+    test('Single short syntax image with raw data attributes', () => {
+        const testString = '!(https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" data-raw-href="https://example.com/image.png" data-link-variant="auto" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    })
+
     test('Image with invalid url should remain unchanged', () => {
         const testString = '![test](invalid)';
         expect(parser.replace(testString)).toBe(testString);
