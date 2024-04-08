@@ -52,11 +52,7 @@ const propTypes = {
     safeDescription: PropTypes.bool,
 
     // An array of extra classes to put on the combobox
-    extraClasses: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.array,
-        PropTypes.object,
-    ]),
+    extraClasses: PropTypes.oneOfType([PropTypes.string, PropTypes.array, PropTypes.object]),
 
     // There is usually text just following a switch that says "ENABLED" and "DISABLED" and
     // you can use this option to hide that text
@@ -108,7 +104,7 @@ class OnOffSwitch extends Component {
     onChangeCallback(newState) {
         invoke(this.props.onChangeCallback, [newState]);
         this.setState({
-            checked: newState
+            checked: newState,
         });
     }
 
@@ -127,8 +123,8 @@ class OnOffSwitch extends Component {
      * Note: this is used via refs, so please don't delete it unless you know what you're doing :D
      */
     toggle() {
-        this.setState(prevState => ({
-            checked: !prevState.checked
+        this.setState((prevState) => ({
+            checked: !prevState.checked,
         }));
     }
 
@@ -141,7 +137,7 @@ class OnOffSwitch extends Component {
         this.setState({
             checked,
             preventEdit: true,
-            preventEditDescription: msg
+            preventEditDescription: msg,
         });
     }
 
@@ -149,34 +145,30 @@ class OnOffSwitch extends Component {
      * Release switch to its original value, and allow editing it
      */
     unlock() {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             checked: prevState.checked,
             preventEdit: false,
-            preventEditDescription: ''
+            preventEditDescription: '',
         }));
     }
 
     render() {
         const childrenClasses = {
             depreciated: !this.props.noLeftPaddingOnChildren,
-            helperLabel: !this.props.noLeftPaddingOnChildren
+            helperLabel: !this.props.noLeftPaddingOnChildren,
         };
 
         if (!this.props.alwaysShowChildren) {
             childrenClasses[UI.HIDDEN] = !this.state.checked;
         }
 
-        const children = this.props.children ? (
-            <div className={cn(childrenClasses)}>{this.props.children}</div>
-        ) : null;
+        const children = this.props.children ? <div className={cn(childrenClasses)}>{this.props.children}</div> : null;
 
         // Only use dangerouslySetInnerHTML if we explicitly pass safeDescription as a parameter.
         // Otherwise, just set the description inside a div
         // We use dangerouslySetInnerHTML, which could introduce XSS vulnerabilities if derived from user input,
         // to keep the description property simple without a bunch of nested HTML elements
-        const description = this.state.preventEdit && this.state.preventEditDescription
-            ? this.state.preventEditDescription
-            : this.props.description;
+        const description = this.state.preventEdit && this.state.preventEditDescription ? this.state.preventEditDescription : this.props.description;
         let descriptionElm = null;
 
         if (description && (this.state.checked || !this.props.onlyShowDescriptionWhenOn)) {
@@ -196,18 +188,20 @@ class OnOffSwitch extends Component {
             <div>
                 {/* For 100% a11y compliance we'd need to move the <input> into the <label> element */}
                 {/* eslint-disable jsx-a11y/label-has-for */}
-                {this.props.label && !this.props.labelOnRight
-                    && <label className={cn(this.props.labelClasses)} htmlFor={this.props.id}>{this.props.label}</label>
-                }
+                {this.props.label && !this.props.labelOnRight && (
+                    <label
+                        className={cn(this.props.labelClasses)}
+                        htmlFor={this.props.id}
+                    >
+                        {this.props.label}
+                    </label>
+                )}
                 <Switch
                     id={this.props.id}
                     checked={this.state.checked}
                     disabled={this.state.preventEdit}
                     onChange={this.onChangeCallback}
-                    extraClasses={[
-                        this.props.extraClasses,
-                        {marginLeft10: !this.props.labelOnRight}
-                    ]}
+                    extraClasses={[this.props.extraClasses, {marginLeft10: !this.props.labelOnRight}]}
                     hideEnabledDisabledText={this.props.hideEnabledDisabledText}
                     tooltipText={this.props.tooltipText}
                 />

@@ -478,8 +478,24 @@ declare const Str: {
     /**
      * Check for whether a phone number is valid.
      * @param phone
+     * @deprecated use isValidE164Phone to validate E.164 phone numbers or isValidPhoneFormat to validate phone numbers in general
      */
     isValidPhone(phone: string): boolean;
+    /**
+     * Check for whether a phone number is valid according to E.164 standard.
+     * @param phone
+     */
+    isValidE164Phone(phone: string): boolean;
+    /**
+     * Check for whether a phone number is valid in different formats/standards. For example:
+     * significant: 4404589784
+     * international: +1 440-458-9784
+     * e164: +14404589784
+     * national: (440) 458-9784
+     * 123.456.7890
+     * @param phone
+     */
+    isValidPhoneFormat(phone: string): boolean;
     /**
      * We validate mentions by checking if it's first character is an allowed character.
      *
@@ -493,7 +509,7 @@ declare const Str: {
      */
     removeSMSDomain(text: string): string;
     /**
-     * Returns true if the text is a valid phone number with our SMS domain removed
+     * Returns true if the text is a valid E.164 phone number with our SMS domain removed
      *
      * @param text
      */
@@ -566,17 +582,17 @@ declare const Str: {
      */
     isImage(url: string): boolean;
     /**
-    * Takes in a URL and checks if the file extension is a video
-    * that can be rendered by React Native. Do NOT add extensions
-    * to this list unless they are supported by all platforms.
-    *
-    * https://developer.android.com/media/platform/supported-formats#video-formats
-    * https://developer.apple.com/documentation/coremedia/1564239-video_codec_constants
-    * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
-    * 
-    * @param url
-    */
-   isVideo(url: string): boolean;
+     * Takes in a URL and checks if the file extension is a video
+     * that can be rendered by React Native. Do NOT add extensions
+     * to this list unless they are supported by all platforms.
+     *
+     * https://developer.android.com/media/platform/supported-formats#video-formats
+     * https://developer.apple.com/documentation/coremedia/1564239-video_codec_constants
+     * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
+     *
+     * @param url
+     */
+    isVideo(url: string): boolean;
     /**
      * Checks whether the given string is a +@ domain email account, such as
      * +@domain.com

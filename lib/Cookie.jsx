@@ -58,8 +58,7 @@ function set(name, value, expiredays) {
     // Get expiry date, set
     const exdate = new Date();
     exdate.setDate(exdate.getDate() + expiredays);
-    document.cookie = `${name}=${encodeURIComponent(value)}`
-        + `${((expiredays === null) ? '' : `;expires=${exdate.toUTCString()}`)}`;
+    document.cookie = `${name}=${encodeURIComponent(value)}` + `${expiredays === null ? '' : `;expires=${exdate.toUTCString()}`}`;
 }
 
 /**
@@ -87,7 +86,7 @@ function enabled() {
  * @return {String|null} The value of the cookie.
  */
 function get(name) {
-    if (!name || (document.cookie.length <= 0)) {
+    if (!name || document.cookie.length <= 0) {
         return null;
     }
     let start;
@@ -103,7 +102,6 @@ function get(name) {
     }
     return null;
 }
-
 
 /**
  * Parses a cookie value to JSON.
@@ -173,5 +171,5 @@ export default {
     has,
     getHelpLink,
     set,
-    ...CONST
+    ...CONST,
 };

@@ -24,10 +24,10 @@ const generateID = (eventName) => {
 };
 
 /**
-* Find the name of the event from the ID
-* @param {string} eventID
-* @return {String}
-*/
+ * Find the name of the event from the ID
+ * @param {string} eventID
+ * @return {String}
+ */
 const extractEventName = (eventID = '') => eventID.substring(0, eventID.indexOf('@#@'));
 
 const PubSubModule = {
@@ -103,7 +103,7 @@ const PubSubModule = {
 
         eventMap[eventName][eventID] = {
             callback,
-            scope
+            scope,
         };
 
         return eventID;
@@ -122,7 +122,7 @@ const PubSubModule = {
                 delete eventMap[eventName][id];
             }
         });
-    }
+    },
 };
 
-export default (window !== undefined && window.PubSub) ? window.PubSub : PubSubModule;
+export default window !== undefined && window.PubSub ? window.PubSub : PubSubModule;

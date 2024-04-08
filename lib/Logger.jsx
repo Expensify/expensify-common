@@ -20,16 +20,16 @@ export default class Logger {
     }
 
     /**
-    * Ask the server to write the log message
-    */
+     * Ask the server to write the log message
+     */
     logToServer() {
         // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=true
-        if (!this.logLines.length || _.all(this.logLines, l => l.onlyFlushWithOthers)) {
+        if (!this.logLines.length || _.all(this.logLines, (l) => l.onlyFlushWithOthers)) {
             return;
         }
 
         // We don't care about log setting web cookies so let's define it as false
-        const linesToLog = _.map(this.logLines, l => {
+        const linesToLog = _.map(this.logLines, (l) => {
             delete l.onlyFlushWithOthers;
             return l;
         });
@@ -57,7 +57,7 @@ export default class Logger {
             message,
             parameters,
             onlyFlushWithOthers,
-            timestamp: (new Date())
+            timestamp: new Date(),
         });
 
         if (this.isDebug) {
@@ -66,7 +66,7 @@ export default class Logger {
 
         // If we're over the limit, flush the logs
         if (length > MAX_LOG_LINES_BEFORE_FLUSH || forceFlushToServer) {
-            this.logToServer()
+            this.logToServer();
         }
     }
 
@@ -79,7 +79,7 @@ export default class Logger {
      * @param {Object|String} parameters The parameters to send along with the message
      * @param {Boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    info(message, sendNow = false, parameters= '', onlyFlushWithOthers = false) {
+    info(message, sendNow = false, parameters = '', onlyFlushWithOthers = false) {
         const msg = `[info] ${message}`;
         this.add(msg, parameters, sendNow, onlyFlushWithOthers);
     }

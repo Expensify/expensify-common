@@ -45,5 +45,5 @@ export default {
      */
     componentWillUnmount() {
         _.each(this.eventIds, _.bind(PubSub.unsubscribe, PubSub));
-    }
+    },
 };
