@@ -1959,5 +1959,92 @@ describe('Image markdown conversion to html tag', () => {
         const testString = '![`code`](https://example.com/image.png)';
         const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
         expect(parser.replace(testString)).toBe(resultString);
-    })
+    });
+});
+
+describe('room mentions', () => {
+    test('simple room mention', () => {
+        const testString = '#room';
+        const resultString = '<mention-room>#room</mention-room>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with leading word and space', () => {
+        const testString = 'hi all #room';
+        const resultString = 'hi all <mention-room>#room</mention-room>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with leading word and no space', () => {
+        const testString = 'hi all#room';
+        const resultString = 'hi all#room';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with space between hash and room name', () => {
+        const testString = '# room';
+        const resultString = '<h1>room</h1>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test.only('room mention with markdown syntax before the # prefix', () => {
+        const testString = 'hello *#room';
+        const resultString = 'hello *<mention-room>#room</mention-room>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with italic, bold and strikethrough styles', () => {
+        const testString = '#room'
+        + ' _#room_'
+        + ' *#room*'
+        + ' ~#room~'
+        + ' [#room](google.com)'
+        + ' #room abc'
+        + ' #room*'
+        + ' #room~'
+        + ' #room#'
+        + ' #room@'
+        + ' #room$'
+        + ' #room^'
+        + ' #room('
+        + ' #room.'
+        + ' #room!'
+        + ' #room?';
+
+        const resultString = '<mention-room>#room</mention-room>'
+        + ' <em><mention-room>#room</mention-room></em>'
+        + ' <strong><mention-room>#room</mention-room></strong>'
+        + ' <del><mention-room>#room</mention-room></del>'
+        + ' <a href="https://google.com" target="_blank" rel="noreferrer noopener">#room</a>'
+        + ' <mention-room>#room</mention-room> abc'
+        + ' <mention-room>#room</mention-room>*'
+        + ' <mention-room>#room</mention-room>~'
+        + ' <mention-room>#room</mention-room>#'
+        + ' <mention-room>#room</mention-room>@'
+        + ' <mention-room>#room</mention-room>$'
+        + ' <mention-room>#room</mention-room>^'
+        + ' <mention-room>#room</mention-room>('
+        + ' <mention-room>#room</mention-room>.'
+        + ' <mention-room>#room</mention-room>!'
+        + ' <mention-room>#room</mention-room>?';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention inside link should not be rendered', () => {
+        const testString = '[#room](google.com)';
+        const resultString = '<a href="https://google.com" target="_blank" rel="noreferrer noopener">#room</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with space inside link should not be rendered', () => {
+        const testString = '[ #room](google.com/sub#111)';
+        const resultString = '<a href="https://google.com/sub#111" target="_blank" rel="noreferrer noopener">#room</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention inside code block should not be rendered', () => {
+        const testString = '```\n#room\n```';
+        const resultString = '<pre>#room<br /></pre>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
