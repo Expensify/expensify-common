@@ -2047,4 +2047,22 @@ describe('room mentions', () => {
         const resultString = '<pre>#room<br /></pre>';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('room mention without room name', () => {
+        const testString = '#';
+        const resultString = '#';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with numbers', () => {
+        const testString = '#room123';
+        const resultString = '#room123';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with hyphens', () => {
+        const testString = '#room-name';
+        const resultString = '<mention-report>#room-name</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
