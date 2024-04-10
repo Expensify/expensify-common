@@ -529,7 +529,7 @@ test('Test heading1 markdown replacement when # is followed by multiple spaces',
 
 test('Test heading1 markdown when # is not followed by a space', () => {
     const testString = '#This is not a heading1 because starts with a # but has no space after it\n';
-    const resultString = '#This is not a heading1 because starts with a # but has no space after it<br />';
+    const resultString = '<mention-report>#This</mention-report> is not a heading1 because starts with a # but has no space after it<br />';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -688,7 +688,7 @@ test('Test codeFence copy from selection does not add extra new line', () => {
     expect(parser.htmlToMarkdown(testString)).toBe('```\ncode\n```\ntext');
 
     testString = '<h3>test heading</h3><div><pre class=\"notranslate\"><code class=\"notranslate\">Code snippet\n</code></pre></div><blockquote><p><a href=\"https://www.example.com\">link</a></p></blockquote>';
-    expect(parser.htmlToMarkdown(testString)).toBe('test heading\n```\nCode snippet\n```\n> [link](https://www.example.com)')
+    expect(parser.htmlToMarkdown(testString)).toBe('test heading\n```\nCode snippet\n```\n> [link](https://www.example.com)');
 });
 
 test('Linebreak should be remained for text between code block', () => {
@@ -758,17 +758,17 @@ test('Mention html to markdown', () => {
 });
 
 describe('Image tag conversion to markdown', () => {
-   test('Image with alt attribute', () => {
-         const testString = '<img src="https://example.com/image.png" alt="image" />';
-         const resultString = '![image](https://example.com/image.png)';
-         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
-   });
+    test('Image with alt attribute', () => {
+        const testString = '<img src="https://example.com/image.png" alt="image" />';
+        const resultString = '![image](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
 
-   test('Image without alt attribute', () => {
+    test('Image without alt attribute', () => {
         const testString = '<img src="https://example.com/image.png" />';
         const resultString = '![https://example.com/image.png](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
-   });
+    });
 
     test('Image with alt text containing escaped markdown', () => {
         const testString = '<img src="https://example.com/image.png" alt="&ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126;" />';

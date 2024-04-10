@@ -302,14 +302,14 @@ test('Test markdown replacement for emojis with emails', () => {
     + '[😄] abc@gmail.com '
     + '[😄]((abc@gmail.com)) '
     + '[😄abc@gmail.com](abc@gmail.com) '
-    + '[😄 abc@gmail.com ](abc@gmail.com) '
+    + '[😄 abc@gmail.com ](abc@gmail.com) ';
     const result = 'Do not replace the emoji with link '
     + '[<emoji>😄</emoji>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
     + '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
     + '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> '
     + '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) '
     + '[<emoji>😄</emoji><a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
-    + '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) '
+    + '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) ';
     expect(parser.replace(testString)).toBe(result);
 });
 
@@ -318,14 +318,14 @@ test('Test markdown replacement for composite emoji', () => {
     + '😶‍🌫️ '
     + '🧑‍🔧 '
     + '👨‍🏫 '
-    + '👨🏾‍❤️‍👨🏽 '
+    + '👨🏾‍❤️‍👨🏽 ';
     const result = 'Replace composite emoji with only one emoji tag '
     + '<emoji>😶‍🌫️</emoji> '
     + '<emoji>🧑‍🔧</emoji> '
     + '<emoji>👨‍🏫</emoji> '
-    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> '
+    + '<emoji>👨🏾‍❤️‍👨🏽</emoji> ';
     expect(parser.replace(testString)).toBe(result);
-})
+});
 
 
 // Markdown style links replaced successfully
@@ -550,30 +550,30 @@ test('Test wrapped URLs', () => {
 });
 
 test('Test Url, where double quote is not allowed', () => {
-    const urlTestStartString = '"om https://www.she.com/"\n' +
-        '"om https://www.she.com"\n' +
-        '"https://www.she.com/ end"\n' +
-        '"https://www.she.com end"\n' +
-        'https://www.she.com/path?test="123"\n' +
-        'https://www.she.com/path?test="123/"\n' +
-        '"https://www.she.com/path?test="123"\n' +
-        '"https://www.she.com/path?test="123/"\n' +
-        'https://www.she.com/path?test=123"\n' +
-        'https://www.she.com/path?test=123/"\n' +
-        'https://www.she.com/path?test=/"123"\n' +
-        'https://www.she.com/path?test=/"123/"';
-    const urlTestReplacedString = '&quot;om <a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a>&quot;<br />' +
-        '&quot;om <a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a>&quot;<br />' +
-        '&quot;<a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a> end&quot;<br />' +
-        '&quot;<a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a> end&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
-        '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />' +
-        '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=123\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123</a>&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=123/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123/</a>&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123&quot;<br />' +
-        '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123/&quot;';
+    const urlTestStartString = '"om https://www.she.com/"\n'
+        + '"om https://www.she.com"\n'
+        + '"https://www.she.com/ end"\n'
+        + '"https://www.she.com end"\n'
+        + 'https://www.she.com/path?test="123"\n'
+        + 'https://www.she.com/path?test="123/"\n'
+        + '"https://www.she.com/path?test="123"\n'
+        + '"https://www.she.com/path?test="123/"\n'
+        + 'https://www.she.com/path?test=123"\n'
+        + 'https://www.she.com/path?test=123/"\n'
+        + 'https://www.she.com/path?test=/"123"\n'
+        + 'https://www.she.com/path?test=/"123/"';
+    const urlTestReplacedString = '&quot;om <a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a>&quot;<br />'
+        + '&quot;om <a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a>&quot;<br />'
+        + '&quot;<a href=\"https://www.she.com/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/</a> end&quot;<br />'
+        + '&quot;<a href=\"https://www.she.com\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com</a> end&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />'
+        + '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123&quot;<br />'
+        + '&quot;<a href=\"https://www.she.com/path?test=\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=</a>&quot;123/&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=123\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123</a>&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=123/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=123/</a>&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123&quot;<br />'
+        + '<a href=\"https://www.she.com/path?test=/\" target=\"_blank\" rel=\"noreferrer noopener\">https://www.she.com/path?test=/</a>&quot;123/&quot;';
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
 
@@ -732,7 +732,7 @@ test('Test urls with unmatched closing parentheses autolinks correctly', () => {
             resultString: '<a href="https://google.com/(toto)" target="_blank" rel="noreferrer noopener">google.com/(toto)</a>)titi)',
         },
     ];
-    testCases.forEach(testCase => {
+    testCases.forEach((testCase) => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
     });
 });
@@ -867,7 +867,7 @@ test('Test urls autolinks correctly', () => {
         },
     ];
 
-    testCases.forEach(testCase => {
+    testCases.forEach((testCase) => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
     });
 });
@@ -1143,7 +1143,7 @@ test('Test for link with no content', () => {
 
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';;
+    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 test('Test quotes markdown replacement with heading inside', () => {
@@ -1478,7 +1478,7 @@ test('Test for mention inside link and email markdown', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Skip rendering invalid markdown',() => {
+test('Skip rendering invalid markdown', () => {
     let testString = '_*test_*';
     expect(parser.replace(testString)).toBe('<em>*test</em>*');
 
@@ -1965,5 +1965,116 @@ describe('Image markdown conversion to html tag', () => {
         const testString = '![`code`](https://example.com/image.png)';
         const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
         expect(parser.replace(testString)).toBe(resultString);
-    })
+    });
+});
+
+describe('room mentions', () => {
+    test('simple room mention', () => {
+        const testString = '#room';
+        const resultString = '<mention-report>#room</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with leading word and space', () => {
+        const testString = 'hi all #room';
+        const resultString = 'hi all <mention-report>#room</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with leading word and no space', () => {
+        const testString = 'hi all#room';
+        const resultString = 'hi all#room';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with space between hash and room name', () => {
+        const testString = '# room';
+        const resultString = '<h1>room</h1>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with markdown syntax before the # prefix', () => {
+        const testString = 'hello *#room';
+        const resultString = 'hello *<mention-report>#room</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with italic, bold and strikethrough styles', () => {
+        const testString = '#room'
+        + ' _#room_'
+        + ' *#room*'
+        + ' ~#room~'
+        + ' [#room](google.com)'
+        + ' #room abc'
+        + ' #room*'
+        + ' #room~'
+        + ' #room#'
+        + ' #room@'
+        + ' #room$'
+        + ' #room^'
+        + ' #room('
+        + ' #room.'
+        + ' #room!'
+        + ' #room?';
+
+        const resultString = '<mention-report>#room</mention-report>'
+        + ' <em><mention-report>#room</mention-report></em>'
+        + ' <strong><mention-report>#room</mention-report></strong>'
+        + ' <del><mention-report>#room</mention-report></del>'
+        + ' <a href="https://google.com" target="_blank" rel="noreferrer noopener">#room</a>'
+        + ' <mention-report>#room</mention-report> abc'
+        + ' <mention-report>#room</mention-report>*'
+        + ' <mention-report>#room</mention-report>~'
+        + ' <mention-report>#room</mention-report>#'
+        + ' <mention-report>#room</mention-report>@'
+        + ' <mention-report>#room</mention-report>$'
+        + ' <mention-report>#room</mention-report>^'
+        + ' <mention-report>#room</mention-report>('
+        + ' <mention-report>#room</mention-report>.'
+        + ' <mention-report>#room</mention-report>!'
+        + ' <mention-report>#room</mention-report>?';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention inside link should not be rendered', () => {
+        const testString = '[#room](google.com)';
+        const resultString = '<a href="https://google.com" target="_blank" rel="noreferrer noopener">#room</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with space inside link should not be rendered', () => {
+        const testString = '[ #room](google.com/sub#111)';
+        const resultString = '<a href="https://google.com/sub#111" target="_blank" rel="noreferrer noopener">#room</a>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention inside code block should not be rendered', () => {
+        const testString = '```\n#room\n```';
+        const resultString = '<pre>#room<br /></pre>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention without room name', () => {
+        const testString = '#';
+        const resultString = '#';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with numbers', () => {
+        const testString = '#room123';
+        const resultString = '<mention-report>#room123</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with hyphens', () => {
+        const testString = '#room-name';
+        const resultString = '<mention-report>#room-name</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with hypens and numbers', () => {
+        const testString = '#room-name123';
+        const resultString = '<mention-report>#room-name123</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
