@@ -1987,7 +1987,7 @@ describe('room mentions', () => {
         expect(parser.replace(testString)).toBe(resultString);
     });
 
-    test.only('room mention with markdown syntax before the # prefix', () => {
+    test('room mention with markdown syntax before the # prefix', () => {
         const testString = 'hello *#room';
         const resultString = 'hello *<mention-report>#room</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
@@ -2056,13 +2056,19 @@ describe('room mentions', () => {
 
     test('room mention with numbers', () => {
         const testString = '#room123';
-        const resultString = '#room123';
+        const resultString = '<mention-report>#room123</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
     test('room mention with hyphens', () => {
         const testString = '#room-name';
         const resultString = '<mention-report>#room-name</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('room mention with hypens and numbers', () => {
+        const testString = '#room-name123';
+        const resultString = '<mention-report>#room-name123</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 });
