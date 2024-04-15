@@ -21,6 +21,13 @@ test('Test multi-line bold markdown replacement', () => {
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+
+test('Test bold within code blocks is skipped', () => {
+    const testString = 'bold\n```*not a bold*```\nThis is *bold*';
+    const replacedString = 'bold<br /><pre>*not&#32;a&#32;bold*</pre>This is <strong>bold</strong>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 test('Test heading markdown replacement', () => {
     let testString = '# Heading should not have new line after it.\n';
     expect(parser.replace(testString)).toBe('<h1>Heading should not have new line after it.</h1>');
@@ -1910,21 +1917,33 @@ describe('multi-level blockquote', () => {
 });
 
 describe('Image markdown conversion to html tag', () => {
-    test('Single image', () => {
+    test('Single image with alt text', () => {
         const testString = '![test](https://example.com/image.png)';
         const resultString = '<img src="https://example.com/image.png" alt="test" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
+    test('Single image with empty alt text', () => {
+        const testString = '![](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Single image short syntax without alt text', () => {
+        const testString = '!(https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" />';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
     test('Text containing images', () => {
-        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image of a developer: ![dev](https://example.com/developer.png)';
-        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image of a developer: <img src="https://example.com/developer.png" alt="dev" />';
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an image without alt: !(https://example.com/developer.png)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an image without alt: <img src="https://example.com/developer.png" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
     test('Image with alt text containing markdown', () => {
         const testString = '![# fake-heading *bold* _italic_ ~strike~ [:-)]](https://example.com/image.png)';
-        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading &ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126; &lbrack;:-)&rbrack;" />';
+        const resultString = '<img src="https://example.com/image.png" alt="# fake-heading *bold* _italic_ ~strike~ [:-)]" />';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -1939,6 +1958,12 @@ describe('Image markdown conversion to html tag', () => {
         const resultString = '<img src="https://example.com/image.png" alt="test" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
+
+    test('Single short syntax image with raw data attributes', () => {
+        const testString = '!(https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" data-raw-href="https://example.com/image.png" data-link-variant="auto" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    })
 
     test('Image with invalid url should remain unchanged', () => {
         const testString = '![test](invalid)';
@@ -1963,8 +1988,14 @@ describe('Image markdown conversion to html tag', () => {
 
     test('No html inside the src attribute', () => {
         const testString = '![`code`](https://example.com/image.png)';
-        const resultString = '<img src="https://example.com/image.png" alt="<code>code</code>" />';
+        const resultString = '<img src="https://example.com/image.png" alt="&#x60;code&#x60;" />';
         expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('No html inside the alt attribute - pre tag', () => {
+        const testString = '![```code```](https://example.com/image.png)';
+        const resultString = '<img src="https://example.com/image.png" alt="&#x60;&#x60;&#x60;code&#x60;&#x60;&#x60;" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
 });
 

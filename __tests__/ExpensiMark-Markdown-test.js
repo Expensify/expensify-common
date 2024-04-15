@@ -766,13 +766,25 @@ describe('Image tag conversion to markdown', () => {
 
     test('Image without alt attribute', () => {
         const testString = '<img src="https://example.com/image.png" />';
-        const resultString = '![https://example.com/image.png](https://example.com/image.png)';
+        const resultString = '!(https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
 
     test('Image with alt text containing escaped markdown', () => {
         const testString = '<img src="https://example.com/image.png" alt="&ast;bold&ast; &lowbar;italic&lowbar; &#126;strike&#126;" />';
         const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+
+    test('Image with alt text containing unescaped markdown', () => {
+        const testString = '<img src="https://example.com/image.png" alt="*bold* _italic_ ~strike~" />';
+        const resultString = '![*bold* _italic_ ~strike~](https://example.com/image.png)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+
+    test('Alt attribute with complex/escaped content', () => {
+        const testString = '<img src="https://example.com/image.png" alt="&#x60;&#x60;&#x60;code&#x60;&#x60;&#x60;" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
+        const resultString = '![```code```](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
 });
