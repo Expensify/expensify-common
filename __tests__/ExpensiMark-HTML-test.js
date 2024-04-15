@@ -21,6 +21,13 @@ test('Test multi-line bold markdown replacement', () => {
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+
+test('Test bold within code blocks is skipped', () => {
+    const testString = 'bold\n```*not a bold*```\nThis is *bold*';
+    const replacedString = 'bold<br /><pre>*not&#32;a&#32;bold*</pre>This is <strong>bold</strong>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 test('Test heading markdown replacement', () => {
     let testString = '# Heading should not have new line after it.\n';
     expect(parser.replace(testString)).toBe('<h1>Heading should not have new line after it.</h1>');
