@@ -89,14 +89,16 @@ export default class ExpensiMark {
      * Replaces HTML with markdown
      *
      * @param htmlString
+     * @param extras
      */
-    htmlToMarkdown(htmlString: string): string;
+    htmlToMarkdown(htmlString: string, extras?: Object): string;
     /**
      * Convert HTML to text
      *
      * @param htmlString
+     * @param extras
      */
-    htmlToText(htmlString: string): string;
+    htmlToText(htmlString: string, extras?: Object): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
