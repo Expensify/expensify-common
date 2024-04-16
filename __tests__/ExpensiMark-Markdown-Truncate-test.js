@@ -49,7 +49,7 @@ describe('truncateMarkdown', () => {
         const text = 'This is a text with [a link](https://example.com) that exceeds the limit. The link should be preserved in the truncated text. Additionally, it includes [another link](https://example.org) for testing purposes.';
         const limit = 80;
         const result = parser.truncateMarkdown(text, limit, true);
-        expect(result).toBe('This is a text with [a link](https://example.com) that exceeds the limit. The link...');
+        expect(result).toBe('This is a text with [a link](https://example.com) that exceeds the limit. The...');
     });
 
     test('should handle text with code blocks', () => {
