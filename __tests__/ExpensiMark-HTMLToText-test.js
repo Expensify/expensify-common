@@ -133,7 +133,7 @@ test('Test remove style tag', () => {
     expect(parser.htmlToText(testString)).toBe('a text');
 });
 
-test('Mention html to text', () => {
+test('Mention user html to text', () => {
     let testString = '<mention-user>@user@domain.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@domain.com');
 
@@ -145,6 +145,36 @@ test('Mention html to text', () => {
 
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
+
+    const extras = {
+        "accountIdToName": {
+            "1234": "@user@domain.com"
+        }
+    }
+    testString = '<mention-user accountID="1234" />';
+    expect(parser.htmlToText(testString, extras)).toBe('@user@domain.com');
+});
+
+test('Mention report html to text', () => {
+    let testString = '<mention-report>#room-name</mention-report>';
+    expect(parser.htmlToText(testString)).toBe('#room-name');
+
+    testString = '<mention-report>#ROOM-NAME</mention-report>';
+    expect(parser.htmlToText(testString)).toBe('#ROOM-NAME');
+
+    testString = '<mention-report>#ROOM-name</mention-report>';
+    expect(parser.htmlToText(testString)).toBe('#ROOM-name');
+
+    testString = '<mention-report>#room-NAME</mention-report>';
+    expect(parser.htmlToText(testString)).toBe('#room-NAME');
+
+    const extras = {
+        "reportIdToName": {
+            "1234": "#room-name"
+        }
+    }
+    testString = '<mention-report reportID="1234" />';
+    expect(parser.htmlToText(testString, extras)).toBe('#room-name');
 });
 
 test('Test replacement for <img> tags', () => {
