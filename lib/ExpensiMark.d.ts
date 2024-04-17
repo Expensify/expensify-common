@@ -1,10 +1,11 @@
-declare type Replacement = (...args: string[]) => string;
+declare type Replacement = (...args: string[], extras?: ExtrasObject) => string;
 declare type Name =
     | 'codeFence'
     | 'inlineCodeBlock'
     | 'email'
     | 'link'
     | 'hereMentions'
+    | 'roomMentions'
     | 'userMentions'
     | 'autoEmail'
     | 'autolink'
@@ -31,6 +32,11 @@ declare type Rule = {
     replacement: Replacement | string;
     pre?: (input: string) => string;
     post?: (input: string) => string;
+};
+
+declare type ExtrasObject = {
+    reportIdToName?: Record<string, string>;
+    accountIDToName?: Record<string, string>;
 };
 export default class ExpensiMark {
     rules: Rule[];
@@ -91,14 +97,14 @@ export default class ExpensiMark {
      * @param htmlString
      * @param extras
      */
-    htmlToMarkdown(htmlString: string, extras?: Object): string;
+    htmlToMarkdown(htmlString: string, extras?: ExtrasObject): string;
     /**
      * Convert HTML to text
      *
      * @param htmlString
      * @param extras
      */
-    htmlToText(htmlString: string, extras?: Object): string;
+    htmlToText(htmlString: string, extras?: ExtrasObject): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
