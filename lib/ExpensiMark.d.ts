@@ -7,6 +7,7 @@ declare type Name =
     | 'hereMentions'
     | 'roomMentions'
     | 'userMentions'
+    | 'reportMentions'
     | 'autoEmail'
     | 'autolink'
     | 'quote'
@@ -49,7 +50,9 @@ export default class ExpensiMark {
      * @param text - Text to parse as markdown
      * @param options - Options to customize the markdown parser
      * @param options.filterRules=[] - An array of name of rules as defined in this class.
-     * If not provided, all available rules will be applied.
+     * If not provided, all available rules will be applied. If provided, only the rules in the array will be applied.
+     * @param options.disabledRules=[] - An array of name of rules as defined in this class.
+     * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
      * @param options.shouldEscapeText=true - Whether or not the text should be escaped
      * @param options.shouldKeepRawInput=false - Whether or not the raw input should be kept and returned
      */
@@ -60,7 +63,8 @@ export default class ExpensiMark {
             shouldEscapeText,
             shouldKeepRawInput,
         }?: {
-            filterRules?: string[];
+            filterRules?: Name[];
+            disabledRules?: Name[];
             shouldEscapeText?: boolean;
             shouldKeepRawInput?: boolean;
         },
