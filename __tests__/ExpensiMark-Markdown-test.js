@@ -757,10 +757,13 @@ test('Mention user html to markdown', () => {
     expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
 
     const extras = {
-        "accountIdToName": {
-            "1234": "@user@domain.com"
-        }
-    }
+        accountIdToName: {
+            '1234': 'user@domain.com',
+        },
+    };
+    testString = '<mention-user accountID="1234"/>';
+    expect(parser.htmlToMarkdown(testString, extras)).toBe('@user@domain.com');
+
     testString = '<mention-user accountID="1234" />';
     expect(parser.htmlToMarkdown(testString, extras)).toBe('@user@domain.com');
 });
@@ -779,10 +782,13 @@ test('Mention report html to markdown', () => {
     expect(parser.htmlToMarkdown(testString)).toBe('#room-NAME');
 
     const extras = {
-        "reportIdToName": {
-            "1234": "#room-name"
-        }
-    }
+        reportIdToName: {
+            '1234': '#room-name',
+        },
+    };
+    testString = '<mention-report reportID="1234"/>';
+    expect(parser.htmlToMarkdown(testString, extras)).toBe('#room-name');
+
     testString = '<mention-report reportID="1234" />';
     expect(parser.htmlToMarkdown(testString, extras)).toBe('#room-name');
 });
