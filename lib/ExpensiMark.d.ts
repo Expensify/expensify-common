@@ -5,7 +5,6 @@ declare type Name =
     | 'email'
     | 'link'
     | 'hereMentions'
-    | 'roomMentions'
     | 'userMentions'
     | 'reportMentions'
     | 'autoEmail'
