@@ -1,4 +1,4 @@
-declare type Replacement = (...args: string[]) => string;
+declare type Replacement = (...args: string[], extras?: ExtrasObject) => string;
 declare type Name =
     | 'codeFence'
     | 'inlineCodeBlock'
@@ -6,6 +6,7 @@ declare type Name =
     | 'link'
     | 'hereMentions'
     | 'userMentions'
+    | 'reportMentions'
     | 'autoEmail'
     | 'autolink'
     | 'quote'
@@ -32,6 +33,11 @@ declare type Rule = {
     pre?: (input: string) => string;
     post?: (input: string) => string;
 };
+
+declare type ExtrasObject = {
+    reportIdToName?: Record<string, string>;
+    accountIDToName?: Record<string, string>;
+};
 export default class ExpensiMark {
     rules: Rule[];
     htmlToMarkdownRules: Rule[];
@@ -43,7 +49,9 @@ export default class ExpensiMark {
      * @param text - Text to parse as markdown
      * @param options - Options to customize the markdown parser
      * @param options.filterRules=[] - An array of name of rules as defined in this class.
-     * If not provided, all available rules will be applied.
+     * If not provided, all available rules will be applied. If provided, only the rules in the array will be applied.
+     * @param options.disabledRules=[] - An array of name of rules as defined in this class.
+     * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
      * @param options.shouldEscapeText=true - Whether or not the text should be escaped
      * @param options.shouldKeepRawInput=false - Whether or not the raw input should be kept and returned
      */
@@ -54,7 +62,8 @@ export default class ExpensiMark {
             shouldEscapeText,
             shouldKeepRawInput,
         }?: {
-            filterRules?: string[];
+            filterRules?: Name[];
+            disabledRules?: Name[];
             shouldEscapeText?: boolean;
             shouldKeepRawInput?: boolean;
         },
@@ -89,14 +98,16 @@ export default class ExpensiMark {
      * Replaces HTML with markdown
      *
      * @param htmlString
+     * @param extras
      */
-    htmlToMarkdown(htmlString: string): string;
+    htmlToMarkdown(htmlString: string, extras?: ExtrasObject): string;
     /**
      * Convert HTML to text
      *
      * @param htmlString
+     * @param extras
      */
-    htmlToText(htmlString: string): string;
+    htmlToText(htmlString: string, extras?: ExtrasObject): string;
     /**
      * Modify text for Quotes replacing chevrons with html elements
      *
