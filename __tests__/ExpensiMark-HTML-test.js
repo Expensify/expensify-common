@@ -2030,6 +2030,13 @@ describe('room mentions', () => {
         expect(parser.replace(testString)).toBe(resultString);
     });
 
+    test('room mention shouldn\'t be parsed when rule is disabled', () => {
+        const testString = '*hello* @user@mail.com in #room!';
+        const resultString = '<strong>hello</strong> <mention-user>@user@mail.com</mention-user> in #room!';
+        const disabledRules = ['reportMentions'];
+        expect(parser.replace(testString, {disabledRules})).toBe(resultString);
+    });
+
     test('room mention with italic, bold and strikethrough styles', () => {
         const testString = '#room'
         + ' _#room_'

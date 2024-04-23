@@ -34,13 +34,13 @@
     "underscore": "1.13.6"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-env": "^7.24.3",
     "@lwc/eslint-plugin-lwc": "^1.7.2",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint": "^7.15.0",
     "eslint-config-expensify": "^2.0.44",
-    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-jest": "^24.7.0",
     "grunt": "1.6.1",
     "grunt-chokidar": "1.0.2",
