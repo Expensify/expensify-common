@@ -34,7 +34,7 @@
     "underscore": "1.13.6"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.24.3",
+    "@babel/preset-env": "^7.24.4",
     "@lwc/eslint-plugin-lwc": "^1.7.2",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
