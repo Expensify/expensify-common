@@ -1813,6 +1813,12 @@ describe('when should keep raw input flag is enabled', () => {
             const resultString = '<a href="mailto:mail@mail.com" data-raw-href="mailto:mail@mail.com" data-link-variant="labeled"><strong>mail</strong></a>';
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
+
+        test('user mention from phone number', () => {
+            const testString = '@+1234567890';
+            const resultString = '<mention-user>@+1234567890</mention-user>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
     });
 });
 
