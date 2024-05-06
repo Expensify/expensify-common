@@ -439,6 +439,21 @@ test('Test inline code blocks', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
 });
 
+test('Test inline code blocks with double backticks', () => {
+    const inlineCodeStartString = 'My favorite language is ``JavaScript``. How about you?';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;JavaScript&#x60;</code>. How about you?');
+});
+
+test('Test inline code blocks with triple backticks', () => {
+    const inlineCodeStartString = 'My favorite language is ```JavaScript```. How about you?';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;&#x60;JavaScript&#x60;&#x60;</code>. How about you?');
+});
+
+test('Test multiple inline codes in one line', () => {
+    const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you? I also like `Python`.';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you? I also like <code>Python</code>.');
+});
+
 test('Test inline code with one backtick as content', () => {
     const inlineCodeStartString = '```';
     expect(parser.replace(inlineCodeStartString)).toBe('&#x60;&#x60;&#x60;');
