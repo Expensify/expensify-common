@@ -291,15 +291,15 @@ export const CONST = {
         EMAIL_PART: EMAIL_BASE_REGEX,
 
         /**
-        * Regex matching a text containing general phone number
-        *
-        * @type RegExp
-        */
+         * Regex matching a text containing general phone number
+         *
+         * @type RegExp
+         */
         GENERAL_PHONE_PART: /^(\+\d{1,2}\s?)?(\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}$/,
 
         /**
-        * Regex matching a text containing an E.164 format phone number
-        */
+         * Regex matching a text containing an E.164 format phone number
+         */
         PHONE_PART: '\\+[1-9]\\d{1,14}',
 
         /**
@@ -368,7 +368,8 @@ export const CONST = {
          *
          * @type RegExp
          */
-        EMOJI_RULE: /[\p{Extended_Pictographic}](\u200D[\p{Extended_Pictographic}]|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007F}]|\uFE0F|\u20E3)*|[\u{1F1E6}-\u{1F1FF}]{2}|[#*0-9]\uFE0F?\u20E3/gu,
+        EMOJI_RULE:
+            /[\p{Extended_Pictographic}](\u200D[\p{Extended_Pictographic}]|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007F}]|\uFE0F|\u20E3)*|[\u{1F1E6}-\u{1F1FF}]{2}|[#*0-9]\uFE0F?\u20E3/gu,
     },
 
     REPORT: {
