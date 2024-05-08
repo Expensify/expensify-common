@@ -1103,6 +1103,35 @@ test('Test quotes markdown replacement with text includes multiple spaces', () =
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
 
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>test';
+    const resultString = '&gt;test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>>>test';
+    const resultString = '&gt;&gt;&gt;test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '> >>test';
+    const resultString = '<blockquote>&gt;&gt;test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '> > > test';
+    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>>> test';
+    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Single char matching', () => {
     const testString = ' *1* char _1_ char ~1~ char';
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
