@@ -44,7 +44,7 @@ test('Test heading markdown replacement', () => {
 
 // Sections starting with > are successfully wrapped with <blockquote></blockquote>
 test('Test quote markdown replacement', () => {
-    const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+    const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
     const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br /><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
 
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
@@ -1016,7 +1016,7 @@ test('Test autolink replacement to avoid parsing nested links', () => {
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
-    const testString = 'The next line should be quoted\n>Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence```';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence```';
 
     const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote><pre>The&#32;next&#32;line&#32;should&#32;not&#32;be&#32;quoted<br />&gt;Hello,I’mtext<br />since&#32;its&#32;inside&#32;a&#32;codefence</pre>';
 
@@ -1024,7 +1024,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence at the same line', () => {
-    const testString = 'The next line should be quoted\n>Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```\nsince its inside a codefence';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```\nsince its inside a codefence';
 
     const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>since its inside a codefence';
 
@@ -1032,7 +1032,7 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence at the end of the text', () => {
-    const testString = 'The next line should be quoted\n>Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```';
 
     const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>';
 
@@ -1040,9 +1040,9 @@ test('Test quotes markdown replacement with text matching inside and outside cod
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence with quotes at the end of the text', () => {
-    const testString = 'The next line should be quoted\n```>Hello,I’mtext```\nThe next line should not be quoted\n>Hello,I’mtext';
+    const testString = 'The next line should be quoted\n```> Hello,I’mtext```\nThe next line should not be quoted\n> Hello,I’mtext';
 
-    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext</pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
+    const resultString = 'The next line should be quoted<br /><pre>&gt;&#32;Hello,I’mtext</pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1068,31 +1068,31 @@ test('Test quotes markdown replacement with text starts with blank quote', () =>
 });
 
 test('Test quotes markdown replacement with quotes starts with blank quote row', () => {
-    const testString = '> \n>test';
+    const testString = '> \n> test';
     const resultString = '<blockquote>test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with quotes ends with blank quote rows', () => {
-    const testString = '>test\n> \n>';
+    const testString = '> test\n> \n>';
     const resultString = '<blockquote>test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with quotes includes a middle blank quote row', () => {
-    const testString = '>test\n> \n>test';
+    const testString = '> test\n> \n> test';
     const resultString = '<blockquote>test<br /><br />test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with quotes includes multiple middle blank quote rows', () => {
-    const testString = '>test\n> \n> \n>test\ntest\n>test\n> \n> \n> \n>test';
+    const testString = '> test\n> \n> \n> test\ntest\n> test\n> \n> \n> \n> test';
     const resultString = '<blockquote>test<br /><br /><br />test</blockquote>test<br /><blockquote>test<br /><br /><br /><br />test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text includes blank quotes', () => {
-    const testString = '> \n>quote1 line a\n> quote1 line b\ntest\n> \ntest\n>quote2 line a\n> \n> \n>quote2 line b with an empty line above';
+    const testString = '> \n> quote1 line a\n> quote1 line b\ntest\n> \ntest\n> quote2 line a\n> \n> \n> quote2 line b with an empty line above';
     const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br /><br />quote2 line b with an empty line above</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1101,6 +1101,35 @@ test('Test quotes markdown replacement with text includes multiple spaces', () =
     const quoteTestStartString = '>   Indented\n>No indent\n>   Indented  \n> >   Nested indented  \n>     Indented ';
     const quoteTestReplacedString = '<blockquote>  Indented<br />No indent<br />  Indented  <br /><blockquote>  Nested indented  </blockquote>    Indented </blockquote>';
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>test';
+    const resultString = '&gt;test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>>>test';
+    const resultString = '&gt;&gt;&gt;test';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '> >>test';
+    const resultString = '<blockquote>&gt;&gt;test</blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '> > > test';
+    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test markdown quotes without spaces after > should not be parsed', () => {
+    const testString = '>>> test';
+    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Single char matching', () => {
@@ -1687,8 +1716,8 @@ test('Mention', () => {
 
 describe('when should keep raw input flag is enabled', () => {
     test('quote without space', () => {
-        const quoteTestStartString = '>Hello world';
-        const quoteTestReplacedString = '<blockquote>Hello world</blockquote>';
+        const quoteTestStartString = '> Hello world';
+        const quoteTestReplacedString = '<blockquote> Hello world</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
@@ -1708,23 +1737,23 @@ describe('when should keep raw input flag is enabled', () => {
     });
 
     test('multiple quotes', () => {
-        const quoteTestStartString = '>Hello my\n>beautiful\n>world\n';
-        const quoteTestReplacedString = '<blockquote>Hello my</blockquote>\n<blockquote>beautiful</blockquote>\n<blockquote>world</blockquote>\n';
+        const quoteTestStartString = '> Hello my\n> beautiful\n> world\n';
+        const quoteTestReplacedString = '<blockquote> Hello my</blockquote>\n<blockquote> beautiful</blockquote>\n<blockquote> world</blockquote>\n';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('separate blockqoutes', () => {
-        const quoteTestStartString = '>Lorem ipsum\ndolor\n>sit amet';
-        const quoteTestReplacedString = '<blockquote>Lorem ipsum</blockquote>\ndolor\n<blockquote>sit amet</blockquote>';
+        const quoteTestStartString = '> Lorem ipsum\ndolor\n> sit amet';
+        const quoteTestReplacedString = '<blockquote> Lorem ipsum</blockquote>\ndolor\n<blockquote> sit amet</blockquote>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     describe('nested heading in blockquote', () => {
         test('without spaces', () => {
-            const quoteTestStartString = '># Hello world';
-            const quoteTestReplacedString = '<blockquote><h1>Hello world</h1></blockquote>';
+            const quoteTestStartString = '> # Hello world';
+            const quoteTestReplacedString = '<blockquote> <h1>Hello world</h1></blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
@@ -1737,8 +1766,8 @@ describe('when should keep raw input flag is enabled', () => {
         });
 
         test('with multiple spaces after #', () => {
-            const quoteTestStartString = '>#    Hello world';
-            const quoteTestReplacedString = '<blockquote><h1>   Hello world</h1></blockquote>';
+            const quoteTestStartString = '> #    Hello world';
+            const quoteTestReplacedString = '<blockquote> <h1>   Hello world</h1></blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
@@ -1746,30 +1775,30 @@ describe('when should keep raw input flag is enabled', () => {
 
     describe('trailing whitespace after blockquote', () => {
         test('nothing', () => {
-            const quoteTestStartString = '>Hello world!';
-            const quoteTestReplacedString = '<blockquote>Hello world!</blockquote>';
+            const quoteTestStartString = '> Hello world!';
+            const quoteTestReplacedString = '<blockquote> Hello world!</blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('space', () => {
-            const quoteTestStartString = '>Hello world ';
-            const quoteTestReplacedString = '<blockquote>Hello world </blockquote>';
+            const quoteTestStartString = '> Hello world ';
+            const quoteTestReplacedString = '<blockquote> Hello world </blockquote>';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
 
         test('newline', () => {
-            const quoteTestStartString = '>Hello world\n';
-            const quoteTestReplacedString = '<blockquote>Hello world</blockquote>\n';
+            const quoteTestStartString = '> Hello world\n';
+            const quoteTestReplacedString = '<blockquote> Hello world</blockquote>\n';
 
             expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
         });
     });
 
     test('quote with other markdowns', () => {
-        const quoteTestStartString = '>This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre data-code-raw=\"\nhere is a codefenced quote\n&gt;it should not be quoted\n\">here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
+        const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+        const quoteTestReplacedString = '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre data-code-raw=\"\nhere is a codefenced quote\n&gt;it should not be quoted\n\">here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
