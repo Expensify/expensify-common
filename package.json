@@ -41,7 +41,7 @@
     "eslint": "^7.15.0",
     "eslint-config-expensify": "^2.0.48",
     "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-jest": "^24.7.0",
+    "eslint-plugin-jest": "^25.0.4",
     "grunt": "1.6.1",
     "grunt-chokidar": "1.0.2",
     "grunt-eslint": "25.0.0",
