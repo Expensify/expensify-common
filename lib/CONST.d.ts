@@ -254,11 +254,11 @@ export declare const CONST: {
         /**
          * Regex matching a text containing general phone number
          */
-        readonly GENERAL_PHONE_PART: RegExp,
+        readonly GENERAL_PHONE_PART: RegExp;
         /**
-        * Regex matching a text containing an E.164 format phone number
-        */
-        readonly PHONE_PART: "\\+[1-9]\\d{1,14}";
+         * Regex matching a text containing an E.164 format phone number
+         */
+        readonly PHONE_PART: '\\+[1-9]\\d{1,14}';
         /**
          * Regular expression to check that a basic name is valid
          */
