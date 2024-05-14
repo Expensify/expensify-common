@@ -756,6 +756,9 @@ test('Mention user html to markdown', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
 
+    testString = '<mention-user accountID="1234"/>';
+    expect(parser.htmlToMarkdown(testString)).toBe('');
+
     const extras = {
         accountIdToName: {
             '1234': 'user@domain.com',

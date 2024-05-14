@@ -146,6 +146,9 @@ test('Mention user html to text', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
 
+    testString = '<mention-user accountID="1234"/>';
+    expect(parser.htmlToText(testString)).toBe('');
+
     const extras = {
         accountIdToName: {
             '1234': 'user@domain.com',
