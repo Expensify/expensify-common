@@ -146,6 +146,7 @@ test('Mention user html to text', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
 
+    // When there is `accountID` and no `extras` an empty string should be returned
     testString = '<mention-user accountID="1234"/>';
     expect(parser.htmlToText(testString)).toBe('');
 
