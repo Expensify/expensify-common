@@ -485,6 +485,11 @@ declare const Str: {
      * Check for whether a phone number is valid according to E.164 standard.
      * @param phone
      */
+    isValidPhoneNumber(phone: string): boolean;
+    /**
+     * Check for whether a phone number is valid.
+     * @param phone
+     */
     isValidE164Phone(phone: string): boolean;
     /**
      * Check for whether a phone number is valid in different formats/standards. For example:
