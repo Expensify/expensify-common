@@ -482,12 +482,12 @@ declare const Str: {
      */
     isValidPhone(phone: string): boolean;
     /**
-     * Check for whether a phone number is valid according to E.164 standard.
+     * Check for whether a phone number is valid.
      * @param phone
      */
     isValidPhoneNumber(phone: string): boolean;
     /**
-     * Check for whether a phone number is valid.
+     * Check for whether a phone number is valid according to E.164 standard.
      * @param phone
      */
     isValidE164Phone(phone: string): boolean;
