@@ -150,6 +150,7 @@ export default function API(network, args) {
      * @param {String} commandName The name of the API command
      */
     function requireParameters(parameterNames, parameters, commandName) {
+        // eslint-disable-next-line rulesdir/prefer-early-return
         parameterNames.forEach((parameterName) => {
             if (!_(parameters).has(parameterName) || parameters[parameterName] === null || parameters[parameterName] === undefined) {
                 const parametersCopy = _.clone(parameters);

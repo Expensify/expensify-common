@@ -30,6 +30,7 @@ export default class Logger {
 
         // We don't care about log setting web cookies so let's define it as false
         const linesToLog = _.map(this.logLines, (l) => {
+            // eslint-disable-next-line no-param-reassign
             delete l.onlyFlushWithOthers;
             return l;
         });
@@ -38,6 +39,7 @@ export default class Logger {
         if (!promise) {
             return;
         }
+        // eslint-disable-next-line rulesdir/prefer-early-return
         promise.then((response) => {
             if (response.requestID) {
                 this.info('Previous log requestID', false, {requestID: response.requestID}, true);
