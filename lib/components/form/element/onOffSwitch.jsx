@@ -176,6 +176,7 @@ class OnOffSwitch extends Component {
                 descriptionElm = (
                     <div
                         className="depreciated helperLabel"
+                        // eslint-disable-next-line react/no-danger
                         dangerouslySetInnerHTML={{__html: description}}
                     />
                 );

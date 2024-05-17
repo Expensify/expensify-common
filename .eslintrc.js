@@ -16,6 +16,7 @@ module.exports = {
                 'react/jsx-filename-extension': 'off',
                 'rulesdir/no-api-in-views': 'off',
                 'rulesdir/no-multiple-api-calls': 'off',
+                'rulesdir/prefer-import-module-contents': 'off',
                 'no-constructor-return': 'off',
                 'import/extensions': [
                     'error',

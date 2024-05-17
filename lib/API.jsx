@@ -823,7 +823,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            createAdminIssuedVirtualCard: function (parameters) {
+            createAdminIssuedVirtualCard(parameters) {
                 const commandName = 'Card_CreateAdminIssuedVirtualCard';
                 requireParameters(['cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
@@ -842,7 +842,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            editAdminIssuedVirtualCard: function (parameters) {
+            editAdminIssuedVirtualCard(parameters) {
                 const commandName = 'Card_EditAdminIssuedVirtualCard';
                 requireParameters(['domainName', 'cardID', 'cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
