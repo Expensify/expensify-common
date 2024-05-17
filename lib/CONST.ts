@@ -8,14 +8,14 @@ const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 /**
  * URL of our CloudFront Instance
  */
-export const g_cloudFront = 'https://d2k5nsl2zxldvw.cloudfront.net';
+const g_cloudFront = 'https://d2k5nsl2zxldvw.cloudfront.net';
 
 /**
  * URL of our image CDN
  */
-export const g_cloudFrontImg = `${g_cloudFront}/images/`;
+const g_cloudFrontImg = `${g_cloudFront}/images/`;
 
-export const CONST = {
+const CONST = {
     CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: ['USD', 'GBP', 'EUR', 'AUD', 'CAD'],
 
     /**
@@ -361,6 +361,7 @@ export const CONST = {
          *
          * @type RegExp
          */
+        // eslint-disable-next-line no-misleading-character-class
         EMOJIS: /[\p{Extended_Pictographic}\u200d\u{1f1e6}-\u{1f1ff}\u{1f3fb}-\u{1f3ff}\u{e0020}-\u{e007f}\u20E3\uFE0F]|[#*0-9]\uFE0F?\u20E3/gu,
 
         /**
@@ -883,12 +884,12 @@ export const CONST = {
             prompt: 'What software are you migrating to and what led to this decision?',
         },
     },
-};
+} as const;
 
 /**
  * UI Constants
  */
-export const UI = {
+const UI = {
     ICON: {
         DELETE: 'trashcan',
         CAR: 'car',
@@ -922,10 +923,10 @@ export const UI = {
 
     // Base z-index for dialogs $zindex-dialog in _vars.scss should take it's value from here!
     DIALOG_Z_INDEX: 4000,
-};
+} as const;
 
 // List of most frequently used public domains
-export const PUBLIC_DOMAINS = [
+const PUBLIC_DOMAINS = [
     'accountant.com',
     'afis.ch',
     'aol.com',
@@ -997,4 +998,6 @@ export const PUBLIC_DOMAINS = [
     'yahoo.com',
     'yahoo.com.br',
     'ymail.com',
-];
+] as const;
+
+export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS};
