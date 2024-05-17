@@ -5,3 +5,4 @@ npm-debug.log
 package.json-e
 .DS_Store
 *.swp
+dist
