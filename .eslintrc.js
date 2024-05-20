@@ -56,6 +56,16 @@ module.exports = {
                 '@typescript-eslint/no-non-null-assertion': 'off',
                 '@typescript-eslint/array-type': ['error', {default: 'array-simple'}],
                 '@typescript-eslint/consistent-type-definitions': 'off',
+                'import/extensions': [
+                    'error',
+                    'ignorePackages',
+                    {
+                        js: 'never',
+                        jsx: 'never',
+                        ts: 'never',
+                        tsx: 'never',
+                    },
+                ],
             },
         },
     ],
