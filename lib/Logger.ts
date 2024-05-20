@@ -1,8 +1,22 @@
-import _ from 'underscore';
+type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>>;
+type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
+type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
+type ClientLoggingCallBack = (message: string) => void;
+type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date};
+type LoggerOptions = {serverLoggingCallback: ServerLoggingCallback; isDebug: boolean; clientLoggingCallback: ClientLoggingCallBack};
 
 const MAX_LOG_LINES_BEFORE_FLUSH = 50;
+
 export default class Logger {
-    constructor({serverLoggingCallback, isDebug, clientLoggingCallback}) {
+    logLines: LogLine[];
+
+    serverLoggingCallback: ServerLoggingCallback;
+
+    clientLoggingCallback: ClientLoggingCallBack;
+
+    isDebug: boolean;
+
+    constructor({serverLoggingCallback, isDebug, clientLoggingCallback}: LoggerOptions) {
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
         this.logLines = [];
         this.serverLoggingCallback = serverLoggingCallback;
@@ -10,26 +24,27 @@ export default class Logger {
         this.isDebug = isDebug;
 
         // Public Methods
+        // eslint-disable-next-line no-constructor-return
         return {
             info: this.info.bind(this),
             alert: this.alert.bind(this),
             warn: this.warn.bind(this),
             hmmm: this.hmmm.bind(this),
             client: this.client.bind(this),
-        };
+        } as this;
     }
 
     /**
      * Ask the server to write the log message
      */
-    logToServer() {
+    logToServer(): void {
         // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=true
-        if (!this.logLines.length || _.all(this.logLines, (l) => l.onlyFlushWithOthers)) {
+        if (!this.logLines.length || this.logLines?.every((l) => l.onlyFlushWithOthers)) {
             return;
         }
 
         // We don't care about log setting web cookies so let's define it as false
-        const linesToLog = _.map(this.logLines, (l) => {
+        const linesToLog = this.logLines?.map((l) => {
             // eslint-disable-next-line no-param-reassign
             delete l.onlyFlushWithOthers;
             return l;
@@ -49,12 +64,11 @@ export default class Logger {
 
     /**
      * Add a message to the list
-     * @param {String} message
-     * @param {Object|String} parameters The parameters associated with the message
-     * @param {Boolean} forceFlushToServer Should we force flushing all logs to server?
-     * @param {Boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param parameters The parameters associated with the message
+     * @param forceFlushToServer Should we force flushing all logs to server?
+     * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    add(message, parameters, forceFlushToServer, onlyFlushWithOthers = false) {
+    add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false) {
         const length = this.logLines.push({
             message,
             parameters,
@@ -76,12 +90,12 @@ export default class Logger {
      * Caches an informational message locally, to be sent to the server if
      * needed later.
      *
-     * @param {String} message The message to log.
-     * @param {Boolean} sendNow if true, the message will be sent right away.
-     * @param {Object|String} parameters The parameters to send along with the message
-     * @param {Boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param message The message to log.
+     * @param sendNow if true, the message will be sent right away.
+     * @param parameters The parameters to send along with the message
+     * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    info(message, sendNow = false, parameters = '', onlyFlushWithOthers = false) {
+    info(message: string, sendNow = false, parameters: Parameters = '', onlyFlushWithOthers = false) {
         const msg = `[info] ${message}`;
         this.add(msg, parameters, sendNow, onlyFlushWithOthers);
     }
@@ -89,16 +103,16 @@ export default class Logger {
     /**
      * Logs an alert.
      *
-     * @param {String} message The message to alert.
-     * @param {Object|String} parameters The parameters to send along with the message
-     * @param {Boolean} includeStackTrace Must be disabled for testing
+     * @param message The message to alert.
+     * @param parameters The parameters to send along with the message
+     * @param includeStackTrace Must be disabled for testing
      */
-    alert(message, parameters = {}, includeStackTrace = true) {
+    alert(message: string, parameters: Parameters = {}, includeStackTrace = true) {
         const msg = `[alrt] ${message}`;
         const params = parameters;
 
         if (includeStackTrace) {
-            params.stack = JSON.stringify(new Error().stack);
+            (params as Record<string, unknown>).stack = JSON.stringify(new Error().stack);
         }
 
         this.add(msg, params, true);
@@ -110,7 +124,7 @@ export default class Logger {
      * @param {String} message The message to warn.
      * @param {Object|String} parameters The parameters to send along with the message
      */
-    warn(message, parameters = '') {
+    warn(message: string, parameters: Parameters = '') {
         const msg = `[warn] ${message}`;
         this.add(msg, parameters, true);
     }
@@ -118,10 +132,10 @@ export default class Logger {
     /**
      * Logs a hmmm.
      *
-     * @param {String} message The message to hmmm.
-     * @param {Object|String} parameters The parameters to send along with the message
+     * @param message The message to hmmm.
+     * @param parameters The parameters to send along with the message
      */
-    hmmm(message, parameters = '') {
+    hmmm(message: string, parameters: Parameters = '') {
         const msg = `[hmmm] ${message}`;
         this.add(msg, parameters, false);
     }
@@ -129,9 +143,9 @@ export default class Logger {
     /**
      * Logs a message in the browser console.
      *
-     * @param {String} message The message to log.
+     * @param message The message to log.
      */
-    client(message) {
+    client(message: string) {
         if (!this.clientLoggingCallback) {
             return;
         }
