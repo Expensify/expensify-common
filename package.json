@@ -45,7 +45,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
-    "@lwc/eslint-plugin-lwc": "^1.7.2",
+    "@lwc/eslint-plugin-lwc": "^1.8.0",
     "@types/jest": "^29.5.12",
     "@types/react-dom": "^18.3.0",
     "@types/ua-parser-js": "^0.7.39",
