@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.4",
-    "@lwc/eslint-plugin-lwc": "^1.7.2",
+    "@lwc/eslint-plugin-lwc": "^1.8.0",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint": "^7.15.0",
