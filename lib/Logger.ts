@@ -111,8 +111,8 @@ export default class Logger {
         const msg = `[alrt] ${message}`;
         const params = parameters;
 
-        if (includeStackTrace) {
-            (params as Record<string, unknown>).stack = JSON.stringify(new Error().stack);
+        if (includeStackTrace && typeof params === 'object' && !Array.isArray(params)) {
+            params.stack = JSON.stringify(new Error().stack);
         }
 
         this.add(msg, params, true);
