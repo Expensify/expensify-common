@@ -1,4 +1,4 @@
-type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>>;
+type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>> | Error;
 type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
 type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 type ClientLoggingCallBack = (message: string) => void;
