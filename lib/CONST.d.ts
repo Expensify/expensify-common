@@ -742,6 +742,7 @@ export declare const CONST: {
             readonly prompt: 'What software are you migrating to and what led to this decision?';
         };
     };
+    readonly VIDEO_EXTENSIONS: readonly string[]
 };
 /**
  * UI Constants

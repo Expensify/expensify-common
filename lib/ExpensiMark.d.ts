@@ -37,7 +37,13 @@ declare type Rule = {
 declare type ExtrasObject = {
     reportIdToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
+    cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
 };
+
+declare type ExtraParamsForReplaceFunc = {
+    videoAttributeCache?: Record<string, string>;
+}
+
 export default class ExpensiMark {
     rules: Rule[];
     htmlToMarkdownRules: Rule[];
@@ -61,11 +67,13 @@ export default class ExpensiMark {
             filterRules,
             shouldEscapeText,
             shouldKeepRawInput,
+            extras,
         }?: {
             filterRules?: Name[];
             disabledRules?: Name[];
             shouldEscapeText?: boolean;
             shouldKeepRawInput?: boolean;
+            extras?: ExtraParamsForReplaceFunc;
         },
     ): string;
     /**
