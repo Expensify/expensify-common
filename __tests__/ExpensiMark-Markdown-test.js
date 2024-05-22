@@ -497,6 +497,18 @@ test('map div with quotes', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
+test('double quotes in same line', () => {
+    const testString = '<blockquote><blockquote>line 1</blockquote></blockquote>';
+    const resultString = '>> line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('tripple quotes in same line', () => {
+    const testString = '<blockquote><blockquote><blockquote>line 1</blockquote></blockquote></blockquote>';
+    const resultString = '>>> line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
 test('map table to newline', () => {
     const testString = '<tbody><tr>line 1</tr><tr>line 2</tr></tbody>';
     const resultString = 'line 1\nline 2';
