@@ -11,9 +11,9 @@ const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
  * if it is a function then we will call it with
  * any additional arguments.
  */
-function result<R, A extends unknown[]>(parameter: string): string;
+function result(parameter: string): string;
 function result<R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
-function result<R, A extends unknown[]>(parameter: string | ((...args: A) => R), ...args: A): string | R {
+function result<R, A extends unknown[]>(parameter: string | ((...a: A) => R), ...args: A): string | R {
     if (typeof parameter === 'function') {
         return parameter(...args);
     }
