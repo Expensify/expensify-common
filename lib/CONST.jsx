@@ -560,6 +560,7 @@ export const CONST = {
         'qa+travisreceipts@expensify.com',
         'bills@expensify.com',
         'admin@expensify.com',
+        'notifications@expensify.com',
     ],
 
     /**
