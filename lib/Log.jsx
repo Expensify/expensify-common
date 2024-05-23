@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import API from './API';
 import Network from './Network';
 import Logger from './Logger';
@@ -26,7 +25,7 @@ function clientLoggingCallback(message) {
         return;
     }
 
-    if (window.console && _.isFunction(console.log)) {
+    if (window.console && typeof console.log === 'function') {
         console.log(message);
     }
 }
