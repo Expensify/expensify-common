@@ -1,6 +1,4 @@
 /* eslint-disable no-control-regex */
-import lodashEscape from 'lodash/escape';
-import lodashUnescape from 'lodash/unescape';
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
@@ -108,8 +106,8 @@ const Str = {
      * @param s The string to escape
      * @returns The escaped string
      */
-    safeEscape(s: string): string {
-        return lodashEscape(lodashUnescape(s));
+    safeEscape(s) {
+        return Utils.escape(Utils.unescape(s));
     },
 
     /**
