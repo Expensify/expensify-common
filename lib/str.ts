@@ -5,6 +5,7 @@ import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
+import * as Utils from './utils';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
@@ -87,11 +88,7 @@ const Str = {
      * @param s The string to decode.
      * @returns The decoded string.
      */
-    htmlDecode(s: string): string {
-        // Use jQuery if it exists or else use html-entities
-        if (typeof jQuery !== 'undefined') {
-            return jQuery('<textarea/>').html(s).text();
-        }
+    htmlDecode(s) {
         return HtmlEntities.decode(s);
     },
 
@@ -101,11 +98,7 @@ const Str = {
      * @param s The string to encode.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s: string): string {
-        // Use jQuery if it exists or else use html-entities
-        if (typeof jQuery !== 'undefined') {
-            return jQuery('<textarea/>').text(s).html();
-        }
+    htmlEncode(s) {
         return HtmlEntities.encode(s);
     },
 
