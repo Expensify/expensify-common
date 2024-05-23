@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import _ from 'underscore';
 
 /**
  * Invokes the given callback with the given arguments
@@ -11,7 +10,7 @@ import _ from 'underscore';
  * @returns {Mixed}
  */
 function invoke(callback, args, scope) {
-    if (!_(callback).isFunction()) {
+    if (typeof callback !== 'function') {
         return null;
     }
 
@@ -29,7 +28,7 @@ function invoke(callback, args, scope) {
  * @returns {$.Deferred}
  */
 function invokeAsync(callback, args, scope) {
-    if (!_(callback).isFunction()) {
+    if (typeof callback !== 'function') {
         return new $.Deferred().resolve();
     }
 
@@ -68,7 +67,7 @@ function die() {
  * @returns {Array}
  */
 function mapByName(list, methodName) {
-    return _.map(list, (item) => item[methodName].call(item));
+    return list.map((item) => item[methodName].call(item));
 }
 
 export {invoke, invokeAsync, bulkInvoke, die, mapByName};
