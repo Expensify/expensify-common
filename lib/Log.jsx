@@ -1,9 +1,7 @@
-/* eslint-disable no-console */
-import _ from 'underscore';
 import API from './API';
 import Network from './Network';
 import Logger from './Logger';
-import {isWindowAvailable} from './utils';
+import * as Utils from './utils';
 
 /**
  * Network interface for logger.
@@ -24,11 +22,11 @@ function serverLoggingCallback(logger, params) {
  * @param {String} message
  */
 function clientLoggingCallback(message) {
-    if (isWindowAvailable() && typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
+    if (Utils.isWindowAvailable() && typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
         return;
     }
 
-    if (window.console && _.isFunction(console.log)) {
+    if (window.console && typeof console.log === 'function') {
         console.log(message);
     }
 }
