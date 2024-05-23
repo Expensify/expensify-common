@@ -3,9 +3,8 @@
  * WIP, This is in the process of migration from web-e. Please add methods to this as is needed.|
  * ----------------------------------------------------------------------------------------------
  */
-
-import _ from 'underscore';
-import {invoke, bulkInvoke} from './Func';
+import * as Utils from './utils';
+import * as Func from './Func';
 
 /**
  * @param {jquery.Deferred} promise
@@ -50,15 +49,15 @@ export default function APIDeferred(promise, extractedProperty) {
     function handleError(jsonCode, response) {
         // Look for handlers for this error code
         const handlers = errorHandlers[jsonCode];
-        if (!_(handlers).isEmpty()) {
-            bulkInvoke(handlers, [jsonCode, response]);
+        if (handlers.length > 0) {
+            Func.bulkInvoke(handlers, [jsonCode, response]);
         } else {
             // No explicit handlers, call the unhandled callbacks
-            bulkInvoke(unhandledCallbacks, [jsonCode, response]);
+            Func.bulkInvoke(unhandledCallbacks, [jsonCode, response]);
         }
 
         // Always run the "fail" callbacks in case of error
-        bulkInvoke(failCallbacks, [jsonCode, response]);
+        Func.bulkInvoke(failCallbacks, [jsonCode, response]);
     }
 
     /**
@@ -73,8 +72,8 @@ export default function APIDeferred(promise, extractedProperty) {
 
         // Figure out if we need to extract a property from the response, and if it is there.
         const jsonCode = extractJSONCode(response);
-        const propertyRequested = !_.isNull(extractedPropertyName);
-        const requestedPropertyPresent = propertyRequested && response && !_.isUndefined(response[extractedPropertyName]);
+        const propertyRequested = !Number.isNull(extractedPropertyName);
+        const requestedPropertyPresent = propertyRequested && response && response[extractedPropertyName] !== undefined;
         const propertyRequestedButMissing = propertyRequested && !requestedPropertyPresent;
 
         // Save the response for any callbacks that might run in the future
@@ -86,8 +85,8 @@ export default function APIDeferred(promise, extractedProperty) {
             returnedData = propertyRequested && requestedPropertyPresent ? response[extractedPropertyName] : response;
 
             // And then run the success callbacks
-            bulkInvoke(doneCallbacks, [returnedData]);
-        } else if (!_(jsonCode).isNull() && jsonCode !== 200) {
+            Func.bulkInvoke(doneCallbacks, [returnedData]);
+        } else if (jsonCode !== null && jsonCode !== 200) {
             // Exception thrown, handle it
             handleError(jsonCode, response);
         } else {
@@ -102,7 +101,7 @@ export default function APIDeferred(promise, extractedProperty) {
         }
 
         // Always run the "always" callbacks
-        bulkInvoke(alwaysCallbacks, [response]);
+        Func.bulkInvoke(alwaysCallbacks, [response]);
     }
 
     /**
@@ -133,8 +132,8 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         done(callback) {
-            if (_(callback).isFunction()) {
-                doneCallbacks.push(_(callback).once());
+            if (typeof callback === 'function') {
+                doneCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -148,8 +147,8 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         always(callback) {
-            if (_(callback).isFunction()) {
-                alwaysCallbacks.push(_(callback).once());
+            if (typeof callback === 'function') {
+                alwaysCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -165,7 +164,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         handle(jsonCodes, callback) {
-            if (_(callback).isFunction()) {
+            if (typeof callback === 'function') {
                 jsonCodes.forEach((code) => {
                     if (code === 200) {
                         return;
@@ -174,7 +173,7 @@ export default function APIDeferred(promise, extractedProperty) {
                     if (!errorHandlers[code]) {
                         errorHandlers[code] = [];
                     }
-                    errorHandlers[code].push(_(callback).once());
+                    errorHandlers[code].push(Utils.once(callback));
                 });
 
                 ensureFutureCallbacksFire();
@@ -191,8 +190,8 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         unhandled(callback) {
-            if (_(callback).isFunction()) {
-                unhandledCallbacks.push(_(callback).once());
+            if (typeof callback === 'function') {
+                unhandledCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -207,8 +206,8 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         fail(callback) {
-            if (_(callback).isFunction()) {
-                failCallbacks.push(_(callback).once());
+            if (typeof callback === 'function') {
+                failCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -225,11 +224,11 @@ export default function APIDeferred(promise, extractedProperty) {
             return promise.then((response) => {
                 const responseCode = extractJSONCode(response);
 
-                if (responseCode !== 200 || !_(callback).isFunction()) {
+                if (responseCode !== 200 || typeof callback !== 'function') {
                     return;
                 }
 
-                invoke(callback, [response]);
+                Func.invoke(callback, [response]);
 
                 return this;
             });
