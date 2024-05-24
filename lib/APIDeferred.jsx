@@ -3,6 +3,7 @@
  * WIP, This is in the process of migration from web-e. Please add methods to this as is needed.|
  * ----------------------------------------------------------------------------------------------
  */
+import {once} from 'lodash';
 import * as Utils from './utils';
 import * as Func from './Func';
 
@@ -133,7 +134,7 @@ export default function APIDeferred(promise, extractedProperty) {
          */
         done(callback) {
             if (Utils.isFunction(callback)) {
-                doneCallbacks.push(Utils.once(callback));
+                doneCallbacks.push(once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -148,7 +149,7 @@ export default function APIDeferred(promise, extractedProperty) {
          */
         always(callback) {
             if (Utils.isFunction(callback)) {
-                alwaysCallbacks.push(Utils.once(callback));
+                alwaysCallbacks.push(once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -173,7 +174,7 @@ export default function APIDeferred(promise, extractedProperty) {
                     if (!errorHandlers[code]) {
                         errorHandlers[code] = [];
                     }
-                    errorHandlers[code].push(Utils.once(callback));
+                    errorHandlers[code].push(once(callback));
                 });
 
                 ensureFutureCallbacksFire();
@@ -191,7 +192,7 @@ export default function APIDeferred(promise, extractedProperty) {
          */
         unhandled(callback) {
             if (Utils.isFunction(callback)) {
-                unhandledCallbacks.push(Utils.once(callback));
+                unhandledCallbacks.push(once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
@@ -207,7 +208,7 @@ export default function APIDeferred(promise, extractedProperty) {
          */
         fail(callback) {
             if (Utils.isFunction(callback)) {
-                failCallbacks.push(Utils.once(callback));
+                failCallbacks.push(once(callback));
                 ensureFutureCallbacksFire();
             }
             return this;
