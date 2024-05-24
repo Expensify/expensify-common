@@ -94,8 +94,8 @@ const PubSubModule = {
             throw new Error('Attempted to subscribe to undefined event');
         }
 
-        const callback = typeof optionalCallback === 'function' ? optionalCallback : () => {};
-        const scope = typeof optionalScope === 'object' && optionalScope !== null ? optionalScope : window;
+        const callback = Utils.isFunction(optionalCallback) ? optionalCallback : () => {};
+        const scope = Utils.isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
         const eventID = generateID(eventName);
 
         if (eventMap[eventName] === undefined) {

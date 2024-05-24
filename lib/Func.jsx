@@ -10,7 +10,7 @@ import * as Utils from './utils';
  * @returns {Mixed}
  */
 function invoke(callback, args, scope) {
-    if (typeof callback !== 'function') {
+    if (!Utils.isFunction(callback)) {
         return null;
     }
 
@@ -25,7 +25,7 @@ function invoke(callback, args, scope) {
  * @param {Array} [args]
  * @param {Object} [scope]
  *
- * @returns {$.Deferred}
+ * @returns {Promise}
  */
 function invokeAsync(callback, args, scope) {
     if (!Utils.isFunction(callback)) {

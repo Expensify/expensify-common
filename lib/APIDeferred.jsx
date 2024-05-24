@@ -132,7 +132,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         done(callback) {
-            if (typeof callback === 'function') {
+            if (Utils.isFunction(callback)) {
                 doneCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
@@ -147,7 +147,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         always(callback) {
-            if (typeof callback === 'function') {
+            if (Utils.isFunction(callback)) {
                 alwaysCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
@@ -164,7 +164,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         handle(jsonCodes, callback) {
-            if (typeof callback === 'function') {
+            if (Utils.isFunction(callback)) {
                 jsonCodes.forEach((code) => {
                     if (code === 200) {
                         return;
@@ -190,7 +190,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         unhandled(callback) {
-            if (typeof callback === 'function') {
+            if (Utils.isFunction(callback)) {
                 unhandledCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
@@ -206,7 +206,7 @@ export default function APIDeferred(promise, extractedProperty) {
          * @returns {APIDeferred} itself, for chaining
          */
         fail(callback) {
-            if (typeof callback === 'function') {
+            if (Utils.isFunction(callback)) {
                 failCallbacks.push(Utils.once(callback));
                 ensureFutureCallbacksFire();
             }
@@ -224,7 +224,7 @@ export default function APIDeferred(promise, extractedProperty) {
             return promise.then((response) => {
                 const responseCode = extractJSONCode(response);
 
-                if (responseCode !== 200 || typeof callback !== 'function') {
+                if (responseCode !== 200 || !Utils.isFunction(callback)) {
                     return;
                 }
 

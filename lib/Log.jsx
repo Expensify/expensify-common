@@ -1,6 +1,8 @@
+/* eslint-disable no-console */
 import API from './API';
 import Network from './Network';
 import Logger from './Logger';
+import * as Utils from './utils';
 
 /**
  * Network interface for logger.
@@ -25,7 +27,7 @@ function clientLoggingCallback(message) {
         return;
     }
 
-    if (window.console && typeof console.log === 'function') {
+    if (window.console && Utils.isFunction(console.log)) {
         console.log(message);
     }
 }
