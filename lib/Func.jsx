@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import * as Utils from './utils';
 
 /**
  * Invokes the given callback with the given arguments
@@ -28,15 +28,15 @@ function invoke(callback, args, scope) {
  * @returns {$.Deferred}
  */
 function invokeAsync(callback, args, scope) {
-    if (typeof callback !== 'function') {
-        return new $.Deferred().resolve();
+    if (!Utils.isFunction(callback)) {
+        return Promise.resolve();
     }
 
     let promiseFromCallback = callback.apply(scope, args || []);
 
     // If there was not a promise returned from the prefetch callback, then create a dummy promise and resolve it
     if (!promiseFromCallback) {
-        promiseFromCallback = new $.Deferred().resolve();
+        promiseFromCallback = Promise.resolve();
     }
 
     return promiseFromCallback;
