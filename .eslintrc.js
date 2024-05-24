@@ -5,6 +5,9 @@ module.exports = {
         'react/jsx-filename-extension': 'off',
         'no-restricted-globals': 'off',
         'rulesdir/prefer-underscore-method': 'off',
+        'rulesdir/no-api-in-views': 'off',
+        'rulesdir/no-multiple-api-calls': 'off',
+        'no-constructor-return': 'off',
     },
     plugins: ['jest'],
     env: {
