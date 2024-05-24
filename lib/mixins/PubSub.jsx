@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import PubSubModule from '../PubSub';
 import {isWindowAvailable} from '../utils';
 
@@ -18,7 +17,7 @@ const PubSub = (isWindowAvailable() && window.PubSub) || PubSubModule;
  *     }
  * });
  */
-export default {
+const PubSubMixin = {
     UNSAFE_componentWillMount() {
         this.eventIds = [];
     },
@@ -45,6 +44,10 @@ export default {
      * When the component is unmounted, we want to subscribe from all of our event IDs
      */
     componentWillUnmount() {
-        _.each(this.eventIds, _.bind(PubSub.unsubscribe, PubSub));
+        this.eventIds.forEach((eventId) => {
+            PubSub.unsubscribe(eventId);
+        });
     },
 };
+
+export default PubSubMixin;
