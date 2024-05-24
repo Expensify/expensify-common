@@ -1,6 +1,6 @@
-import _ from 'underscore';
 import has from 'lodash/has';
 import Log from './Log';
+import * as Utils from './utils';
 
 /**
  * PubSub
@@ -73,7 +73,7 @@ const PubSubModule = {
     once(eventName, callback, optionalScope) {
         const scope = typeof optionalScope === 'object' && optionalScope !== null ? optionalScope : window;
         // TODO: Check how to replace once function
-        const functionToCallOnce = _.once((...args) => callback.apply(scope, args));
+        const functionToCallOnce = Utils.once((...args) => callback.apply(scope, args));
         return this.subscribe(eventName, functionToCallOnce);
     },
 
