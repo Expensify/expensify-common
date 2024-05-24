@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 import $ from 'jquery';
 import {template as createTemplate} from 'lodash';
 import * as Utils from './utils';
