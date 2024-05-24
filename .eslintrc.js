@@ -8,6 +8,7 @@ module.exports = {
         'rulesdir/no-api-in-views': 'off',
         'rulesdir/no-multiple-api-calls': 'off',
         'no-constructor-return': 'off',
+        'max-classes-per-file': 'off',
     },
     plugins: ['jest'],
     env: {
