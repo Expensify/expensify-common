@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import ExpensiMark from '../lib/ExpensiMark';
-import _ from 'underscore';
+import * as Utils from '../lib/utils';
 
 const parser = new ExpensiMark();
 
@@ -17,24 +17,28 @@ test('Test text is unescaped', () => {
 });
 
 test('Test with regex Maximum regex stack depth reached error', () => {
-    const testString = '<h1>heading</h1> asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfisjksksjsjssskssjskskssksksksksskdkddkddkdksskskdkdkdksskskskdkdkdkdkekeekdkddenejeodxkdndekkdjddkeemdjxkdenendkdjddekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdi.cdjd';
-    const parser = new ExpensiMark();
+    const testString =
+        '<h1>heading</h1> asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfisjksksjsjssskssjskskssksksksksskdkddkddkdksskskdkdkdksskskskdkdkdkdkekeekdkddenejeodxkdndekkdjddkeemdjxkdenendkdjddekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdi.cdjd';
+    const expensiMarkParser = new ExpensiMark();
     // Mock method modifyTextForUrlLinks to let it throw an error to test try/catch of method ExpensiMark.replace
-    const modifyTextForUrlLinksMock = jest.fn((a, b, c) => {throw new Error('Maximum regex stack depth reached')});
-    parser.modifyTextForUrlLinks = modifyTextForUrlLinksMock;
-    expect(parser.replace(testString)).toBe(_.escape(testString));
+    const modifyTextForUrlLinksMock = jest.fn(() => {
+        throw new Error('Maximum regex stack depth reached');
+    });
+    expensiMarkParser.modifyTextForUrlLinks = modifyTextForUrlLinksMock;
+    expect(expensiMarkParser.replace(testString)).toBe(Utils.escape(testString));
     expect(modifyTextForUrlLinksMock).toHaveBeenCalledTimes(1);
 
     // Mock method extractLinksInMarkdownComment to let it return undefined to test try/catch of method ExpensiMark.extractLinksInMarkdownComment
-    const extractLinksInMarkdownCommentMock = jest.fn((a) => undefined);
-    parser.extractLinksInMarkdownComment = extractLinksInMarkdownCommentMock;
-    expect(parser.extractLinksInMarkdownComment(testString)).toBe(undefined);
-    expect(parser.getRemovedMarkdownLinks(testString, 'google.com')).toStrictEqual([]);
+    const extractLinksInMarkdownCommentMock = jest.fn(() => undefined);
+    expensiMarkParser.extractLinksInMarkdownComment = extractLinksInMarkdownCommentMock;
+    expect(expensiMarkParser.extractLinksInMarkdownComment(testString)).toBe(undefined);
+    expect(expensiMarkParser.getRemovedMarkdownLinks(testString, 'google.com')).toStrictEqual([]);
     expect(extractLinksInMarkdownCommentMock).toHaveBeenCalledTimes(3);
 });
 
 test('Test extract link with ending parentheses', () => {
-    const comment = '[Staging Detail](https://staging.new.expensify.com/details) [Staging Detail](https://staging.new.expensify.com/details)) [Staging Detail](https://staging.new.expensify.com/details)))';
+    const comment =
+        '[Staging Detail](https://staging.new.expensify.com/details) [Staging Detail](https://staging.new.expensify.com/details)) [Staging Detail](https://staging.new.expensify.com/details)))';
     const links = ['https://staging.new.expensify.com/details', 'https://staging.new.expensify.com/details', 'https://staging.new.expensify.com/details'];
     expect(parser.extractLinksInMarkdownComment(comment)).toStrictEqual(links);
 });
