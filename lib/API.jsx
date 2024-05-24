@@ -6,6 +6,7 @@
 
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
+import {has} from 'lodash';
 import ExpensifyAPIDeferred from './APIDeferred';
 import * as Utils from './utils';
 
@@ -151,15 +152,15 @@ export default function API(network, args) {
      */
     function requireParameters(parameterNames, parameters, commandName) {
         parameterNames.forEach((parameterName) => {
-            if (Utils.has(parameters, parameterName) && parameters[parameterName] !== null && parameters[parameterName] !== undefined) {
+            if (has(parameters, parameterName) && parameters[parameterName] !== null && parameters[parameterName] !== undefined) {
                 return;
             }
 
             const parametersCopy = {...parameters};
-            if (Utils.has(parametersCopy, 'authToken')) {
+            if (has(parametersCopy, 'authToken')) {
                 parametersCopy.authToken = '<redacted>';
             }
-            if (Utils.has(parametersCopy, 'password')) {
+            if (has(parametersCopy, 'password')) {
                 parametersCopy.password = '<redacted>';
             }
             const keys = Object.keys(parametersCopy).join(', ') || 'none';
