@@ -1,5 +1,3 @@
-import _ from 'underscore';
-
 const MAX_LOG_LINES_BEFORE_FLUSH = 50;
 export default class Logger {
     constructor({serverLoggingCallback, isDebug, clientLoggingCallback}) {
@@ -10,13 +8,11 @@ export default class Logger {
         this.isDebug = isDebug;
 
         // Public Methods
-        return {
-            info: this.info.bind(this),
-            alert: this.alert.bind(this),
-            warn: this.warn.bind(this),
-            hmmm: this.hmmm.bind(this),
-            client: this.client.bind(this),
-        };
+        this.info = this.info.bind(this);
+        this.alert = this.alert.bind(this);
+        this.warn = this.warn.bind(this);
+        this.hmmm = this.hmmm.bind(this);
+        this.client = this.client.bind(this);
     }
 
     /**
@@ -24,14 +20,15 @@ export default class Logger {
      */
     logToServer() {
         // We do not want to call the server with an empty list or if all the lines has onlyFlushWithOthers=true
-        if (!this.logLines.length || _.all(this.logLines, (l) => l.onlyFlushWithOthers)) {
+        if (!this.logLines.length || this.logLines.every((l) => l.onlyFlushWithOthers)) {
             return;
         }
 
         // We don't care about log setting web cookies so let's define it as false
-        const linesToLog = _.map(this.logLines, (l) => {
-            delete l.onlyFlushWithOthers;
-            return l;
+        const linesToLog = this.logLines.map((l) => {
+            const copy = {...l};
+            delete copy.onlyFlushWithOthers;
+            return copy;
         });
         this.logLines = [];
         const promise = this.serverLoggingCallback(this, {api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
@@ -39,9 +36,10 @@ export default class Logger {
             return;
         }
         promise.then((response) => {
-            if (response.requestID) {
-                this.info('Previous log requestID', false, {requestID: response.requestID}, true);
+            if (!response.requestID) {
+                return;
             }
+            this.info('Previous log requestID', false, {requestID: response.requestID}, true);
         });
     }
 
