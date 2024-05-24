@@ -754,8 +754,8 @@ const Str = {
     /**
      * Trim a string
      */
-    trim(str: string): string {
-        return $.trim(str);
+    trim(str) {
+        return str.trim();
     },
 
     /**

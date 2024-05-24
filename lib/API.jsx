@@ -39,7 +39,7 @@ export default function API(network, args) {
      * Returns a promise that is rejected if a change is detected
      * Otherwise, it is resolved successfully
      *
-     * @returns {Object} $.Deferred
+     * @returns {Object} Deferred
      */
     function isRunningLatestVersionOfCode() {
         const promise = new Deferred();
