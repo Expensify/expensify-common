@@ -1040,15 +1040,15 @@ test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test quotes markdown replacement skipping blank quotes', () => {
+test('Test quotes markdown replacement including blank quotes', () => {
     const testString = '> \n>';
-    const resultString = '&gt; <br />&gt;';
+    const resultString = '<blockquote></blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text starts with blank quote', () => {
     const testString = '> \ntest';
-    const resultString = '&gt; <br />test';
+    const resultString = '<blockquote></blockquote>test';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1078,7 +1078,7 @@ test('Test quotes markdown replacement with quotes includes multiple middle blan
 
 test('Test quotes markdown replacement with text includes blank quotes', () => {
     const testString = '> \n> quote1 line a\n> quote1 line b\ntest\n> \ntest\n> quote2 line a\n> \n> \n> quote2 line b with an empty line above';
-    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /><br /><br />quote2 line b with an empty line above</blockquote>';
+    const resultString = '<blockquote>quote1 line a<br />quote1 line b</blockquote>test<br /><blockquote></blockquote>test<br /><blockquote>quote2 line a<br /><br /><br />quote2 line b with an empty line above</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
