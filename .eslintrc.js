@@ -44,7 +44,7 @@ module.exports = {
                 'react/require-default-props': 'off',
                 'valid-jsdoc': 'off',
                 'es/no-optional-chaining': 'off',
-                'es/no-nullish-coalescing': 'off',
+                'es/no-nullish-coalescing-operators': 'off',
                 'react/jsx-filename-extension': ['error', {extensions: ['.tsx', '.jsx']}],
                 'import/no-unresolved': 'error',
                 'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
