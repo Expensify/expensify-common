@@ -32,7 +32,15 @@ module.exports = {
         },
         {
             files: ['*.ts', '*.tsx'],
-            extends: ['expensify', 'plugin:@typescript-eslint/recommended', 'plugin:@typescript-eslint/stylistic', 'plugin:import/typescript', 'prettier', 'plugin:prettier/recommended'],
+            extends: [
+                'expensify',
+                'plugin:@typescript-eslint/recommended',
+                'plugin:@typescript-eslint/stylistic',
+                'plugin:import/typescript',
+                'plugin:you-dont-need-lodash-underscore/all',
+                'prettier',
+                'plugin:prettier/recommended',
+            ],
             plugins: ['react', 'import', '@typescript-eslint'],
             parserOptions: {
                 project: './tsconfig.json',
