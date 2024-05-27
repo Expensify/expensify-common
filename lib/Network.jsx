@@ -64,6 +64,7 @@ export default function Network(endpoint) {
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
+                // eslint-disable-next-line no-param-reassign
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
             }

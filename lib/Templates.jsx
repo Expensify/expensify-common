@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import _ from 'underscore';
 import $ from 'jquery';
 
@@ -67,6 +68,7 @@ export default (function () {
         get(data = {}) {
             // Add the "template" object to the parameter to allow nested templates
             const dataToCompile = {...data};
+            // eslint-disable-next-line no-undef
             dataToCompile.nestedTemplate = Templates.get;
             if (!this.compiled) {
                 this.compiled = _.template($(`#${this.id}`).html());
@@ -119,22 +121,18 @@ export default (function () {
          * @return {String}
          */
         get(templatePath, data = {}) {
-            try {
-                const template = getTemplate(templatePath);
-                if (_.isUndefined(template)) {
-                    throw Error(`Template '${templatePath}' is not defined`);
-                }
-
-                // Check for the absense of get which means someone is likely using
-                // the templating engine wrong and trying to access a template namespace
-                if (!{}.propertyIsEnumerable.call(template, 'get')) {
-                    throw Error(`'${templatePath}' is not a valid template path`);
-                }
-
-                return template.get(data);
-            } catch (err) {
-                throw err;
+            const template = getTemplate(templatePath);
+            if (_.isUndefined(template)) {
+                throw Error(`Template '${templatePath}' is not defined`);
             }
+
+            // Check for the absense of get which means someone is likely using
+            // the templating engine wrong and trying to access a template namespace
+            if (!{}.propertyIsEnumerable.call(template, 'get')) {
+                throw Error(`'${templatePath}' is not a valid template path`);
+            }
+
+            return template.get(data);
         },
 
         /**
@@ -151,6 +149,7 @@ export default (function () {
          */
         init() {
             // Read the DOM to find all the templates, and make them available to the code
+            // eslint-disable-next-line rulesdir/prefer-underscore-method
             $('.js_template').each((__, $el) => {
                 const namespaceElements = $el.id.split('_');
                 const id = namespaceElements.pop();

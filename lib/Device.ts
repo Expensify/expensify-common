@@ -1,6 +1,13 @@
 import {UAParser} from 'ua-parser-js';
 
-function getOSAndName() {
+type DeviceInfo = {
+    os: string | undefined;
+    osVersion: string | undefined;
+    deviceName: string | undefined;
+    deviceVersion: string | undefined;
+};
+
+function getOSAndName(): DeviceInfo {
     const parser = new UAParser();
     const result = parser.getResult();
     return {

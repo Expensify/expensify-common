@@ -58,7 +58,7 @@ function set(name, value, expiredays) {
     // Get expiry date, set
     const exdate = new Date();
     exdate.setDate(exdate.getDate() + expiredays);
-    document.cookie = `${name}=${encodeURIComponent(value)}` + `${expiredays === null ? '' : `;expires=${exdate.toUTCString()}`}`;
+    document.cookie = `${name}=${encodeURIComponent(value)}${expiredays === null ? '' : `;expires=${exdate.toUTCString()}`}`;
 }
 
 /**
