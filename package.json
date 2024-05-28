@@ -28,6 +28,7 @@
     "url": "git+ssh://git@github.com/Expensify/JS-Libs.git"
   },
   "dependencies": {
+    "awesome-phonenumber": "^5.4.0",
     "classnames": "2.5.0",
     "clipboard": "2.0.11",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.14.0",
