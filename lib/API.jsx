@@ -8,6 +8,7 @@ import _ from 'underscore';
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
 import ExpensifyAPIDeferred from './APIDeferred';
+import {isWindowAvailable} from './utils';
 
 /**
  * @param {Network} network
@@ -47,7 +48,7 @@ export default function API(network, args) {
         network
             .get('/revision.txt')
             .done((codeRevision) => {
-                if (codeRevision.trim() === window.CODE_REVISION) {
+                if (isWindowAvailable() && codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
                     promise.resolve();
                 } else {
