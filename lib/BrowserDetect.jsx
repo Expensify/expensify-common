@@ -78,7 +78,7 @@ function searchString() {
 }
 
 function getMobileDevice() {
-    if (!isNavigatorAvailable()) {
+    if (!isNavigatorAvailable() || !navigator.userAgent) {
         return '';
     }
 
