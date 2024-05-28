@@ -15,7 +15,7 @@ export {default as PageEvent} from './PageEvent';
 export {default as PubSub} from './PubSub';
 export {default as ReportHistoryStore} from './ReportHistoryStore';
 export {default as Templates} from './Templates';
-export {default as Url} from './Url';
+export * as Url from './Url';
 export {default as fastMerge} from './fastMerge';
 export {default as Str} from './str';
 export {default as TLD_REGEX} from './tlds';
