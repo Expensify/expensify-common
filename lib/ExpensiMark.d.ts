@@ -35,7 +35,7 @@ declare type Rule = {
 };
 
 declare type ExtrasObject = {
-    reportIdToName?: Record<string, string>;
+    reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
 };
 export default class ExpensiMark {
