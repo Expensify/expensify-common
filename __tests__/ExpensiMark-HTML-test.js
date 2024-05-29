@@ -57,6 +57,16 @@ test('Test italic markdown replacement', () => {
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
+test('Test italic markdown replacement', () => {
+    const italicTestStartString = 'Note that _this is correctly italicized_\n'
+        + 'Note that `_this is correctly not italicized_` and _following inline contents are italicized_'
+        
+    const italicTestReplacedString = 'Note that <em>this is correctly italicized</em><br />'
+        + 'Note that <code>_this is correctly not italicized_</code> and <em>following inline contents are italicized</em>'
+        
+    expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
+});
+
 // Multi-line text wrapped in _ is successfully replaced with <em></em>
 test('Test multi-line italic markdown replacement', () => {
     const testString = '_Here is a multi-line\ncomment that should\nbe italic_ \n_\n_test\n_';
