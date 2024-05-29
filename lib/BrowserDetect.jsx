@@ -1,3 +1,5 @@
+import {isNavigatorAvailable, isWindowAvailable} from './utils';
+
 const BROWSERS = {
     EDGE: 'Edge',
     CHROME: 'Chrome',
@@ -13,6 +15,10 @@ const MOBILE_PLATFORMS = {
 };
 
 function searchString() {
+    if (!isWindowAvailable() || !isNavigatorAvailable()) {
+        return '';
+    }
+
     const data = [
         {
             string: navigator.userAgent,
@@ -72,6 +78,10 @@ function searchString() {
 }
 
 function getMobileDevice() {
+    if (!isNavigatorAvailable() || !navigator.userAgent) {
+        return '';
+    }
+
     const data = [
         {
             devices: ['iPhone', 'iPad', 'iPod'],

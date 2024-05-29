@@ -768,8 +768,16 @@ test('Mention user html to markdown', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
 
+    // When there is a phone number mention the sms domain `@expensify.sms`should be removed from returned string
+    testString = '<mention-user>@+311231231@expensify.sms</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@+311231231');
+
+    // When there is `accountID` and no `extras`, `@Hidden` should be returned
+    testString = '<mention-user accountID="1234"/>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@Hidden');
+
     const extras = {
-        accountIdToName: {
+        accountIDToName: {
             '1234': 'user@domain.com',
         },
     };
@@ -793,8 +801,12 @@ test('Mention report html to markdown', () => {
     testString = '<mention-report>#room-NAME</mention-report>';
     expect(parser.htmlToMarkdown(testString)).toBe('#room-NAME');
 
+    // When there is `reportID` and no `extras`, `#Hidden` should be returned
+    testString = '<mention-report reportID="1234"/>';
+    expect(parser.htmlToText(testString)).toBe('#Hidden');
+
     const extras = {
-        reportIdToName: {
+        reportIDToName: {
             '1234': '#room-name',
         },
     };

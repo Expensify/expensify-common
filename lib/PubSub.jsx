@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import has from 'lodash/has';
 import Log from './Log';
+import {isWindowAvailable} from './utils';
 
 /**
  * PubSub
@@ -125,4 +126,4 @@ const PubSubModule = {
     },
 };
 
-export default window !== undefined && window.PubSub ? window.PubSub : PubSubModule;
+export default isWindowAvailable() && window.PubSub ? window.PubSub : PubSubModule;
