@@ -1,7 +1,8 @@
 import _ from 'underscore';
 import PubSubModule from '../PubSub';
+import {isWindowAvailable} from '../utils';
 
-const PubSub = window.PubSub || PubSubModule;
+const PubSub = (isWindowAvailable() && window.PubSub) || PubSubModule;
 
 /**
  * This mixin sets up automatic PubSub bindings which will be removed when

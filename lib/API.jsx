@@ -8,6 +8,7 @@ import _ from 'underscore';
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
 import ExpensifyAPIDeferred from './APIDeferred';
+import {isWindowAvailable} from './utils';
 
 /**
  * @param {Network} network
@@ -47,7 +48,7 @@ export default function API(network, args) {
         network
             .get('/revision.txt')
             .done((codeRevision) => {
-                if (codeRevision.trim() === window.CODE_REVISION) {
+                if (isWindowAvailable() && codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
                     promise.resolve();
                 } else {
@@ -150,6 +151,7 @@ export default function API(network, args) {
      * @param {String} commandName The name of the API command
      */
     function requireParameters(parameterNames, parameters, commandName) {
+        // eslint-disable-next-line rulesdir/prefer-early-return
         parameterNames.forEach((parameterName) => {
             if (!_(parameters).has(parameterName) || parameters[parameterName] === null || parameters[parameterName] === undefined) {
                 const parametersCopy = _.clone(parameters);
@@ -823,7 +825,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            createAdminIssuedVirtualCard: function (parameters) {
+            createAdminIssuedVirtualCard(parameters) {
                 const commandName = 'Card_CreateAdminIssuedVirtualCard';
                 requireParameters(['cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType', 'domainName'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
@@ -842,7 +844,7 @@ export default function API(network, args) {
              *
              * @returns {APIDeferred}
              */
-            editAdminIssuedVirtualCard: function (parameters) {
+            editAdminIssuedVirtualCard(parameters) {
                 const commandName = 'Card_EditAdminIssuedVirtualCard';
                 requireParameters(['domainName', 'cardID', 'cardTitle', 'assigneeEmail', 'cardLimit', 'cardLimitType'], parameters, commandName);
                 return performPOSTRequest(commandName, parameters);
