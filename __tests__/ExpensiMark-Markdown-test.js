@@ -503,7 +503,7 @@ test('double quotes in same line', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
-test('tripple quotes in same line', () => {
+test('triple quotes in same line', () => {
     const testString = '<blockquote><blockquote><blockquote>line 1</blockquote></blockquote></blockquote>';
     const resultString = '>>> line 1';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
