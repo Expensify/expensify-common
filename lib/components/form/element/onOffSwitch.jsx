@@ -19,6 +19,7 @@ const propTypes = {
     labelOnRight: PropTypes.bool,
 
     // Classes of the label
+    // eslint-disable-next-line react/forbid-prop-types
     labelClasses: PropTypes.any,
 
     // True if the switch is on
@@ -176,6 +177,7 @@ class OnOffSwitch extends Component {
                 descriptionElm = (
                     <div
                         className="depreciated helperLabel"
+                        // eslint-disable-next-line react/no-danger
                         dangerouslySetInnerHTML={{__html: description}}
                     />
                 );

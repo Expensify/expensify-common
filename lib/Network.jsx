@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import _ from 'underscore';
+import {isWindowAvailable} from './utils';
 
 /**
  * Adds our API command to the URL so the API call is more easily identified in the
@@ -40,9 +41,11 @@ export default function Network(endpoint) {
     }
 
     // Attach a listener to the event indicating that we're leaving a page
-    window.onbeforeunload = () => {
-        isNavigatingAway = true;
-    };
+    if (isWindowAvailable()) {
+        window.onbeforeunload = () => {
+            isNavigatingAway = true;
+        };
+    }
 
     return {
         /**
@@ -64,6 +67,7 @@ export default function Network(endpoint) {
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
+                // eslint-disable-next-line no-param-reassign
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
             }

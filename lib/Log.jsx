@@ -1,7 +1,9 @@
+/* eslint-disable no-console */
 import _ from 'underscore';
 import API from './API';
 import Network from './Network';
 import Logger from './Logger';
+import {isWindowAvailable} from './utils';
 
 /**
  * Network interface for logger.
@@ -22,7 +24,7 @@ function serverLoggingCallback(logger, params) {
  * @param {String} message
  */
 function clientLoggingCallback(message) {
-    if (typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
+    if (isWindowAvailable() && typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
         return;
     }
 
@@ -34,5 +36,5 @@ function clientLoggingCallback(message) {
 export default new Logger({
     serverLoggingCallback,
     clientLoggingCallback,
-    isDebug: window.DEBUG,
+    isDebug: isWindowAvailable() ? window.DEBUG : false,
 });

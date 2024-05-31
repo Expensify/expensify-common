@@ -146,8 +146,12 @@ test('Mention user html to text', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToText(testString)).toBe('@user@DOMAIN.com');
 
+    // When there is `accountID` and no `extras`, `@Hidden` should be returned
+    testString = '<mention-user accountID="1234"/>';
+    expect(parser.htmlToText(testString)).toBe('@Hidden');
+
     const extras = {
-        accountIdToName: {
+        accountIDToName: {
             '1234': 'user@domain.com',
         },
     };
@@ -171,8 +175,12 @@ test('Mention report html to text', () => {
     testString = '<mention-report>#room-NAME</mention-report>';
     expect(parser.htmlToText(testString)).toBe('#room-NAME');
 
+    // When there is `reportID` and no `extras`, `#Hidden` should be returned
+    testString = '<mention-report reportID="1234"/>';
+    expect(parser.htmlToText(testString)).toBe('#Hidden');
+
     const extras = {
-        reportIdToName: {
+        reportIDToName: {
             '1234': '#room-name',
         },
     };

@@ -263,9 +263,6 @@ export default class ReportHistoryStore {
             delete this.cache[reportID];
         }
 
-        // We'll poll the API for the un-cached history
-        const cachedHistory = this.cache[reportID] || [];
-
         this.API.Report_GetHistory({
             reportID,
         })
