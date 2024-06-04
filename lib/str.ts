@@ -207,7 +207,7 @@ const Str = {
      * The ellipses will only be appended if @p text is longer than the @p length
      * given.
      *
-     * @param val   The string to reduce in size.
+     * @param val The string to reduce in size.
      * @param length The maximal length desired.
      * @returns The shortened @p text.
      */
