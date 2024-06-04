@@ -847,10 +847,10 @@ const Str = {
     /**
      * Checks if a string could be the masked version of another one.
      *
-     * @param strA string to compare
-     * @param strB string to compare
-     * @param [mask] defaults to X
-     * @returns true when first could be the masked version of second
+     * @param strA String to compare
+     * @param strB String to compare
+     * @param [mask] Defaults to X
+     * @returns True when first could be the masked version of second
      */
     maskedEquals(strA: string, strB: string, mask: string): boolean {
         const firsts = strA.match(/.{1,1}/g) ?? [];
