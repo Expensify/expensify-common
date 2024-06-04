@@ -24,14 +24,11 @@ export default class Logger {
         this.isDebug = isDebug;
 
         // Public Methods
-        // eslint-disable-next-line no-constructor-return
-        return {
-            info: this.info.bind(this),
-            alert: this.alert.bind(this),
-            warn: this.warn.bind(this),
-            hmmm: this.hmmm.bind(this),
-            client: this.client.bind(this),
-        } as this;
+        this.info = this.info.bind(this);
+        this.alert = this.alert.bind(this);
+        this.warn = this.warn.bind(this);
+        this.hmmm = this.hmmm.bind(this);
+        this.client = this.client.bind(this);
     }
 
     /**

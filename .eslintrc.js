@@ -32,7 +32,15 @@ module.exports = {
         },
         {
             files: ['*.ts', '*.tsx'],
-            extends: ['expensify', 'plugin:@typescript-eslint/recommended', 'plugin:@typescript-eslint/stylistic', 'plugin:import/typescript', 'prettier', 'plugin:prettier/recommended'],
+            extends: [
+                'expensify',
+                'plugin:@typescript-eslint/recommended',
+                'plugin:@typescript-eslint/stylistic',
+                'plugin:import/typescript',
+                'plugin:you-dont-need-lodash-underscore/all',
+                'prettier',
+                'plugin:prettier/recommended',
+            ],
             plugins: ['react', 'import', '@typescript-eslint'],
             parserOptions: {
                 project: './tsconfig.json',
@@ -44,7 +52,7 @@ module.exports = {
                 'react/require-default-props': 'off',
                 'valid-jsdoc': 'off',
                 'es/no-optional-chaining': 'off',
-                'es/no-nullish-coalescing': 'off',
+                'es/no-nullish-coalescing-operators': 'off',
                 'react/jsx-filename-extension': ['error', {extensions: ['.tsx', '.jsx']}],
                 'import/no-unresolved': 'error',
                 'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],

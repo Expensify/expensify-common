@@ -1,5 +1,6 @@
 /* eslint-disable no-control-regex */
 import _ from 'underscore';
+import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
@@ -881,6 +882,16 @@ const Str = {
      */
     isValidPhone(phone: string): boolean {
         return Constants.CONST.SMS.E164_REGEX.test(phone);
+    },
+
+    /**
+     * Check for whether a phone number is valid.
+     * @param {String} phone
+     *
+     * @return {bool}
+     */
+    isValidPhoneNumber(phone) {
+        return parsePhoneNumber(phone).possible;
     },
 
     /**
