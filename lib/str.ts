@@ -44,7 +44,7 @@ const Str = {
      * @param allowFraction Flag indicating if fractions of cents should be
      *                               allowed in the output.
      *
-     * @return number The cent value of the @p amountStr.
+     * @returns The cent value of the @p amountStr.
      */
     fromUSDToNumber(amountStr: string, allowFraction: boolean): number {
         let amount: string | number = String(amountStr).replace(/[^\d.\-()]+/g, '');
