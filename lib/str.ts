@@ -1,5 +1,6 @@
 /* eslint-disable no-control-regex */
-import _ from 'underscore';
+import lodashEscape from 'lodash/escape';
+import lodashUnescape from 'lodash/unescape';
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
@@ -12,9 +13,9 @@ const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
  * if it is a function then we will call it with
  * any additional arguments.
  */
-function result(parameter: string): string;
-function result<R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
-function result<R, A extends unknown[]>(parameter: string | ((...a: A) => R), ...args: A): string | R {
+function resultFn(parameter: string): string;
+function resultFn<R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
+function resultFn<R, A extends unknown[]>(parameter: string | ((...a: A) => R), ...args: A): string | R {
     if (typeof parameter === 'function') {
         return parameter(...args);
     }
@@ -115,7 +116,7 @@ const Str = {
      * @return string the escaped string
      */
     safeEscape(s: string): string {
-        return _.escape(_.unescape(s));
+        return lodashEscape(lodashUnescape(s));
     },
 
     /**
@@ -168,7 +169,7 @@ const Str = {
         }
         str = str.substr(0, 1).toUpperCase() + str.substr(1).toLowerCase();
 
-        function recap_callback(t, a, b) {
+        function recap_callback(t: unknown, a: string, b: string) {
             return a + b.toUpperCase();
         }
         return str.replace(
@@ -606,7 +607,7 @@ const Str = {
      * @returns Uppercase worded string
      */
     ucwords(str: string): string {
-        const capitalize = ($1) => $1.toUpperCase();
+        const capitalize = ($1: string) => $1.toUpperCase();
         return String(str).replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
     },
 
@@ -886,11 +887,8 @@ const Str = {
 
     /**
      * Check for whether a phone number is valid.
-     * @param {String} phone
-     *
-     * @return {bool}
      */
-    isValidPhoneNumber(phone) {
+    isValidPhoneNumber(phone: string): boolean {
         return parsePhoneNumber(phone).possible;
     },
 
@@ -1006,14 +1004,14 @@ const Str = {
         return website.toLowerCase() + this.cutBefore(match[1], match[2]);
     },
 
-    result,
+    result: resultFn,
 
     /**
      * Get file extension for a given url with or
      * without query parameters
      */
     getExtension(url: string): string | undefined {
-        return _.first(_.last(url.split('.')).split('?')).toLowerCase();
+        return url.split('.').pop()?.split('?')[0]?.toLowerCase();
     },
 
     /**
@@ -1035,7 +1033,13 @@ const Str = {
      * https://reactnative.dev/docs/image#source
      */
     isImage(url: string): boolean {
-        return _.contains(['jpeg', 'jpg', 'gif', 'png', 'bmp', 'webp'], this.getExtension(url));
+        const extension = this.getExtension(url);
+
+        if (!extension) {
+            return false;
+        }
+
+        return ['jpeg', 'jpg', 'gif', 'png', 'bmp', 'webp'].includes(extension);
     },
 
     /**
@@ -1048,7 +1052,13 @@ const Str = {
      * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
      */
     isVideo(url: string): boolean {
-        return _.contains(['mov', 'mp4', 'webm', 'mkv'], this.getExtension(url));
+        const extension = this.getExtension(url);
+
+        if (!extension) {
+            return false;
+        }
+
+        return ['mov', 'mp4', 'webm', 'mkv'].includes(extension);
     },
 
     /**
@@ -1063,10 +1073,6 @@ const Str = {
 
     /**
      * Polyfill for String.prototype.replaceAll
-     *
-     * @param text
-     * @param searchValue
-     * @param replaceValue
      */
     replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => string)): string {
         return String.prototype.replaceAll.call(text, searchValue, replaceValue as (...args: unknown[]) => string);
