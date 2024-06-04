@@ -85,7 +85,7 @@ const Str = {
      * Decodes the given HTML encoded string.
      *
      * @param s The string to decode.
-     * @return string The decoded string.
+     * @returns The decoded string.
      */
     htmlDecode(s: string): string {
         // Use jQuery if it exists or else use html-entities
