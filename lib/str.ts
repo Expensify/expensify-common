@@ -134,7 +134,7 @@ const Str = {
      * Creates an ID that can be used as an HTML attribute from @p str.
      *
      * @param str A string to create an ID from.
-     * @return string The ID string made from @p str.
+     * @returns The ID string made from @p str.
      */
     makeID(str: string): string {
         const modifiedString = String(str)
