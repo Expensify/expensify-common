@@ -967,7 +967,6 @@ const Str = {
      * A simple GUID generator taken from https://stackoverflow.com/a/32760401/9114791
      *
      * @param [prefix] an optional prefix to put in front of the guid
-     *
      */
     guid(prefix = ''): string {
         function s4() {
