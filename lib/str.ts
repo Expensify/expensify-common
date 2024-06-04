@@ -124,7 +124,7 @@ const Str = {
      *
      * @param first string to compare
      * @param second string to compare
-     * @return boolean true when first === second, ignoring HTML encoding
+     * @returns True when first === second, ignoring HTML encoding
      */
     htmlEncodingInsensitiveEquals(first: string, second: string): boolean {
         return first === second || this.htmlDecode(first) === second || this.htmlEncode(first) === second;
