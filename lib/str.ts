@@ -112,8 +112,8 @@ const Str = {
     /**
      * Escape text while preventing any sort of double escape, so 'X & Y' -> 'X &amp; Y' and 'X &amp; Y' -> 'X &amp; Y'
      *
-     * @param s the string to escape
-     * @return string the escaped string
+     * @param s The string to escape
+     * @returns The escaped string
      */
     safeEscape(s: string): string {
         return lodashEscape(lodashUnescape(s));
