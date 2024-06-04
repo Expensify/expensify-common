@@ -759,10 +759,10 @@ const Str = {
     /**
      * Replace first N characters of the string with maskChar
      * eg: maskFirstNCharacters( '1234567890', 6, 'X' ) yields XXXXXX7890
-     * @param str string to mask
-     * @param num number of characters we want to mask from the string
-     * @param mask string we want replace the first N chars with
-     * @returns masked string
+     * @param str String to mask
+     * @param num Number of characters we want to mask from the string
+     * @param mask String we want replace the first N chars with
+     * @returns Masked string
      */
     maskFirstNCharacters(str: string, num: number, mask: string): string {
         // if str is empty, str or mask aren't strings,
