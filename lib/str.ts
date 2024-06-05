@@ -289,9 +289,9 @@ const Str = {
     /**
      * Returns true if the haystack begins with the needle
      *
-     * @param haystack  The full string to be searched
-     * @param needle    The case-sensitive string to search for
-     * @returns Retruns true if the haystack starts with the needle.
+     * @param haystack The full string to be searched
+     * @param needle  The case-sensitive string to search for
+     * @returns True if the haystack starts with the needle.
      */
     startsWith(haystack: string, needle: string): boolean {
         return this.isString(haystack) && this.isString(needle) && haystack.substring(0, needle.length) === needle;
@@ -360,7 +360,7 @@ const Str = {
      *
      * @param str The string to check for domainnameness.
      *
-     * @returns True iff the string is a domain name
+     * @returns True if the string is a domain name
      */
     isValidDomainName(str: string): boolean {
         return Boolean(String(str).match(Constants.CONST.REG_EXP.DOMAIN));
@@ -381,7 +381,7 @@ const Str = {
      *
      * @param str The string to check for email validity.
      *
-     * @returns True iff the string is an email
+     * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
         return Boolean(String(str).match(Constants.CONST.REG_EXP.EMAIL));
