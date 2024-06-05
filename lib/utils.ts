@@ -1,3 +1,13 @@
+/** Checks if the `window` global object is available. */
+function isWindowAvailable(): boolean {
+    return typeof window !== 'undefined';
+}
+
+/** Checks if the `navigator` global object is available. */
+function isNavigatorAvailable(): boolean {
+    return typeof navigator !== 'undefined';
+}
+
 const htmlEscapes = {
     '&': '&amp;',
     '<': '&lt;',
@@ -12,11 +22,9 @@ const reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
 /**
  * Converts the characters "&", "<", ">", '"', and "'" in `string` to their
  * corresponding HTML entities.
- * @param {string} string - The input string to escape.
- * @returns {string} - The escaped string.
  */
-function escape(string) {
-    return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr]) : string || '';
+function escape(string: string): string {
+    return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
 }
 
 const htmlUnescapes = {
@@ -36,11 +44,9 @@ const reHasEscapedHtml = RegExp(reEscapedHtml.source);
  * The inverse of `escape`this method converts the HTML entities
  * `&amp;`, `&lt;`, `&gt;`, `&quot;` and `&#39;` in `string` to
  * their corresponding characters.
- * @param {string} string - The input string to unescape.
- * @returns {string} - The unescaped string.
  * */
-function unescape(string) {
-    return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity] || "'") : string || '';
+function unescape(string: string): string {
+    return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
 }
 
 /**
@@ -48,7 +54,8 @@ function unescape(string) {
  * @param {*} variableToCheck
  * @returns {boolean}
  */
-function isFunction(variableToCheck) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isFunction(variableToCheck: any): boolean {
     return variableToCheck instanceof Function;
 }
 
@@ -57,9 +64,10 @@ function isFunction(variableToCheck) {
  * @param {*} obj
  * @returns {boolean}
  */
-function isObject(obj) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isObject(obj: any): boolean {
     const type = typeof obj;
     return type === 'function' || (!!obj && type === 'object');
 }
 
-export {escape, unescape, isFunction, isObject};
+export {isWindowAvailable, isNavigatorAvailable, escape, unescape, isFunction, isObject};

@@ -1,7 +1,7 @@
 import has from 'lodash/has';
-import Log from './Log';
-import * as Utils from './utils';
 import {once} from 'lodash';
+import Log from './Log';
+import {isWindowAvailable, isFunction, isObject} from './utils';
 
 /**
  * PubSub
@@ -95,8 +95,8 @@ const PubSubModule = {
             throw new Error('Attempted to subscribe to undefined event');
         }
 
-        const callback = Utils.isFunction(optionalCallback) ? optionalCallback : () => {};
-        const scope = Utils.isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
+        const callback = isFunction(optionalCallback) ? optionalCallback : () => {};
+        const scope = isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
         const eventID = generateID(eventName);
 
         if (eventMap[eventName] === undefined) {
@@ -127,4 +127,4 @@ const PubSubModule = {
     },
 };
 
-export default window !== undefined && window.PubSub ? window.PubSub : PubSubModule;
+export default isWindowAvailable() && window.PubSub ? window.PubSub : PubSubModule;

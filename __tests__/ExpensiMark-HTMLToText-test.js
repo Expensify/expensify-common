@@ -151,7 +151,7 @@ test('Mention user html to text', () => {
     expect(parser.htmlToText(testString)).toBe('@Hidden');
 
     const extras = {
-        accountIdToName: {
+        accountIDToName: {
             '1234': 'user@domain.com',
         },
     };
@@ -180,7 +180,7 @@ test('Mention report html to text', () => {
     expect(parser.htmlToText(testString)).toBe('#Hidden');
 
     const extras = {
-        reportIdToName: {
+        reportIDToName: {
             '1234': '#room-name',
         },
     };

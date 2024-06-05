@@ -149,6 +149,7 @@ export default (function () {
          */
         init() {
             // Read the DOM to find all the templates, and make them available to the code
+            // eslint-disable-next-line rulesdir/prefer-underscore-method
             $('.js_template').each((__, $el) => {
                 const namespaceElements = $el.id.split('_');
                 const id = namespaceElements.pop();

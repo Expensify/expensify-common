@@ -8,7 +8,7 @@
 import {Deferred} from 'simply-deferred';
 import {has} from 'lodash';
 import ExpensifyAPIDeferred from './APIDeferred';
-import * as Utils from './utils';
+import {isWindowAvailable, isFunction} from './utils';
 
 /**
  * @param {Network} network
@@ -48,7 +48,7 @@ export default function API(network, args) {
         network
             .get('/revision.txt')
             .done((codeRevision) => {
-                if (codeRevision.trim() === window.CODE_REVISION) {
+                if (isWindowAvailable() && codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
                     promise.resolve();
                 } else {
@@ -105,7 +105,7 @@ export default function API(network, args) {
         let newParameters = {...parameters, command};
 
         // If there was an enhanceParameters() method supplied in our args, then we will call that here
-        if (args && Utils.isFunction(args.enhanceParameters)) {
+        if (args && isFunction(args.enhanceParameters)) {
             newParameters = args.enhanceParameters(newParameters);
         }
 
@@ -151,6 +151,7 @@ export default function API(network, args) {
      * @param {String} commandName The name of the API command
      */
     function requireParameters(parameterNames, parameters, commandName) {
+        // eslint-disable-next-line rulesdir/prefer-early-return
         parameterNames.forEach((parameterName) => {
             if (has(parameters, parameterName) && parameters[parameterName] !== null && parameters[parameterName] !== undefined) {
                 return;
@@ -174,7 +175,7 @@ export default function API(network, args) {
          * @param  {Function} callback
          */
         registerDefaultHandler(jsonCodes, callback) {
-            if (!Utils.isFunction(callback)) {
+            if (!isFunction(callback)) {
                 return;
             }
 
@@ -231,7 +232,7 @@ export default function API(network, args) {
 
             return (parameters, keepalive = false) => {
                 // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
-                if (Utils.isFunction(data.validate)) {
+                if (isFunction(data.validate)) {
                     data.validate(parameters);
                 }
 
