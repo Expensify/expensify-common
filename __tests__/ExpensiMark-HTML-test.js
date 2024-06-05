@@ -1274,6 +1274,12 @@ test('Test for user mention with codefence style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for room mention with codefence style', () => {
+    const testString = '```\n#room\n```';
+    const resultString = '<pre>#room<br /></pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for user mention with inlineCodeBlock style', () => {
     const testString = '`@username@expensify.com`';
     const resultString = '<code>@username@expensify.com</code>';
