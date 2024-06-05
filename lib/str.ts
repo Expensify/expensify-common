@@ -259,11 +259,7 @@ const Str = {
     getByteLength(input: string): number {
         // Force string type
         const stringInput = String(input);
-        let byteLength = 0;
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < stringInput.length; i++) {
-            byteLength += this.getRawByteSize(stringInput[i]);
-        }
+        const byteLength = Array.from(stringInput).reduce((acc, char) => acc + this.getRawByteSize(char), 0);
         return byteLength;
     },
 
@@ -423,13 +419,7 @@ const Str = {
         }
 
         const emails = string.split(',');
-        let result = true;
-        // eslint-disable-next-line @typescript-eslint/prefer-for-of
-        for (let i = 0; i < emails.length; i += 1) {
-            if (!this.isValidEmail(emails[i].trim())) {
-                result = false;
-            }
-        }
+        const result = emails.every((email) => this.isValidEmail(email.trim()));
         return result;
     },
 
@@ -544,10 +534,6 @@ const Str = {
 
     /**
      * Checks if a string's length is in the specified range
-     *
-     * @param str The subject
-     * @param minimumLength
-     * @param [maximumLength]
      *
      * @returns true if the length is in the range, false otherwise
      */
@@ -1003,6 +989,11 @@ const Str = {
         return website.toLowerCase() + this.cutBefore(match[1], match[2]);
     },
 
+    /**
+     * Checks if parameter is a string or function
+     * if it is a function then we will call it with
+     * any additional arguments.
+     */
     result: resultFn,
 
     /**
