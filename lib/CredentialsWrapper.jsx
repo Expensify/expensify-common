@@ -1,6 +1,6 @@
 import localForage from 'localforage';
 
-export const LOGIN_PARTNER_DETAILS = {
+const LOGIN_PARTNER_DETAILS = {
     CREDENTIALS_KEY: 'DEVICE_SESSION_CREDENTIALS',
     EXPENSIFY_PARTNER_PREFIX: 'expensify.',
     PARTNER_NAME: 'chat-expensify-com',
@@ -33,6 +33,7 @@ const CredentialWrapper = {
      */
     setCredentials(credentials) {
         if (!credentials.partnerUserID || !credentials.partnerUserSecret) {
+            // eslint-disable-next-line prefer-promise-reject-errors
             return Promise.reject('Invalid credential pair');
         }
 
@@ -48,3 +49,4 @@ const CredentialWrapper = {
 };
 
 export default CredentialWrapper;
+export {LOGIN_PARTNER_DETAILS};
