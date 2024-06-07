@@ -850,4 +850,3 @@ export declare const PUBLIC_DOMAINS: readonly [
     'yahoo.com.br',
     'ymail.com',
 ];
-
