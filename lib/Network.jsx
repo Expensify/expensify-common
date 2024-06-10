@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import {isWindowAvailable, isObject} from './utils';
+import * as Utils from './utils';
 
 /**
  * Adds our API command to the URL so the API call is more easily identified in the
@@ -40,7 +40,7 @@ export default function Network(endpoint) {
     }
 
     // Attach a listener to the event indicating that we're leaving a page
-    if (isWindowAvailable()) {
+    if (Utils.isWindowAvailable()) {
         window.onbeforeunload = () => {
             isNavigatingAway = true;
         };
@@ -138,7 +138,7 @@ export default function Network(endpoint) {
                 }
                 if (Array.isArray(value)) {
                     value.forEach((valueItem, i) => {
-                        if (isObject(valueItem)) {
+                        if (Utils.isObject(valueItem)) {
                             Object.entries(valueItem).forEach(([valueItemObjectKey, valueItemObjectValue]) => {
                                 formData.append(`${key}[${i}][${valueItemObjectKey}]`, valueItemObjectValue);
                             });

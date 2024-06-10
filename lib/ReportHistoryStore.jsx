@@ -282,7 +282,7 @@ export default class ReportHistoryStore {
         const cachedHistory = this.cache[reportID] || [];
 
         // If comment is not in cache then fetch it
-        if (cachedHistory.length > 0) {
+        if (cachedHistory.length === 0) {
             return this.getFlatHistory(reportID);
         }
 

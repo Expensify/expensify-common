@@ -8,7 +8,7 @@
 import {Deferred} from 'simply-deferred';
 import {has} from 'lodash';
 import ExpensifyAPIDeferred from './APIDeferred';
-import {isWindowAvailable, isFunction} from './utils';
+import * as Utils from './utils';
 
 /**
  * @param {Network} network
@@ -48,7 +48,7 @@ export default function API(network, args) {
         network
             .get('/revision.txt')
             .done((codeRevision) => {
-                if (isWindowAvailable() && codeRevision.trim() === window.CODE_REVISION) {
+                if (Utils.isWindowAvailable() && codeRevision.trim() === window.CODE_REVISION) {
                     console.debug('Code revision is up to date');
                     promise.resolve();
                 } else {
@@ -105,7 +105,7 @@ export default function API(network, args) {
         let newParameters = {...parameters, command};
 
         // If there was an enhanceParameters() method supplied in our args, then we will call that here
-        if (args && isFunction(args.enhanceParameters)) {
+        if (args && Utils.isFunction(args.enhanceParameters)) {
             newParameters = args.enhanceParameters(newParameters);
         }
 
@@ -175,7 +175,7 @@ export default function API(network, args) {
          * @param  {Function} callback
          */
         registerDefaultHandler(jsonCodes, callback) {
-            if (!isFunction(callback)) {
+            if (!Utils.isFunction(callback)) {
                 return;
             }
 
@@ -232,7 +232,7 @@ export default function API(network, args) {
 
             return (parameters, keepalive = false) => {
                 // Optional validate function for required logic before making the call. e.g. validating params in the front-end etc.
-                if (isFunction(data.validate)) {
+                if (Utils.isFunction(data.validate)) {
                     data.validate(parameters);
                 }
 

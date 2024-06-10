@@ -2,7 +2,7 @@
 import API from './API';
 import Network from './Network';
 import Logger from './Logger';
-import {isWindowAvailable, isFunction} from './utils';
+import * as Utils from './utils';
 
 /**
  * Network interface for logger.
@@ -23,11 +23,11 @@ function serverLoggingCallback(logger, params) {
  * @param {String} message
  */
 function clientLoggingCallback(message) {
-    if (isWindowAvailable() && typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
+    if (Utils.isWindowAvailable() && typeof window.g_printableReport !== 'undefined' && window.g_printableReport === true) {
         return;
     }
 
-    if (window.console && isFunction(console.log)) {
+    if (window.console && Utils.isFunction(console.log)) {
         console.log(message);
     }
 }
@@ -35,5 +35,5 @@ function clientLoggingCallback(message) {
 export default new Logger({
     serverLoggingCallback,
     clientLoggingCallback,
-    isDebug: isWindowAvailable() ? window.DEBUG : false,
+    isDebug: Utils.isWindowAvailable() ? window.DEBUG : false,
 });
