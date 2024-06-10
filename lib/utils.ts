@@ -22,6 +22,7 @@ const reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
 /**
  * Converts the characters "&", "<", ">", '"', and "'" in `string` to their
  * corresponding HTML entities.
+ * Source: https://github.com/lodash/lodash/blob/main/src/escape.ts
  */
 function escape(string: string): string {
     return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
@@ -44,6 +45,7 @@ const reHasEscapedHtml = RegExp(reEscapedHtml.source);
  * The inverse of `escape`this method converts the HTML entities
  * `&amp;`, `&lt;`, `&gt;`, `&quot;` and `&#39;` in `string` to
  * their corresponding characters.
+ * Source: https://github.com/lodash/lodash/blob/main/src/unescape.ts
  * */
 function unescape(string: string): string {
     return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
@@ -54,8 +56,7 @@ function unescape(string: string): string {
  * @param {*} variableToCheck
  * @returns {boolean}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isFunction(variableToCheck: any): boolean {
+function isFunction(variableToCheck: unknown): boolean {
     return variableToCheck instanceof Function;
 }
 
@@ -64,8 +65,7 @@ function isFunction(variableToCheck: any): boolean {
  * @param {*} obj
  * @returns {boolean}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isObject(obj: any): boolean {
+function isObject(obj: unknown): boolean {
     const type = typeof obj;
     return type === 'function' || (!!obj && type === 'object');
 }

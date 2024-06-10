@@ -73,7 +73,6 @@ const PubSubModule = {
      */
     once(eventName, callback, optionalScope) {
         const scope = typeof optionalScope === 'object' && optionalScope !== null ? optionalScope : window;
-        // TODO: Check how to replace once function
         const functionToCallOnce = once((...args) => callback.apply(scope, args));
         return this.subscribe(eventName, functionToCallOnce);
     },
@@ -96,7 +95,7 @@ const PubSubModule = {
         }
 
         const callback = isFunction(optionalCallback) ? optionalCallback : () => {};
-        const scope = isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
+        const scope = isObject(optionalScope) ? optionalScope : window;
         const eventID = generateID(eventName);
 
         if (eventMap[eventName] === undefined) {

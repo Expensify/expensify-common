@@ -104,7 +104,7 @@ export default (function () {
         for (let argumentNumber = 0; argumentNumber < wantedNamespace.length; argumentNumber++) {
             currentArgument = wantedNamespace[argumentNumber];
 
-            if (!namespace[currentArgument]) {
+            if (namespace[currentArgument] === undefined) {
                 namespace[currentArgument] = {};
             }
             namespace = namespace[currentArgument];
@@ -122,7 +122,7 @@ export default (function () {
          */
         get(templatePath, data = {}) {
             const template = getTemplate(templatePath);
-            if (!template) {
+            if (template === undefined) {
                 throw Error(`Template '${templatePath}' is not defined`);
             }
 
@@ -141,7 +141,7 @@ export default (function () {
          * @return {Boolean}
          */
         has(templatePath) {
-            return !!getTemplate(templatePath);
+            return getTemplate(templatePath) !== undefined;
         },
 
         /**

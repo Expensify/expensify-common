@@ -67,7 +67,11 @@ function die() {
  * @returns {Array}
  */
 function mapByName(list, methodName) {
-    return list.map((item) => item[methodName].call(item));
+    let arr = list;
+    if (!Array.isArray(arr)) {
+        arr = Object.values(arr);
+    }
+    return arr.map((item) => item[methodName].call(item));
 }
 
 export {invoke, invokeAsync, bulkInvoke, die, mapByName};

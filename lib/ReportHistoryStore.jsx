@@ -220,7 +220,7 @@ export default class ReportHistoryStore {
 
         // We'll poll the API for the un-cached history
         const cachedHistory = this.cache[reportID] || [];
-        const firstHistoryItem = cachedHistory.length > 0 ? cachedHistory[0] : {};
+        const firstHistoryItem = cachedHistory[0] || {};
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({

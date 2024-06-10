@@ -14,13 +14,15 @@ module.exports = {
             rules: {
                 // Allow JSX to be written in any file ignoring the extension type
                 'react/jsx-filename-extension': 'off',
-                'rulesdir/prefer-underscore-method': 'off',
                 'rulesdir/no-api-in-views': 'off',
                 'rulesdir/no-multiple-api-calls': 'off',
                 'rulesdir/prefer-import-module-contents': 'off',
                 'no-constructor-return': 'off',
                 'max-classes-per-file': 'off',
                 'arrow-body-style': 'off',
+                'es/no-nullish-coalescing-operators': 'off',
+                'rulesdir/prefer-underscore-method': 'off',
+                'es/no-optional-chaining': 'off',
                 'import/extensions': [
                     'error',
                     'ignorePackages',
@@ -50,7 +52,6 @@ module.exports = {
             },
             rules: {
                 'prefer-regex-literals': 'off',
-                'rulesdir/prefer-underscore-method': 'off',
                 'react/jsx-props-no-spreading': 'off',
                 'react/require-default-props': 'off',
                 'valid-jsdoc': 'off',
