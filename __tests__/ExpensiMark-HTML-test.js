@@ -505,19 +505,19 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
 
     codeFenceExample = '*Test1 ```\ncode\n``` Test2*';
     expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code<br /></pre> Test2*');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre data-code-raw=\"\ncode\n\">code\n</pre> Test2*');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre>code\n</pre> Test2*');
 
     codeFenceExample = '_Test1 ```\ncode\n``` Test2_';
     expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code<br /></pre> Test2_');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre data-code-raw=\"\ncode\n\">code\n</pre> Test2_');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre>code\n</pre> Test2_');
 
     codeFenceExample = '~Test1 ```\ncode\n``` Test2~';
     expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code<br /></pre> Test2~');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre data-code-raw=\"\ncode\n\">code\n</pre> Test2~');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre>code\n</pre> Test2~');
 
     codeFenceExample = '[```\ncode\n```](google.com)';
     expect(parser.replace(codeFenceExample)).toBe('[<pre>code<br /></pre>](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre data-code-raw=\"\ncode\n\">code\n</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre>code\n</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
 });
 
 test('Test code fencing with additional backticks inside', () => {
@@ -1284,6 +1284,12 @@ test('Test for user mention with codefence style', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for room mention with codefence style', () => {
+    const testString = '```\n#room\n```';
+    const resultString = '<pre>#room<br /></pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for user mention with inlineCodeBlock style', () => {
     const testString = '`@username@expensify.com`';
     const resultString = '<code>@username@expensify.com</code>';
@@ -1793,14 +1799,14 @@ describe('when should keep raw input flag is enabled', () => {
 
     test('quote with other markdowns', () => {
         const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre data-code-raw=\"\nhere is a codefenced quote\n&gt;it should not be quoted\n\">here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
+        const quoteTestReplacedString = '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre>here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('codeBlock with newlines', () => {
         const quoteTestStartString = '```\nhello world\n```';
-        const quoteTestReplacedString = '<pre data-code-raw="\nhello world\n">hello&#32;world\n</pre>';
+        const quoteTestReplacedString = '<pre>hello&#32;world\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });

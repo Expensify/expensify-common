@@ -1,5 +1,6 @@
 /* eslint-disable no-control-regex */
-import _ from 'underscore';
+import lodashEscape from 'lodash/escape';
+import lodashUnescape from 'lodash/unescape';
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
@@ -7,15 +8,29 @@ import * as UrlPatterns from './Url';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
+/**
+ * Checks if parameter is a string or function
+ * if it is a function then we will call it with
+ * any additional arguments.
+ */
+function resultFn(parameter: string): string;
+function resultFn<R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
+function resultFn<R, A extends unknown[]>(parameter: string | ((...a: A) => R), ...args: A): string | R {
+    if (typeof parameter === 'function') {
+        return parameter(...args);
+    }
+
+    return parameter;
+}
+
 const Str = {
     /**
      * Return true if the string is ending with the provided suffix
      *
-     * @param {String} str String ot search in
-     * @param {String} suffix What to look for
-     * @return {Boolean}
+     * @param str String ot search in
+     * @param suffix What to look for
      */
-    endsWith(str, suffix) {
+    endsWith(str: string, suffix: string): boolean {
         if (!str || !suffix) {
             return false;
         }
@@ -25,37 +40,28 @@ const Str = {
     /**
      * Converts a USD string into th number of cents it represents.
      *
-     * @param {String}  amountStr     A string representing a USD value.
-     * @param {Boolean} allowFraction Flag indicating if fractions of cents should be
+     * @param amountStr A string representing a USD value.
+     * @param allowFraction Flag indicating if fractions of cents should be
      *                               allowed in the output.
      *
-     * @return {Number} The cent value of the @p amountStr.
+     * @returns The cent value of the @p amountStr.
      */
-    fromUSDToNumber(amountStr, allowFraction) {
-        let amount = String(amountStr).replace(/[^\d.\-()]+/g, '');
+    fromUSDToNumber(amountStr: string, allowFraction: boolean): number {
+        let amount: string | number = String(amountStr).replace(/[^\d.\-()]+/g, '');
         if (amount.match(/\(.*\)/)) {
             const modifiedAmount = amount.replace(/[()]/g, '');
             amount = `-${modifiedAmount}`;
         }
         amount = Number(amount) * 100;
 
-        // We round it here to a precision of 3 because some floating point numbers, when multiplied by 100
-        // don't give us a very pretty result. Try this in the JS console:
-        // 0.678 * 100
-        // 67.80000000000001
-        // 0.679 * 100
-        // 67.9
         amount = Math.round(amount * 1e3) / 1e3;
         return allowFraction ? amount : Math.round(amount);
     },
 
     /**
      * Truncates the middle section of a string based on the max allowed length
-     * @param {string} fullStr
-     * @param {int}    maxLength
-     * @returns {string}
      */
-    truncateInMiddle(fullStr, maxLength) {
+    truncateInMiddle(fullStr: string, maxLength: number): string {
         if (fullStr.length <= maxLength) {
             return fullStr;
         }
@@ -70,21 +76,18 @@ const Str = {
 
     /**
      * Convert new line to <br />
-     *
-     * @param {String} str
-     * @returns {string}
      */
-    nl2br(str) {
+    nl2br(str: string): string {
         return str.replace(/\n/g, '<br />');
     },
 
     /**
      * Decodes the given HTML encoded string.
      *
-     * @param {String} s The string to decode.
-     * @return {String} The decoded string.
+     * @param s The string to decode.
+     * @returns The decoded string.
      */
-    htmlDecode(s) {
+    htmlDecode(s: string): string {
         // Use jQuery if it exists or else use html-entities
         if (typeof jQuery !== 'undefined') {
             return jQuery('<textarea/>').html(s).text();
@@ -95,10 +98,10 @@ const Str = {
     /**
      * HTML encodes the given string.
      *
-     * @param {String} s The string to encode.
-     * @return {String} @p s HTML encoded.
+     * @param s The string to encode.
+     * @return string @p s HTML encoded.
      */
-    htmlEncode(s) {
+    htmlEncode(s: string): string {
         // Use jQuery if it exists or else use html-entities
         if (typeof jQuery !== 'undefined') {
             return jQuery('<textarea/>').text(s).html();
@@ -109,31 +112,31 @@ const Str = {
     /**
      * Escape text while preventing any sort of double escape, so 'X & Y' -> 'X &amp; Y' and 'X &amp; Y' -> 'X &amp; Y'
      *
-     * @param {String} s the string to escape
-     * @return {String} the escaped string
+     * @param s The string to escape
+     * @returns The escaped string
      */
-    safeEscape(s) {
-        return _.escape(_.unescape(s));
+    safeEscape(s: string): string {
+        return lodashEscape(lodashUnescape(s));
     },
 
     /**
      * HTML encoding insensitive equals.
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @return {Boolean} true when first === second, ignoring HTML encoding
+     * @param first string to compare
+     * @param second string to compare
+     * @returns True when first === second, ignoring HTML encoding
      */
-    htmlEncodingInsensitiveEquals(first, second) {
+    htmlEncodingInsensitiveEquals(first: string, second: string): boolean {
         return first === second || this.htmlDecode(first) === second || this.htmlEncode(first) === second;
     },
 
     /**
      * Creates an ID that can be used as an HTML attribute from @p str.
      *
-     * @param {String} str A string to create an ID from.
-     * @return {String} The ID string made from @p str.
+     * @param str A string to create an ID from.
+     * @returns The ID string made from @p str.
      */
-    makeID(str) {
+    makeID(str: string): string {
         const modifiedString = String(str)
             .replace(/[^A-Za-z0-9]/g, '_')
             .toUpperCase();
@@ -143,22 +146,21 @@ const Str = {
     /**
      * Extracts an ID made with Str.makeID from a larger string.
      *
-     * @param {String} str A string containing an id made with Str.makeID
-     * @return {String|null} The ID string.
+     * @param str A string containing an id made with Str.makeID
+     * @returns The ID string.
      */
-    extractID(str) {
+    extractID(str: string): string | null {
         const matches = str.match(/id[A-Z0-9_]+/);
-        return matches.length > 0 ? matches[0] : null;
+        return matches && matches.length > 0 ? matches[0] : null;
     },
 
     /**
      * Modifies the string so the first letter of each word is capitalized and the
      * rest lowercased.
      *
-     * @param {String} val The string to modify
-     * @return {String}
+     * @param val The string to modify
      */
-    recapitalize(val) {
+    recapitalize(val: string): string {
         // First replace every letter with its lowercase equivalent
         // Cast to string.
         let str = String(val);
@@ -167,7 +169,7 @@ const Str = {
         }
         str = str.substr(0, 1).toUpperCase() + str.substr(1).toLowerCase();
 
-        function recap_callback(t, a, b) {
+        function recap_callback(t: unknown, a: string, b: string) {
             return a + b.toUpperCase();
         }
         return str.replace(
@@ -179,30 +181,23 @@ const Str = {
 
     /**
      * Replace all the non alphanumerical character by _
-     *
-     * @param {String} input
-     * @returns {String}
      */
-    sanitizeToAlphaNumeric(input) {
+    sanitizeToAlphaNumeric(input: string): string {
         return String(input).replace(/[^\d\w]/g, '_');
     },
 
     /**
      * Strip out all the non numerical characters
-     *
-     * @param {String} input
-     * @returns {String}
      */
-    stripNonNumeric(input) {
+    stripNonNumeric(input: string): string {
         return String(input).replace(/[^\d]/g, '');
     },
 
     /**
      * Strips all non ascii characters from a string
-     * @param {String} input
-     * @returns {String} The ascii version of the string.
+     * @returns The ascii version of the string.
      */
-    stripNonASCIICharacters(input) {
+    stripNonASCIICharacters(input: string): string {
         return String(input).replace(/[\u0000-\u0019\u0080-\uffff]/g, '');
     },
 
@@ -212,11 +207,11 @@ const Str = {
      * The ellipses will only be appended if @p text is longer than the @p length
      * given.
      *
-     * @param {String} val   The string to reduce in size.
-     * @param {Number} length The maximal length desired.
-     * @return {String} The shortened @p text.
+     * @param val The string to reduce in size.
+     * @param length The maximal length desired.
+     * @returns The shortened @p text.
      */
-    shortenText(val, length) {
+    shortenText(val: string, length: number): string {
         // Remove extra spaces because they don't show up in html anyway.
         const text = String(val).replace(/\s+/g, ' ');
         const truncatedText = text.substr(0, length - 3);
@@ -225,13 +220,13 @@ const Str = {
 
     /**
      * Returns the byte size of a character
-     * @param {String} inputChar You can input more than one character, but it will only return the size of the first
+     * @param inputChar You can input more than one character, but it will only return the size of the first
      * one.
-     * @returns {Number} Byte size of the character
+     * @returns Byte size of the character
      */
-    getRawByteSize(inputChar) {
+    getRawByteSize(inputChar: string): number {
         const onlyChar = String(inputChar);
-        const c = onlyChar.charCodeAt();
+        const c = onlyChar.charCodeAt(0);
 
         // If we are grabbing the byte size, we need to temporarily diable no-bitwise for linting
         /* eslint-disable no-bitwise */
@@ -259,26 +254,21 @@ const Str = {
 
     /**
      * Gets the length of a string in bytes, including non-ASCII characters
-     * @param {String} input
-     * @returns {Number} The number of bytes used by string
+     * @returns The number of bytes used by string
      */
-    getByteLength(input) {
+    getByteLength(input: string): number {
         // Force string type
         const stringInput = String(input);
-        let byteLength = 0;
-        for (let i = 0; i < stringInput.length; i++) {
-            byteLength += this.getRawByteSize(stringInput[i]);
-        }
+        const byteLength = Array.from(stringInput).reduce((acc, char) => acc + this.getRawByteSize(char), 0);
         return byteLength;
     },
 
     /**
      * Shortens the input by max byte size instead of by character length
-     * @param {String} input
-     * @param {Number} maxSize The max size in bytes, e.g. 256
-     * @returns {String} Returns a shorted input if the input size exceeds the max
+     * @param maxSize The max size in bytes, e.g. 256
+     * @returns Returns a shorted input if the input size exceeds the max
      */
-    shortenByByte(input, maxSize) {
+    shortenByByte(input: string, maxSize: number): string {
         const stringInput = String(input);
         let totalByteLength = 0;
         for (let i = 0; i < stringInput.length; i++) {
@@ -295,21 +285,21 @@ const Str = {
     /**
      * Returns true if the haystack begins with the needle
      *
-     * @param {String} haystack  The full string to be searched
-     * @param {String} needle    The case-sensitive string to search for
-     * @return {Boolean} Retruns true if the haystack starts with the needle.
+     * @param haystack The full string to be searched
+     * @param needle  The case-sensitive string to search for
+     * @returns True if the haystack starts with the needle.
      */
-    startsWith(haystack, needle) {
+    startsWith(haystack: string, needle: string): boolean {
         return this.isString(haystack) && this.isString(needle) && haystack.substring(0, needle.length) === needle;
     },
 
     /**
      * Gets the textual value of the given string.
      *
-     * @param {String} str The string to fetch the text value from.
-     * @return {String} The text from within the HTML string.
+     * @param str The string to fetch the text value from.
+     * @returns The text from within the HTML string.
      */
-    stripHTML(str) {
+    stripHTML(str: string): string {
         if (!this.isString(str)) {
             return '';
         }
@@ -320,10 +310,10 @@ const Str = {
     /**
      * Modifies the string so the first letter of the string is capitalized
      *
-     * @param {String} str The string to modify.
-     * @return {String} The recapitalized string.
+     * @param str The string to modify.
+     * @returns The recapitalized string.
      */
-    UCFirst(str) {
+    UCFirst(str: string): string {
         return str.substr(0, 1).toUpperCase() + str.substr(1);
     },
 
@@ -332,11 +322,11 @@ const Str = {
      * of str to the first occurrence of substr.
      * Example: Str.cutAfter( 'hello$%world', '$%' ) // returns 'hello'
      *
-     * @param {String} str The string to modify.
-     * @param {String} substr The substring to search for.
-     * @return {String} The cut/trimmed string.
+     * @param str The string to modify.
+     * @param substr The substring to search for.
+     * @returns The cut/trimmed string.
      */
-    cutAfter(str, substr) {
+    cutAfter(str: string, substr: string): string {
         const index = str.indexOf(substr);
         if (index !== -1) {
             return str.substring(0, index);
@@ -349,11 +339,11 @@ const Str = {
      * occurrence of substr to the end of the string.
      * Example: Str.cutBefore( 'hello$%world', '$%' ) // returns 'world'
      *
-     * @param {String} str The string to modify.
-     * @param {String} substr The substring to search for.
-     * @return {String} The cut/trimmed string.
+     * @param str The string to modify.
+     * @param substr The substring to search for.
+     * @returns The cut/trimmed string.
      */
-    cutBefore(str, substr) {
+    cutBefore(str: string, substr: string): string {
         const index = str.indexOf(substr);
         if (index !== -1) {
             return str.substring(index + substr.length);
@@ -364,101 +354,91 @@ const Str = {
     /**
      * Checks that the string is a domain name (e.g. example.com)
      *
-     * @param {String} string The string to check for domainnameness.
+     * @param str The string to check for domainnameness.
      *
-     * @returns {Boolean} True iff the string is a domain name
+     * @returns True if the string is a domain name
      */
-    isValidDomainName(string) {
-        return Boolean(String(string).match(Constants.CONST.REG_EXP.DOMAIN));
+    isValidDomainName(str: string): boolean {
+        return Boolean(String(str).match(Constants.CONST.REG_EXP.DOMAIN));
     },
 
     /**
      * Checks that the string is a valid url
      *
-     * @param {String} string
-     *
-     * @returns {Boolean} True if the string is a valid hyperlink
+     * @returns True if the string is a valid hyperlink
      */
-    isValidURL(string) {
-        return Boolean(String(string).match(Constants.CONST.REG_EXP.HYPERLINK));
+    isValidURL(str: string): boolean {
+        return Boolean(String(str).match(Constants.CONST.REG_EXP.HYPERLINK));
     },
 
     /**
      * Checks that the string is an email address.
      * NOTE: TLDs are not just 2-4 characters. Keep this in sync with _inputrules.php
      *
-     * @param {String} string The string to check for email validity.
+     * @param str The string to check for email validity.
      *
-     * @returns {Boolean} True iff the string is an email
+     * @returns True if the string is an email
      */
-    isValidEmail(string) {
-        return Boolean(String(string).match(Constants.CONST.REG_EXP.EMAIL));
+    isValidEmail(str: string): boolean {
+        return Boolean(String(str).match(Constants.CONST.REG_EXP.EMAIL));
     },
 
     /**
      * Checks if the string is an valid email address formed during comment markdown formation.
      *
-     * @param {String} string The string to check for email validity.
+     * @param str The string to check for email validity.
      *
-     * @returns {Boolean} True if the string is an valid email created by comment markdown.
+     * @returns True if the string is an valid email created by comment markdown.
      */
-    isValidEmailMarkdown(string) {
-        return Boolean(String(string).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`));
+    isValidEmailMarkdown(str: string): boolean {
+        return Boolean(String(str).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`));
     },
 
     /**
      * Remove trailing comma from a string.
      *
-     * @param {String} string The string with any trailing comma to be removed.
+     * @param str The string with any trailing comma to be removed.
      *
-     * @returns {String} string with the trailing comma removed
+     * @returns string with the trailing comma removed
      */
-    removeTrailingComma(string) {
-        return string.trim().replace(/(,$)/g, '');
+    removeTrailingComma(str: string): string {
+        return str.trim().replace(/(,$)/g, '');
     },
 
     /**
      * Checks that the string is a list of coma separated email addresss.
      *
-     * @param {String} str The string to check for emails validity.
+     * @param str The string to check for emails validity.
      *
-     * @returns {Boolean} True if all emails are valid or if input is empty
+     * @returns True if all emails are valid or if input is empty
      */
-    areValidEmails(str) {
+    areValidEmails(str: string): boolean {
         const string = this.removeTrailingComma(str);
         if (string === '') {
             return true;
         }
 
         const emails = string.split(',');
-        let result = true;
-        for (let i = 0; i < emails.length; i += 1) {
-            if (!this.isValidEmail(emails[i].trim())) {
-                result = false;
-            }
-        }
+        const result = emails.every((email) => this.isValidEmail(email.trim()));
         return result;
     },
 
     /**
      * Extract the email addresses from a string
-     *
-     * @param {String} string
-     * @returns {String[]|null}
      */
-    extractEmail(string) {
-        return String(string).match(Constants.CONST.REG_EXP.EMAIL_SEARCH);
+    extractEmail(str: string): RegExpMatchArray | null {
+        return String(str).match(Constants.CONST.REG_EXP.EMAIL_SEARCH);
     },
 
     /**
      * Extracts the domain name from the given email address
      * (e.g. "domain.com" for "joe@domain.com").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String} The domain name in the email address.
+     * @returns The domain name in the email address.
      */
-    extractEmailDomain(email) {
+    extractEmailDomain(email: string): string {
         return this.cutBefore(email, '@');
     },
 
@@ -466,11 +446,11 @@ const Str = {
      * Tries to extract the company name from the given email address
      * (e.g. "yelp" for "joe@yelp.co.uk").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String|null} The company name in the email address or null.
+     * @returns The company name in the email address or null.
      */
-    extractCompanyNameFromEmailDomain(email) {
+    extractCompanyNameFromEmailDomain(email: string): string | null {
         const domain = this.extractEmailDomain(email);
         if (!domain) {
             return null;
@@ -488,32 +468,26 @@ const Str = {
      * Extracts the local part from the given email address
      * (e.g. "joe" for "joe@domain.com").
      *
-     * @param {String} email The email address.
+     * @param email The email address.
      *
-     * @returns {String} The local part in the email address.
+     * @returns The local part in the email address.
      */
-    extractEmailLocalPart(email) {
+    extractEmailLocalPart(email: string): string {
         return this.cutAfter(email, '@');
     },
 
     /**
      * Sanitize phone number to return only numbers. Return null if non valid phone number.
-     *
-     * @param {String} str
-     * @returns {String|null}
      */
-    sanitizePhoneNumber(str) {
+    sanitizePhoneNumber(str: string): string | null {
         const string = str.replace(/(?!^\+)\D/g, '');
         return string.length <= 15 && string.length >= 10 ? string : null;
     },
 
     /**
      * Sanitize email. Return null if non valid email.
-     *
-     * @param {String} str
-     * @returns {String|null}
      */
-    sanitizeEmail(str) {
+    sanitizeEmail(str: string): string | null {
         const string = str.toLowerCase().trim();
         return Constants.CONST.REG_EXP.EMAIL.test(string) ? string : null;
     },
@@ -521,63 +495,56 @@ const Str = {
     /**
      * Escapes all special RegExp characters from a string
      *
-     * @param {String} string The subject
+     * @param str The subject
      *
-     * @returns {String} The escaped string
+     * @returns The escaped string
      */
-    escapeForRegExp(string) {
-        return string.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+    escapeForRegExp(str: string): string {
+        return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     },
 
     /**
      * Escapes all special RegExp characters from a string except for the period
      *
-     * @param {String} string The subject
-     * @returns {String} The escaped string
+     * @param str The subject
+     * @returns The escaped string
      */
-    escapeForExpenseRule(string) {
-        return string.replace(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
+    escapeForExpenseRule(str: string): string {
+        return str.replace(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
     },
 
     /**
      * Adds a backslash in front of each of colon
      * if they don't already have a backslash in front of them
      *
-     * @param {String} string The subject
-     * @returns {String} The escaped string
+     * @param str The subject
+     * @returns The escaped string
      */
-    addBackslashBeforeColonsForTagNamesComingFromQBD(string) {
-        return string.replace(/([^\\]):/g, '$1\\:');
+    addBackslashBeforeColonsForTagNamesComingFromQBD(str: string): string {
+        return str.replace(/([^\\]):/g, '$1\\:');
     },
 
     /**
      * Removes backslashes from string
      * eg: myString\[\]\* -> myString[]*
-     *
-     * @param {String} string
-     * @returns {String}
      */
-    stripBackslashes(string) {
-        return string.replace(/\\/g, '');
+    stripBackslashes(str: string): string {
+        return str.replace(/\\/g, '');
     },
 
     /**
      * Checks if a string's length is in the specified range
      *
-     * @param {String} string The subject
-     * @param {Number} minimumLength
-     * @param {Number} [maximumLength]
-     *
-     * @returns {Boolean} true if the length is in the range, false otherwise
+     * @returns true if the length is in the range, false otherwise
      */
-    isOfLength(string, minimumLength, maximumLength) {
-        if (!this.isString(string)) {
+    isOfLength(str: string, minimumLength: number, maximumLength: number): boolean {
+        if (!this.isString(str)) {
             return false;
         }
-        if (string.length < minimumLength) {
+        if (str.length < minimumLength) {
             return false;
         }
-        if (!this.isUndefined(maximumLength) && string.length > maximumLength) {
+        if (!this.isUndefined(maximumLength) && str.length > maximumLength) {
             return false;
         }
         return true;
@@ -588,13 +555,13 @@ const Str = {
      * This is faster than counting the results of haystack.match( /needle/g )
      * via http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string
      *
-     * @param {String} haystack The string to look inside of
-     * @param {String} needle What we're looking for
-     * @param {Boolean} allowOverlapping Defaults to false
+     * @param haystack The string to look inside of
+     * @param needle What we're looking for
+     * @param allowOverlapping Defaults to false
      *
-     * @returns {Integer} The number of times needle is in haystack.
+     * @returns The number of times needle is in haystack.
      */
-    occurences(haystack, needle, allowOverlapping) {
+    occurences(haystack: string, needle: string, allowOverlapping: boolean): number {
         let count = 0;
         let pos = 0;
 
@@ -622,81 +589,81 @@ const Str = {
      * Uppercases the first letter of each word
      * via https://github.com/kvz/phpjs/blob/master/functions/strings/ucwords.js
      *
-     * @param   {String}  str to uppercase words
-     * @returns {String}  Uppercase worded string
+     * @param str to uppercase words
+     * @returns Uppercase worded string
      */
-    ucwords(str) {
-        const capitalize = ($1) => $1.toUpperCase();
+    ucwords(str: string): string {
+        const capitalize = ($1: string) => $1.toUpperCase();
         return String(str).replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
     },
 
     /**
      * Returns true if the haystack contains the needle
      *
-     * @param {String} haystack The full string to be searched
-     * @param {String} needle The case-sensitive string to search for
+     * @param haystack The full string to be searched
+     * @param needle The case-sensitive string to search for
      *
-     * @return {Boolean} Retruns true if the haystack contains the needle
+     * @returns Returns true if the haystack contains the needle
      */
-    contains(haystack, needle) {
+    contains(haystack: string, needle: string): boolean {
         return haystack.indexOf(needle) !== -1;
     },
 
     /**
      * Returns true if the haystack contains the needle, ignoring case
      *
-     * @param {String} haystack The full string to be searched
-     * @param {String} needle The case-insensitive string to search for
+     * @param haystack The full string to be searched
+     * @param needle The case-insensitive string to search for
      *
-     * @return {Boolean} Retruns true if the haystack contains the needle, ignoring case
+     * @returns Returns true if the haystack contains the needle, ignoring case
      */
-    caseInsensitiveContains(haystack, needle) {
+    caseInsensitiveContains(haystack: string, needle: string): boolean {
         return this.contains(haystack.toLowerCase(), needle.toLowerCase());
     },
 
     /**
      * Case insensitive compare function
      *
-     * @param {String} string1 string to compare
-     * @param {String} string2 string to compare
+     * @param strA string to compare
+     * @param strB string to compare
      *
-     * @return {Number} -1 if first string < second string
+     * @returns -1 if first string < second string
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
-    caseInsensitiveCompare(string1, string2) {
-        const lowerCase1 = string1.toLocaleLowerCase();
-        const lowerCase2 = string2.toLocaleLowerCase();
+    caseInsensitiveCompare(strA: string, strB: string): 1 | 0 | -1 {
+        const lowerCaseStrA = strA.toLocaleLowerCase();
+        const lowerCaseStrB = strB.toLocaleLowerCase();
 
-        return this.compare(lowerCase1, lowerCase2);
+        return this.compare(lowerCaseStrA, lowerCaseStrB);
     },
 
     /**
      * Case insensitive equals
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @return {Boolean} true when first == second except for case
+     * @param strA string to compare
+     * @param strB string to compare
+     * @returns true when first == second except for case
      */
-    caseInsensitiveEquals(first, second) {
-        return this.caseInsensitiveCompare(first, second) === 0;
+    caseInsensitiveEquals(strA: string, strB: string): boolean {
+        return this.caseInsensitiveCompare(strA, strB) === 0;
     },
 
     /**
      * Compare function
      *
-     * @param {String} string1 string to compare
-     * @param {String} string2 string to compare
+     * @param strA string to compare
+     * @param strB string to compare
      *
-     * @return {Number} -1 if first string < second string
+     * @returns -1 if first string < second string
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
-    compare(string1, string2) {
-        if (string1 < string2) {
+    compare(strA: string, strB: string): 1 | 0 | -1 {
+        if (strA < strB) {
             return -1;
         }
-        if (string1 > string2) {
+        if (strA > strB) {
             return 1;
         }
         return 0;
@@ -704,25 +671,23 @@ const Str = {
 
     /**
      * Check if a file extension is supported by SmartReports
-     * @param  {String}  filename
-     * @return {Boolean}
      */
-    isFileExtensionSmartReportsValid(filename) {
+    isFileExtensionSmartReportsValid(filename: string): boolean {
         // Allowed extensions. Make sure to keep them in sync with those defined
         // in SmartReport_Utils::templateFileUploadCheck()
         const allowedExtensions = ['xls', 'xlsx', 'xlsm', 'xltm'];
-        const extension = filename.split('.').pop().toLowerCase();
-        return allowedExtensions.indexOf(extension) > -1;
+        const extension = filename.split('.').pop()?.toLowerCase();
+        return !!extension && allowedExtensions.indexOf(extension) > -1;
     },
 
     /**
      * Mask Permanent Account Number (PAN) the same way Auth does
-     * @param {Number|String} number account number
-     * @return {String} masked account number
+     * @param num account number
+     * @returns masked account number
      */
-    maskPAN(number) {
+    maskPAN(num: number | string): string {
         // cast to string
-        const accountNumber = String(number);
+        const accountNumber = String(num);
         const len = accountNumber.length;
 
         // Hide these numbers completely
@@ -746,42 +711,33 @@ const Str = {
     /**
      * Checks if something is a string
      * Stolen from underscore
-     * @param  {Mixed} obj
-     * @return {Boolean}
      */
-    isString(obj) {
+    isString(obj: unknown): obj is string {
         return this.isTypeOf(obj, 'String');
     },
 
     /**
      * Checks if something is a number
      * Stolen from underscore
-     * @param  {Mixed} obj
-     * @return {Boolean}
+     * @param obj
      */
-    isNumber(obj) {
+    isNumber(obj: unknown): obj is number {
         return this.isTypeOf(obj, 'Number');
     },
 
     /**
      * Checks if something is a certain type
      * Stolen from underscore
-     * @param  {Mixed} obj
-     * @param  {String} type one of ['Arguments', 'Function', 'String', 'Number', 'Date',
-     *                       'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet']
-     * @return {Boolean}
      */
-    isTypeOf(obj, type) {
+    isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean {
         return Object.prototype.toString.call(obj) === `[object ${type}]`;
     },
 
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
-     * @param  {Mixed} obj
-     * @return {Boolean}
      */
-    isUndefined(obj) {
+    isUndefined(obj: unknown): boolean {
         // eslint-disable-next-line no-void
         return obj === void 0;
     },
@@ -789,63 +745,55 @@ const Str = {
     /**
      * Replace first N characters of the string with maskChar
      * eg: maskFirstNCharacters( '1234567890', 6, 'X' ) yields XXXXXX7890
-     * @param {String} str string to mask
-     * @param {Number} n number of characters we want to mask from the string
-     * @param {String} mask string we want replace the first N chars with
-     * @return {String} masked string
+     * @param str String to mask
+     * @param num Number of characters we want to mask from the string
+     * @param mask String we want replace the first N chars with
+     * @returns Masked string
      */
-    maskFirstNCharacters(str, n, mask) {
+    maskFirstNCharacters(str: string, num: number, mask: string): string {
         // if str is empty, str or mask aren't strings,
         // or n is not a number, do nothing
-        if (!this.isString(str) || !this.isString(mask) || str.length === 0 || !this.isNumber(n)) {
+        if (!this.isString(str) || !this.isString(mask) || str.length === 0 || !this.isNumber(num)) {
             return str;
         }
 
-        return str.substring(0, n).replace(/./g, mask) + str.substring(n);
+        return str.substring(0, num).replace(/./g, mask) + str.substring(num);
     },
 
     /**
      * Trim a string
-     *
-     * @param {String} str
-     * @returns {string}
      */
-    trim(str) {
+    trim(str: string): string {
         return $.trim(str);
     },
 
     /**
      * Convert a percentage string like '25%' to 25/
-     * @param {String} percentageString The percentage as a string
-     * @returns {Number}
+     * @param percentageString The percentage as a string
      */
-    percentageStringToNumber(percentageString) {
+    percentageStringToNumber(percentageString: string): number {
         return Number(this.cutAfter(percentageString, '%'));
     },
 
     /**
-     * Remoce all the spaces from a string
-     * @param {string} input
-     * @returns {string}
+     * Remove all the spaces from a string
      */
-    removeSpaces(input) {
+    removeSpaces(input: string): string {
         return String(input).replace(' ', '');
     },
 
     /**
      * Returns the proper phrase depending on the count that is passed.
      * Example:
-     * console.log(Str.pluralize('puppy', 'puppies', 1)); // puppy
-     * console.log(Str.pluralize('puppy', 'puppies', 3)); // puppies
+     * console.log(Str.pluralize('puppy', 'puppies', 1)) { // puppy
+     * console.log(Str.pluralize('puppy', 'puppies', 3)) { // puppies
      *
-     * @param {String} singular form of the phrase
-     * @param {String} plural form of the phrase
-     * @param {Number} n the count which determines the plurality
-     *
-     * @return {String}
+     * @param singular form of the phrase
+     * @param plural form of the phrase
+     * @param num the count which determines the plurality
      */
-    pluralize(singular, plural, n) {
-        if (!n || n > 1) {
+    pluralize(singular: string, plural: string, num: number): string {
+        if (!num || num > 1) {
             return plural;
         }
         return singular;
@@ -854,19 +802,19 @@ const Str = {
     /**
      * Returns whether or not a string is an encrypted number or not.
      *
-     * @param {String} number that we want to see if its encrypted or not
+     * @param num that we want to see if its encrypted or not
      *
-     * @return {Boolean} Whether or not this string is an encrpypted number
+     * @returns Whether or not this string is an encrpypted number
      */
-    isEncryptedCardNumber(number) {
+    isEncryptedCardNumber(num: string): boolean {
         // Older encrypted versioning.
-        if (/^[\da-fA-F]+$/.test(number)) {
-            return number.length % 32 === 0;
+        if (/^[\da-fA-F]+$/.test(num)) {
+            return num.length % 32 === 0;
         }
 
         // Check with the new versioning.
-        if (/^[vV][\d]+:[\da-fA-F]+$/.test(number)) {
-            return number.split(':')[1].length % 32 === 0;
+        if (/^[vV][\d]+:[\da-fA-F]+$/.test(num)) {
+            return num.split(':')[1].length % 32 === 0;
         }
 
         return false;
@@ -874,10 +822,8 @@ const Str = {
 
     /**
      * Converts a value to boolean, case-insensitive.
-     * @param {mixed} value
-     * @return {Boolean}
      */
-    toBool(value) {
+    toBool(value: unknown): boolean {
         if (this.isString(value)) {
             return value.toLowerCase() === 'true';
         }
@@ -887,14 +833,14 @@ const Str = {
     /**
      * Checks if a string could be the masked version of another one.
      *
-     * @param {String} first string to compare
-     * @param {String} second string to compare
-     * @param {String} [mask] defaults to X
-     * @return {Boolean} true when first could be the masked version of second
+     * @param strA String to compare
+     * @param strB String to compare
+     * @param [mask] Defaults to X
+     * @returns True when first could be the masked version of second
      */
-    maskedEquals(first, second, mask) {
-        const firsts = first.match(/.{1,1}/g);
-        const seconds = second.match(/.{1,1}/g);
+    maskedEquals(strA: string, strB: string, mask: string): boolean {
+        const firsts = strA.match(/.{1,1}/g) ?? [];
+        const seconds = strB.match(/.{1,1}/g) ?? [];
         const defaultMask = mask || 'X';
 
         if (firsts.length !== seconds.length) {
@@ -912,42 +858,30 @@ const Str = {
 
     /**
      * Bold any word matching the regexp in the text.
-     * @param {string} text, htmlEncoded
-     * @param {RegExp} regexp
-     * @return {string}
      */
-    boldify(text, regexp) {
+    boldify(text: string, regexp: RegExp): string {
         return text.replace(regexp, '<strong>$1</strong>');
     },
 
     /**
      * Check for whether a phone number is valid.
-     * @param {String} phone
-     *
-     * @return {bool}
      * @deprecated use isValidE164Phone to validate E.164 phone numbers or isValidPhoneFormat to validate phone numbers in general
      */
-    isValidPhone(phone) {
+    isValidPhone(phone: string): boolean {
         return Constants.CONST.SMS.E164_REGEX.test(phone);
     },
 
     /**
      * Check for whether a phone number is valid.
-     * @param {String} phone
-     *
-     * @return {bool}
      */
-    isValidPhoneNumber(phone) {
+    isValidPhoneNumber(phone: string): boolean {
         return parsePhoneNumber(phone).possible;
     },
 
     /**
      * Check for whether a phone number is valid according to E.164 standard.
-     * @param {String} phone
-     *
-     * @return {bool}
      */
-    isValidE164Phone(phone) {
+    isValidE164Phone(phone: string): boolean {
         return Constants.CONST.SMS.E164_REGEX.test(phone);
     },
 
@@ -958,21 +892,15 @@ const Str = {
      * e164: +14404589784
      * national: (440) 458-9784
      * 123.456.7890
-     * @param {String} phone
-     *
-     * @return {bool}
      */
-    isValidPhoneFormat(phone) {
+    isValidPhoneFormat(phone: string): boolean {
         return Constants.CONST.REG_EXP.GENERAL_PHONE_PART.test(phone);
     },
 
     /**
      * We validate mentions by checking if it's first character is an allowed character.
-     *
-     * @param {String} mention
-     * @returns {bool}
      */
-    isValidMention(mention) {
+    isValidMention(mention: string): boolean {
         // Mentions can start @ proceeded by a space, eg "ping @user@domain.tld"
         if (/[\s@]/g.test(mention.charAt(0))) {
             return true;
@@ -987,21 +915,15 @@ const Str = {
 
     /**
      * Returns text without our SMS domain
-     *
-     * @param {String} text
-     * @return {String}
      */
-    removeSMSDomain(text) {
+    removeSMSDomain(text: string): string {
         return text.replace(REMOVE_SMS_DOMAIN_PATTERN, '');
     },
 
     /**
      * Returns true if the text is a valid E.164 phone number with our SMS domain removed
-     *
-     * @param {String} text
-     * @return {String}
      */
-    isSMSLogin(text) {
+    isSMSLogin(text: string): boolean {
         return this.isValidE164Phone(this.removeSMSDomain(text));
     },
 
@@ -1010,32 +932,29 @@ const Str = {
      * JS yet, so this is a good way of doing it according to
      * https://github.com/airbnb/javascript/issues/1439#issuecomment-306297399 and doesn't get us in trouble with
      * linting rules.
-     *
-     * @param {String} str
-     * @param {RegExp} regex
-     *
-     * @returns {Array}
      */
-    matchAll(str, regex) {
-        const matches = [];
-        const collectMatches = (...args) => {
-            const match = Array.prototype.slice.call(args, 0, -2);
+    matchAll(str: string, regex: RegExp): Array<RegExpMatchArray & {input: string; index: number}> {
+        const matches: Array<RegExpMatchArray & {input: string; index: number}> = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const collectMatches = (...args: any[]) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const match: any = Array.prototype.slice.call(args, 0, -2);
             match.input = args[args.length - 1];
             match.index = args[args.length - 2];
             matches.push(match);
         };
 
-        str.replace(regex, collectMatches);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        str.replace(regex, collectMatches as any);
         return matches;
     },
 
     /**
      * A simple GUID generator taken from https://stackoverflow.com/a/32760401/9114791
      *
-     * @param {String} [prefix] an optional prefix to put in front of the guid
-     * @returns {String}
+     * @param [prefix] an optional prefix to put in front of the guid
      */
-    guid(prefix = '') {
+    guid(prefix = ''): string {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
                 .toString(16)
@@ -1047,20 +966,20 @@ const Str = {
     /**
      * Takes in a URL and returns it with a leading '/'
      *
-     * @param {mixed} url The URL to be formatted
-     * @returns {String} The formatted URL
+     * @param url The URL to be formatted
+     * @returns The formatted URL
      */
-    normalizeUrl(url) {
+    normalizeUrl(url: string): string {
         return typeof url === 'string' && url.startsWith('/') ? url : `/${url}`;
     },
 
     /**
      *  Formats a URL by converting the domain name to lowercase and adding the missing 'https://' protocol.
      *
-     * @param {url} url The URL to be formatted
-     * @returns {String} The formatted URL
+     * @param url The URL to be formatted
+     * @returns The formatted URL
      */
-    sanitizeURL(url) {
+    sanitizeURL(url: string): string {
         const regex = new RegExp(`^${UrlPatterns.URL_REGEX}$`, 'i');
         const match = regex.exec(url);
         if (!match) {
@@ -1074,32 +993,24 @@ const Str = {
      * Checks if parameter is a string or function
      * if it is a function then we will call it with
      * any additional arguments.
-     *
-     * @param {String|Function} parameter
-     * @returns {String}
      */
-    result(parameter, ...args) {
-        return _.isFunction(parameter) ? parameter(...args) : parameter;
-    },
+    result: resultFn,
 
     /**
      * Get file extension for a given url with or
      * without query parameters
-     *
-     * @param {String} url
-     * @returns {String|undefined}
      */
-    getExtension(url) {
-        return _.first(_.last(url.split('.')).split('?')).toLowerCase();
+    getExtension(url: string): string | undefined {
+        return url.split('.').pop()?.split('?')[0]?.toLowerCase();
     },
 
     /**
      * Takes in a URL and checks if the file extension is PDF
      *
-     * @param {String} url The URL to be checked
-     * @returns {Boolean} Whether file path is PDF or not
+     * @param url The URL to be checked
+     * @returns Whether file path is PDF or not
      */
-    isPDF(url) {
+    isPDF(url: string): boolean {
         return this.getExtension(url) === 'pdf';
     },
 
@@ -1110,12 +1021,15 @@ const Str = {
      * supported by all platforms.
      *
      * https://reactnative.dev/docs/image#source
-     *
-     * @param {String} url
-     * @returns {Boolean}
      */
-    isImage(url) {
-        return _.contains(['jpeg', 'jpg', 'gif', 'png', 'bmp', 'webp'], this.getExtension(url));
+    isImage(url: string): boolean {
+        const extension = this.getExtension(url);
+
+        if (!extension) {
+            return false;
+        }
+
+        return ['jpeg', 'jpg', 'gif', 'png', 'bmp', 'webp'].includes(extension);
     },
 
     /**
@@ -1126,35 +1040,32 @@ const Str = {
      * https://developer.android.com/media/platform/supported-formats#video-formats
      * https://developer.apple.com/documentation/coremedia/1564239-video_codec_constants
      * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
-     *
-     * @param {String} url
-     * @returns {Boolean}
      */
-    isVideo(url) {
-        return _.contains(['mov', 'mp4', 'webm', 'mkv'], this.getExtension(url));
+    isVideo(url: string): boolean {
+        const extension = this.getExtension(url);
+
+        if (!extension) {
+            return false;
+        }
+
+        return ['mov', 'mp4', 'webm', 'mkv'].includes(extension);
     },
 
     /**
      * Checks whether the given string is a +@ domain email account, such as
      * +@domain.com
      *
-     * @param {String} email
-     * @return {Boolean} True if is a domain account email, otherwise false.
+     * @returns True if is a domain account email, otherwise false.
      */
-    isDomainEmail(email) {
+    isDomainEmail(email: string): boolean {
         return this.startsWith(email, '+@');
     },
 
     /**
      * Polyfill for String.prototype.replaceAll
-     *
-     * @param {String} text
-     * @param {String|RegExp} searchValue
-     * @param {String|Function} replaceValue
-     * @returns {String}
      */
-    replaceAll(text, searchValue, replaceValue) {
-        return String.prototype.replaceAll.call(text, searchValue, replaceValue);
+    replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => string)): string {
+        return String.prototype.replaceAll.call(text, searchValue, replaceValue as (...args: unknown[]) => string);
     },
 };
 

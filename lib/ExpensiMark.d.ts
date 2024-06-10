@@ -1,3 +1,5 @@
+import type Logger from './Logger';
+
 declare type Replacement = (...args: string[], extras?: ExtrasObject) => string;
 declare type Name =
     | 'codeFence'
@@ -39,6 +41,9 @@ declare type ExtrasObject = {
     accountIDToName?: Record<string, string>;
 };
 export default class ExpensiMark {
+    static Log: Logger;
+    static setLogger(logger: Logger): void;
+
     rules: Rule[];
     htmlToMarkdownRules: Rule[];
     htmlToTextRules: Rule[];
