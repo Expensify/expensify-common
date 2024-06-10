@@ -133,7 +133,7 @@ export default function Network(endpoint) {
             // Add our data as form data
             const formData = new FormData();
             Object.entries(parameters).forEach(([key, value]) => {
-                if (!value && value !== '') {
+                if (value === undefined) {
                     return;
                 }
                 if (Array.isArray(value)) {

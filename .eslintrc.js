@@ -18,6 +18,11 @@ module.exports = {
                 'rulesdir/no-multiple-api-calls': 'off',
                 'rulesdir/prefer-import-module-contents': 'off',
                 'no-constructor-return': 'off',
+                'max-classes-per-file': 'off',
+                'arrow-body-style': 'off',
+                'es/no-nullish-coalescing-operators': 'off',
+                'rulesdir/prefer-underscore-method': 'off',
+                'es/no-optional-chaining': 'off',
                 'import/extensions': [
                     'error',
                     'ignorePackages',
@@ -47,7 +52,6 @@ module.exports = {
             },
             rules: {
                 'prefer-regex-literals': 'off',
-                'rulesdir/prefer-underscore-method': 'off',
                 'react/jsx-props-no-spreading': 'off',
                 'react/require-default-props': 'off',
                 'valid-jsdoc': 'off',
