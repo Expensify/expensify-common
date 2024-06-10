@@ -1,4 +1,4 @@
-import {isNavigatorAvailable, isWindowAvailable} from './utils';
+import * as Utils from './utils';
 
 const BROWSERS = {
     EDGE: 'Edge',
@@ -15,7 +15,7 @@ const MOBILE_PLATFORMS = {
 };
 
 function searchString() {
-    if (!isWindowAvailable() || !isNavigatorAvailable()) {
+    if (!Utils.isWindowAvailable() || !Utils.isNavigatorAvailable()) {
         return '';
     }
 
@@ -78,7 +78,7 @@ function searchString() {
 }
 
 function getMobileDevice() {
-    if (!isNavigatorAvailable() || !navigator.userAgent) {
+    if (!Utils.isNavigatorAvailable() || !navigator.userAgent) {
         return '';
     }
 

@@ -1,7 +1,7 @@
 import PubSubModule from '../PubSub';
-import {isWindowAvailable} from '../utils';
+import * as Utils from '../utils';
 
-const PubSub = (isWindowAvailable() && window.PubSub) || PubSubModule;
+const PubSub = (Utils.isWindowAvailable() && window.PubSub) || PubSubModule;
 
 /**
  * This mixin sets up automatic PubSub bindings which will be removed when

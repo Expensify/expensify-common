@@ -35,5 +35,5 @@ function clientLoggingCallback(message) {
 export default new Logger({
     serverLoggingCallback,
     clientLoggingCallback,
-    isDebug: isWindowAvailable() ? window.DEBUG : false,
+    isDebug: Utils.isWindowAvailable() ? window.DEBUG : false,
 });
