@@ -4,11 +4,13 @@ import * as UrlPatterns from './Url';
 import * as Utils from './utils';
 import Logger from './Logger';
 
-// (match, __, textWithinFences)
-type ReplacementFn = (...matches: string[]) => string;
-type ReplacementFnWithExtras = (...matches: Array<string | ExtrasObject>) => string;
+type Extras = {
+    reportIDToName?: Record<string, string>;
+    accountIDToName?: Record<string, string>;
+};
 
-type Process = (textToProcess: string, replacement: ReplacementFn, shouldKeepRawInput: boolean) => string;
+type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
+type ProcessFn = (textToProcess: string, replacement: ReplacementFn, shouldKeepRawInput: boolean) => string;
 
 type CommonRule = {
     name: string;
@@ -20,11 +22,11 @@ type CommonRule = {
 
 type RuleWithRegex = CommonRule & {
     regex: RegExp;
-    process?: Process;
+    process?: ProcessFn;
 };
 
 type RuleWithProcess = CommonRule & {
-    process: Process;
+    process: ProcessFn;
 };
 
 type QuoteReplacementFn = (match: string, shouldKeepRawInput?: boolean) => string;
@@ -38,11 +40,6 @@ type QuoteRule = {
 };
 
 type Rule = RuleWithRegex | RuleWithProcess | QuoteRule;
-
-type ExtrasObject = {
-    reportIDToName?: Record<string, string>;
-    accountIDToName?: Record<string, string>;
-};
 
 type ReplaceOptions = {
     filterRules?: string[];
@@ -110,7 +107,7 @@ export default class ExpensiMark {
             {
                 name: 'emoji',
                 regex: Constants.CONST.REG_EXP.EMOJI_RULE,
-                replacement: (match) => `<emoji>${match}</emoji>`,
+                replacement: (_extras, match) => `<emoji>${match}</emoji>`,
             },
 
             /**
@@ -129,11 +126,11 @@ export default class ExpensiMark {
                 // with the new lines here since they need to be converted into <br>. And we don't
                 // want to do this anywhere else since that would break HTML.
                 // &nbsp; will create styling issues so use &#32;
-                replacement: (match, __, textWithinFences) => {
+                replacement: (_extras, _match, _g1, textWithinFences) => {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
-                rawInputReplacement: (match, __, textWithinFences) => {
+                rawInputReplacement: (_extras, _match, _g1, textWithinFences) => {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
                     return `<pre>${group}</pre>`;
                 },
@@ -164,7 +161,7 @@ export default class ExpensiMark {
                     const regex = new RegExp(`(?!\\[\\s*\\])\\[([^[\\]]*)]\\((mailto:)?${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}\\)`, 'gim');
                     return this.modifyTextForEmailLinks(regex, textToProcess, replacement, shouldKeepRawInput);
                 },
-                replacement: (match, g1, g2) => {
+                replacement: (_extras, match, g1, g2) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
                         return match;
                     }
@@ -173,7 +170,7 @@ export default class ExpensiMark {
                     const formattedLabel = label === href ? g2 : label;
                     return `<a href="${href}">${formattedLabel}</a>`;
                 },
-                rawInputReplacement: (match, g1, g2, g3) => {
+                rawInputReplacement: (_extras, match, g1, g2, g3) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
                         return match;
                     }
@@ -188,7 +185,7 @@ export default class ExpensiMark {
                 name: 'heading1',
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|\n|\r\n).)+)/gm;
-                    return textToProcess.replace(regexp, replacement);
+                    return textToProcess.replace(regexp, (...args) => replacement({}, ...args));
                 },
                 replacement: '<h1>$1</h1>',
             },
@@ -203,8 +200,8 @@ export default class ExpensiMark {
             {
                 name: 'image',
                 regex: MARKDOWN_IMAGE_REGEX,
-                replacement: (match, g1, g2) => `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} />`,
-                rawInputReplacement: (match, g1, g2) =>
+                replacement: (_extras, _match, g1, g2) => `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} />`,
+                rawInputReplacement: (_extras, _match, g1, g2) =>
                     `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} data-raw-href="${g2}" data-link-variant="${typeof g1 === 'string' ? 'labeled' : 'auto'}" />`,
             },
 
@@ -216,13 +213,13 @@ export default class ExpensiMark {
             {
                 name: 'link',
                 process: (textToProcess, replacement) => this.modifyTextForUrlLinks(MARKDOWN_LINK_REGEX, textToProcess, replacement),
-                replacement: (match, g1, g2) => {
+                replacement: (_extras, match, g1, g2) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
                         return match;
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;
                 },
-                rawInputReplacement: (match, g1, g2) => {
+                rawInputReplacement: (_extras, match, g1, g2) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
                         return match;
                     }
@@ -240,7 +237,7 @@ export default class ExpensiMark {
             {
                 name: 'hereMentions',
                 regex: /([a-zA-Z0-9.!$%&+/=?^`{|}_-]?)(@here)([.!$%&+/=?^`{|}_-]?)(?=\b)(?!([\w'#%+-]*@(?:[a-z\d-]+\.)+[a-z]{2,}(?:\s|$|@here))|((?:(?!<a).)+)?<\/a>|[^<]*(<\/pre>|<\/code>))/gm,
-                replacement: (match, g1, g2, g3) => {
+                replacement: (_extras, match, g1, g2, g3) => {
                     if (!Str.isValidMention(match)) {
                         return match;
                     }
@@ -276,7 +273,7 @@ export default class ExpensiMark {
                     `(@here|[a-zA-Z0-9.!$%&+=?^\`{|}-]?)(@${Constants.CONST.REG_EXP.EMAIL_PART}|@${Constants.CONST.REG_EXP.PHONE_PART})(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`,
                     'gim',
                 ),
-                replacement: (match, g1, g2) => {
+                replacement: (_extras, match, g1, g2) => {
                     const phoneNumberRegex = new RegExp(`^${Constants.CONST.REG_EXP.PHONE_PART}$`);
                     const mention = g2.slice(1);
                     const mentionWithoutSMSDomain = Str.removeSMSDomain(mention);
@@ -286,7 +283,7 @@ export default class ExpensiMark {
                     const phoneRegex = new RegExp(`^@${Constants.CONST.REG_EXP.PHONE_PART}$`);
                     return `${g1}<mention-user>${g2}${phoneRegex.test(g2) ? `@${Constants.CONST.SMS.DOMAIN}` : ''}</mention-user>`;
                 },
-                rawInputReplacement: (match, g1, g2) => {
+                rawInputReplacement: (_extras, match, g1, g2) => {
                     if (!Str.isValidMention(match)) {
                         return match;
                     }
@@ -312,11 +309,11 @@ export default class ExpensiMark {
                     return this.modifyTextForUrlLinks(regex, textToProcess, replacement);
                 },
 
-                replacement: (match, g1, g2) => {
+                replacement: (_extras, _match, g1, g2) => {
                     const href = Str.sanitizeURL(g2);
                     return `${g1}<a href="${href}" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
                 },
-                rawInputReplacement: (_match, g1, g2) => {
+                rawInputReplacement: (_extras, _match, g1, g2) => {
                     const href = Str.sanitizeURL(g2);
                     return `${g1}<a href="${href}" data-raw-href="${g2}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
                 },
@@ -374,7 +371,7 @@ export default class ExpensiMark {
             {
                 name: 'italic',
                 regex: /(<(pre|code|a|mention-user)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>)))/g,
-                replacement: (match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
+                replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
                     // Skip any <pre>, <code>, <a>, <mention-user> tag contents
                     if (html) {
                         return html;
@@ -410,12 +407,12 @@ export default class ExpensiMark {
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
                 regex: /(?<!<[^>]*)\B\*(?![^<]*(?:<\/pre>|<\/code>|<\/a>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
-                replacement: (match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<strong>${g1}</strong>`),
+                replacement: (_extras, match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<strong>${g1}</strong>`),
             },
             {
                 name: 'strikethrough',
                 regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
-                replacement: (match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
+                replacement: (_extras, match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
                 name: 'newline',
@@ -505,7 +502,7 @@ export default class ExpensiMark {
             {
                 name: 'quote',
                 regex: /<(blockquote|q)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
-                replacement: (match, g1, g2) => {
+                replacement: (_extras, _match, _g1, g2) => {
                     // We remove the line break before heading inside quote to avoid adding extra line
                     let resultString: string[] | string = g2
                         .replace(/\n?(<h1># )/g, '$1')
@@ -544,12 +541,12 @@ export default class ExpensiMark {
             {
                 name: 'codeFence',
                 regex: /<(pre)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)(\n?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
-                replacement: (match, g1, g2) => `\`\`\`\n${g2}\n\`\`\``,
+                replacement: (_extras, _match, _g1, g2) => `\`\`\`\n${g2}\n\`\`\``,
             },
             {
                 name: 'anchor',
                 regex: /<(a)[^><]*href\s*=\s*(['"])(.*?)\2(?:".*?"|'.*?'|[^'"><])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
-                replacement: (match, g1, g2, g3, g4) => {
+                replacement: (_extras, _match, _g1, _g2, g3, g4) => {
                     const email = g3.startsWith('mailto:') ? g3.slice(7) : '';
                     if (email === g4) {
                         return email;
@@ -560,7 +557,7 @@ export default class ExpensiMark {
             {
                 name: 'image',
                 regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(?:[^><]*alt\s*=\s*(['"])(.*?)\3)?[^><]*>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
-                replacement: (match, g1, g2, g3, g4) => {
+                replacement: (_extras, _match, g1, g2, g3, g4) => {
                     if (g4) {
                         return `![${g4}](${g2})`;
                     }
@@ -571,8 +568,8 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
-                replacement: (match, g1, offset, string, extras) => {
-                    const reportToNameMap = (extras as ExtrasObject).reportIDToName;
+                replacement: (extras, _match, g1, _offset, _string) => {
+                    const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
                         return '#Hidden';
@@ -584,15 +581,15 @@ export default class ExpensiMark {
             {
                 name: 'userMention',
                 regex: /(?:<mention-user accountID="(\d+)" *\/>)|(?:<mention-user>(.*?)<\/mention-user>)/gi,
-                replacement: (match, g1, g2, offset, string, extras) => {
+                replacement: (extras, _match, g1, g2, _offset, _string) => {
                     if (g1) {
-                        const accountToNameMap = (extras as ExtrasObject).accountIDToName;
+                        const accountToNameMap = extras.accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
                             ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
                             return '@Hidden';
                         }
 
-                        return `@${(extras as ExtrasObject).accountIDToName?.[g1]}`;
+                        return `@${extras.accountIDToName?.[g1]}`;
                     }
                     return Str.removeSMSDomain(g2);
                 },
@@ -642,8 +639,8 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
-                replacement: (match, g1, offset, string, extras) => {
-                    const reportToNameMap = (extras as ExtrasObject).reportIDToName;
+                replacement: (extras, _match, g1, _offset, _string) => {
+                    const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
                         return '#Hidden';
@@ -655,13 +652,13 @@ export default class ExpensiMark {
             {
                 name: 'userMention',
                 regex: /<mention-user accountID="(\d+)" *\/>/gi,
-                replacement: (match, g1, offset, string, extras) => {
-                    const accountToNameMap = (extras as ExtrasObject).accountIDToName;
+                replacement: (extras, _match, g1, _offset, _string) => {
+                    const accountToNameMap = extras.accountIDToName;
                     if (!accountToNameMap || !accountToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
                         return '@Hidden';
                     }
-                    return `@${(extras as ExtrasObject).accountIDToName?.[g1]}`;
+                    return `@${extras.accountIDToName?.[g1]}`;
                 },
             },
             {
@@ -857,7 +854,7 @@ export default class ExpensiMark {
                           filterRules: ['bold', 'strikethrough', 'italic'],
                           shouldEscapeText: false,
                       });
-                replacedText = replacedText.concat(replacement(match[0], linkText, url));
+                replacedText = replacedText.concat(replacement({}, match[0], linkText, url));
             }
             startIndex = match.index + match[0].length;
 
@@ -890,7 +887,7 @@ export default class ExpensiMark {
             });
 
             // rawInputReplacment needs to be called with additional parameters from match
-            const replacedMatch = shouldKeepRawInput ? replacement(match[0], linkText, match[2], match[3]) : replacement(match[0], linkText, match[3]);
+            const replacedMatch = shouldKeepRawInput ? replacement({}, match[0], linkText, match[2], match[3]) : replacement({}, match[0], linkText, match[3]);
             replacedText = replacedText.concat(replacedMatch);
             startIndex = match.index + match[0].length;
 
@@ -948,7 +945,7 @@ export default class ExpensiMark {
     /**
      * Replaces HTML with markdown
      */
-    htmlToMarkdown(htmlString: string, extras: ExtrasObject = {}): string {
+    htmlToMarkdown(htmlString: string, extras: Extras = {}): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -964,11 +961,13 @@ export default class ExpensiMark {
                 generatedMarkdown = rule.pre(generatedMarkdown);
             }
 
-            // if replacement is a function, we want to pass optional extras to it
-            const replacementFunction = Utils.isFunction(rule.replacement)
-                ? (...args: Parameters<ReplacementFn>) => (rule.replacement as ReplacementFnWithExtras)(...args, extras)
-                : rule.replacement;
-            generatedMarkdown = generatedMarkdown.replace(rule.regex, replacementFunction as (substring: string, ...args: unknown[]) => string);
+            const {replacement} = rule;
+            if (typeof replacement === 'function') {
+                // if replacement is a function, we want to pass optional extras to it
+                generatedMarkdown = generatedMarkdown.replace(rule.regex, (...args) => replacement(extras, ...args));
+            } else {
+                generatedMarkdown = generatedMarkdown.replace(rule.regex, replacement);
+            }
         };
 
         this.htmlToMarkdownRules.forEach(processRule);
@@ -978,14 +977,16 @@ export default class ExpensiMark {
     /**
      * Convert HTML to text
      */
-    htmlToText(htmlString: string, extras: ExtrasObject = {}): string {
+    htmlToText(htmlString: string, extras: Extras = {}): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
-            // if replacement is a function, we want to pass optional extras to it
-            const replacementFunction = Utils.isFunction(rule.replacement)
-                ? (...args: Parameters<ReplacementFn>) => (rule.replacement as ReplacementFnWithExtras)(...args, extras)
-                : rule.replacement;
-            replacedText = replacedText.replace(rule.regex, replacementFunction as (substring: string, ...args: unknown[]) => string);
+            const {replacement} = rule;
+            if (typeof replacement === 'function') {
+                // if replacement is a function, we want to pass optional extras to it
+                replacedText = replacedText.replace(rule.regex, (...args) => replacement(extras, ...args));
+            } else {
+                replacedText = replacedText.replace(rule.regex, replacement);
+            }
         };
 
         this.htmlToTextRules.forEach(processRule);
@@ -1069,7 +1070,7 @@ export default class ExpensiMark {
 
             // Remove leading and trailing line breaks
             textToFormat = textToFormat.replace(/^\n+|\n+$/g, '');
-            return replacement(textToFormat);
+            return replacement({}, textToFormat);
         }
         return textToCheck;
     }
