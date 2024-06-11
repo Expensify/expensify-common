@@ -8,14 +8,16 @@ type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
 };
+const EXTRAS_DEFAULT = {};
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
-type ProcessFn = (textToProcess: string, replacement: ReplacementFn, shouldKeepRawInput: boolean) => string;
+type Replacement = ReplacementFn | string;
+type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
 
 type CommonRule = {
     name: string;
-    replacement: ReplacementFn | string;
-    rawInputReplacement?: ReplacementFn | string;
+    replacement: Replacement;
+    rawInputReplacement?: Replacement;
     pre?: (input: string) => string;
     post?: (input: string) => string;
 };
@@ -148,7 +150,7 @@ export default class ExpensiMark {
                 name: 'email',
                 process: (textToProcess, replacement, shouldKeepRawInput) => {
                     const regex = new RegExp(`(?!\\[\\s*\\])\\[([^[\\]]*)]\\((mailto:)?${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}\\)`, 'gim');
-                    return this.modifyTextForEmailLinks(regex, textToProcess, replacement, shouldKeepRawInput);
+                    return this.modifyTextForEmailLinks(regex, textToProcess, replacement as ReplacementFn, shouldKeepRawInput);
                 },
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
@@ -174,7 +176,10 @@ export default class ExpensiMark {
                 name: 'heading1',
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|\n|\r\n).)+)/gm;
-                    return textToProcess.replace(regexp, (...args) => replacement({}, ...args));
+                    if (typeof replacement === 'function') {
+                        return textToProcess.replace(regexp, (...args) => replacement(EXTRAS_DEFAULT, ...args));
+                    }
+                    return textToProcess.replace(regexp, replacement);
                 },
                 replacement: '<h1>$1</h1>',
             },
@@ -201,7 +206,7 @@ export default class ExpensiMark {
              */
             {
                 name: 'link',
-                process: (textToProcess, replacement) => this.modifyTextForUrlLinks(MARKDOWN_LINK_REGEX, textToProcess, replacement),
+                process: (textToProcess, replacement) => this.modifyTextForUrlLinks(MARKDOWN_LINK_REGEX, textToProcess, replacement as ReplacementFn),
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
                         return match;
@@ -295,7 +300,7 @@ export default class ExpensiMark {
 
                 process: (textToProcess, replacement) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|.+\\/>))`, 'gi');
-                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement);
+                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn);
                 },
 
                 replacement: (_extras, _match, g1, g2) => {
@@ -316,12 +321,12 @@ export default class ExpensiMark {
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
-                    const replaceFunction = (g1: string) => replacement({}, g1);
+                    const replaceFunction = (g1: string) => (typeof replacement === 'function' ? replacement(EXTRAS_DEFAULT, g1) : replacement);
                     if (shouldKeepRawInput) {
                         const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
                         return textToProcess.replace(rawInputRegex, replaceFunction);
                     }
-                    return this.modifyTextForQuote(regex, textToProcess, replacement);
+                    return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
                 },
                 replacement: (_extras, g1) => {
                     // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
@@ -747,11 +752,14 @@ export default class ExpensiMark {
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
-            const replacementFunction = shouldKeepRawInput && rule.rawInputReplacement ? (rule.rawInputReplacement as ReplacementFn) : (rule.replacement as ReplacementFn);
+            const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
-                replacedText = rule.process(replacedText, replacementFunction, shouldKeepRawInput);
+                replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
+            } else if (typeof replacement === 'function') {
+                // if replacement is a function, we want to pass optional extras to it
+                replacedText = replacedText.replace(rule.regex, (...args) => replacement(EXTRAS_DEFAULT, ...args));
             } else {
-                replacedText = replacedText.replace(rule.regex, (...args) => replacementFunction({}, ...args));
+                replacedText = replacedText.replace(rule.regex, replacement);
             }
 
             // Post-process text after applying regex
@@ -762,8 +770,7 @@ export default class ExpensiMark {
         try {
             rules.forEach(processRule);
         } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn('Error replacing text with html in ExpensiMark.replace', {error: e});
+            ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
 
             // We want to return text without applying rules if exception occurs during replacing
             return shouldEscapeText ? Utils.escape(text) : text;
@@ -861,7 +868,7 @@ export default class ExpensiMark {
                           filterRules: ['bold', 'strikethrough', 'italic'],
                           shouldEscapeText: false,
                       });
-                replacedText = replacedText.concat(replacement({}, match[0], linkText, url));
+                replacedText = replacedText.concat(replacement(EXTRAS_DEFAULT, match[0], linkText, url));
             }
             startIndex = match.index + match[0].length;
 
@@ -893,8 +900,8 @@ export default class ExpensiMark {
                 shouldEscapeText: false,
             });
 
-            // rawInputReplacment needs to be called with additional parameters from match
-            const replacedMatch = shouldKeepRawInput ? replacement({}, match[0], linkText, match[2], match[3]) : replacement({}, match[0], linkText, match[3]);
+            // rawInputReplacement needs to be called with additional parameters from match
+            const replacedMatch = shouldKeepRawInput ? replacement(EXTRAS_DEFAULT, match[0], linkText, match[2], match[3]) : replacement(EXTRAS_DEFAULT, match[0], linkText, match[3]);
             replacedText = replacedText.concat(replacedMatch);
             startIndex = match.index + match[0].length;
 
@@ -1077,7 +1084,7 @@ export default class ExpensiMark {
 
             // Remove leading and trailing line breaks
             textToFormat = textToFormat.replace(/^\n+|\n+$/g, '');
-            return replacement({}, textToFormat);
+            return replacement(EXTRAS_DEFAULT, textToFormat);
         }
         return textToCheck;
     }
@@ -1134,8 +1141,7 @@ export default class ExpensiMark {
             const links = matches.map(sanitizeMatch);
             return links;
         } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn('Error parsing url in ExpensiMark.extractLinksInMarkdownComment', {error: e});
+            ExpensiMark.Log.alert('Error parsing url in ExpensiMark.extractLinksInMarkdownComment', {error: e});
             return undefined;
         }
     }
