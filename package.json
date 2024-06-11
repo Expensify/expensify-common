@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -59,7 +59,7 @@
     "eslint": "^8.57.0",
     "eslint-config-expensify": "^2.0.48",
     "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-jest": "^24.7.0",
+    "eslint-plugin-jest": "^28.6.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.14.0",
     "grunt": "1.6.1",
