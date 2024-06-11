@@ -52,6 +52,7 @@ module.exports = {
             },
             rules: {
                 'prefer-regex-literals': 'off',
+                'rulesdir/prefer-underscore-method': 'off',
                 'react/jsx-props-no-spreading': 'off',
                 'react/require-default-props': 'off',
                 'valid-jsdoc': 'off',
