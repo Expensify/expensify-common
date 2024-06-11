@@ -22,24 +22,13 @@ type CommonRule = {
 
 type RuleWithRegex = CommonRule & {
     regex: RegExp;
-    process?: ProcessFn;
 };
 
 type RuleWithProcess = CommonRule & {
     process: ProcessFn;
 };
 
-type QuoteReplacementFn = (match: string, shouldKeepRawInput?: boolean) => string;
-type QuoteRule = {
-    name: 'quote';
-    process: (textToProcess: string, replacement: QuoteReplacementFn, shouldKeepRawInput: boolean) => string;
-    replacement: QuoteReplacementFn;
-    rawInputReplacement?: ReplacementFn | string;
-    pre?: (input: string) => string;
-    post?: (input: string) => string;
-};
-
-type Rule = RuleWithRegex | RuleWithProcess | QuoteRule;
+type Rule = RuleWithRegex | RuleWithProcess;
 
 type ReplaceOptions = {
     filterRules?: string[];
@@ -328,25 +317,43 @@ export default class ExpensiMark {
                 // We also want to capture a blank line before or after the quote so that we do not add extra spaces.
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
-                process: (textToProcess: string, replacement: QuoteReplacementFn, shouldKeepRawInput = false) => {
+                process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
-                    const replaceFunction = (g1: string) => replacement(g1, shouldKeepRawInput);
+                    const replaceFunction = (g1: string) => replacement({}, g1);
                     if (shouldKeepRawInput) {
                         const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
                         return textToProcess.replace(rawInputRegex, replaceFunction);
                     }
-                    return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn & QuoteReplacementFn);
+                    return this.modifyTextForQuote(regex, textToProcess, replacement);
                 },
-                replacement: (g1: string, shouldKeepRawInput = false) => {
+                replacement: (_extras, g1) => {
+                    // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
+                    // To do this we need to parse body of the quote without first space
+                    const handleMatch = (match: string) => match;
+                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
+                    const filterRules = ['heading1'];
+
+                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
+                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1) {
+                        filterRules.push('quote');
+                        this.currentQuoteDepth++;
+                    }
+
+                    const replacedText = this.replace(textToReplace, {
+                        filterRules,
+                        shouldEscapeText: false,
+                        shouldKeepRawInput: false,
+                    });
+                    this.currentQuoteDepth = 0;
+                    return `<blockquote> ${replacedText}</blockquote>`;
+                },
+                rawInputReplacement: (_extras, g1) => {
                     // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
                     // To do this we need to parse body of the quote without first space
                     let isStartingWithSpace = false;
-                    const handleMatch = (match: string, g2: string) => {
-                        if (shouldKeepRawInput) {
-                            isStartingWithSpace = !!g2;
-                            return '';
-                        }
-                        return match;
+                    const handleMatch = (_match: string, g2: string) => {
+                        isStartingWithSpace = !!g2;
+                        return '';
                     };
                     const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
                     const filterRules = ['heading1'];
@@ -360,7 +367,7 @@ export default class ExpensiMark {
                     const replacedText = this.replace(textToReplace, {
                         filterRules,
                         shouldEscapeText: false,
-                        shouldKeepRawInput,
+                        shouldKeepRawInput: true,
                     });
                     this.currentQuoteDepth = 0;
                     return `<blockquote>${isStartingWithSpace ? ' ' : ''}${replacedText}</blockquote>`;
@@ -743,11 +750,11 @@ export default class ExpensiMark {
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
-            const replacementFunction = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
-            if (rule.process) {
-                replacedText = rule.process(replacedText, replacementFunction as ReplacementFn & QuoteReplacementFn, shouldKeepRawInput);
+            const replacementFunction = shouldKeepRawInput && rule.rawInputReplacement ? (rule.rawInputReplacement as ReplacementFn) : (rule.replacement as ReplacementFn);
+            if ('process' in rule) {
+                replacedText = rule.process(replacedText, replacementFunction, shouldKeepRawInput);
             } else {
-                replacedText = replacedText.replace((rule as RuleWithRegex).regex, replacementFunction as ReplacementFn & QuoteReplacementFn);
+                replacedText = replacedText.replace(rule.regex, (...args) => replacementFunction({}, ...args));
             }
 
             // Post-process text after applying regex
