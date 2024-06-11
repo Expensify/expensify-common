@@ -959,7 +959,7 @@ export default class ExpensiMark {
     /**
      * Replaces HTML with markdown
      */
-    htmlToMarkdown(htmlString: string, extras: Extras = {}): string {
+    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -991,7 +991,7 @@ export default class ExpensiMark {
     /**
      * Convert HTML to text
      */
-    htmlToText(htmlString: string, extras: Extras = {}): string {
+    htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
             const {replacement} = rule;
