@@ -1844,9 +1844,15 @@ describe('when should keep raw input flag is enabled', () => {
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
 
-        test('user mention from phone number', () => {
+        test('user mention from invalid phone number', () => {
             const testString = '@+1234567890';
-            const resultString = '<mention-user>@+1234567890</mention-user>';
+            const resultString = '@+1234567890';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+
+        test('user mention from valid phone number', () => {
+            const testString = '@+15005550006';
+            const resultString = '<mention-user>@+15005550006</mention-user>';
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
     });
