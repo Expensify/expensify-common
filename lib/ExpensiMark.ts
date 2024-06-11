@@ -4,6 +4,53 @@ import * as UrlPatterns from './Url';
 import * as Utils from './utils';
 import Logger from './Logger';
 
+// (match, __, textWithinFences)
+type ReplacementFn = (...matches: string[]) => string;
+type ReplacementFnWithExtras = (...matches: Array<string | ExtrasObject>) => string;
+
+type Process = (textToProcess: string, replacement: ReplacementFn, shouldKeepRawInput: boolean) => string;
+
+type CommonRule = {
+    name: string;
+    replacement: ReplacementFn | string;
+    rawInputReplacement?: ReplacementFn | string;
+    pre?: (input: string) => string;
+    post?: (input: string) => string;
+};
+
+type RuleWithRegex = CommonRule & {
+    regex: RegExp;
+    process?: Process;
+};
+
+type RuleWithProcess = CommonRule & {
+    process: Process;
+};
+
+type QuoteReplacementFn = (match: string, shouldKeepRawInput?: boolean) => string;
+type QuoteRule = {
+    name: 'quote';
+    process: (textToProcess: string, replacement: QuoteReplacementFn, shouldKeepRawInput: boolean) => string;
+    replacement: QuoteReplacementFn;
+    rawInputReplacement?: ReplacementFn | string;
+    pre?: (input: string) => string;
+    post?: (input: string) => string;
+};
+
+type Rule = RuleWithRegex | RuleWithProcess | QuoteRule;
+
+type ExtrasObject = {
+    reportIDToName?: Record<string, string>;
+    accountIDToName?: Record<string, string>;
+};
+
+type ReplaceOptions = {
+    filterRules?: string[];
+    disabledRules?: string[];
+    shouldEscapeText?: boolean;
+    shouldKeepRawInput?: boolean;
+};
+
 const MARKDOWN_LINK_REGEX = new RegExp(`\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 
@@ -11,7 +58,7 @@ const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type=
 
 export default class ExpensiMark {
     static Log = new Logger({
-        serverLoggingCallback: () => {},
+        serverLoggingCallback: () => undefined,
         // eslint-disable-next-line no-console
         clientLoggingCallback: (message) => console.warn(message),
         isDebug: true,
@@ -19,18 +66,44 @@ export default class ExpensiMark {
 
     /**
      * Set the logger to use for logging inside of the ExpensiMark class
-     * @param {Object} logger - The logger object to use
+     * @param logger - The logger object to use
      */
-    static setLogger(logger) {
+    static setLogger(logger: Logger) {
         ExpensiMark.Log = logger;
     }
+
+    rules: Rule[];
+
+    htmlToMarkdownRules: RuleWithRegex[];
+
+    htmlToTextRules: RuleWithRegex[];
+
+    whitespaceRulesToDisable = ['newline', 'replacepre', 'replacebr', 'replaceh1br'];
+
+    /**
+     * The list of rules that have to be applied when shouldKeepWhitespace flag is true.
+     */
+    filterRules: (rule: Rule) => boolean;
+
+    /**
+     * Filters rules to determine which should keep whitespace.
+     */
+    shouldKeepWhitespaceRules: Rule[];
+
+    /**
+     * maxQuoteDepth is the maximum depth of nested quotes that we want to support.
+     */
+    maxQuoteDepth: number;
+
+    /**
+     * currentQuoteDepth is the current depth of nested quotes that we are processing.
+     */
+    currentQuoteDepth: number;
 
     constructor() {
         /**
          * The list of regex replacements to do on a comment. Check the link regex is first so links are processed
          * before other delimiters
-         *
-         * @type {Object[]}
          */
         this.rules = [
             // Apply the emoji first avoid applying any other formatting rules inside of it
@@ -255,20 +328,20 @@ export default class ExpensiMark {
                 // We also want to capture a blank line before or after the quote so that we do not add extra spaces.
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
-                process: (textToProcess, replacement, shouldKeepRawInput = false) => {
+                process: (textToProcess: string, replacement: QuoteReplacementFn, shouldKeepRawInput = false) => {
                     const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
-                    const replaceFunction = (g1) => replacement(g1, shouldKeepRawInput);
+                    const replaceFunction = (g1: string) => replacement(g1, shouldKeepRawInput);
                     if (shouldKeepRawInput) {
                         const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
                         return textToProcess.replace(rawInputRegex, replaceFunction);
                     }
-                    return this.modifyTextForQuote(regex, textToProcess, replacement);
+                    return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn & QuoteReplacementFn);
                 },
-                replacement: (g1, shouldKeepRawInput = false) => {
+                replacement: (g1: string, shouldKeepRawInput = false) => {
                     // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
                     // To do this we need to parse body of the quote without first space
                     let isStartingWithSpace = false;
-                    const handleMatch = (match, g2) => {
+                    const handleMatch = (match: string, g2: string) => {
                         if (shouldKeepRawInput) {
                             isStartingWithSpace = !!g2;
                             return '';
@@ -366,7 +439,6 @@ export default class ExpensiMark {
         /**
          * The list of regex replacements to do on a HTML comment for converting it to markdown.
          * Order of rules is important
-         * @type {Object[]}
          */
         this.htmlToMarkdownRules = [
             // Used to Exclude tags
@@ -435,7 +507,7 @@ export default class ExpensiMark {
                 regex: /<(blockquote|q)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
                 replacement: (match, g1, g2) => {
                     // We remove the line break before heading inside quote to avoid adding extra line
-                    let resultString = g2
+                    let resultString: string[] | string = g2
                         .replace(/\n?(<h1># )/g, '$1')
                         .replace(/(<h1>|<\/h1>)+/g, '\n')
                         .trim()
@@ -500,7 +572,7 @@ export default class ExpensiMark {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
                 replacement: (match, g1, offset, string, extras) => {
-                    const reportToNameMap = extras.reportIDToName;
+                    const reportToNameMap = (extras as ExtrasObject).reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
                         return '#Hidden';
@@ -514,13 +586,13 @@ export default class ExpensiMark {
                 regex: /(?:<mention-user accountID="(\d+)" *\/>)|(?:<mention-user>(.*?)<\/mention-user>)/gi,
                 replacement: (match, g1, g2, offset, string, extras) => {
                     if (g1) {
-                        const accountToNameMap = extras.accountIDToName;
+                        const accountToNameMap = (extras as ExtrasObject).accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
                             ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
                             return '@Hidden';
                         }
 
-                        return `@${extras.accountIDToName[g1]}`;
+                        return `@${(extras as ExtrasObject).accountIDToName?.[g1]}`;
                     }
                     return Str.removeSMSDomain(g2);
                 },
@@ -530,7 +602,6 @@ export default class ExpensiMark {
         /**
          * The list of rules to covert the HTML to text.
          * Order of rules is important
-         * @type {Object[]}
          */
         this.htmlToTextRules = [
             {
@@ -572,7 +643,7 @@ export default class ExpensiMark {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
                 replacement: (match, g1, offset, string, extras) => {
-                    const reportToNameMap = extras.reportIDToName;
+                    const reportToNameMap = (extras as ExtrasObject).reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
                         return '#Hidden';
@@ -585,12 +656,12 @@ export default class ExpensiMark {
                 name: 'userMention',
                 regex: /<mention-user accountID="(\d+)" *\/>/gi,
                 replacement: (match, g1, offset, string, extras) => {
-                    const accountToNameMap = extras.accountIDToName;
+                    const accountToNameMap = (extras as ExtrasObject).accountIDToName;
                     if (!accountToNameMap || !accountToNameMap[g1]) {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
                         return '@Hidden';
                     }
-                    return `@${extras.accountIDToName[g1]}`;
+                    return `@${(extras as ExtrasObject).accountIDToName?.[g1]}`;
                 },
             },
             {
@@ -602,40 +673,43 @@ export default class ExpensiMark {
 
         /**
          * The list of rules that we have to exclude in shouldKeepWhitespaceRules list.
-         * @type {Object[]}
          */
         this.whitespaceRulesToDisable = ['newline', 'replacepre', 'replacebr', 'replaceh1br'];
 
         /**
          * The list of rules that have to be applied when shouldKeepWhitespace flag is true.
-         * @param {Object} rule - The rule to check.
-         * @returns {boolean} Returns true if the rule should be applied, otherwise false.
+         * @param rule - The rule to check.
+         * @returns Returns true if the rule should be applied, otherwise false.
          */
-        this.filterRules = (rule) => !this.whitespaceRulesToDisable.includes(rule.name);
+        this.filterRules = (rule: Rule) => !this.whitespaceRulesToDisable.includes(rule.name);
 
         /**
          * Filters rules to determine which should keep whitespace.
-         * @returns {Object[]} The filtered rules.
+         * @returns The filtered rules.
          */
         this.shouldKeepWhitespaceRules = this.rules.filter(this.filterRules);
 
         /**
          * maxQuoteDepth is the maximum depth of nested quotes that we want to support.
-         * @type {Number}
          */
         this.maxQuoteDepth = 3;
 
         /**
          * currentQuoteDepth is the current depth of nested quotes that we are processing.
-         * @type {Number}
          */
         this.currentQuoteDepth = 0;
     }
 
-    getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput) {
+    /**
+     * Retrieves the HTML ruleset based on the provided filter rules, disabled rules, and shouldKeepRawInput flag.
+     * @param filterRules - An array of rule names to filter the ruleset.
+     * @param disabledRules - An array of rule names to disable in the ruleset.
+     * @param shouldKeepRawInput - A boolean flag indicating whether to keep raw input.
+     */
+    getHtmlRuleset(filterRules: string[], disabledRules: string[], shouldKeepRawInput: boolean) {
         let rules = this.rules;
-        const hasRuleName = (rule) => filterRules.includes(rule.name);
-        const hasDisabledRuleName = (rule) => !disabledRules.includes(rule.name);
+        const hasRuleName = (rule: Rule) => filterRules.includes(rule.name);
+        const hasDisabledRuleName = (rule: Rule) => !disabledRules.includes(rule.name);
         if (shouldKeepRawInput) {
             rules = this.shouldKeepWhitespaceRules;
         }
@@ -651,31 +725,29 @@ export default class ExpensiMark {
     /**
      * Replaces markdown with html elements
      *
-     * @param {String} text - Text to parse as markdown
-     * @param {Object} [options] - Options to customize the markdown parser
-     * @param {String[]} [options.filterRules=[]] - An array of name of rules as defined in this class.
+     * @param text - Text to parse as markdown
+     * @param [options] - Options to customize the markdown parser
+     * @param [options.filterRules=[]] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied.
-     * @param {Boolean} [options.shouldEscapeText=true] - Whether or not the text should be escaped
-     * @param {String[]} [options.disabledRules=[]] - An array of name of rules as defined in this class.
+     * @param [options.shouldEscapeText=true] - Whether or not the text should be escaped
+     * @param [options.disabledRules=[]] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
-     *
-     * @returns {String}
      */
-    replace(text, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = []} = {}) {
+    replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = []}: ReplaceOptions = {}): string {
         // This ensures that any html the user puts into the comment field shows as raw html
         let replacedText = shouldEscapeText ? Utils.escape(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
-        const processRule = (rule) => {
+        const processRule = (rule: Rule) => {
             // Pre-process text before applying regex
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
             const replacementFunction = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if (rule.process) {
-                replacedText = rule.process(replacedText, replacementFunction, shouldKeepRawInput);
+                replacedText = rule.process(replacedText, replacementFunction as ReplacementFn & QuoteReplacementFn, shouldKeepRawInput);
             } else {
-                replacedText = replacedText.replace(rule.regex, replacementFunction);
+                replacedText = replacedText.replace((rule as RuleWithRegex).regex, replacementFunction as ReplacementFn & QuoteReplacementFn);
             }
 
             // Post-process text after applying regex
@@ -698,14 +770,8 @@ export default class ExpensiMark {
 
     /**
      * Checks matched URLs for validity and replace valid links with html elements
-     *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
      */
-    modifyTextForUrlLinks(regex, textToCheck, replacement) {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
@@ -807,15 +873,8 @@ export default class ExpensiMark {
 
     /**
      * Checks matched Emails for validity and replace valid links with html elements
-     *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     * @param {Boolean} shouldKeepRawInput
-     *
-     * @returns {String}
      */
-    modifyTextForEmailLinks(regex, textToCheck, replacement, shouldKeepRawInput) {
+    modifyTextForEmailLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldKeepRawInput: boolean): string {
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
@@ -850,16 +909,13 @@ export default class ExpensiMark {
      * 2. The text does not end with a new line.
      * 3. The text does not have quote mark '>' .
      * 4. It's not the last element in the string.
-     *
-     * @param {String} htmlString
-     * @returns {String}
      */
-    replaceBlockElementWithNewLine(htmlString) {
+    replaceBlockElementWithNewLine(htmlString: string): string {
         // eslint-disable-next-line max-len
         let splitText = htmlString.split(
             /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
         );
-        const stripHTML = (text) => Str.stripHTML(text);
+        const stripHTML = (text: string) => Str.stripHTML(text);
         splitText = splitText.map(stripHTML);
         let joinedText = '';
 
@@ -871,7 +927,7 @@ export default class ExpensiMark {
             splitText.pop();
         }
 
-        const processText = (text, index) => {
+        const processText = (text: string, index: number) => {
             if (text.trim().length === 0 && !text.match(/\n/)) {
                 return;
             }
@@ -891,13 +947,8 @@ export default class ExpensiMark {
 
     /**
      * Replaces HTML with markdown
-     *
-     * @param {String} htmlString
-     * @param {Object} extras
-     *
-     * @returns {String}
      */
-    htmlToMarkdown(htmlString, extras = {}) {
+    htmlToMarkdown(htmlString: string, extras: ExtrasObject = {}): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -907,15 +958,17 @@ export default class ExpensiMark {
             generatedMarkdown = parseBodyTag[2];
         }
 
-        const processRule = (rule) => {
+        const processRule = (rule: RuleWithRegex) => {
             // Pre-processes input HTML before applying regex
             if (rule.pre) {
                 generatedMarkdown = rule.pre(generatedMarkdown);
             }
 
             // if replacement is a function, we want to pass optional extras to it
-            const replacementFunction = Utils.isFunction(rule.replacement) ? (...args) => rule.replacement(...args, extras) : rule.replacement;
-            generatedMarkdown = generatedMarkdown.replace(rule.regex, replacementFunction);
+            const replacementFunction = Utils.isFunction(rule.replacement)
+                ? (...args: Parameters<ReplacementFn>) => (rule.replacement as ReplacementFnWithExtras)(...args, extras)
+                : rule.replacement;
+            generatedMarkdown = generatedMarkdown.replace(rule.regex, replacementFunction as (substring: string, ...args: unknown[]) => string);
         };
 
         this.htmlToMarkdownRules.forEach(processRule);
@@ -924,18 +977,15 @@ export default class ExpensiMark {
 
     /**
      * Convert HTML to text
-     *
-     * @param {String} htmlString
-     * @param {Object} extras
-     *
-     * @returns {String}
      */
-    htmlToText(htmlString, extras = {}) {
+    htmlToText(htmlString: string, extras: ExtrasObject = {}): string {
         let replacedText = htmlString;
-        const processRule = (rule) => {
+        const processRule = (rule: RuleWithRegex) => {
             // if replacement is a function, we want to pass optional extras to it
-            const replacementFunction = Utils.isFunction(rule.replacement) ? (...args) => rule.replacement(...args, extras) : rule.replacement;
-            replacedText = replacedText.replace(rule.regex, replacementFunction);
+            const replacementFunction = Utils.isFunction(rule.replacement)
+                ? (...args: Parameters<ReplacementFn>) => (rule.replacement as ReplacementFnWithExtras)(...args, extras)
+                : rule.replacement;
+            replacedText = replacedText.replace(rule.regex, replacementFunction as (substring: string, ...args: unknown[]) => string);
         };
 
         this.htmlToTextRules.forEach(processRule);
@@ -948,15 +998,8 @@ export default class ExpensiMark {
 
     /**
      * Modify text for Quotes replacing chevrons with html elements
-     *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
      */
-
-    modifyTextForQuote(regex, textToCheck, replacement) {
+    modifyTextForQuote(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
         let replacedText = '';
         let textToFormat = '';
         const match = textToCheck.match(regex);
@@ -1011,17 +1054,11 @@ export default class ExpensiMark {
 
     /**
      * Format the content of blockquote if the text matches the regex or else just return the original text
-     *
-     * @param {RegExp} regex
-     * @param {String} textToCheck
-     * @param {Function} replacement
-     *
-     * @returns {String}
      */
-    formatTextForQuote(regex, textToCheck, replacement) {
+    formatTextForQuote(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
         if (textToCheck.match(regex)) {
             // Remove '&gt;' and trim the spaces between nested quotes
-            const formatRow = (row) => {
+            const formatRow = (row: string) => {
                 const quoteContent = row[4] === ' ' ? row.substr(5) : row.substr(4);
                 if (quoteContent.trimStart().startsWith('&gt;')) {
                     return quoteContent.trimStart();
@@ -1040,11 +1077,9 @@ export default class ExpensiMark {
     /**
      * Check if the input text includes only the open or the close tag of an element.
      *
-     * @param {String} textToCheck - Text to check
-     *
-     * @returns {Boolean}
+     * @param textToCheck - Text to check
      */
-    containsNonPairTag(textToCheck) {
+    containsNonPairTag(textToCheck: string): boolean {
         // Create a regular expression to match HTML tags
         const tagRegExp = /<([a-z][a-z0-9-]*)\b[^>]*>|<\/([a-z][a-z0-9-]*)\s*>/gi;
 
@@ -1077,10 +1112,9 @@ export default class ExpensiMark {
     }
 
     /**
-     * @param {String} comment
-     * @returns {Array} or undefined if exception occurs when executing regex matching
+     * @returns or undefined if exception occurs when executing regex matching
      */
-    extractLinksInMarkdownComment(comment) {
+    extractLinksInMarkdownComment(comment: string): string[] | undefined {
         try {
             const htmlString = this.replace(comment, {filterRules: ['link']});
             // We use same anchor tag template as link and autolink rules to extract link
@@ -1088,7 +1122,7 @@ export default class ExpensiMark {
             const matches = [...htmlString.matchAll(regex)];
 
             // Element 1 from match is the regex group if it exists which contains the link URLs
-            const sanitizeMatch = (match) => Str.sanitizeURL(match[1]);
+            const sanitizeMatch = (match: RegExpExecArray) => Str.sanitizeURL(match[1]);
             const links = matches.map(sanitizeMatch);
             return links;
         } catch (e) {
@@ -1100,12 +1134,8 @@ export default class ExpensiMark {
 
     /**
      * Compares two markdown comments and returns a list of the links removed in a new comment.
-     *
-     * @param {String} oldComment
-     * @param {String} newComment
-     * @returns {Array}
      */
-    getRemovedMarkdownLinks(oldComment, newComment) {
+    getRemovedMarkdownLinks(oldComment: string, newComment: string): string[] {
         const linksInOld = this.extractLinksInMarkdownComment(oldComment);
         const linksInNew = this.extractLinksInMarkdownComment(newComment);
         return linksInOld === undefined || linksInNew === undefined ? [] : linksInOld.filter((link) => !linksInNew.includes(link));
@@ -1113,10 +1143,10 @@ export default class ExpensiMark {
 
     /**
      * Escapes the content of an HTML attribute value
-     * @param {String} content - string content that possible contains HTML
-     * @returns {String} - original MD content escaped for use in HTML attribute value
+     * @param content - string content that possible contains HTML
+     * @returns - original MD content escaped for use in HTML attribute value
      */
-    escapeAttributeContent(content) {
+    escapeAttributeContent(content: string): string {
         let originalContent = this.htmlToMarkdown(content);
         if (content === originalContent) {
             return content;
