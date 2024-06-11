@@ -324,10 +324,12 @@ export default class ExpensiMark {
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
-                    const replaceFunction = (g1: string) => (typeof replacement === 'function' ? replacement(EXTRAS_DEFAULT, g1) : replacement);
                     if (shouldKeepRawInput) {
                         const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
-                        return textToProcess.replace(rawInputRegex, replaceFunction);
+                        if (typeof replacement === 'function') {
+                            return textToProcess.replace(rawInputRegex, (...args) => replacement(EXTRAS_DEFAULT, ...args));
+                        }
+                        return textToProcess.replace(rawInputRegex, replacement);
                     }
                     return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
                 },
@@ -350,7 +352,7 @@ export default class ExpensiMark {
                         shouldKeepRawInput: false,
                     });
                     this.currentQuoteDepth = 0;
-                    return `<blockquote> ${replacedText}</blockquote>`;
+                    return `<blockquote>${replacedText}</blockquote>`;
                 },
                 rawInputReplacement: (_extras, g1) => {
                     // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
