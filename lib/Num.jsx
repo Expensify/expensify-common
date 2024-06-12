@@ -122,7 +122,7 @@ export default {
      * @returns {Boolean} true if the number is finite and not NaN.
      */
     isFiniteNumber(number) {
-        return typeof number === 'number' && isFinite(number) && !isNaN(number);
+        return typeof number === 'number' && Number.isFinite(number) && !Number.isNaN(number);
     },
 
     /**

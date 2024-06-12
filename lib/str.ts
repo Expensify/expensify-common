@@ -86,7 +86,7 @@ const Str = {
      * @param s The string to decode.
      * @returns The decoded string.
      */
-    htmlDecode(s) {
+    htmlDecode(s: string) {
         return HtmlEntities.decode(s);
     },
 
@@ -96,7 +96,7 @@ const Str = {
      * @param s The string to encode.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s) {
+    htmlEncode(s: string) {
         return HtmlEntities.encode(s);
     },
 
@@ -106,7 +106,7 @@ const Str = {
      * @param s The string to escape
      * @returns The escaped string
      */
-    safeEscape(s) {
+    safeEscape(s: string) {
         return Utils.escape(Utils.unescape(s));
     },
 
@@ -754,7 +754,7 @@ const Str = {
     /**
      * Trim a string
      */
-    trim(str) {
+    trim(str: string) {
         return str.trim();
     },
 
