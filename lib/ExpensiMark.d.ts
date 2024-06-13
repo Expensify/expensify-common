@@ -44,7 +44,7 @@ declare type ExtrasObject = {
 
 declare type ExtraParamsForReplaceFunc = {
     videoAttributeCache?: Record<string, string>;
-}
+};
 
 export default class ExpensiMark {
     static Log: Logger;
