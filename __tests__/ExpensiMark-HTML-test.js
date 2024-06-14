@@ -2074,7 +2074,6 @@ describe('Image markdown conversion to html tag', () => {
     });
 });
 
-
 describe('room mentions', () => {
     test('simple room mention', () => {
         const testString = '#room';
