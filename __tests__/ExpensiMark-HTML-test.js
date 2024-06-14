@@ -1981,7 +1981,14 @@ describe('Video markdown conversion to html tag', () => {
                 }
             }
         })).toBe(resultString);
-    }) 
+    })
+
+    test('Text containing image and video', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) and a video of a banana: ![banana](https://example.com/banana.mp4)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> and a video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
 })
 
 describe('Image markdown conversion to html tag', () => {
@@ -2066,6 +2073,7 @@ describe('Image markdown conversion to html tag', () => {
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
 });
+
 
 describe('room mentions', () => {
     test('simple room mention', () => {
