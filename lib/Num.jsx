@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import Str from './str';
 
 export default {
@@ -123,7 +122,7 @@ export default {
      * @returns {Boolean} true if the number is finite and not NaN.
      */
     isFiniteNumber(number) {
-        return _.isNumber(number) && _.isFinite(number) && !_.isNaN(number);
+        return typeof number === 'number' && Number.isFinite(number) && !Number.isNaN(number);
     },
 
     /**
