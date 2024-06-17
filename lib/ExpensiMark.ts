@@ -7,6 +7,8 @@ import * as Utils from './utils';
 type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
+    cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
+    videoAttributeCache?: Record<string, string>;
 };
 const EXTRAS_DEFAULT = {};
 
@@ -33,6 +35,7 @@ type RuleWithProcess = CommonRule & {
 type Rule = RuleWithRegex | RuleWithProcess;
 
 type ReplaceOptions = {
+    extras?: Extras;
     filterRules?: string[];
     disabledRules?: string[];
     shouldEscapeText?: boolean;
@@ -41,6 +44,11 @@ type ReplaceOptions = {
 
 const MARKDOWN_LINK_REGEX = new RegExp(`\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
+
+const MARKDOWN_VIDEO_REGEX = new RegExp(
+    `\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(((${UrlPatterns.MARKDOWN_URL_REGEX})\\.(?:${Constants.CONST.VIDEO_EXTENSIONS.join('|')}))\\)(?![^<]*(<\\/pre>|<\\/code>))`,
+    'gi',
+);
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
@@ -185,7 +193,32 @@ export default class ExpensiMark {
             },
 
             /**
-             * Converts markdown style images to img tags e.g. ![Expensify](https://www.expensify.com/attachment.png)
+             * Converts markdown style video to video tags e.g. ![Expensify](https://www.expensify.com/attachment.mp4)
+             * We need to convert before image rules since they will not try to create a image tag from an existing video URL
+             * Extras arg could contain the attribute cache for the video tag which is cached during the html-to-markdown conversion
+             */
+            {
+                name: 'video',
+                regex: MARKDOWN_VIDEO_REGEX,
+                /**
+                 * @param match
+                 * @param videoName - The first capture group - video name
+                 * @param videoSource - The second capture group - video URL
+                 * @param args - The rest capture groups and `extras` object. args[args.length-1] will the `extras` object
+                 * @return Returns the HTML video tag
+                 */
+                replacement: (extras, _match, videoName, videoSource) => {
+                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
+                },
+                rawInputReplacement: (extras, _match, videoName, videoSource) => {
+                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
+                },
+            },
+
+            /**
+             * Converts markdown style images to image tags e.g. ![Expensify](https://www.expensify.com/attachment.png)
              * We need to convert before linking rules since they will not try to create a link from an existing img
              * tag.
              * Additional sanitization is done to the alt attribute to prevent parsing it further to html by later
@@ -570,10 +603,11 @@ export default class ExpensiMark {
                     return `[${g4}](${email || g3})`;
                 },
             },
+
             {
                 name: 'image',
                 regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(?:[^><]*alt\s*=\s*(['"])(.*?)\3)?[^><]*>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
-                replacement: (_extras, _match, g1, g2, g3, g4) => {
+                replacement: (_extras, _match, _g1, g2, _g3, g4) => {
                     if (g4) {
                         return `![${g4}](${g2})`;
                     }
@@ -581,6 +615,31 @@ export default class ExpensiMark {
                     return `!(${g2})`;
                 },
             },
+
+            {
+                name: 'video',
+                regex: /<video[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/video>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
+                /**
+                 * @param match The full match
+                 * @param g1 {string} The first capture group
+                 * @param videoSource - the second capture group - video source (video URL)
+                 * @param videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
+                 * @param videoName - the fourth capture group will be the video file name (the text between opening and closing video tags)
+                 * @param args The rest of the arguments. args[args.length-1] will the `extras` object
+                 * @returns Returns the markdown video tag
+                 */
+                replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
+                    if (videoAttrs && extras && extras.cacheVideoAttributes && typeof extras.cacheVideoAttributes === 'function') {
+                        extras.cacheVideoAttributes(videoSource, videoAttrs);
+                    }
+                    if (videoName) {
+                        return `![${videoName}](${videoSource})`;
+                    }
+
+                    return `!(${videoSource})`;
+                },
+            },
+
             {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
@@ -746,7 +805,7 @@ export default class ExpensiMark {
      * @param [options.disabledRules=[]] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
      */
-    replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = []}: ReplaceOptions = {}): string {
+    replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = [], extras = EXTRAS_DEFAULT}: ReplaceOptions = {}): string {
         // This ensures that any html the user puts into the comment field shows as raw html
         let replacedText = shouldEscapeText ? Utils.escape(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
@@ -761,7 +820,7 @@ export default class ExpensiMark {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
             } else if (typeof replacement === 'function') {
                 // if replacement is a function, we want to pass optional extras to it
-                replacedText = replacedText.replace(rule.regex, (...args) => replacement(EXTRAS_DEFAULT, ...args));
+                replacedText = replacedText.replace(rule.regex, (...args) => replacement(extras, ...args));
             } else {
                 replacedText = replacedText.replace(rule.regex, replacement);
             }

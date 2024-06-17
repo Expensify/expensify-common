@@ -885,6 +885,7 @@ const CONST = {
             prompt: 'What software are you moving to and why?',
         },
     },
+    VIDEO_EXTENSIONS: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'ogv'],
 } as const;
 
 /**
