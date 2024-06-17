@@ -534,7 +534,6 @@ export default class ExpensiMark {
 
                     resultString = resultString
                         .map((text) => {
-                            // Recursive function to replace nested <blockquote> with ">"
                             let modifiedText = text;
                             let depth;
                             do {

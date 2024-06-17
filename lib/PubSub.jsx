@@ -72,7 +72,7 @@ const PubSubModule = {
      * @returns {String}
      */
     once(eventName, callback, optionalScope) {
-        const scope = typeof optionalScope === 'object' && optionalScope !== null ? optionalScope : window;
+        const scope = Utils.isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
         const functionToCallOnce = once((...args) => callback.apply(scope, args));
         return this.subscribe(eventName, functionToCallOnce);
     },
