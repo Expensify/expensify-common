@@ -184,10 +184,7 @@ export default class ExpensiMark {
                 name: 'heading1',
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|\n|\r\n).)+)/gm;
-                    if (typeof replacement === 'function') {
-                        return textToProcess.replace(regexp, (...args) => replacement(EXTRAS_DEFAULT, ...args));
-                    }
-                    return textToProcess.replace(regexp, replacement);
+                    return this.replaceTextWithExtras(textToProcess, regexp, EXTRAS_DEFAULT, replacement);
                 },
                 replacement: '<h1>$1</h1>',
             },
@@ -359,10 +356,7 @@ export default class ExpensiMark {
                     const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
                     if (shouldKeepRawInput) {
                         const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
-                        if (typeof replacement === 'function') {
-                            return textToProcess.replace(rawInputRegex, (...args) => replacement(EXTRAS_DEFAULT, ...args));
-                        }
-                        return textToProcess.replace(rawInputRegex, replacement);
+                        return this.replaceTextWithExtras(textToProcess, rawInputRegex, EXTRAS_DEFAULT, replacement);
                     }
                     return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
                 },
@@ -751,7 +745,7 @@ export default class ExpensiMark {
         /**
          * The list of rules that have to be applied when shouldKeepWhitespace flag is true.
          * @param rule - The rule to check.
-         * @returns Returns true if the rule should be applied, otherwise false.
+         * @returns true if the rule should be applied, otherwise false.
          */
         this.filterRules = (rule: Rule) => !this.whitespaceRulesToDisable.includes(rule.name);
 
@@ -818,11 +812,8 @@ export default class ExpensiMark {
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
-            } else if (typeof replacement === 'function') {
-                // if replacement is a function, we want to pass optional extras to it
-                replacedText = replacedText.replace(rule.regex, (...args) => replacement(extras, ...args));
             } else {
-                replacedText = replacedText.replace(rule.regex, replacement);
+                replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
             }
 
             // Post-process text after applying regex
@@ -1038,13 +1029,7 @@ export default class ExpensiMark {
                 generatedMarkdown = rule.pre(generatedMarkdown);
             }
 
-            const {replacement} = rule;
-            if (typeof replacement === 'function') {
-                // if replacement is a function, we want to pass optional extras to it
-                generatedMarkdown = generatedMarkdown.replace(rule.regex, (...args) => replacement(extras, ...args));
-            } else {
-                generatedMarkdown = generatedMarkdown.replace(rule.regex, replacement);
-            }
+            generatedMarkdown = this.replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
         };
 
         this.htmlToMarkdownRules.forEach(processRule);
@@ -1057,13 +1042,7 @@ export default class ExpensiMark {
     htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
-            const {replacement} = rule;
-            if (typeof replacement === 'function') {
-                // if replacement is a function, we want to pass optional extras to it
-                replacedText = replacedText.replace(rule.regex, (...args) => replacement(extras, ...args));
-            } else {
-                replacedText = replacedText.replace(rule.regex, replacement);
-            }
+            replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
         };
 
         this.htmlToTextRules.forEach(processRule);
@@ -1190,7 +1169,7 @@ export default class ExpensiMark {
     }
 
     /**
-     * @returns or undefined if exception occurs when executing regex matching
+     * @returns array or undefined if exception occurs when executing regex matching
      */
     extractLinksInMarkdownComment(comment: string): string[] | undefined {
         try {
@@ -1221,7 +1200,7 @@ export default class ExpensiMark {
     /**
      * Escapes the content of an HTML attribute value
      * @param content - string content that possible contains HTML
-     * @returns - original MD content escaped for use in HTML attribute value
+     * @returns original MD content escaped for use in HTML attribute value
      */
     escapeAttributeContent(content: string): string {
         let originalContent = this.htmlToMarkdown(content);
@@ -1233,5 +1212,21 @@ export default class ExpensiMark {
         // illegal attribute value characters like `," or ' which might break the HTML
         originalContent = Str.replaceAll(originalContent, '\n', '');
         return Utils.escape(originalContent);
+    }
+
+    /**
+     * Replaces text with a replacement based on a regex
+     * @param text - The text to replace
+     * @param regexp - The regex to match
+     * @param extras - The extras object
+     * @param replacement - The replacement string or function
+     * @returns The replaced text
+     */
+    replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, replacement: Replacement): string {
+        if (typeof replacement === 'function') {
+            // if the replacement is a function, we pass the extras object to it
+            return text.replace(regexp, (...args) => replacement(extras, ...args));
+        }
+        return text.replace(regexp, replacement);
     }
 }
