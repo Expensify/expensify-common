@@ -867,22 +867,22 @@ const CONST = {
         TOO_LIMITED: {
             id: 'tooLimited',
             label: 'Functionality needs improvement',
-            prompt: 'What software are you migrating to and what led to this decision?',
+            prompt: 'What software are you moving to and why?',
         },
         TOO_EXPENSIVE: {
             id: 'tooExpensive',
             label: 'Too expensive',
-            prompt: 'What software are you migrating to and what led to this decision?',
+            prompt: 'What software are you moving to and why?',
         },
         INADEQUATE_SUPPORT: {
             id: 'inadequateSupport',
             label: 'Inadequate customer support',
-            prompt: 'What software are you migrating to and what led to this decision?',
+            prompt: 'What software are you moving to and why?',
         },
         BUSINESS_CLOSING: {
             id: 'businessClosing',
             label: 'Company closing, downsizing, or acquired',
-            prompt: 'What software are you migrating to and what led to this decision?',
+            prompt: 'What software are you moving to and why?',
         },
     },
     VIDEO_EXTENSIONS: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'ogv'],

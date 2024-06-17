@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.11",
+  "version": "2.0.15",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -40,8 +40,7 @@
     "react-dom": "16.12.0",
     "semver": "^7.6.0",
     "simply-deferred": "git+https://github.com/Expensify/simply-deferred.git#77a08a95754660c7bd6e0b6979fdf84e8e831bf5",
-    "ua-parser-js": "^1.0.37",
-    "underscore": "1.13.6"
+    "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.4",
@@ -53,7 +52,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/ua-parser-js": "^0.7.39",
     "@typescript-eslint/eslint-plugin": "^7.9.0",
-    "@typescript-eslint/parser": "^7.9.0",
+    "@typescript-eslint/parser": "^7.10.0",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint": "^8.57.0",
