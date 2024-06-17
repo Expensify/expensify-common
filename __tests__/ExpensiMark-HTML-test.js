@@ -1958,6 +1958,45 @@ describe('multi-level blockquote', () => {
     });
 });
 
+describe('Video markdown conversion to html tag', () => {
+    test('Single video with source', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" >test</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing videos', () => {
+        const testString = 'A video of a banana: ![banana](https://example.com/banana.mp4) a video without name: !(https://example.com/developer.mp4)';
+        const resultString = 'A video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video> a video without name: <video data-expensify-source="https://example.com/developer.mp4" ></video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Video with raw data attributes', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-raw-href="https://example.com/video.mp4" data-link-variant="labeled" >test</video>';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    })
+
+    test('Single video with extra cached attribues', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-height="100" data-expensify-width="100">test</video>';
+        expect(parser.replace(testString, {
+            extras: {
+                videoAttributeCache: {
+                    'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"'
+                }
+            }
+        })).toBe(resultString);
+    })
+
+    test('Text containing image and video', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) and a video of a banana: ![banana](https://example.com/banana.mp4)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> and a video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+})
+
 describe('Image markdown conversion to html tag', () => {
     test('Single image with alt text', () => {
         const testString = '![test](https://example.com/image.png)';
