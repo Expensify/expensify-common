@@ -68,12 +68,24 @@ export default class ExpensiMark {
         ExpensiMark.Log = logger;
     }
 
+    /** Rules to apply to the text */
     rules: Rule[];
 
+    /**
+     * The list of regex replacements to do on a HTML comment for converting it to markdown.
+     * Order of rules is important
+     */
     htmlToMarkdownRules: RuleWithRegex[];
 
+    /**
+     * The list of rules to covert the HTML to text.
+     * Order of rules is important
+     */
     htmlToTextRules: RuleWithRegex[];
 
+    /**
+     * The list of rules that we have to exclude in shouldKeepWhitespaceRules list.
+     */
     whitespaceRulesToDisable = ['newline', 'replacepre', 'replacebr', 'replaceh1br'];
 
     /**
