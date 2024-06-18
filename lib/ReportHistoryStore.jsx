@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import {Deferred} from 'simply-deferred';
 
 export default class ReportHistoryStore {
@@ -31,11 +30,12 @@ export default class ReportHistoryStore {
          *
          * @returns {Object[]}
          */
-        this.filterHiddenActions = (historyItems) => _.filter(historyItems, (historyItem) => historyItem.shouldShow);
+        this.filterHiddenActions = (historyItems) => historyItems.filter((historyItem) => historyItem.shouldShow);
 
         /**
          * Public Methods
          */
+
         return {
             /**
              * Returns the history for a given report.
@@ -124,7 +124,7 @@ export default class ReportHistoryStore {
                 this.getFromCache(reportID)
                     .done((cachedHistory) => {
                         // Do we have the reportAction immediately before this one?
-                        if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
+                        if (cachedHistory.some(({reportActionID}) => reportActionID === reportAction.reportActionID)) {
                             // If we have the previous one then we can assume we have an up to date history minus the most recent
                             // and must merge it into the cache
                             this.mergeHistoryByTimestamp(reportID, [reportAction]);
@@ -149,7 +149,7 @@ export default class ReportHistoryStore {
              * @param {String[]} events
              */
             bindCacheClearingEvents: (events) => {
-                _.each(events, (event) => this.PubSub.subscribe(event, () => (this.cache = {})));
+                events.each((event) => this.PubSub.subscribe(event, () => (this.cache = {})));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -169,19 +169,15 @@ export default class ReportHistoryStore {
             return;
         }
 
-        const newCache = _.reduce(
-            newHistory.reverse(),
-            (prev, curr) => {
-                if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
-                    prev.unshift(curr);
-                }
-                return prev;
-            },
-            this.cache[reportID] || [],
-        );
+        const newCache = newHistory.reverse().reduce((prev, curr) => {
+            if (!prev.some((item) => item.sequenceNumber === curr.sequenceNumber)) {
+                prev.unshift(curr);
+            }
+            return prev;
+        }, this.cache[reportID] || []);
 
         // Sort items in case they have become out of sync
-        this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
+        this.cache[reportID] = newCache.sort((a, b) => b.sequenceNumber - a.sequenceNumber);
     }
 
     /**
@@ -195,19 +191,15 @@ export default class ReportHistoryStore {
             return;
         }
 
-        const newCache = _.reduce(
-            newHistory.reverse(),
-            (prev, curr) => {
-                if (!_.findWhere(prev, {reportActionTimestamp: curr.reportActionTimestamp})) {
-                    prev.unshift(curr);
-                }
-                return prev;
-            },
-            this.cache[reportID] || [],
-        );
+        const newCache = newHistory.reverse().reduce((prev, curr) => {
+            if (!prev.some((item) => item.reportActionTimestamp === curr.reportActionTimestamp)) {
+                prev.unshift(curr);
+            }
+            return prev;
+        }, this.cache[reportID] || []);
 
         // Sort items in case they have become out of sync
-        this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp').reverse();
+        this.cache[reportID] = newCache.sort((a, b) => b.reportActionTimestamp - a.reportActionTimestamp);
     }
 
     /**
@@ -228,7 +220,7 @@ export default class ReportHistoryStore {
 
         // We'll poll the API for the un-cached history
         const cachedHistory = this.cache[reportID] || [];
-        const firstHistoryItem = _.first(cachedHistory) || {};
+        const firstHistoryItem = cachedHistory[0] || {};
 
         // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
@@ -290,7 +282,7 @@ export default class ReportHistoryStore {
         const cachedHistory = this.cache[reportID] || [];
 
         // If comment is not in cache then fetch it
-        if (_.isEmpty(cachedHistory)) {
+        if (cachedHistory.length === 0) {
             return this.getFlatHistory(reportID);
         }
 

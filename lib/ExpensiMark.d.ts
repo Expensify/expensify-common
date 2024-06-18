@@ -39,7 +39,13 @@ declare type Rule = {
 declare type ExtrasObject = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
+    cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
 };
+
+declare type ExtraParamsForReplaceFunc = {
+    videoAttributeCache?: Record<string, string>;
+};
+
 export default class ExpensiMark {
     static Log: Logger;
     static setLogger(logger: Logger): void;
@@ -66,11 +72,13 @@ export default class ExpensiMark {
             filterRules,
             shouldEscapeText,
             shouldKeepRawInput,
+            extras,
         }?: {
             filterRules?: Name[];
             disabledRules?: Name[];
             shouldEscapeText?: boolean;
             shouldKeepRawInput?: boolean;
+            extras?: ExtraParamsForReplaceFunc;
         },
     ): string;
     /**
