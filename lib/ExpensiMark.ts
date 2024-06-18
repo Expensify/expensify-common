@@ -210,10 +210,9 @@ export default class ExpensiMark {
                 name: 'video',
                 regex: MARKDOWN_VIDEO_REGEX,
                 /**
-                 * @param match
+                 * @param extras - The extras object
                  * @param videoName - The first capture group - video name
                  * @param videoSource - The second capture group - video URL
-                 * @param args - The rest capture groups and `extras` object. args[args.length-1] will the `extras` object
                  * @return Returns the HTML video tag
                  */
                 replacement: (extras, _match, videoName, videoSource) => {
@@ -626,12 +625,12 @@ export default class ExpensiMark {
                 name: 'video',
                 regex: /<video[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/video>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 /**
+                 * @param extras - The extras object
                  * @param match The full match
-                 * @param g1 {string} The first capture group
+                 * @param _g1 The first capture group
                  * @param videoSource - the second capture group - video source (video URL)
                  * @param videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
                  * @param videoName - the fourth capture group will be the video file name (the text between opening and closing video tags)
-                 * @param args The rest of the arguments. args[args.length-1] will the `extras` object
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
