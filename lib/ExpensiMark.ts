@@ -620,7 +620,7 @@ export default class ExpensiMark {
                  * @param videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
                  * @param videoName - the fourth capture group will be the video file name (the text between opening and closing video tags)
                  * @param args The rest of the arguments. args[args.length-1] will the `extras` object
-                 * @returns Returns the markdown video tag
+                 * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
                     if (videoAttrs && extras && extras.cacheVideoAttributes && typeof extras.cacheVideoAttributes === 'function') {
@@ -1133,8 +1133,6 @@ export default class ExpensiMark {
 
     /**
      * Check if the input text includes only the open or the close tag of an element.
-     *
-     * @param textToCheck - Text to check
      */
     containsNonPairTag(textToCheck: string): boolean {
         // Create a regular expression to match HTML tags
