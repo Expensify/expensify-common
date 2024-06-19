@@ -497,6 +497,18 @@ test('map div with quotes', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
+test('double quotes in same line', () => {
+    const testString = '<blockquote><blockquote>line 1</blockquote></blockquote>';
+    const resultString = '>> line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
+test('triple quotes in same line', () => {
+    const testString = '<blockquote><blockquote><blockquote>line 1</blockquote></blockquote></blockquote>';
+    const resultString = '>>> line 1';
+    expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+});
+
 test('map table to newline', () => {
     const testString = '<tbody><tr>line 1</tr><tr>line 2</tr></tbody>';
     const resultString = 'line 1\nline 2';
@@ -756,12 +768,16 @@ test('Mention user html to markdown', () => {
     testString = '<mention-user>@user@DOMAIN.com</mention-user>';
     expect(parser.htmlToMarkdown(testString)).toBe('@user@DOMAIN.com');
 
+    // When there is a phone number mention the sms domain `@expensify.sms`should be removed from returned string
+    testString = '<mention-user>@+311231231@expensify.sms</mention-user>';
+    expect(parser.htmlToMarkdown(testString)).toBe('@+311231231');
+
     // When there is `accountID` and no `extras`, `@Hidden` should be returned
     testString = '<mention-user accountID="1234"/>';
     expect(parser.htmlToMarkdown(testString)).toBe('@Hidden');
 
     const extras = {
-        accountIdToName: {
+        accountIDToName: {
             '1234': 'user@domain.com',
         },
     };
@@ -790,7 +806,7 @@ test('Mention report html to markdown', () => {
     expect(parser.htmlToText(testString)).toBe('#Hidden');
 
     const extras = {
-        reportIdToName: {
+        reportIDToName: {
             '1234': '#room-name',
         },
     };
@@ -832,3 +848,28 @@ describe('Image tag conversion to markdown', () => {
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
 });
+
+describe('Video tag conversion to markdown', () => {
+    test('Video with name', () => {
+        const testString = '<video data-expensify-source="https://example.com/video.mp4">video</video>';
+        const resultString = '![video](https://example.com/video.mp4)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    })
+
+    test('Video without name', () => {
+        const testString = '<video data-expensify-source="https://example.com/video.mp4"></video>';
+        const resultString = '!(https://example.com/video.mp4)';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    })
+
+    test('While convert video, cache some extra attributes from the video tag', () => {
+        const cacheVideoAttributes = jest.fn();
+        const testString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg">video</video>';
+        const resultString = '![video](https://example.com/video.mp4)';
+        const extras = {
+            cacheVideoAttributes,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
+    })
+})

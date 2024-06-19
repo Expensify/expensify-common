@@ -1,7 +1,7 @@
-import _ from 'underscore';
 import PubSubModule from '../PubSub';
+import * as Utils from '../utils';
 
-const PubSub = window.PubSub || PubSubModule;
+const PubSub = (Utils.isWindowAvailable() && window.PubSub) || PubSubModule;
 
 /**
  * This mixin sets up automatic PubSub bindings which will be removed when
@@ -17,7 +17,7 @@ const PubSub = window.PubSub || PubSubModule;
  *     }
  * });
  */
-export default {
+const PubSubMixin = {
     UNSAFE_componentWillMount() {
         this.eventIds = [];
     },
@@ -44,6 +44,10 @@ export default {
      * When the component is unmounted, we want to subscribe from all of our event IDs
      */
     componentWillUnmount() {
-        _.each(this.eventIds, _.bind(PubSub.unsubscribe, PubSub));
+        this.eventIds.forEach((eventId) => {
+            PubSub.unsubscribe(eventId);
+        });
     },
 };
+
+export default PubSubMixin;

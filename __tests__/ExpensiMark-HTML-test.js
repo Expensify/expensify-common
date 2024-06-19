@@ -23,8 +23,8 @@ test('Test multi-line bold markdown replacement', () => {
 
 
 test('Test bold within code blocks is skipped', () => {
-    const testString = 'bold\n```*not a bold*```\nThis is *bold*';
-    const replacedString = 'bold<br /><pre>*not&#32;a&#32;bold*</pre>This is <strong>bold</strong>';
+    const testString = 'bold\n```\n*not a bold*\n```\nThis is *bold*';
+    const replacedString = 'bold<br /><pre>*not&#32;a&#32;bold*<br /></pre>This is <strong>bold</strong>';
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
@@ -54,6 +54,16 @@ test('Test quote markdown replacement', () => {
 test('Test italic markdown replacement', () => {
     const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. ___ _italic__ _test_ _ testing_ test_test_test. _ test _ _test _';
     const italicTestReplacedString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. ___ <em>italic</em>_ <em>test</em> _ testing_ test_test_test. _ test _ _test _';
+    expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
+});
+
+test('Test italic markdown replacement', () => {
+    const italicTestStartString = 'Note that _this is correctly italicized_\n'
+        + 'Note that `_this is correctly not italicized_` and _following inline contents are italicized_'
+        
+    const italicTestReplacedString = 'Note that <em>this is correctly italicized</em><br />'
+        + 'Note that <code>_this is correctly not italicized_</code> and <em>following inline contents are italicized</em>'
+        
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
 
@@ -202,14 +212,14 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
 // Check emails within other markdown
 test('Test emails within other markdown', () => {
     const testString = '> test@example.com\n'
-    + '```test@example.com```\n'
+    + '```\ntest@example.com\n```\n'
     + '`test@example.com`\n'
     + '_test@example.com_ '
     + '_test@example.com__ '
     + '__test@example.com__ '
     + '__test@example.com_';
     const result = '<blockquote><a href="mailto:test@example.com">test@example.com</a></blockquote>'
-    + '<pre>test@example.com</pre>'
+    + '<pre>test@example.com<br /></pre>'
     + '<code>test@example.com</code><br />'
     + '<em><a href="mailto:test@example.com">test@example.com</a></em> '
     + '<em><a href="mailto:test@example.com">test@example.com</a></em>_ '
@@ -410,31 +420,13 @@ test('Test period replacements', () => {
 });
 
 test('Test code fencing', () => {
-    let codeFenceExampleMarkdown = '```\nconst javaScript = \'javaScript\'\n```';
+    const codeFenceExampleMarkdown = '```\nconst javaScript = \'javaScript\'\n```';
     expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br /></pre>');
-
-    codeFenceExampleMarkdown = '```const javaScript = \'javaScript\'\n```';
-    expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br /></pre>');
-
-    codeFenceExampleMarkdown = '```\nconst javaScript = \'javaScript\'```';
-    expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;</pre>');
-
-    codeFenceExampleMarkdown = '```const javaScript = \'javaScript\'```';
-    expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;</pre>');
 });
 
 test('Test code fencing with spaces and new lines', () => {
     let codeFenceExample = '```\nconst javaScript = \'javaScript\'\n    const php = \'php\'\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;<br /></pre>');
-
-    codeFenceExample = '```const javaScript = \'javaScript\'\n    const php = \'php\'\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;<br /></pre>');
-
-    codeFenceExample = '```\nconst javaScript = \'javaScript\'\n    const php = \'php\'```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
-
-    codeFenceExample = '```const javaScript = \'javaScript\'\n    const php = \'php\'```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;</pre>');
 
     codeFenceExample = '```\n\n# test\n\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
@@ -455,6 +447,21 @@ test('Test code fencing with spaces and new lines', () => {
 test('Test inline code blocks', () => {
     const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you?';
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
+});
+
+test('Test inline code blocks with double backticks', () => {
+    const inlineCodeStartString = 'My favorite language is ``JavaScript``. How about you?';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;JavaScript&#x60;</code>. How about you?');
+});
+
+test('Test inline code blocks with triple backticks', () => {
+    const inlineCodeStartString = 'My favorite language is ```JavaScript```. How about you?';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;&#x60;JavaScript&#x60;&#x60;</code>. How about you?');
+});
+
+test('Test multiple inline codes in one line', () => {
+    const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you? I also like `Python`.';
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you? I also like <code>Python</code>.');
 });
 
 test('Test inline code with one backtick as content', () => {
@@ -488,58 +495,46 @@ test('Test inline code blocks with two backticks', () => {
 });
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
-    let codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
+    const codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)<br /></pre>');
-
-    codeFenceExample = '```This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)<br /></pre>');
-
-    codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
-
-    codeFenceExample = '```This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)```';
-    expect(parser.replace(codeFenceExample)).toBe('<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)</pre>');
 });
 
 test('Test code fencing with ExpensiMark syntax outside', () => {
-    let codeFenceExample = '# Test1 ```code``` Test2';
-    expect(parser.replace(codeFenceExample)).toBe('<h1>Test1 </h1><pre>code</pre> Test2');
+    let codeFenceExample = '# Test1 ```\ncode\n``` Test2';
+    expect(parser.replace(codeFenceExample)).toBe('<h1>Test1 </h1><pre>code<br /></pre> Test2');
 
-    codeFenceExample = '*Test1 ```code``` Test2*';
-    expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code</pre> Test2*');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre data-code-raw=\"code\">code</pre> Test2*');
+    codeFenceExample = '*Test1 ```\ncode\n``` Test2*';
+    expect(parser.replace(codeFenceExample)).toBe('*Test1 <pre>code<br /></pre> Test2*');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1 <pre>code\n</pre> Test2*');
 
-    codeFenceExample = '_Test1 ```code``` Test2_';
-    expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code</pre> Test2_');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre data-code-raw=\"code\">code</pre> Test2_');
+    codeFenceExample = '_Test1 ```\ncode\n``` Test2_';
+    expect(parser.replace(codeFenceExample)).toBe('_Test1 <pre>code<br /></pre> Test2_');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('_Test1 <pre>code\n</pre> Test2_');
 
-    codeFenceExample = '~Test1 ```code``` Test2~';
-    expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code</pre> Test2~');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre data-code-raw=\"code\">code</pre> Test2~');
+    codeFenceExample = '~Test1 ```\ncode\n``` Test2~';
+    expect(parser.replace(codeFenceExample)).toBe('~Test1 <pre>code<br /></pre> Test2~');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('~Test1 <pre>code\n</pre> Test2~');
 
-    codeFenceExample = '[```code```](google.com)';
-    expect(parser.replace(codeFenceExample)).toBe('[<pre>code</pre>](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre data-code-raw=\"code\">code</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
+    codeFenceExample = '[```\ncode\n```](google.com)';
+    expect(parser.replace(codeFenceExample)).toBe('[<pre>code<br /></pre>](<a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('[<pre>code\n</pre>](<a href=\"https://google.com\" data-raw-href=\"google.com\" data-link-variant=\"auto\" target=\"_blank\" rel=\"noreferrer noopener\">google.com</a>)');
 });
 
 test('Test code fencing with additional backticks inside', () => {
-    let nestedBackticks = '````test````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;</pre>');
+    let nestedBackticks = '```\n`test`\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;<br /></pre>');
 
-    nestedBackticks = '````\ntest\n````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />test<br />&#x60;</pre>');
+    nestedBackticks = '```\n`\ntest\n`\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />test<br />&#x60;<br /></pre>');
 
-    nestedBackticks = '````````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;</pre>');
+    nestedBackticks = '```\n``\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;<br /></pre>');
 
-    nestedBackticks = '````\n````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />&#x60;</pre>');
+    nestedBackticks = '```\n`\n`\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;<br />&#x60;<br /></pre>');
 
-    nestedBackticks = '```````````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;&#x60;&#x60;&#x60;&#x60;</pre>');
-
-    nestedBackticks = '````This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)````';
-    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;</pre>');
+    nestedBackticks = '```\n`This is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)`\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;<br /></pre>');
 });
 
 test('Test combination replacements', () => {
@@ -1016,41 +1011,41 @@ test('Test autolink replacement to avoid parsing nested links', () => {
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence without spaces', () => {
-    const testString = 'The next line should be quoted\n> Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence```';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\n```\nThe next line should not be quoted\n>Hello,I’mtext\nsince its inside a codefence\n```';
 
-    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote><pre>The&#32;next&#32;line&#32;should&#32;not&#32;be&#32;quoted<br />&gt;Hello,I’mtext<br />since&#32;its&#32;inside&#32;a&#32;codefence</pre>';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote><pre>The&#32;next&#32;line&#32;should&#32;not&#32;be&#32;quoted<br />&gt;Hello,I’mtext<br />since&#32;its&#32;inside&#32;a&#32;codefence<br /></pre>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence at the same line', () => {
-    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```\nsince its inside a codefence';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```\n>Hello,I’mtext\n```\nsince its inside a codefence';
 
-    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>since its inside a codefence';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext<br /></pre>since its inside a codefence';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence at the end of the text', () => {
-    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```>Hello,I’mtext```';
+    const testString = 'The next line should be quoted\n> Hello,I’mtext\nThe next line should not be quoted\n```\n>Hello,I’mtext\n```';
 
-    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext</pre>';
+    const resultString = 'The next line should be quoted<br /><blockquote>Hello,I’mtext</blockquote>The next line should not be quoted<br /><pre>&gt;Hello,I’mtext<br /></pre>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text matching inside and outside codefence with quotes at the end of the text', () => {
-    const testString = 'The next line should be quoted\n```> Hello,I’mtext```\nThe next line should not be quoted\n> Hello,I’mtext';
+    const testString = 'The next line should be quoted\n```\n> Hello,I’mtext\n```\nThe next line should not be quoted\n> Hello,I’mtext';
 
-    const resultString = 'The next line should be quoted<br /><pre>&gt;&#32;Hello,I’mtext</pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
+    const resultString = 'The next line should be quoted<br /><pre>&gt;&#32;Hello,I’mtext<br /></pre>The next line should not be quoted<br /><blockquote>Hello,I’mtext</blockquote>';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </pre><br/>', () => {
-    const testString = 'The next line should be quoted\n```>Hello,I’mtext```\nThe next line should not be quoted';
+    const testString = 'The next line should be quoted\n```\n>Hello,I’mtext\n```\nThe next line should not be quoted';
 
-    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext</pre>The next line should not be quoted';
+    const resultString = 'The next line should be quoted<br /><pre>&gt;Hello,I’mtext<br /></pre>The next line should not be quoted';
 
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1284,8 +1279,14 @@ test('Test for user mention with invalid username', () => {
 });
 
 test('Test for user mention with codefence style', () => {
-    const testString = '```@username@expensify.com```';
-    const resultString = '<pre>@username@expensify.com</pre>';
+    const testString = '```\n@username@expensify.com\n```';
+    const resultString = '<pre>@username@expensify.com<br /></pre>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for room mention with codefence style', () => {
+    const testString = '```\n#room\n```';
+    const resultString = '<pre>#room<br /></pre>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1296,8 +1297,8 @@ test('Test for user mention with inlineCodeBlock style', () => {
 });
 
 test('Test for user mention with text with codefence style', () => {
-    const testString = '```hi @username@expensify.com```';
-    const resultString = '<pre>hi&#32;@username@expensify.com</pre>';
+    const testString = '```\nhi @username@expensify.com\n```';
+    const resultString = '<pre>hi&#32;@username@expensify.com<br /></pre>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1326,8 +1327,8 @@ test('Test for user mention with user email includes underscores', () => {
 });
 
 test('Test for @here mention with codefence style', () => {
-    const testString = '```@here```';
-    const resultString = '<pre>@here</pre>';
+    const testString = '```\n@here\n```';
+    const resultString = '<pre>@here<br /></pre>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1589,11 +1590,11 @@ test('Test here mention with @here@here', () => {
 });
 
 test('Test link with code fence inside the alias text part', () => {
-    const testString = '[```code```](google.com) '
-        + '[test ```code``` test](google.com)';
+    const testString = '[```\ncode\n```](google.com) '
+        + '[test ```\ncode\n``` test](google.com)';
 
-    const resultString = '[<pre>code</pre>](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>) '
-        + '[test <pre>code</pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
+    const resultString = '[<pre>code<br /></pre>](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>) '
+        + '[test <pre>code<br /></pre> test](<a href="https://google.com" target="_blank" rel="noreferrer noopener">google.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1635,20 +1636,20 @@ test('Linebreak between end of text and start of code block should be remained',
             resultString: '|<br /><pre>code<br /></pre>',
         },
         {
-            testString: 'text1```code```text2',
-            resultString: 'text1<pre>code</pre>text2',
+            testString: 'text1```\ncode\n```text2',
+            resultString: 'text1<pre>code<br /></pre>text2',
         },
         {
-            testString: 'text1 ``` code ``` text2',
-            resultString: 'text1 <pre>&#32;code&#32;</pre> text2',
+            testString: 'text1 ```\n code \n``` text2',
+            resultString: 'text1 <pre>&#32;code&#32;<br /></pre> text2',
         },
         {
-            testString: 'text1\n```code```\ntext2',
-            resultString: 'text1<br /><pre>code</pre>text2',
+            testString: 'text1\n```\ncode\n```\ntext2',
+            resultString: 'text1<br /><pre>code<br /></pre>text2',
         },
         {
-            testString: 'text1\n``` code ```\ntext2',
-            resultString: 'text1<br /><pre>&#32;code&#32;</pre>text2',
+            testString: 'text1\n```\n code \n```\ntext2',
+            resultString: 'text1<br /><pre>&#32;code&#32;<br /></pre>text2',
         },
         {
             testString: 'text1\n```\n\ncode\n```\ntext2',
@@ -1674,24 +1675,24 @@ test('Linebreak between end of text and start of code block should be remained',
 
 test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em> tag', () => {
     const testString = '`code`test@gmail.com '
-        + '```code block```test@gmail.com '
+        + '```\ncode block\n```test@gmail.com '
         + '[Google](https://google.com)test@gmail.com '
         + '_test@gmail.com_ '
         + '_test\n\ntest@gmail.com_ '
         + '`test@expensify.com` '
-        + '```test@expensify.com``` '
+        + '```\ntest@expensify.com\n``` '
         + '@test@expensify.com '
         + '_@username@expensify.com_ '
         + '[https://staging.new.expensify.com/details/test@expensify.com](https://staging.new.expensify.com/details/test@expensify.com) '
         + '[test italic style wrap email _test@gmail.com_ inside a link](https://google.com) ';
 
     const resultString = '<code>code</code><a href="mailto:test@gmail.com">test@gmail.com</a> '
-        + '<pre>code&#32;block</pre><a href="mailto:test@gmail.com">test@gmail.com</a> '
+        + '<pre>code&#32;block<br /></pre><a href="mailto:test@gmail.com">test@gmail.com</a> '
         + '<a href="https://google.com" target="_blank" rel="noreferrer noopener">Google</a><a href="mailto:test@gmail.com">test@gmail.com</a> '
         + '<em><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
         + '<em>test<br /><br /><a href="mailto:test@gmail.com">test@gmail.com</a></em> '
         + '<code>test@expensify.com</code> '
-        + '<pre>test@expensify.com</pre> '
+        + '<pre>test@expensify.com<br /></pre> '
         + '<mention-user>@test@expensify.com</mention-user> '
         + '<em><mention-user>@username@expensify.com</mention-user></em> '
         + '<a href="https://staging.new.expensify.com/details/test@expensify.com" target="_blank" rel="noreferrer noopener">https://staging.new.expensify.com/details/test@expensify.com</a> '
@@ -1798,14 +1799,14 @@ describe('when should keep raw input flag is enabled', () => {
 
     test('quote with other markdowns', () => {
         const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
-        const quoteTestReplacedString = '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre data-code-raw=\"\nhere is a codefenced quote\n&gt;it should not be quoted\n\">here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
+        const quoteTestReplacedString = '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre>here&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
 
     test('codeBlock with newlines', () => {
         const quoteTestStartString = '```\nhello world\n```';
-        const quoteTestReplacedString = '<pre data-code-raw="\nhello world\n">hello&#32;world\n</pre>';
+        const quoteTestReplacedString = '<pre>hello&#32;world\n</pre>';
 
         expect(parser.replace(quoteTestStartString, {shouldKeepRawInput: true})).toBe(quoteTestReplacedString);
     });
@@ -1843,29 +1844,35 @@ describe('when should keep raw input flag is enabled', () => {
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
 
-        test('user mention from phone number', () => {
+        test('user mention from invalid phone number', () => {
             const testString = '@+1234567890';
-            const resultString = '<mention-user>@+1234567890</mention-user>';
+            const resultString = '@+1234567890';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+
+        test('user mention from valid phone number', () => {
+            const testString = '@+15005550006';
+            const resultString = '<mention-user>@+15005550006</mention-user>';
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
     });
 });
 
 test('Test code fence within inline code', () => {
-    let testString = 'Hello world `(```test```)` Hello world';
-    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test</pre>)&#x60; Hello world');
+    let testString = 'Hello world `(```\ntest\n```)` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br /></pre>)&#x60; Hello world');
 
-    testString = 'Hello world `(```test\ntest```)` Hello world';
-    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br />test</pre>)&#x60; Hello world');
+    testString = 'Hello world `(```\ntest\ntest\n```)` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world &#x60;(<pre>test<br />test<br /></pre>)&#x60; Hello world');
 
-    testString = 'Hello world ```(`test`)``` Hello world';
-    expect(parser.replace(testString)).toBe('Hello world <pre>(&#x60;test&#x60;)</pre> Hello world');
+    testString = 'Hello world ```\n(`test`)\n``` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <pre>(&#x60;test&#x60;)<br /></pre> Hello world');
 
-    testString = 'Hello world `test`space```block``` Hello world';
-    expect(parser.replace(testString)).toBe('Hello world <code>test</code>space<pre>block</pre> Hello world');
+    testString = 'Hello world `test`space```\nblock\n``` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <code>test</code>space<pre>block<br /></pre> Hello world');
 
-    testString = 'Hello world ```block```space`test` Hello world';
-    expect(parser.replace(testString)).toBe('Hello world <pre>block</pre>space<code>test</code> Hello world');
+    testString = 'Hello world ```\nblock\n```space`test` Hello world';
+    expect(parser.replace(testString)).toBe('Hello world <pre>block<br /></pre>space<code>test</code> Hello world');
 });
 
 test('Test italic/bold/strikethrough markdown to keep consistency', () => {
@@ -1950,6 +1957,45 @@ describe('multi-level blockquote', () => {
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 });
+
+describe('Video markdown conversion to html tag', () => {
+    test('Single video with source', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" >test</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Text containing videos', () => {
+        const testString = 'A video of a banana: ![banana](https://example.com/banana.mp4) a video without name: !(https://example.com/developer.mp4)';
+        const resultString = 'A video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video> a video without name: <video data-expensify-source="https://example.com/developer.mp4" ></video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('Video with raw data attributes', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-raw-href="https://example.com/video.mp4" data-link-variant="labeled" >test</video>';
+        expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+    })
+
+    test('Single video with extra cached attribues', () => {
+        const testString = '![test](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-height="100" data-expensify-width="100">test</video>';
+        expect(parser.replace(testString, {
+            extras: {
+                videoAttributeCache: {
+                    'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"'
+                }
+            }
+        })).toBe(resultString);
+    })
+
+    test('Text containing image and video', () => {
+        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) and a video of a banana: ![banana](https://example.com/banana.mp4)';
+        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> and a video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+})
 
 describe('Image markdown conversion to html tag', () => {
     test('Single image with alt text', () => {

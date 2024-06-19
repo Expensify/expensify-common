@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import * as Utils from './utils';
 
 /**
  * Adds our API command to the URL so the API call is more easily identified in the
@@ -40,9 +40,11 @@ export default function Network(endpoint) {
     }
 
     // Attach a listener to the event indicating that we're leaving a page
-    window.onbeforeunload = () => {
-        isNavigatingAway = true;
-    };
+    if (Utils.isWindowAvailable()) {
+        window.onbeforeunload = () => {
+            isNavigatingAway = true;
+        };
+    }
 
     return {
         /**
@@ -64,6 +66,7 @@ export default function Network(endpoint) {
             if (isNewURLFormat) {
                 // Remove command from parameters and use it in the URL
                 const command = parameters.command;
+                // eslint-disable-next-line no-param-reassign
                 delete parameters.command;
                 newURL = `${endpoint}${command}`;
             }
@@ -83,7 +86,7 @@ export default function Network(endpoint) {
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
             // the ajax settings accordingly
-            _(parameters).each((value, key) => {
+            Object.entries(parameters).forEach(([key, value]) => {
                 if (!value) {
                     return;
                 }
@@ -129,14 +132,14 @@ export default function Network(endpoint) {
 
             // Add our data as form data
             const formData = new FormData();
-            _(parameters).each((value, key) => {
-                if (_.isUndefined(value)) {
+            Object.entries(parameters).forEach(([key, value]) => {
+                if (value === undefined) {
                     return;
                 }
-                if (_.isArray(value)) {
-                    _.each(value, (valueItem, i) => {
-                        if (_.isObject(valueItem)) {
-                            _.each(valueItem, (valueItemObjectValue, valueItemObjectKey) => {
+                if (Array.isArray(value)) {
+                    value.forEach((valueItem, i) => {
+                        if (Utils.isObject(valueItem)) {
+                            Object.entries(valueItem).forEach(([valueItemObjectKey, valueItemObjectValue]) => {
                                 formData.append(`${key}[${i}][${valueItemObjectKey}]`, valueItemObjectValue);
                             });
                         } else {

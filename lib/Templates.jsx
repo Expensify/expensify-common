@@ -1,5 +1,6 @@
-import _ from 'underscore';
 import $ from 'jquery';
+import {template as createTemplate} from 'lodash';
+import * as Utils from './utils';
 
 /**
  * JS Templating system, powered by underscore template
@@ -36,7 +37,7 @@ export default (function () {
          */
         get(data = {}) {
             if (!this.compiled) {
-                this.compiled = _.template(this.templateValue);
+                this.compiled = createTemplate(this.templateValue);
                 this.templateValue = '';
             }
             return this.compiled(data);
@@ -67,9 +68,10 @@ export default (function () {
         get(data = {}) {
             // Add the "template" object to the parameter to allow nested templates
             const dataToCompile = {...data};
+            // eslint-disable-next-line no-undef
             dataToCompile.nestedTemplate = Templates.get;
             if (!this.compiled) {
-                this.compiled = _.template($(`#${this.id}`).html());
+                this.compiled = createTemplate($(`#${this.id}`).html());
             }
             return this.compiled(dataToCompile);
         }
@@ -83,7 +85,7 @@ export default (function () {
      */
     function getTemplate(templatePath) {
         let template = templateStore;
-        _.each(templatePath, (pathname) => {
+        templatePath.forEach((pathname) => {
             template = template[pathname];
         });
         return template;
@@ -102,7 +104,7 @@ export default (function () {
         for (let argumentNumber = 0; argumentNumber < wantedNamespace.length; argumentNumber++) {
             currentArgument = wantedNamespace[argumentNumber];
 
-            if (_.isUndefined(namespace[currentArgument])) {
+            if (namespace[currentArgument] === undefined) {
                 namespace[currentArgument] = {};
             }
             namespace = namespace[currentArgument];
@@ -119,22 +121,18 @@ export default (function () {
          * @return {String}
          */
         get(templatePath, data = {}) {
-            try {
-                const template = getTemplate(templatePath);
-                if (_.isUndefined(template)) {
-                    throw Error(`Template '${templatePath}' is not defined`);
-                }
-
-                // Check for the absense of get which means someone is likely using
-                // the templating engine wrong and trying to access a template namespace
-                if (!{}.propertyIsEnumerable.call(template, 'get')) {
-                    throw Error(`'${templatePath}' is not a valid template path`);
-                }
-
-                return template.get(data);
-            } catch (err) {
-                throw err;
+            const template = getTemplate(templatePath);
+            if (template === undefined) {
+                throw Error(`Template '${templatePath}' is not defined`);
             }
+
+            // Check for the absense of get which means someone is likely using
+            // the templating engine wrong and trying to access a template namespace
+            if (!{}.propertyIsEnumerable.call(template, 'get')) {
+                throw Error(`'${templatePath}' is not a valid template path`);
+            }
+
+            return template.get(data);
         },
 
         /**
@@ -143,7 +141,7 @@ export default (function () {
          * @return {Boolean}
          */
         has(templatePath) {
-            return !_.isUndefined(getTemplate(templatePath));
+            return getTemplate(templatePath) !== undefined;
         },
 
         /**
@@ -151,6 +149,7 @@ export default (function () {
          */
         init() {
             // Read the DOM to find all the templates, and make them available to the code
+            // eslint-disable-next-line rulesdir/prefer-underscore-method
             $('.js_template').each((__, $el) => {
                 const namespaceElements = $el.id.split('_');
                 const id = namespaceElements.pop();
@@ -170,13 +169,13 @@ export default (function () {
          */
         register(wantedNamespace, templateData) {
             const namespace = getTemplateNamespace(wantedNamespace);
-            _.each(_.keys(templateData), (key) => {
+            Object.keys(templateData).forEach((key) => {
                 const template = templateData[key];
 
-                if (_.isObject(template)) {
+                if (Utils.isObject(template)) {
                     // If the template is an object, add templates for all keys
                     namespace[key] = {};
-                    _.each(_.keys(template), (templateKey) => {
+                    Object.keys(template).forEach((templateKey) => {
                         namespace[key][templateKey] = new InlineTemplate(template[templateKey]);
                     });
                 } else {
