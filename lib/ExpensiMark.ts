@@ -1085,9 +1085,17 @@ export default class ExpensiMark {
                     insideCodefence = Str.contains(textSplitted[i], '<pre>');
                 }
 
-                // We only want to modify lines starting with &gt; that is not codefence
-                if (Str.startsWith(textSplitted[i], '&gt;') && !insideCodefence) {
-                    textToFormat += `${textSplitted[i]}\n`;
+                // Since the last space will be trimmed and would incorrectly disable a condition we check it manually
+                const isLastBlockquote = textSplitted[i] === '&gt;' && i === textSplitted.length - 1;
+
+                // We only want to modify lines starting with "&gt; " that is not codefence
+                if ((Str.startsWith(textSplitted[i], '&gt; ') || isLastBlockquote) && !insideCodefence) {
+                    if (textSplitted[i] === '&gt;') {
+                        textToFormat += `${textSplitted[i]} \n`;
+                        insideCodefence = true;
+                    } else {
+                        textToFormat += `${textSplitted[i]}\n`;
+                    }
                 } else {
                     // Make sure we will only modify if we have Text needed to be formatted for quote
                     if (textToFormat !== '') {
@@ -1127,7 +1135,9 @@ export default class ExpensiMark {
         if (textToCheck.match(regex)) {
             // Remove '&gt;' and trim the spaces between nested quotes
             const formatRow = (row: string) => {
-                const quoteContent = row[4] === ' ' ? row.substr(5) : row.substr(4);
+                let quoteContent = row[4] === ' ' ? row.substr(5) : row.substr(4);
+                if (row === '&gt; ') quoteContent = row.substr(4);
+
                 if (quoteContent.trimStart().startsWith('&gt;')) {
                     return quoteContent.trimStart();
                 }
