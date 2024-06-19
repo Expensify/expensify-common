@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.17",
+  "version": "2.0.20",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -43,9 +43,9 @@
     "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.24.4",
-    "@babel/preset-typescript": "^7.24.1",
+    "@babel/preset-env": "^7.24.5",
     "@lwc/eslint-plugin-lwc": "^1.8.0",
+    "@babel/preset-typescript": "^7.24.1",
     "@types/jest": "^29.5.12",
     "@types/jquery": "^3.5.30",
     "@types/lodash": "^4.17.4",
