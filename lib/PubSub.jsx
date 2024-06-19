@@ -1,7 +1,7 @@
-import _ from 'underscore';
 import has from 'lodash/has';
+import {once} from 'lodash';
 import Log from './Log';
-import {isWindowAvailable} from './utils';
+import * as Utils from './utils';
 
 /**
  * PubSub
@@ -46,14 +46,14 @@ const PubSubModule = {
             return;
         }
 
-        const eventIDs = _.keys(eventMap[eventName]);
+        const eventIDs = eventMap[eventName].keys();
         if (eventName === this.ERROR) {
             // Doing the split slice 2 because the 1st element of the stacktrace will always be from here (PubSub.publish)
             // When debugging, we just need to know who called PubSub.publish (so, all next elements in the stack)
             Log.hmmm('Error published', 0, {tplt: param.tplt, stackTrace: new Error().stack.split(' at ').slice(2)});
         }
 
-        _.each(eventIDs, (eventID) => {
+        eventIDs.forEach((eventID) => {
             const subscriber = eventMap[eventName][eventID];
             if (subscriber) {
                 subscriber.callback.call(subscriber.scope, param);
@@ -72,8 +72,8 @@ const PubSubModule = {
      * @returns {String}
      */
     once(eventName, callback, optionalScope) {
-        const scope = _.isObject(optionalScope) ? optionalScope : window;
-        const functionToCallOnce = _.once((...args) => callback.apply(scope, args));
+        const scope = Utils.isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
+        const functionToCallOnce = once((...args) => callback.apply(scope, args));
         return this.subscribe(eventName, functionToCallOnce);
     },
 
@@ -94,8 +94,8 @@ const PubSubModule = {
             throw new Error('Attempted to subscribe to undefined event');
         }
 
-        const callback = _.isFunction(optionalCallback) ? optionalCallback : () => {};
-        const scope = _.isObject(optionalScope) ? optionalScope : window;
+        const callback = Utils.isFunction(optionalCallback) ? optionalCallback : () => {};
+        const scope = Utils.isObject(optionalScope) && optionalScope !== null ? optionalScope : window;
         const eventID = generateID(eventName);
 
         if (eventMap[eventName] === undefined) {
@@ -116,8 +116,8 @@ const PubSubModule = {
      * @param {String} bindID The id of the element to delete
      */
     unsubscribe(bindID) {
-        const IDs = _.isArray(bindID) ? bindID : [bindID];
-        _.each(IDs, (id) => {
+        const IDs = Array.isArray(bindID) ? bindID : [bindID];
+        IDs.forEach((id) => {
             const eventName = extractEventName(id);
             if (has(eventMap, `${eventName}.${id}`)) {
                 delete eventMap[eventName][id];
@@ -126,4 +126,4 @@ const PubSubModule = {
     },
 };
 
-export default isWindowAvailable() && window.PubSub ? window.PubSub : PubSubModule;
+export default Utils.isWindowAvailable() && window.PubSub ? window.PubSub : PubSubModule;

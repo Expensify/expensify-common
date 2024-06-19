@@ -1,5 +1,3 @@
-import _ from 'underscore';
-
 export default class ExpenseRule {
     /**
      * Creates a new instance of this class.
@@ -7,7 +5,7 @@ export default class ExpenseRule {
      * @param {Array} ruleArray
      */
     constructor(ruleArray) {
-        _.each(ruleArray, (value, key) => {
+        ruleArray.forEach((value, key) => {
             this[key] = value;
         });
     }
@@ -21,7 +19,7 @@ export default class ExpenseRule {
      * @return {Object}
      */
     getApplyWhenByField(field) {
-        return _.find(this.applyWhen, (conditions) => conditions.field === field) || {};
+        return this.applyWhen.find((conditions) => conditions.field === field) || {};
     }
 
     /**
@@ -41,7 +39,7 @@ export default class ExpenseRule {
      */
     isMatch(expense) {
         let isMatch = true;
-        _.each(this.applyWhen, (conditions) => {
+        this.applyWhen.forEach((conditions) => {
             switch (conditions.field) {
                 case 'category':
                     if (!this.checkCondition(conditions.condition, conditions.value, expense.getCategory())) {
