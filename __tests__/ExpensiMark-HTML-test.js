@@ -1117,7 +1117,8 @@ test('Test quotes markdown replacement with text includes blank quotes', () => {
 
 test('Test quotes markdown replacement with text includes multiple spaces', () => {
     const quoteTestStartString = '>   Indented\n>No indent\n>   Indented  \n> >   Nested indented  \n>     Indented ';
-    const quoteTestReplacedString = '<blockquote>  Indented<br />No indent<br />  Indented  <br /><blockquote>  Nested indented  </blockquote>    Indented </blockquote>';
+    const quoteTestReplacedString =
+        '<blockquote>  Indented</blockquote>&gt;No indent<br /><blockquote>  Indented  <br /><blockquote>  Nested indented  </blockquote>    Indented </blockquote>';
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
 
@@ -1146,7 +1147,7 @@ test('Test markdown quotes without spaces after > should not be parsed', () => {
 
 test('Test markdown quotes without spaces after > should not be parsed', () => {
     const testString = '>>> test';
-    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
+    const resultString = '&gt;&gt;&gt; test';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1202,6 +1203,17 @@ test('Test for link with emoji', () => {
     const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
     expect(parser.replace(testString)).toBe(resultString);
 });
+
+test('Test quotes markdown with blank last line', () => {
+    const testString = '> test1\n> test2\n> ';
+    expect(parser.replace(testString)).toBe('<blockquote>test1<br />test2<br /> </blockquote>');
+});
+
+test('Test quotes markdown with last entry lacking space', () => {
+    const testString = '> test1\n> test2\n>incorrect_entry';
+    expect(parser.replace(testString)).toBe('<blockquote>test1<br />test2</blockquote>&gt;incorrect_entry');
+});
+
 test('Test quotes markdown replacement with heading inside', () => {
     let testString = '> # heading';
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading</h1></blockquote>');
@@ -1216,7 +1228,7 @@ test('Test quotes markdown replacement with heading inside', () => {
     expect(parser.replace(testString)).toBe('<blockquote><h1>heading A</h1><h1>heading B</h1></blockquote>');
 
     testString = '> test\n>\n> # heading\n>\n>test';
-    expect(parser.replace(testString)).toBe('<blockquote>test<br /> </blockquote>&gt; # heading<br />&gt;<br />&gt;test');
+    expect(parser.replace(testString)).toBe('<blockquote>test</blockquote>&gt;<br /><blockquote><h1>heading</h1></blockquote>&gt;<br />&gt;test');
 });
 
 test('Test heading1 markdown replacement with line break before or after the heading1', () => {
@@ -1938,8 +1950,8 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
 
 describe('multi-level blockquote', () => {
     test('test max level of blockquote (3)', () => {
-        const quoteTestStartString = '>>>>> Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>&gt;&gt; Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestStartString = '> > > > > Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>&gt; &gt; Hello world</blockquote></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
