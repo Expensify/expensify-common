@@ -1250,7 +1250,7 @@ export default class ExpensiMark {
      * @param {Object} opts - Options to customize the truncation.
      * @returns {number} The calculated position to truncate the content.
      */
-    getEndPosition(content: string, tailPosition: number, maxLength: number, totalLength: number, opts: TruncateOptions) {
+    getEndPosition(content: string, tailPosition: number | undefined, maxLength: number, totalLength: number, opts: TruncateOptions) {
         const WORD_BREAK_REGEX = /\W+/g;
 
         // Calculate the default position to truncate based on the maximum length and the length of the content processed so far
@@ -1258,6 +1258,8 @@ export default class ExpensiMark {
 
         // Define the slop value, which determines the tolerance for cutting off content near the maximum length
         const slop = opts.slop;
+
+        if (!slop) return defaultPosition;
 
         // Initialize the position to the default position
         let position = defaultPosition;
