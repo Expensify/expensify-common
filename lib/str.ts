@@ -350,7 +350,7 @@ const Str = {
      * @returns True if the string is a domain name
      */
     isValidDomainName(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.DOMAIN));
+        return !!String(str).match(Constants.CONST.REG_EXP.DOMAIN);
     },
 
     /**
@@ -359,7 +359,7 @@ const Str = {
      * @returns True if the string is a valid hyperlink
      */
     isValidURL(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.HYPERLINK));
+        return !!String(str).match(Constants.CONST.REG_EXP.HYPERLINK);
     },
 
     /**
@@ -371,7 +371,7 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.EMAIL));
+        !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
     },
 
     /**
@@ -382,7 +382,7 @@ const Str = {
      * @returns True if the string is an valid email created by comment markdown.
      */
     isValidEmailMarkdown(str: string): boolean {
-        return Boolean(String(str).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`));
+        return !!String(str).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`);
     },
 
     /**
@@ -818,7 +818,7 @@ const Str = {
         if (this.isString(value)) {
             return value.toLowerCase() === 'true';
         }
-        return Boolean(value);
+        return !!value;
     },
 
     /**
