@@ -371,7 +371,7 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
-        !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
+        return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
     },
 
     /**
