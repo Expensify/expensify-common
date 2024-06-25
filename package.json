@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.25",
+  "version": "2.0.26",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -56,7 +56,7 @@
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint": "^8.57.0",
-    "eslint-config-expensify": "^2.0.48",
+    "eslint-config-expensify": "^2.0.50",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-jest": "^28.6.0",
     "eslint-plugin-prettier": "^5.1.3",
