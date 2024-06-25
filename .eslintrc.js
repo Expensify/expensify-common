@@ -18,6 +18,11 @@ module.exports = {
                 'rulesdir/no-multiple-api-calls': 'off',
                 'rulesdir/prefer-import-module-contents': 'off',
                 'no-constructor-return': 'off',
+                'max-classes-per-file': 'off',
+                'arrow-body-style': 'off',
+                'es/no-nullish-coalescing-operators': 'off',
+                'rulesdir/prefer-underscore-method': 'off',
+                'es/no-optional-chaining': 'off',
                 'import/extensions': [
                     'error',
                     'ignorePackages',

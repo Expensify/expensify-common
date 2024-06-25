@@ -1,10 +1,9 @@
 /* eslint-disable no-control-regex */
-import lodashEscape from 'lodash/escape';
-import lodashUnescape from 'lodash/unescape';
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
+import * as Utils from './utils';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
@@ -87,11 +86,7 @@ const Str = {
      * @param s The string to decode.
      * @returns The decoded string.
      */
-    htmlDecode(s: string): string {
-        // Use jQuery if it exists or else use html-entities
-        if (typeof jQuery !== 'undefined') {
-            return jQuery('<textarea/>').html(s).text();
-        }
+    htmlDecode(s: string) {
         return HtmlEntities.decode(s);
     },
 
@@ -101,11 +96,7 @@ const Str = {
      * @param s The string to encode.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s: string): string {
-        // Use jQuery if it exists or else use html-entities
-        if (typeof jQuery !== 'undefined') {
-            return jQuery('<textarea/>').text(s).html();
-        }
+    htmlEncode(s: string) {
         return HtmlEntities.encode(s);
     },
 
@@ -115,8 +106,8 @@ const Str = {
      * @param s The string to escape
      * @returns The escaped string
      */
-    safeEscape(s: string): string {
-        return lodashEscape(lodashUnescape(s));
+    safeEscape(s: string) {
+        return Utils.escape(Utils.unescape(s));
     },
 
     /**
@@ -359,7 +350,7 @@ const Str = {
      * @returns True if the string is a domain name
      */
     isValidDomainName(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.DOMAIN));
+        return !!String(str).match(Constants.CONST.REG_EXP.DOMAIN);
     },
 
     /**
@@ -368,7 +359,7 @@ const Str = {
      * @returns True if the string is a valid hyperlink
      */
     isValidURL(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.HYPERLINK));
+        return !!String(str).match(Constants.CONST.REG_EXP.HYPERLINK);
     },
 
     /**
@@ -380,7 +371,7 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
-        return Boolean(String(str).match(Constants.CONST.REG_EXP.EMAIL));
+        return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
     },
 
     /**
@@ -391,7 +382,7 @@ const Str = {
      * @returns True if the string is an valid email created by comment markdown.
      */
     isValidEmailMarkdown(str: string): boolean {
-        return Boolean(String(str).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`));
+        return !!String(str).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}$`);
     },
 
     /**
@@ -763,8 +754,8 @@ const Str = {
     /**
      * Trim a string
      */
-    trim(str: string): string {
-        return $.trim(str);
+    trim(str: string) {
+        return str.trim();
     },
 
     /**
@@ -827,7 +818,7 @@ const Str = {
         if (this.isString(value)) {
             return value.toLowerCase() === 'true';
         }
-        return Boolean(value);
+        return !!value;
     },
 
     /**

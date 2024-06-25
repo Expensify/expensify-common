@@ -53,9 +53,10 @@ export default class Logger {
         }
         // eslint-disable-next-line rulesdir/prefer-early-return
         promise.then((response) => {
-            if (response.requestID) {
-                this.info('Previous log requestID', false, {requestID: response.requestID}, true);
+            if (!response.requestID) {
+                return;
             }
+            this.info('Previous log requestID', false, {requestID: response.requestID}, true);
         });
     }
 

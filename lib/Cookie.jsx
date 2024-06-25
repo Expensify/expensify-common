@@ -72,7 +72,7 @@ function enabled() {
     const cookieName = `cookieTest_${Math.floor(Math.random() * 1000)}`;
     const cookieValue = 'enabled';
     set(cookieName, cookieValue, 1);
-    const result = Boolean(document.cookie.indexOf(cookieName) >= 0) || false;
+    const result = document.cookie.indexOf(cookieName) >= 0 || false;
     if (result) {
         remove(cookieName);
     }
