@@ -1258,7 +1258,6 @@ export default class ExpensiMark {
 
         // Define the slop value, which determines the tolerance for cutting off content near the maximum length
         const slop = opts.slop;
-
         if (!slop) return defaultPosition;
 
         // Initialize the position to the default position
