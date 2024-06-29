@@ -141,9 +141,9 @@ export default class ExpensiMark {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
-                rawInputReplacement: (_extras, _match, _g1, g2, textWithinFences) => {
+                rawInputReplacement: (_extras, _match, _g1, newLineCharacter, textWithinFences) => {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
-                    return `<pre>${g2}${group}</pre>`;
+                    return `<pre>${newLineCharacter}${group}</pre>`;
                 },
             },
 
