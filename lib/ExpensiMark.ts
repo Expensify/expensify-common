@@ -129,7 +129,7 @@ export default class ExpensiMark {
                 name: 'codeFence',
 
                 // &#x60; is a backtick symbol we are matching on three of them before then after a new line character
-                regex: /(&#x60;&#x60;&#x60;(?:\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
+                regex: /(&#x60;&#x60;&#x60;(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
 
                 // We're using a function here to perform an additional replace on the content
                 // inside the backticks because Android is not able to use <pre> tags and does
@@ -137,13 +137,13 @@ export default class ExpensiMark {
                 // with the new lines here since they need to be converted into <br>. And we don't
                 // want to do this anywhere else since that would break HTML.
                 // &nbsp; will create styling issues so use &#32;
-                replacement: (_extras, _match, _g1, textWithinFences) => {
+                replacement: (_extras, _match, _g1, _g2, textWithinFences) => {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
-                rawInputReplacement: (_extras, _match, _g1, textWithinFences) => {
+                rawInputReplacement: (_extras, _match, _g1, newLineCharacter, textWithinFences) => {
                     const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
-                    return `<pre>${group}</pre>`;
+                    return `<pre>${newLineCharacter}${group}</pre>`;
                 },
             },
 
