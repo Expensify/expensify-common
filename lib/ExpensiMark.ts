@@ -547,7 +547,33 @@ export default class ExpensiMark {
             {
                 name: 'bold',
                 regex: /<(b|strong)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
-                replacement: '*$2*',
+                replacement: (extras, match, tagName, innerContent) => {
+                    // To check if style attribute contains bold font-weight
+                    const isBoldFromStyle = (style: string | null) => {
+                        return style ? style.replace(/\s/g, '').includes('font-weight:bold;') || style.replace(/\s/g, '').includes('font-weight:700;') : false;
+                    };
+
+                    const updateSpacesAndWrapWithAsterisksIfBold = (content: string, isBold: boolean) => {
+                        const trimmedContent = content.trim();
+                        const leadingSpace = content.startsWith(' ') ? ' ' : '';
+                        const trailingSpace = content.endsWith(' ') ? ' ' : '';
+                        return isBold ? `${leadingSpace}*${trimmedContent}*${trailingSpace}` : content;
+                    };
+
+                    // Determine if the outer tag is bold
+                    const styleAttributeMatch = match.match(/style="(.*?)"/);
+                    const isFontWeightBold = isBoldFromStyle(styleAttributeMatch ? styleAttributeMatch[1] : null);
+                    const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
+
+                    // Process nested spans with potential bold style
+                    const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
+                        const nestedStyleMatch = nestedMatch.match(/style="(.*?)"/);
+                        const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
+                        return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
+                    });
+
+                    return updateSpacesAndWrapWithAsterisksIfBold(processedInnerContent, isBold);
+                },
             },
             {
                 name: 'strikethrough',
