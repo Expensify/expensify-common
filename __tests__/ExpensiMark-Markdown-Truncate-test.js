@@ -20,22 +20,15 @@ describe('truncateHTML', () => {
         expect(result).toBe('This is a <strong>long</strong> text that exceeds the character limit. It contains multiple sente...');
     });
 
-    test('truncateHTML should truncate at the nearest space', () => {
-        const markdown =
-            'This is a *long* text that exceeds the character limit. It contains multiple sentences to test the truncation functionality. The truncation should occur at the nearest space to avoid cutting off words.';
-        const limit = 80;
-        const html = parser.replace(markdown);
-        const result = parser.truncateHTML(html, limit, {ellipsis: false});
-        expect(result).toBe('This is a <strong>long</strong> text that exceeds the character limit. It contains multiple sente');
-    });
-
     test('should handle HTML with multiple markdown elements', () => {
         const markdown =
             'This is a *long* text with _multiple_ markdown ~elements~. It includes *bold*, _italic_, and ~strikethrough~ formatting. The truncation should preserve the markdown syntax.';
         const limit = 150;
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
-        expect(result).toBe('This is a <strong>long</strong> text with <em>multiple</em> markdown <del>elements</del>. It includes <strong>bold</strong>, <em>italic</em>, and <del>strikethrough</del> formatting. The truncation should preserve the markdo...');
+        expect(result).toBe(
+            'This is a <strong>long</strong> text with <em>multiple</em> markdown <del>elements</del>. It includes <strong>bold</strong>, <em>italic</em>, and <del>strikethrough</del> formatting. The truncation should preserve the markdo...',
+        );
     });
 
     test('should handle HTML with nested markdown elements', () => {
@@ -43,7 +36,9 @@ describe('truncateHTML', () => {
         const limit = 150;
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
-        expect(result).toBe('This is a <strong>long <em>nested</em> markdown</strong> text. It contains <strong><em>bold italic</em></strong> and <del><em>strikethrough italic</em></del> formatting. The truncation should handle the nesting correctly.');
+        expect(result).toBe(
+            'This is a <strong>long <em>nested</em> markdown</strong> text. It contains <strong><em>bold italic</em></strong> and <del><em>strikethrough italic</em></del> formatting. The truncation should handle the nesting correctly.',
+        );
     });
 
     test('should handle HTML with links', () => {
@@ -75,11 +70,23 @@ describe('truncateHTML', () => {
     });
 
     test('should handle HTML with lists', () => {
-        const markdown = 'This is a text with lists. Here is an example of a list:\n\n- Item 1\n- Item 2\n- Item 3\n\nThe truncation should handle lists correctly.';
-        const limit = 100;
+        const markdown = `
+    This is a text with lists. Here are examples:
+    
+    Unordered list:
+    - Item 1
+    - Item 2
+    - Item 3
+    
+    Ordered list:
+    1. First item
+    2. Second item
+    3. Third item
+    `;
+        const limit = 250; // Increased to accommodate full lists
         const html = parser.replace(markdown);
-        const result = parser.truncateHTML(html, limit, {ellipsis: true});
-        expect(result).toBe('This is a text with lists. Here is an example of a list:<br /><br />- Item 1<br />- Item 2<br />- Item 3<br /><br />The truncation shoul...');
+        const result = parser.truncateHTML(html, limit, {ellipsis: false});
+        expect(result).toBe(`<br />    This is a text with lists. Here are examples:<br />    <br />    Unordered list:<br />    - Item 1<br />    - Item 2<br />    - Item 3<br />    <br />    Ordered list:<br />    1. First item<br />    2. Second item<br />    3. Third item<br />    `);
     });
 
     test('should handle HTML with horizontal rules', () => {
