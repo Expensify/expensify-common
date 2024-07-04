@@ -1008,8 +1008,8 @@ export default class ExpensiMark {
                 return;
             }
 
-            // Insert '\n' unless it ends with '\n' or '>' or it's the last element.
-            if (text.match(/[\n|>][>]?[\s]?$/) || index === splitText.length - 1) {
+            // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
+            if (text.match(/[\n|>][>]?[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
