@@ -13,7 +13,7 @@ describe('truncateHTML', () => {
 
     test('should truncate HTML and add ellipsis if it exceeds the limit', () => {
         const markdown =
-            'This is a *long* text that exceeds the character limit. It contains multiple sentences to test the truncation functionality. The truncation should occur at the nearest space to avoid cutting off words.';
+            'This is a *long* text that exceeds the character limit. It contains multiple sentences to test the truncation functionality. The truncation should occur at the specified character count.';
         const limit = 80;
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
