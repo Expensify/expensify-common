@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.38",
+  "version": "2.0.39",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
