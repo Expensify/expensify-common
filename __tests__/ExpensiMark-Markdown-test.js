@@ -23,6 +23,18 @@ test('Test multi-line bold HTML replacement', () => {
     expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
+test('Converts <b> tags with font-weight 700 inline style in between to markdown bold', () => {
+    const input = '<b><span style="font-weight:400;">This is a text with </span><span style="font-weight:700;">nested bold</span><span style="font-weight:400;"> content</span></b>';
+    const expected = 'This is a text with *nested bold* content';
+    expect(parser.htmlToMarkdown(input)).toBe(expected);
+});
+
+test('Does not convert <b> tags with font-weight normal inline style to markdown bold', () => {
+    const input = '<b><span style="font-weight:400;">This is a text with </span><span style="font-weight:normal;">no bold</span><span style="font-weight:400;"> content</span></b>';
+    const expected = 'This is a text with no bold content';
+    expect(parser.htmlToMarkdown(input)).toBe(expected);
+});
+
 test('Test italic HTML replacement', () => {
     const italicTestStartString = 'This is a <em>sentence,</em> and it has some <em>punctuation, words, and spaces</em>. <em>test</em> _ testing_ test_test_test. _ test _ _test _ '
         + 'This is a <i>sentence,</i> and it has some <i>punctuation, words, and spaces</i>. <i>test</i> _ testing_ test_test_test. _ test _ _test _';
