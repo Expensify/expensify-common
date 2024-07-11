@@ -1200,7 +1200,7 @@ test('Test for link with no content', () => {
 
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    const resultString = '<a href="https://www.link.com" target="_blank" rel="noreferrer noopener"><emoji>😀</emoji></a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
