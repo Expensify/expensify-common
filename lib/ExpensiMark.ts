@@ -173,7 +173,7 @@ export default class ExpensiMark {
                     return this.modifyTextForEmailLinks(regex, textToProcess, replacement as ReplacementFn, shouldKeepRawInput);
                 },
                 replacement: (_extras, match, g1, g2) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
                     const label = g1.trim();
@@ -182,7 +182,7 @@ export default class ExpensiMark {
                     return `<a href="${href}">${formattedLabel}</a>`;
                 },
                 rawInputReplacement: (_extras, match, g1, g2, g3) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
 
