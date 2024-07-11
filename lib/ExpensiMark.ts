@@ -173,7 +173,7 @@ export default class ExpensiMark {
                     return this.modifyTextForEmailLinks(regex, textToProcess, replacement as ReplacementFn, shouldKeepRawInput);
                 },
                 replacement: (_extras, match, g1, g2) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
                     const label = g1.trim();
@@ -182,7 +182,7 @@ export default class ExpensiMark {
                     return `<a href="${href}">${formattedLabel}</a>`;
                 },
                 rawInputReplacement: (_extras, match, g1, g2, g3) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
 
@@ -249,13 +249,13 @@ export default class ExpensiMark {
                 name: 'link',
                 process: (textToProcess, replacement) => this.modifyTextForUrlLinks(MARKDOWN_LINK_REGEX, textToProcess, replacement as ReplacementFn),
                 replacement: (_extras, match, g1, g2) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;
                 },
                 rawInputReplacement: (_extras, match, g1, g2) => {
-                    if (g1.match(Constants.CONST.REG_EXP.EMOJIS) || !g1.trim()) {
+                    if (!g1.trim()) {
                         return match;
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;

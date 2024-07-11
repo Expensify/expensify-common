@@ -295,7 +295,7 @@ test('Test markdown replacement for invalid emails', () => {
 
 test('Test markdown replacement for emojis with emails', () => {
     const testString =
-        'Do not replace the emoji with link ' +
+        'Replace the emoji with link ' +
         '[😄](abc@gmail.com) ' +
         '[😄]( abc@gmail.com) ' +
         '[😄] abc@gmail.com ' +
@@ -303,13 +303,13 @@ test('Test markdown replacement for emojis with emails', () => {
         '[😄abc@gmail.com](abc@gmail.com) ' +
         '[😄 abc@gmail.com ](abc@gmail.com) ';
     const result =
-        'Do not replace the emoji with link ' +
-        '[<emoji>😄</emoji>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) ' +
+        'Replace the emoji with link ' +
+        '<a href=\"mailto:abc@gmail.com\"><emoji>😄</emoji></a> ' +
         '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) ' +
         '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> ' +
         '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) ' +
-        '[<emoji>😄</emoji><a href="mailto:abc@gmail.com">abc@gmail.com</a>](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) ' +
-        '[<emoji>😄</emoji> <a href="mailto:abc@gmail.com">abc@gmail.com</a> ](<a href="mailto:abc@gmail.com">abc@gmail.com</a>) ';
+        '<a href="mailto:abc@gmail.com"><emoji>😄</emoji>abc@gmail.com</a> ' +
+        '<a href="mailto:abc@gmail.com"><emoji>😄</emoji> abc@gmail.com</a> ';
     expect(parser.replace(testString)).toBe(result);
 });
 
@@ -1198,9 +1198,10 @@ test('Test for link with no content', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+// Replace the emoji with email link
 test('Test for link with emoji', () => {
     const testString = '[😀](www.link.com)';
-    const resultString = '[<emoji>😀</emoji>](<a href="https://www.link.com" target="_blank" rel="noreferrer noopener">www.link.com</a>)';
+    const resultString = '<a href="https://www.link.com" target="_blank" rel="noreferrer noopener"><emoji>😀</emoji></a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
