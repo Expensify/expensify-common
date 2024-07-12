@@ -996,6 +996,10 @@ export default class ExpensiMark {
             replacedText = replacedText.concat(replacedMatch);
             startIndex = match.index + match[0].length;
 
+            // Line breaks (`\n`) followed by empty contents are already removed
+            // but line breaks inside contents should be parsed to <br/> to skip `autoEmail` rule
+            replacedText = this.replace(replacedText, {filterRules: ['newline'], shouldEscapeText: false});
+
             // Now we move to the next match that the js regex found in the text
             match = regex.exec(textToCheck);
         }
