@@ -68,7 +68,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "browserify": {
     "transform": [
