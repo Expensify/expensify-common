@@ -33,11 +33,11 @@ describe('truncateHTML', () => {
 
     test('should handle HTML with nested markdown elements', () => {
         const markdown = 'This is a *long _nested_ markdown* text. It contains *_bold italic_* and ~_strikethrough italic_~ formatting. The truncation should handle the nesting correctly.';
-        const limit = 150;
+        const limit = 120;
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
         expect(result).toBe(
-            'This is a <strong>long <em>nested</em> markdown</strong> text. It contains <strong><em>bold italic</em></strong> and <del><em>strikethrough italic</em></del> formatting. The truncation should handle the nesting correctly.',
+            'This is a <strong>long <em>nested</em> markdown</strong> text. It contains <strong><em>bold italic</em></strong> and <del><em>strikethrough italic</em></del> formatting. The truncation should ...',
         );
     });
 
@@ -54,10 +54,10 @@ describe('truncateHTML', () => {
 
     test('should handle HTML with inline code', () => {
         const markdown = 'This is a text with `inline code`. The inline code should be preserved in the truncated text.';
-        const limit = 150;
+        const limit = 25;
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
-        expect(result).toBe('This is a text with <code>inline code</code>. The inline code should be preserved in the truncated text.');
+        expect(result).toBe('This is a text with <code>inlin...</code>');
     });
 
     test('should handle HTML with headings', () => {
