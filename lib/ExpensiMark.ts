@@ -42,6 +42,13 @@ type ReplaceOptions = {
     shouldKeepRawInput?: boolean;
 };
 
+type TruncateOptions = {
+    ellipsis?: string;
+    truncateLastWord?: boolean;
+    slop?: number;
+    removeImageTag?: boolean;
+};
+
 const MARKDOWN_LINK_REGEX = new RegExp(`\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 
@@ -1257,6 +1264,198 @@ export default class ExpensiMark {
         // illegal attribute value characters like `," or ' which might break the HTML
         originalContent = Str.replaceAll(originalContent, '\n', '');
         return Utils.escape(originalContent);
+    }
+
+    /**
+     * Determines the end position to truncate the HTML content while considering word boundaries.
+     *
+     * @param {string} content - The HTML content to be truncated.
+     * @param {number} tailPosition - The position up to which the content should be considered.
+     * @param {number} maxLength - The maximum length of the truncated content.
+     * @param {number} totalLength - The length of the content processed so far.
+     * @param {Object} opts - Options to customize the truncation.
+     * @returns {number} The calculated position to truncate the content.
+     */
+    getEndPosition(content: string, tailPosition: number | undefined, maxLength: number, totalLength: number, opts: TruncateOptions) {
+        const WORD_BREAK_REGEX = /\W+/g;
+
+        // Calculate the default position to truncate based on the maximum length and the length of the content processed so far
+        const defaultPosition = maxLength - totalLength;
+
+        // Define the slop value, which determines the tolerance for cutting off content near the maximum length
+        const slop = opts.slop;
+        if (!slop) return defaultPosition;
+
+        // Initialize the position to the default position
+        let position = defaultPosition;
+
+        // Determine if the default position is considered "short" based on the slop value
+        const isShort = defaultPosition < slop;
+
+        // Calculate the position within the slop range
+        const slopPos = isShort ? defaultPosition : slop - 1;
+
+        // Extract the substring to analyze for word boundaries, considering the slop and tail position
+        const substr = content.slice(isShort ? 0 : defaultPosition - slop, tailPosition !== undefined ? tailPosition : defaultPosition + slop);
+
+        // Find the first word boundary within the substring
+        const wordBreakMatch = WORD_BREAK_REGEX.exec(substr);
+
+        // Adjust the position to avoid truncating in the middle of a word if the option is enabled
+        if (!opts.truncateLastWord) {
+            if (tailPosition && substr.length <= tailPosition) {
+                // If tail position is defined and the substring length is within the tail position, set position to the substring length
+                position = substr.length;
+            } else {
+                // Iterate through word boundary matches to adjust the position
+                while (wordBreakMatch !== null) {
+                    if (wordBreakMatch.index < slopPos) {
+                        // If the word boundary is before the slop position, adjust position backward
+                        position = defaultPosition - (slopPos - wordBreakMatch.index);
+                        if (wordBreakMatch.index === 0 && defaultPosition <= 1) {
+                            break;
+                        }
+                    } else if (wordBreakMatch.index === slopPos) {
+                        // If the word boundary is at the slop position, set position to the default position
+                        position = defaultPosition;
+                        break;
+                    } else {
+                        // If the word boundary is after the slop position, adjust position forward
+                        position = defaultPosition + (wordBreakMatch.index - slopPos);
+                        break;
+                    }
+                }
+            }
+            // If the character at the determined position is a whitespace, adjust position backward
+            if (content.charAt(position - 1).match(/\s$/)) {
+                position--;
+            }
+        }
+
+        // Return the calculated position to truncate the content
+        return position;
+    }
+
+    /**
+     * Truncate HTML string and keep tag safe.
+     * pulled from https://github.com/huang47/nodejs-html-truncate/blob/master/lib/truncate.js
+     *
+     * @param {string} html - The string that needs to be truncated
+     * @param {number} maxLength - Length of truncated string
+     * @param {Object} [options] - Optional configuration options
+     * @returns {string} The truncated string
+     */
+    truncateHTML(html: string, maxLength: number, options?: TruncateOptions) {
+        const EMPTY_STRING = '';
+        const DEFAULT_TRUNCATE_SYMBOL = '...';
+        const DEFAULT_SLOP = Math.min(10, maxLength);
+        const tagsStack = [];
+        const KEY_VALUE_REGEX = '((?:\\s+(?:\\w+|-)+(?:\\s*=\\s*(?:"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|[^\'">\\s]+))?)*)';
+        const IS_CLOSE_REGEX = '\\s*\\/?\\s*';
+        const CLOSE_REGEX = '\\s*\\/\\s*';
+        const SELF_CLOSE_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
+        const HTML_TAG_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${IS_CLOSE_REGEX}>`);
+        const URL_REGEX = /(((ftp|https?):\/\/)[\\-\w@:%_\\+.~#?,&\\/\\/=]+)|((mailto:)?[_.\w\\-]+@([\w][\w\\-]+\.)+[a-zA-Z]{2,3})/g;
+        const IMAGE_TAG_REGEX = new RegExp(`<img\\s*${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
+        let truncatedContent = EMPTY_STRING;
+        let totalLength = 0;
+        let matches = HTML_TAG_REGEX.exec(html);
+        let endResult;
+        let index;
+        let tag;
+        let selfClose = null;
+        let htmlString = html;
+
+        const opts = {
+            ellipsis: DEFAULT_TRUNCATE_SYMBOL,
+            truncateLastWord: true,
+            slop: DEFAULT_SLOP,
+            ...options,
+        };
+
+        function removeImageTag(content: string): string {
+            const match = IMAGE_TAG_REGEX.exec(content);
+            if (!match) {
+                return content;
+            }
+
+            const matchIndex = match.index;
+            const matchLength = match[0].length;
+
+            return content.substring(0, matchIndex) + content.substring(matchIndex + matchLength);
+        }
+
+        function closeTags(tags: string[]): string {
+            return tags
+                .reverse()
+                .map((mappedTag) => {
+                    return `</${mappedTag}>`;
+                })
+                .join('');
+        }
+
+        while (matches) {
+            matches = HTML_TAG_REGEX.exec(htmlString);
+
+            if (!matches) {
+                if (totalLength >= maxLength) {
+                    break;
+                }
+
+                matches = URL_REGEX.exec(htmlString);
+                if (!matches || matches.index >= maxLength) {
+                    truncatedContent += htmlString.substring(0, this.getEndPosition(htmlString, undefined, maxLength, totalLength, opts));
+                    break;
+                }
+
+                while (matches) {
+                    endResult = matches[0];
+                    if (endResult !== null) {
+                        index = matches.index;
+                        truncatedContent += htmlString.substring(0, index + endResult.length - totalLength);
+                        htmlString = htmlString.substring(index + endResult.length);
+                        matches = URL_REGEX.exec(htmlString);
+                    }
+                }
+                break;
+            }
+
+            endResult = matches[0];
+            index = matches.index;
+
+            if (totalLength + index > maxLength) {
+                truncatedContent += htmlString.substring(0, this.getEndPosition(htmlString, index, maxLength, totalLength, opts));
+                break;
+            } else {
+                totalLength += index;
+                truncatedContent += htmlString.substring(0, index);
+            }
+
+            if (endResult[1] === '/') {
+                tagsStack.pop();
+                selfClose = null;
+            } else {
+                selfClose = SELF_CLOSE_REGEX.exec(endResult);
+                if (!selfClose) {
+                    tag = matches[1];
+                    tagsStack.push(tag);
+                }
+            }
+
+            truncatedContent += selfClose ? selfClose[0] : endResult;
+            htmlString = htmlString.substring(index + endResult.length); // Update htmlString
+        }
+
+        if (htmlString.length > maxLength - totalLength && opts.ellipsis) {
+            truncatedContent += opts.ellipsis ? '...' : '';
+        }
+        truncatedContent += closeTags(tagsStack);
+
+        if (opts.removeImageTag) {
+            truncatedContent = removeImageTag(truncatedContent);
+        }
+
+        return truncatedContent;
     }
 
     /**
