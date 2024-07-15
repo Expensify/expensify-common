@@ -209,6 +209,24 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     expect(parser.replace(testInput)).toBe(result);
 });
 
+test('Test markdown replacement for multiline email hyperlinks', () => {
+    let testInput = '[test\ntest](test@test.com)';
+    let result = '<a href="mailto:test@test.com">test<br />test</a>';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[test\n\n\n](test@test.com)';
+    result = '<a href="mailto:test@test.com">test</a>';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = '[test\ntest](test.com)';
+    result = '<a href="https://test.com" target="_blank" rel="noreferrer noopener">test<br />test</a>';
+    expect(parser.replace(testInput)).toBe(result);
+
+    testInput = 'test@gmail.com';
+    result = '<a href="mailto:test@gmail.com">test@gmail.com</a>';
+    expect(parser.replace(testInput)).toBe(result);
+});
+
 // Check emails within other markdown
 test('Test emails within other markdown', () => {
     const testString =
