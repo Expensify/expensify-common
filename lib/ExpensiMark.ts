@@ -812,7 +812,7 @@ export default class ExpensiMark {
      */
     replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = [], extras = EXTRAS_DEFAULT}: ReplaceOptions = {}): string {
         // This ensures that any html the user puts into the comment field shows as raw html
-        let replacedText = shouldEscapeText ? Utils.escape(text) : text;
+        let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
         const processRule = (rule: Rule) => {
@@ -838,7 +838,7 @@ export default class ExpensiMark {
             ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
 
             // We want to return text without applying rules if exception occurs during replacing
-            return shouldEscapeText ? Utils.escape(text) : text;
+            return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
         return replacedText;
@@ -1230,7 +1230,7 @@ export default class ExpensiMark {
         // When the attribute contains HTML and is converted back to MD we need to re-escape it to avoid
         // illegal attribute value characters like `," or ' which might break the HTML
         originalContent = Str.replaceAll(originalContent, '\n', '');
-        return Utils.escape(originalContent);
+        return Utils.escapeText(originalContent);
     }
 
     /**

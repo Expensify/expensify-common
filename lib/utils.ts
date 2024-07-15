@@ -24,7 +24,7 @@ const reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
  * corresponding HTML entities.
  * Source: https://github.com/lodash/lodash/blob/main/src/escape.ts
  */
-function escape(string: string): string {
+function escapeText(string: string): string {
     return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
 }
 
@@ -47,7 +47,7 @@ const reHasEscapedHtml = RegExp(reEscapedHtml.source);
  * their corresponding characters.
  * Source: https://github.com/lodash/lodash/blob/main/src/unescape.ts
  * */
-function unescape(string: string): string {
+function unescapeText(string: string): string {
     return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
 }
 
@@ -70,4 +70,4 @@ function isObject(obj: unknown): boolean {
     return type === 'function' || (!!obj && type === 'object');
 }
 
-export {isWindowAvailable, isNavigatorAvailable, escape, unescape, isFunction, isObject};
+export {isWindowAvailable, isNavigatorAvailable, escapeText, unescapeText, isFunction, isObject};

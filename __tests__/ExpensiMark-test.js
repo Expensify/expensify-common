@@ -25,7 +25,7 @@ test('Test with regex Maximum regex stack depth reached error', () => {
         throw new Error('Maximum regex stack depth reached');
     });
     expensiMarkParser.modifyTextForUrlLinks = modifyTextForUrlLinksMock;
-    expect(expensiMarkParser.replace(testString)).toBe(Utils.escape(testString));
+    expect(expensiMarkParser.replace(testString)).toBe(Utils.escapeText(testString));
     expect(modifyTextForUrlLinksMock).toHaveBeenCalledTimes(1);
 
     // Mock method extractLinksInMarkdownComment to let it return undefined to test try/catch of method ExpensiMark.extractLinksInMarkdownComment
