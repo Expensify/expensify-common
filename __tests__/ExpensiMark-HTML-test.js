@@ -26,6 +26,24 @@ test('Test bold within code blocks is skipped', () => {
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+test('Test special character plus _ ahead asterisk still result in bold', () => {
+    const testString = 'This is a !_*bold*';
+    const replacedString = 'This is a !_<strong>bold</strong>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
+test('Test a word plus _ ahead asterisk not result in bold', () => {
+    const testString = 'This is not a_*bold*';
+    const replacedString = 'This is not a_*bold*';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
+test('Test _ ahead asterisk still result in bold', () => {
+    const testString = 'This is a ~_*bold*';
+    const replacedString = 'This is a ~_<strong>bold</strong>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 test('Test heading markdown replacement', () => {
     let testString = '# Heading should not have new line after it.\n';
     expect(parser.replace(testString)).toBe('<h1>Heading should not have new line after it.</h1>');

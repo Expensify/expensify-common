@@ -468,8 +468,14 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                regex: /(?<!<[^>]*)\B\*(?![^<]*(?:<\/pre>|<\/code>|<\/a>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
-                replacement: (_extras, match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<strong>${g1}</strong>`),
+                regex: /(?<!<[^>]*)(\b_|\B)\*(?![^<]*(?:<\/pre>|<\/code>|<\/a>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
+                replacement: (_extras, match, g1, g2) => {
+                    if (g1.includes('_')) {
+                        return `${g1}<strong>${g2}</strong>`;
+                    }
+
+                    return g2.includes('</pre>') || this.containsNonPairTag(g2) ? match : `<strong>${g2}</strong>`;
+                },
             },
             {
                 name: 'strikethrough',
