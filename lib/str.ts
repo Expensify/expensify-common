@@ -107,7 +107,7 @@ const Str = {
      * @returns The escaped string
      */
     safeEscape(s: string) {
-        return Utils.escape(Utils.unescape(s));
+        return Utils.escapeText(Utils.unescapeText(s));
     },
 
     /**
