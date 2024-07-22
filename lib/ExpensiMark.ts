@@ -554,12 +554,12 @@ export default class ExpensiMark {
             // Use [\s\S]* instead of .* to match newline
             {
                 name: 'italic',
-                regex: /<(em|i)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
+                regex: /<(em|i)\b(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
                 replacement: '_$2_',
             },
             {
                 name: 'bold',
-                regex: /<(b|strong)(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
+                regex: /<(b|strong)\b(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
                 replacement: (extras, match, tagName, innerContent) => {
                     // To check if style attribute contains bold font-weight
                     const isBoldFromStyle = (style: string | null) => {
