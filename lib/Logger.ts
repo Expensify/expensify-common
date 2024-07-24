@@ -1,7 +1,7 @@
 type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>> | Error;
 type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
 type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
-type ClientLoggingCallBack = (message: string) => void;
+type ClientLoggingCallBack = (message: string, extraData: Parameters) => void;
 type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date};
 type LoggerOptions = {serverLoggingCallback: ServerLoggingCallback; isDebug: boolean; clientLoggingCallback: ClientLoggingCallBack};
 
@@ -66,7 +66,7 @@ export default class Logger {
      * @param forceFlushToServer Should we force flushing all logs to server?
      * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false) {
+    add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false, extraData: Parameters = '') {
         const length = this.logLines.push({
             message,
             parameters,
@@ -75,7 +75,7 @@ export default class Logger {
         });
 
         if (this.isDebug) {
-            this.client(`${message} - ${JSON.stringify(parameters)}`);
+            this.client(`${message} - ${JSON.stringify(parameters)}`, extraData);
         }
 
         // If we're over the limit, flush the logs
@@ -93,9 +93,9 @@ export default class Logger {
      * @param parameters The parameters to send along with the message
      * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
-    info(message: string, sendNow = false, parameters: Parameters = '', onlyFlushWithOthers = false) {
+    info(message: string, sendNow = false, parameters: Parameters = '', onlyFlushWithOthers = false, extraData: Parameters = '') {
         const msg = `[info] ${message}`;
-        this.add(msg, parameters, sendNow, onlyFlushWithOthers);
+        this.add(msg, parameters, sendNow, onlyFlushWithOthers, extraData);
     }
 
     /**
@@ -143,11 +143,11 @@ export default class Logger {
      *
      * @param message The message to log.
      */
-    client(message: string) {
+    client(message: string, extraData: Parameters = '') {
         if (!this.clientLoggingCallback) {
             return;
         }
 
-        this.clientLoggingCallback(message);
+        this.clientLoggingCallback(message, extraData);
     }
 }
