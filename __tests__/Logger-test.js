@@ -85,5 +85,5 @@ test('Test Log.hmmm()', () => {
 test('Test Log.client()', () => {
     Log.client('Test');
     expect(mockClientLoggingCallback).toHaveBeenCalled();
-    expect(mockClientLoggingCallback).toHaveBeenCalledWith('Test');
+    expect(mockClientLoggingCallback).toHaveBeenCalledWith('Test', '');
 });
