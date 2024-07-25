@@ -1,3 +1,5 @@
+'worklet';
+
 import Str from './str';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';

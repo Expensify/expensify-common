@@ -1,3 +1,5 @@
+'worklet';
+
 /** Checks if the `window` global object is available. */
 function isWindowAvailable(): boolean {
     return typeof window !== 'undefined';
