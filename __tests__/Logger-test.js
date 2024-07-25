@@ -8,6 +8,12 @@ const Log = new Logger({
     clientLoggingCallback: mockClientLoggingCallback,
 });
 
+const DebugLog = new Logger({
+    serverLoggingCallback: mockServerLoggingCallback,
+    clientLoggingCallback: mockClientLoggingCallback,
+    isDebug: true,
+});
+
 test('Test Log.info()', () => {
     Log.info('Test1', false);
     expect(mockServerLoggingCallback).toHaveBeenCalledTimes(0);
@@ -24,9 +30,14 @@ test('Test Log.info()', () => {
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
-        {message: "[info] Test1", parameters: "", },
-        {message: "[info] Test2", parameters: "", },
+        {message: "[info] Test1", parameters: "",},
+        {message: "[info] Test2", parameters: "",},
     ]);
+
+    // Test the case where `isDebug` is `true` in `Log` instance and we pass `extraData` parameter
+    DebugLog.info('Test2', false, {test: 'test'}, false, {test: 'test'});
+    expect(mockServerLoggingCallback).toHaveBeenCalled();
+    expect(mockClientLoggingCallback).toHaveBeenCalledWith('[info] Test2 - {"test":"test"}', {test: 'test'});
 });
 
 test('Test Log.alert()', () => {
