@@ -1,3 +1,5 @@
+'worklet';
+
 /* eslint-disable no-control-regex */
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
