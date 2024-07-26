@@ -891,3 +891,23 @@ describe('Video tag conversion to markdown', () => {
         expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
     })
 })
+
+describe('Tag names starting with common charaters', () => {
+    test('Italic and emoji', () => {
+        const testString = '<emoji>😄</emoji> <em>italic</em>';
+        const resultString = '😄 _italic_';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+
+    test('Blockquote and bold', () => {
+        const testString = '<blockquote> quote <b>bold</b></blockquote>';
+        const resultString = '> quote *bold*';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+
+    test('Line break and bold', () => {
+        const testString = '<br/><b>bold</b>';
+        const resultString = '\n*bold*';
+        expect(parser.htmlToMarkdown(testString)).toBe(resultString);
+    });
+});
