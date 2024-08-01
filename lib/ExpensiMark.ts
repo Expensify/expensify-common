@@ -157,6 +157,30 @@ export default class ExpensiMark {
             },
 
             /**
+             * Converts markdown style video to video tags e.g. ![Expensify](https://www.expensify.com/attachment.mp4)
+             * We need to convert before image rules since they will not try to create a image tag from an existing video URL
+             * Extras arg could contain the attribute cache for the video tag which is cached during the html-to-markdown conversion
+             */
+            {
+                name: 'video',
+                regex: MARKDOWN_VIDEO_REGEX,
+                /**
+                 * @param extras - The extras object
+                 * @param videoName - The first capture group - video name
+                 * @param videoSource - The second capture group - video URL
+                 * @return Returns the HTML video tag
+                 */
+                replacement: (extras, _match, videoName, videoSource) => {
+                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
+                },
+                rawInputReplacement: (extras, _match, videoName, videoSource) => {
+                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
+                },
+            },
+
+            /**
              * Apply inline code-block to avoid applying any other formatting rules inside of it,
              * like we do for the multi-line code-blocks
              */
@@ -166,7 +190,7 @@ export default class ExpensiMark {
                 // Use the url escaped version of a backtick (`) symbol. Mobile platforms do not support lookbehinds,
                 // so capture the first and third group and place them in the replacement.
                 // but we should not replace backtick symbols if they include <pre> tags between them.
-                regex: /(\B|_|)&#x60;(.*?(?![&#x60;])\S.*?)&#x60;(\B|_|)(?!&#x60;|[^<]*<\/pre>)/gm,
+                regex: /(\B|_|)&#x60;(.*?(?![&#x60;])\S.*?)&#x60;(\B|_|)(?!&#x60;|[^<]*<\/pre>|[^<]*<\/video>)/gm,
                 replacement: '$1<code>$2</code>$3',
             },
 
@@ -204,34 +228,10 @@ export default class ExpensiMark {
             {
                 name: 'heading1',
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|\n|\r\n).)+)/gm;
+                    const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|<video>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|<video>|\n|\r\n).)+)/gm;
                     return this.replaceTextWithExtras(textToProcess, regexp, EXTRAS_DEFAULT, replacement);
                 },
                 replacement: '<h1>$1</h1>',
-            },
-
-            /**
-             * Converts markdown style video to video tags e.g. ![Expensify](https://www.expensify.com/attachment.mp4)
-             * We need to convert before image rules since they will not try to create a image tag from an existing video URL
-             * Extras arg could contain the attribute cache for the video tag which is cached during the html-to-markdown conversion
-             */
-            {
-                name: 'video',
-                regex: MARKDOWN_VIDEO_REGEX,
-                /**
-                 * @param extras - The extras object
-                 * @param videoName - The first capture group - video name
-                 * @param videoSource - The second capture group - video URL
-                 * @return Returns the HTML video tag
-                 */
-                replacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
-                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
-                },
-                rawInputReplacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
-                    return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
-                },
             },
 
             /**
@@ -373,9 +373,9 @@ export default class ExpensiMark {
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]+)/gm;
+                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]+)/gm;
                     if (shouldKeepRawInput) {
-                        const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>))([^\v\n\r]*)/gm;
+                        const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
                         return this.replaceTextWithExtras(textToProcess, rawInputRegex, EXTRAS_DEFAULT, replacement);
                     }
                     return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
@@ -434,9 +434,9 @@ export default class ExpensiMark {
              */
             {
                 name: 'italic',
-                regex: /(<(pre|code|a|mention-user)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>)))/g,
+                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
                 replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
-                    // Skip any <pre>, <code>, <a>, <mention-user> tag contents
+                    // Skip any <pre>, <code>, <a>, <mention-user>, <video> tag contents
                     if (html) {
                         return html;
                     }
@@ -470,7 +470,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                regex: /(?<!<[^>]*)(\b_|\B)\*(?![^<]*(?:<\/pre>|<\/code>|<\/a>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
+                regex: /(?<!<[^>]*)(\b_|\B)\*(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -481,7 +481,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>))/g,
+                regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
