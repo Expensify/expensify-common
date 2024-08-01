@@ -2078,6 +2078,25 @@ describe('Video markdown conversion to html tag', () => {
         expect(parser.replace(testString)).toBe(resultString);
     });
 
+    test('with alt text containing markdown', () => {
+        const testString = '![# fake-heading *bold* _italic_ ~strike~ [:-)]](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" ># fake-heading *bold* _italic_ ~strike~ [:-)]</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('inline code in alt', () => {
+        const testString = '![`code`](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" >&#x60;code&#x60;</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('blockquote in alt', () => {
+        const testString = '![```test```](https://example.com/video.mp4)';
+        const resultString = '<video data-expensify-source="https://example.com/video.mp4" >&#x60;&#x60;&#x60;test&#x60;&#x60;&#x60;</video>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+
 })
 
 describe('Image markdown conversion to html tag', () => {
