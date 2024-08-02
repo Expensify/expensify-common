@@ -37,7 +37,7 @@ const htmlUnescapes = {
     '&quot;': '"',
     '&#x27;': "'",
     '&#x60;': '`',
-    '&#32': ' ',
+    '&#32;': ' ',
 };
 
 const reEscapedHtml = /&(?:amp|lt|gt|quot|#(x27|x60|32));/g;
