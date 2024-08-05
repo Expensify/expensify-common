@@ -261,13 +261,13 @@ export default class ExpensiMark {
                     if (!g1.trim()) {
                         return match;
                     }
-                    return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;
+                    return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1}</a>`;
                 },
                 rawInputReplacement: (_extras, match, g1, g2) => {
                     if (!g1.trim()) {
                         return match;
                     }
-                    return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;
+                    return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1}</a>`;
                 },
             },
 
@@ -298,10 +298,9 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
 
-                regex: /(?<![^ \n*~_])(#[\p{Ll}0-9-]{1,80})(?![^<]*(?:<\/pre>|<\/code>))/gimu,
-                replacement: '<mention-report>$1</mention-report>',
+                regex: /(?<![^ \n*~_])(#[\p{Ll}0-9-]{1,80})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
+                replacement: '<mention-report>$1</mention-report>'
             },
-
             /**
              * This regex matches a valid user mention in a string.
              * A user mention is a string that starts with the '@' symbol and is followed by a valid user's primary
