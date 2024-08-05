@@ -389,8 +389,7 @@ test('Test critical markdown style links', () => {
         '[link with [brackets] inside of it](https://google.com) ' +
         '[link with smart quotes ‘’“”](https://google.com) ' +
         '[link with someone@expensify.com email in it](https://google.com)' +
-        '[Localhost](http://a:3030)' + 
-        '[ name with rear spaces ](https://example.com)';
+        '[Localhost](http://a:3030)';
     const resultString =
         'Testing ' +
         '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener"><del>strikethrough</del> <strong>bold</strong> <em>italic</em></a> ' +
@@ -408,8 +407,7 @@ test('Test critical markdown style links', () => {
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with [brackets] inside of it</a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with smart quotes ‘’“”</a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with someone@expensify.com email in it</a>' +
-        '<a href="http://a:3030" target="_blank" rel="noreferrer noopener">Localhost</a>' +
-        '<a href="https://example.com" target="_blank" rel="noreferrer noopener"> name with rear spaces </a>';
+        '<a href="http://a:3030" target="_blank" rel="noreferrer noopener">Localhost</a>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1034,12 +1032,18 @@ test('Test markdown and url links with inconsistent starting and closing parens'
         '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link [square brackets within] here</a>)' +
         '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link (parenthesis within) here</a>)' +
         '[Text text] more text <a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>' +
-        '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here  </a>)' +
+        '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)' +
         '[Text text] more text ((<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>))' +
         '[Text text] more text [(<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)]' +
         '[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)[Text text] more text (<a href="https://www.google.com" target="_blank" rel="noreferrer noopener">link here</a>)';
 
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test link: Keep spaces at both end for shouldKeepRawInput=true', () => {
+    const testString = '[ link ](https://www.expensify.com)';
+    const resultString = '<a href=\"https://www.expensify.com\" data-raw-href=\"https://www.expensify.com\" data-link-variant=\"labeled\" target=\"_blank\" rel=\"noreferrer noopener\"> link </a>';
+    expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
 });
 
 test('Test autolink replacement to avoid parsing nested links', () => {
@@ -2272,7 +2276,7 @@ describe('room mentions', () => {
 
     test('room mention with space inside link should not be rendered', () => {
         const testString = '[ #room](google.com/sub#111)';
-        const resultString = '<a href="https://google.com/sub#111" target="_blank" rel="noreferrer noopener"> #room</a>';
+        const resultString = '<a href="https://google.com/sub#111" target="_blank" rel="noreferrer noopener">#room</a>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 

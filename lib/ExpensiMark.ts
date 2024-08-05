@@ -261,7 +261,7 @@ export default class ExpensiMark {
                     if (!g1.trim()) {
                         return match;
                     }
-                    return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1}</a>`;
+                    return `<a href="${Str.sanitizeURL(g2)}" target="_blank" rel="noreferrer noopener">${g1.trim()}</a>`;
                 },
                 rawInputReplacement: (_extras, match, g1, g2) => {
                     if (!g1.trim()) {
