@@ -301,6 +301,7 @@ export default class ExpensiMark {
                 regex: /(?<![^ \n*~_])(#[\p{Ll}0-9-]{1,80})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
                 replacement: '<mention-report>$1</mention-report>',
             },
+
             /**
              * This regex matches a valid user mention in a string.
              * A user mention is a string that starts with the '@' symbol and is followed by a valid user's primary
