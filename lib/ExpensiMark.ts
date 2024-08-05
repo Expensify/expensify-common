@@ -299,7 +299,7 @@ export default class ExpensiMark {
                 name: 'reportMentions',
 
                 regex: /(?<![^ \n*~_])(#[\p{Ll}0-9-]{1,80})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
-                replacement: '<mention-report>$1</mention-report>'
+                replacement: '<mention-report>$1</mention-report>',
             },
             /**
              * This regex matches a valid user mention in a string.
