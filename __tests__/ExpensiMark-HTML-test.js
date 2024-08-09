@@ -1040,6 +1040,12 @@ test('Test markdown and url links with inconsistent starting and closing parens'
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test link: Keep spaces at both end for shouldKeepRawInput=true', () => {
+    const testString = '[ link ](https://www.expensify.com)';
+    const resultString = '<a href=\"https://www.expensify.com\" data-raw-href=\"https://www.expensify.com\" data-link-variant=\"labeled\" target=\"_blank\" rel=\"noreferrer noopener\"> link </a>';
+    expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+});
+
 test('Test autolink replacement to avoid parsing nested links', () => {
     const testString =
         '[click google.com *here*](google.com) ' +
