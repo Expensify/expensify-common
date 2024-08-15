@@ -352,7 +352,7 @@ export default class ExpensiMark {
                 name: 'autolink',
 
                 process: (textToProcess, replacement) => {
-                    const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|.+\\/>))`, 'gi');
+                    const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
                     return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn);
                 },
 
