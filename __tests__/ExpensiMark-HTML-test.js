@@ -2137,9 +2137,9 @@ describe('Image markdown conversion to html tag', () => {
     });
 
     test('Text containing image and autolink', () => {
-        const testString = 'An image of a banana: ![banana](https://example.com/banana.png) an autolink: example.com';
+        const testString = 'An autolink: example.com before an image of a banana: ![banana](https://example.com/banana.png), another autolink: example.com after the image';
         const resultString =
-            'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> an autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a>';
+            'An autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a> before an image of a banana: <img src="https://example.com/banana.png" alt="banana" />, another autolink: <a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a> after the image';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
