@@ -576,7 +576,7 @@ export default class ExpensiMark {
                     };
 
                     // Determine if the outer tag is bold
-                    const fontWeightRegex = /style="([^"]*?\bfont-weight:\s*(\d+|bold|normal)[^"]*?)"/
+                    const fontWeightRegex = /style="([^"]*?\bfont-weight:\s*(\d+|bold|normal)[^"]*?)"/;
                     const styleAttributeMatch = match.match(fontWeightRegex);
                     const isFontWeightBold = isBoldFromStyle(styleAttributeMatch ? styleAttributeMatch[1] : null);
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
