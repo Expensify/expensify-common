@@ -576,13 +576,14 @@ export default class ExpensiMark {
                     };
 
                     // Determine if the outer tag is bold
-                    const styleAttributeMatch = match.match(/style="(.*?)"/);
+                    const fontWeightRegex = /style="([^"]*?\bfont-weight:\s*(\d+|bold|normal)[^"]*?)"/
+                    const styleAttributeMatch = match.match(fontWeightRegex);
                     const isFontWeightBold = isBoldFromStyle(styleAttributeMatch ? styleAttributeMatch[1] : null);
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
 
                     // Process nested spans with potential bold style
                     const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
-                        const nestedStyleMatch = nestedMatch.match(/style="(.*?)"/);
+                        const nestedStyleMatch = nestedMatch.match(fontWeightRegex);
                         const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
                         return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
                     });
