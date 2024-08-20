@@ -7,10 +7,12 @@ test('Test bold HTML replacement', () => {
     const boldTestStartString = 'This is a <strong>sentence,</strong> and it has some <strong>punctuation, words, and spaces</strong>. '
         + '<strong>test</strong> * testing* test*test*test. * testing * *testing * '
         + 'This is a <b>sentence,</b> and it has some <b>punctuation, words, and spaces</b>. '
+        + 'This is a <b style="font-size: 20px;">bold sentence with style</b> '
         + '<b>test</b> * testing* test*test*test. * testing * *testing *';
     const boldTestReplacedString = 'This is a *sentence,* and it has some *punctuation, words, and spaces*. '
         + '*test* * testing* test*test*test. * testing * *testing * '
         + 'This is a *sentence,* and it has some *punctuation, words, and spaces*. '
+        + 'This is a *bold sentence with style* '
         + '*test* * testing* test*test*test. * testing * *testing *';
 
     expect(parser.htmlToMarkdown(boldTestStartString)).toBe(boldTestReplacedString);
