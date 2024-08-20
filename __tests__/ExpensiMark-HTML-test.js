@@ -1219,6 +1219,24 @@ test('Test for backticks with suffix', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for backticks with an escaped backtick character inside it', () => {
+    const testString = 'a `;` abc `:` a';
+    const resultString = 'a <code>;</code> abc <code>:</code> a';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for backticks with an escaped backtick character inside it without prefix and suffix', () => {
+    const testString = '`#` abc `:`';
+    const resultString = '<code>#</code> abc <code>:</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for backticks with complete escaped backtick characters inside it', () => {
+    const testString = 'a `&` b `#` c `x` d `6` e `0` f `;` g `test` h';
+    const resultString = 'a <code>&amp;</code> b <code>#</code> c <code>x</code> d <code>6</code> e <code>0</code> f <code>;</code> g <code>test</code> h';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 // Backticks with no content are not replaced with <code>
 test('Test for backticks with no content', () => {
     const testString = '`   `';
