@@ -190,8 +190,8 @@ export default class ExpensiMark {
                 // Use the url escaped version of a backtick (`) symbol. Mobile platforms do not support lookbehinds,
                 // so capture the first and third group and place them in the replacement.
                 // but we should not replace backtick symbols if they include <pre> tags between them.
-                regex: /(\B|_|)&#x60;(.*?(?![&#x60;])\S.*?)&#x60;(\B|_|)(?!&#x60;|[^<]*<\/pre>|[^<]*<\/video>)/gm,
-                replacement: '$1<code>$2</code>$3',
+                regex: /(\B|_|)&#x60;((?:&#x60;)*)(?!&#x60;)(.*?\S+?.*?)(?<!&#x60;)((?:&#x60;)*)(&#x60;)(\B|_|)(?!&#x60;|[^<]*<\/pre>|[^<]*<\/video>)/gm,
+                replacement: '$1<code>$2$3$4</code>$6',
             },
 
             /**
@@ -576,13 +576,14 @@ export default class ExpensiMark {
                     };
 
                     // Determine if the outer tag is bold
-                    const styleAttributeMatch = match.match(/style="(.*?)"/);
+                    const fontWeightRegex = /style="([^"]*?\bfont-weight:\s*(\d+|bold|normal)[^"]*?)"/;
+                    const styleAttributeMatch = match.match(fontWeightRegex);
                     const isFontWeightBold = isBoldFromStyle(styleAttributeMatch ? styleAttributeMatch[1] : null);
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
 
                     // Process nested spans with potential bold style
                     const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
-                        const nestedStyleMatch = nestedMatch.match(/style="(.*?)"/);
+                        const nestedStyleMatch = nestedMatch.match(fontWeightRegex);
                         const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
                         return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
                     });
