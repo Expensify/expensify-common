@@ -403,6 +403,7 @@ const CONST = {
         CLOUDFRONT_FILES: 'https://d2k5nsl2zxldvw.cloudfront.net/files/',
         EXPENSIFY_SYNC_MANAGER: 'quickbooksdesktop/Expensify_QuickBooksDesktop_Setup_2300802.exe',
         USEDOT_ROOT: 'https://use.expensify.com/',
+        HELPDOT_ROOT: 'https://help.expensify.com/',
         ITUNES_SUBSCRIPTION: 'https://buy.itunes.apple.com/WebObjects/MZFinance.woa/wa/manageSubscriptions',
     },
 
