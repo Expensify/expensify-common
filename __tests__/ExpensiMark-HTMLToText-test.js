@@ -164,7 +164,6 @@ test('Mention user html to text', () => {
     extras.accountIDToName['1234'] = '+251924892738@expensify.sms';  
     testString = '<mention-user accountID="1234"/>';
     expect(parser.htmlToText(testString, extras)).toBe('@+251924892738');
-
 });
 
 test('Mention report html to text', () => {
