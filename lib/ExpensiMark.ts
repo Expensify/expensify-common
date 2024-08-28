@@ -780,7 +780,7 @@ export default class ExpensiMark {
                         ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
                         return '@Hidden';
                     }
-                    return `@${extras.accountIDToName?.[g1]}`;
+                    return `@${Str.removeSMSDomain(extras.accountIDToName?.[g1] ?? '')}`;
                 },
             },
             {
