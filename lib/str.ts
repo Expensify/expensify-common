@@ -994,6 +994,7 @@ const Str = {
      * without query parameters
      */
     getExtension(url: string): string | undefined {
+        if (typeof url !== 'string') return undefined;
         return url.split('.').pop()?.split('?')[0]?.toLowerCase();
     },
 
