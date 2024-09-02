@@ -215,3 +215,19 @@ describe('Str.isValidE164Phone', () => {
         expect(Str.isValidE164Phone('+14404589784')).toBeTruthy();
     });
 });
+
+describe('Str.getExtension', () => {
+    it('Correctly returns extension', () => {
+        expect(Str.getExtension(buildTestURLForType('pdf'))).toBeTruthy();
+        expect(Str.getExtension(buildTestURLForType('PDF'))).toBeTruthy();
+        expect(Str.getExtension(buildTestURLForType('mov'))).toBeTruthy();
+        expect(Str.getExtension(buildTestURLForType('MP4'))).toBeTruthy();
+    });
+
+    it('Returns undefined for data types other than string', () => {
+        expect(Str.getExtension(0)).toBeUndefined();
+        expect(Str.getExtension(null)).toBeUndefined();
+        expect(Str.getExtension(undefined)).toBeUndefined();
+        expect(Str.getExtension([])).toBeUndefined();
+    });
+});
