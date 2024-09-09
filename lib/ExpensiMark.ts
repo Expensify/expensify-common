@@ -190,7 +190,7 @@ export default class ExpensiMark {
                 // Use the url escaped version of a backtick (`) symbol. Mobile platforms do not support lookbehinds,
                 // so capture the first and third group and place them in the replacement.
                 // but we should not replace backtick symbols if they include <pre> tags between them.
-                // At least one non-whitespace character or a specific whitespace character (" " and "\u00A0") 
+                // At least one non-whitespace character or a specific whitespace character (" " and "\u00A0")
                 // must be present inside the backticks.
                 regex: /(\B|_|)&#x60;((?:&#x60;)*(?!&#x60;).*?[\S| |\u00A0]+?.*?(?<!&#x60;)(?:&#x60;)*)&#x60;(\B|_|)(?!&#x60;|[^<]*<\/pre>|[^<]*<\/video>)/gm,
                 replacement: (_extras, _match, g1, g2, g3) => {
