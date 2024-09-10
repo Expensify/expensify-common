@@ -194,7 +194,8 @@ export default class ExpensiMark {
                 // must be present inside the backticks.
                 regex: /(\B|_|)&#x60;((?:&#x60;)*(?!&#x60;).*?[\S| |\u00A0]+?.*?(?<!&#x60;)(?:&#x60;)*)&#x60;(\B|_|)(?!&#x60;|[^<]*<\/pre>|[^<]*<\/video>)/gm,
                 replacement: (_extras, _match, g1, g2, g3) => {
-                    return `${g1}<code>${g2.replaceAll(' ', '&nbsp;')}</code>${g3}`;
+                    const g2Value = g2.trim() === '' ? g2.replaceAll(' ', '&nbsp;') : g2;
+                    return `${g1}<code>${g2Value}</code>${g3}`;
                 },
             },
 

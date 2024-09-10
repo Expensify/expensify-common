@@ -79,7 +79,7 @@ test('Test italic markdown replacement', () => {
     const italicTestStartString = 'Note that _this is correctly italicized_\n' + 'Note that `_this is correctly not italicized_` and _following inline contents are italicized_';
 
     const italicTestReplacedString =
-        'Note that <em>this is correctly italicized</em><br />' + 'Note that <code>_this&nbsp;is&nbsp;correctly&nbsp;not&nbsp;italicized_</code> and <em>following inline contents are italicized</em>';
+        'Note that <em>this is correctly italicized</em><br />' + 'Note that <code>_this is correctly not italicized_</code> and <em>following inline contents are italicized</em>';
 
     expect(parser.replace(italicTestStartString)).toBe(italicTestReplacedString);
 });
@@ -402,7 +402,7 @@ test('Test critical markdown style links', () => {
         '<a href="https://necolas.github.io/react-native-web/docs/?path=/docs/components-pressable--disabled" target="_blank" rel="noreferrer noopener">second no http://</a> ' +
         '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">third</a> ' +
         '<a href="https://github.com/Expensify/Expensify.cash/issues/123#:~:text=Please%20work/Expensify.cash" target="_blank" rel="noreferrer noopener">third no https://</a> ' +
-        '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link <code>[inside&nbsp;another&nbsp;link](https://google.com)</code></a> ' +
+        '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link <code>[inside another link](https://google.com)</code></a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with an @ in it</a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with [brackets] inside of it</a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">link with smart quotes ‘’“”</a> ' +
@@ -499,7 +499,7 @@ test('Test inline code with multiple backtick symbols as content', () => {
 
 test('Test inline code blocks with ExpensiMark syntax inside', () => {
     const inlineCodeStartString = '`This is how you can write ~strikethrough~, *bold*, and _italics_`';
-    expect(parser.replace(inlineCodeStartString)).toBe('<code>This&nbsp;is&nbsp;how&nbsp;you&nbsp;can&nbsp;write&nbsp;~strikethrough~,&nbsp;*bold*,&nbsp;and&nbsp;_italics_</code>');
+    expect(parser.replace(inlineCodeStartString)).toBe('<code>This is how you can write ~strikethrough~, *bold*, and _italics_</code>');
 });
 
 test('Test inline code blocks inside ExpensiMark', () => {
@@ -1260,7 +1260,7 @@ test('Test for backticks with only space characters as content', () => {
 // Code-fence with spaces as content
 test('Test for inline code block with triple backtick with spaces as content', () => {
     const testString = '```   ```';
-    const resultString = '<code>&#x60;&#x60;&nbsp;&nbsp;&nbsp;&#x60;&#x60;</code>';
+    const resultString = '<code>&#x60;&#x60;   &#x60;&#x60;</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1417,7 +1417,7 @@ test('Test for user mention with text with codefence style', () => {
 
 test('Test for user mention with text with inlineCodeBlock style', () => {
     const testString = '`hi @username@expensify.com`';
-    const resultString = '<code>hi&nbsp;@username@expensify.com</code>';
+    const resultString = '<code>hi @username@expensify.com</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
