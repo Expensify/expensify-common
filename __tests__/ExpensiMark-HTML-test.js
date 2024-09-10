@@ -1243,17 +1243,24 @@ test('Test for backticks with complete escaped backtick characters inside it', (
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-// Backticks with no content are not replaced with <code>
-test('Test for backticks with no content', () => {
-    const testString = '`   `';
-    const resultString = '&#x60;   &#x60;';
+// Backticks with only tab characters inside it are not replaced with <code>
+test('Test for backticks only tab characters inside it', () => {
+    const testString = '`\u0009`';
+    const resultString = '&#x60;\u0009&#x60;';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-// Code-fence with no content is not replaced with <pre>
-test('Test for codefence with no content', () => {
+// Backticks with only space characters are replaced with <code>
+test('Test for backticks with only space characters as content', () => {
+    const testString = '`  `';
+    const resultString = '<code>&nbsp;&nbsp;</code>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+// Code-fence with spaces as content
+test('Test for inline code block with triple backtick with spaces as content', () => {
     const testString = '```   ```';
-    const resultString = '&#x60;&#x60;&#x60;   &#x60;&#x60;&#x60;';
+    const resultString = '<code>&#x60;&#x60;   &#x60;&#x60;</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
