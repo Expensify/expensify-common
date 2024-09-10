@@ -6,6 +6,7 @@ import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
 import * as Utils from './utils';
+import Log from './Log';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
@@ -994,7 +995,10 @@ const Str = {
      * without query parameters
      */
     getExtension(url: string): string | undefined {
-        if (typeof url !== 'string') return undefined;
+        if (typeof url !== 'string') {
+            Log.warn('Str.getExtension: url is not a string', {url});
+            return undefined;
+        }
         return url.split('.').pop()?.split('?')[0]?.toLowerCase();
     },
 
