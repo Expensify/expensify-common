@@ -3,7 +3,7 @@
  * WIP, This is in the process of migration from web-e. Please add methods to this as is needed.|
  * ----------------------------------------------------------------------------------------------
  */
-import {once} from 'lodash';
+import once from 'lodash/once';
 import * as Utils from './utils';
 import * as Func from './Func';
 

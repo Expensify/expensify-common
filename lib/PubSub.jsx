@@ -1,5 +1,5 @@
 import has from 'lodash/has';
-import {once} from 'lodash';
+import once from 'lodash/once';
 import Log from './Log';
 import * as Utils from './utils';
 
