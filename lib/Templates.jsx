@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import {template as createTemplate} from 'lodash';
+import createTemplate from 'lodash/template';
 import * as Utils from './utils';
 
 /**
