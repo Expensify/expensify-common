@@ -249,9 +249,14 @@ export default class ExpensiMark {
             {
                 name: 'image',
                 regex: MARKDOWN_IMAGE_REGEX,
-                replacement: (_extras, _match, g1, g2) => `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} />`,
-                rawInputReplacement: (_extras, _match, g1, g2) =>
-                    `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} data-raw-href="${g2}" data-link-variant="${typeof g1 === 'string' ? 'labeled' : 'auto'}" />`,
+                replacement: (extras, _match, imgAlt, imgSource) => {
+                    const extraAttrs = extras && extras.mediaAttributeCache && extras.mediaAttributeCache[imgSource];
+                    return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} ${extraAttrs || ''}/>`;
+                },
+                rawInputReplacement: (extras, _match, imgAlt, imgSource) => {
+                    const extraAttrs = extras && extras.mediaAttributeCache && extras.mediaAttributeCache[imgSource];
+                    return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
+                },
             },
 
             /**
@@ -891,6 +896,7 @@ export default class ExpensiMark {
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
+
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);

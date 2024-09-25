@@ -2220,6 +2220,18 @@ describe('Image markdown conversion to html tag', () => {
             '<img src="https://example.com/image.png" alt="&#x60;&#x60;&#x60;code&#x60;&#x60;&#x60;" data-raw-href="https://example.com/image.png" data-link-variant="labeled" />';
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
+
+    test('Single image with extra cached attribues', () => {
+        const testString = '![test](https://example.com/image.jpg)';
+        const resultString = '<img src="https://example.com/image.jpg" alt="test" data-expensify-height="100" data-expensify-width="100"/>';
+        expect(parser.replace(testString, {
+            extras: {
+                mediaAttributeCache: {
+                    'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"'
+                }
+            }
+        })).toBe(resultString);
+    })
 });
 
 describe('room mentions', () => {
