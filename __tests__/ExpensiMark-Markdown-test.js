@@ -867,6 +867,18 @@ describe('Image tag conversion to markdown', () => {
         const resultString = '![```code```](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
+
+    test('Cache extra attributes for img', () => {
+        const cacheMediaAttributes = jest.fn();
+        const testString = '<img src="https://example.com/image.png" alt="altText" data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source" />';
+        const resultString = '![altText](https://example.com/image.png)';
+        const extras = {
+            cacheMediaAttributes,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(cacheMediaAttributes).toHaveBeenCalledWith("https://example.com/image.png", 'data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source"')
+    });
+
 });
 
 describe('Video tag conversion to markdown', () => {
@@ -883,14 +895,14 @@ describe('Video tag conversion to markdown', () => {
     })
 
     test('While convert video, cache some extra attributes from the video tag', () => {
-        const cacheVideoAttributes = jest.fn();
+        const cacheMediaAttributes = jest.fn();
         const testString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg">video</video>';
         const resultString = '![video](https://example.com/video.mp4)';
         const extras = {
-            cacheVideoAttributes,
+            cacheMediaAttributes,
         };
         expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
-        expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
+        expect(cacheMediaAttributes).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
     })
 })
 

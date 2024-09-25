@@ -9,8 +9,8 @@ import * as Utils from './utils';
 type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
-    cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
-    videoAttributeCache?: Record<string, string>;
+    cacheMediaAttributes?: (mediaSource: string, attrs: string) => void;
+    mediaAttributeCache?: Record<string, string>;
 };
 const EXTRAS_DEFAULT = {};
 
@@ -171,11 +171,11 @@ export default class ExpensiMark {
                  * @return Returns the HTML video tag
                  */
                 replacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    const extraAttrs = extras && extras.mediaAttributeCache && extras.mediaAttributeCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
                 rawInputReplacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    const extraAttrs = extras && extras.mediaAttributeCache && extras.mediaAttributeCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
             },
@@ -658,13 +658,37 @@ export default class ExpensiMark {
 
             {
                 name: 'image',
-                regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(?:[^><]*alt\s*=\s*(['"])(.*?)\3)?[^><]*>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
-                replacement: (_extras, _match, _g1, g2, _g3, g4) => {
-                    if (g4) {
-                        return `![${g4}](${g2})`;
+                regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(.*?)>(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
+                /**
+                 * @param extras - The extras object
+                 * @param match - The full match
+                 * @param _g1 - The first capture group (the quote)
+                 * @param imgSource - The second capture group - src attribute value
+                 * @param imgAttrs - The third capture group - any attributes after src
+                 * @returns The markdown image tag
+                 */
+                replacement: (extras, _match, _g1, imgSource, imgAttrs) => {
+                    // Extract alt attribute from imgAttrs
+                    let altText = '';
+                    const altRegex = /alt\s*=\s*(['"])(.*?)\1/i;
+                    const altMatch = imgAttrs.match(altRegex);
+                    let attributes = '';
+                    if (altMatch) {
+                        altText = altMatch[2];
+                        // Remove the alt attribute from imgAttrs
+                        attributes = imgAttrs.replace(altRegex, '');
                     }
-
-                    return `!(${g2})`;
+                    // Remove trailing slash and extra whitespace
+                    attributes = attributes.replace(/\s*\/\s*$/, '').trim();
+                    // Cache attributes without alt and trailing slash
+                    if (imgAttrs && extras && extras.cacheMediaAttributes && typeof extras.cacheMediaAttributes === 'function') {
+                        extras.cacheMediaAttributes(imgSource, attributes);
+                    }
+                    // Return the markdown image tag
+                    if (altText) {
+                        return `![${altText}](${imgSource})`;
+                    }
+                    return `!(${imgSource})`;
                 },
             },
 
@@ -681,8 +705,8 @@ export default class ExpensiMark {
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
-                    if (videoAttrs && extras && extras.cacheVideoAttributes && typeof extras.cacheVideoAttributes === 'function') {
-                        extras.cacheVideoAttributes(videoSource, videoAttrs);
+                    if (videoAttrs && extras && extras.cacheMediaAttributes && typeof extras.cacheMediaAttributes === 'function') {
+                        extras.cacheMediaAttributes(videoSource, videoAttrs);
                     }
                     if (videoName) {
                         return `![${videoName}](${videoSource})`;

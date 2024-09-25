@@ -2102,7 +2102,7 @@ describe('Video markdown conversion to html tag', () => {
         const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-height="100" data-expensify-width="100">test</video>';
         expect(parser.replace(testString, {
             extras: {
-                videoAttributeCache: {
+                mediaAttributeCache: {
                     'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"'
                 }
             }
