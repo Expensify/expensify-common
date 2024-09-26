@@ -19,7 +19,15 @@ type Extras = {
      * @deprecated Replaced with mediaAttributeCache
      */
     videoAttributeCache?: Record<string, string>;
+    /**
+     * Function used to cache HTML tag attributes during conversion to and from Markdown
+     * @param mediaSource URI to media source
+     * @param attrs Additional attributes to be cached
+     */
     mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
+    /**
+     * Key/value cache for HTML tag attributes, where the key is media source URI, value is cached attributes
+     */
     mediaAttributeCache?: Record<string, string>;
 };
 const EXTRAS_DEFAULT = {};
