@@ -30,6 +30,8 @@ type Extras = {
      */
     mediaAttributeCache?: Record<string, string>;
 };
+export type {Extras};
+
 const EXTRAS_DEFAULT = {};
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
@@ -83,7 +85,7 @@ export default class ExpensiMark {
 
     getAttributeCache = (extras?: Extras) => {
         if (!extras) {
-            return { attrCachingFn: undefined, attrCache: undefined };
+            return {attrCachingFn: undefined, attrCache: undefined};
         }
 
         return {

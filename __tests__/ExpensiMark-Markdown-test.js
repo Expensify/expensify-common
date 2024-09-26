@@ -926,7 +926,7 @@ describe('Video tag conversion to markdown', () => {
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     })
 
-    test('While convert video, cache some extra attributes from the video tag', () => {
+    test('Video with extra attributes to be cached with cacheVideoAttributes', () => {
         const cacheVideoAttributes = jest.fn();
         const testString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg">video</video>';
         const resultString = '![video](https://example.com/video.mp4)';
@@ -935,6 +935,17 @@ describe('Video tag conversion to markdown', () => {
         };
         expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
         expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
+    })
+
+    test('Video with extra attributes to be cached with mediaAttributeCachingFn', () => {
+        const mediaAttributeCachingFn = jest.fn();
+        const testString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg">video</video>';
+        const resultString = '![video](https://example.com/video.mp4)';
+        const extras = {
+            mediaAttributeCachingFn,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(mediaAttributeCachingFn).toHaveBeenCalledWith("https://example.com/video.mp4", ' data-expensify-width="100" data-expensify-height="500" data-expensify-thumbnail-url="https://image.com/img.jpg"')
     })
 })
 
