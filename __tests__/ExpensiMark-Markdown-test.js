@@ -867,6 +867,50 @@ describe('Image tag conversion to markdown', () => {
         const resultString = '![```code```](https://example.com/image.png)';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
+
+    test('Cache extra attributes for img with alt with mediaAttributeCachingFn', () => {
+        const mediaAttributeCachingFn = jest.fn();
+        const testString = '<img src="https://example.com/image.png" alt="altText" data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source" />';
+        const resultString = '![altText](https://example.com/image.png)';
+        const extras = {
+            mediaAttributeCachingFn,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(mediaAttributeCachingFn).toHaveBeenCalledWith("https://example.com/image.png", 'data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source"')
+    });
+
+    test('Cache extra attributes for img with alt with cacheVideoAttributes', () => {
+        const cacheVideoAttributes = jest.fn();
+        const testString = '<img src="https://example.com/image.png" alt="altText" data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source" />';
+        const resultString = '![altText](https://example.com/image.png)';
+        const extras = {
+            cacheVideoAttributes,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/image.png", 'data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source"')
+    });
+
+    test('Cache extra attributes for img without alt with mediaAttributeCachingFn', () => {
+        const mediaAttributeCachingFn = jest.fn();
+        const testString = '<img src="https://example.com/image.png" data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source" />';
+        const resultString = '!(https://example.com/image.png)';
+        const extras = {
+            mediaAttributeCachingFn,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(mediaAttributeCachingFn).toHaveBeenCalledWith("https://example.com/image.png", 'data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source"')
+    });
+
+    test('Cache extra attributes for img without alt with cacheVideoAttributes', () => {
+        const cacheVideoAttributes = jest.fn();
+        const testString = '<img src="https://example.com/image.png" data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source" />';
+        const resultString = '!(https://example.com/image.png)';
+        const extras = {
+            cacheVideoAttributes,
+        };
+        expect(parser.htmlToMarkdown(testString, extras)).toBe(resultString);
+        expect(cacheVideoAttributes).toHaveBeenCalledWith("https://example.com/image.png", 'data-expensify-width="100" data-expensify-height="500" data-name="newName" data-expensify-source="expensify-source"')
+    });
 });
 
 describe('Video tag conversion to markdown', () => {
