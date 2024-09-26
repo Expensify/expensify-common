@@ -5,13 +5,8 @@ import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
 import Logger from './Logger';
 import * as Utils from './utils';
+import type Extras from './Extras';
 
-export type Extras = {
-    reportIDToName?: Record<string, string>;
-    accountIDToName?: Record<string, string>;
-    mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
-    mediaAttributeCache?: Record<string, string>;
-};
 const EXTRAS_DEFAULT = {};
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
