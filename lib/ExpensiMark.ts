@@ -9,7 +9,7 @@ import * as Utils from './utils';
 type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
-    cacheMediaAttributes?: (mediaSource: string, attrs: string) => void;
+    mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
     mediaAttributeCache?: Record<string, string>;
 };
 const EXTRAS_DEFAULT = {};
@@ -677,17 +677,17 @@ export default class ExpensiMark {
                     let altText = '';
                     const altRegex = /alt\s*=\s*(['"])(.*?)\1/i;
                     const altMatch = imgAttrs.match(altRegex);
-                    let attributes = '';
+                    let attributes = imgAttrs;
                     if (altMatch) {
                         altText = altMatch[2];
                         // Remove the alt attribute from imgAttrs
-                        attributes = imgAttrs.replace(altRegex, '');
+                        attributes = attributes.replace(altRegex, '');
                     }
                     // Remove trailing slash and extra whitespace
                     attributes = attributes.replace(/\s*\/\s*$/, '').trim();
                     // Cache attributes without alt and trailing slash
-                    if (imgAttrs && extras && extras.cacheMediaAttributes && typeof extras.cacheMediaAttributes === 'function') {
-                        extras.cacheMediaAttributes(imgSource, attributes);
+                    if (imgAttrs && extras && extras.mediaAttributeCachingFn && typeof extras.mediaAttributeCachingFn === 'function') {
+                        extras.mediaAttributeCachingFn(imgSource, attributes);
                     }
                     // Return the markdown image tag
                     if (altText) {
@@ -710,8 +710,8 @@ export default class ExpensiMark {
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
-                    if (videoAttrs && extras && extras.cacheMediaAttributes && typeof extras.cacheMediaAttributes === 'function') {
-                        extras.cacheMediaAttributes(videoSource, videoAttrs);
+                    if (videoAttrs && extras && extras.mediaAttributeCachingFn && typeof extras.mediaAttributeCachingFn === 'function') {
+                        extras.mediaAttributeCachingFn(videoSource, videoAttrs);
                     }
                     if (videoName) {
                         return `![${videoName}](${videoSource})`;

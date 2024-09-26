@@ -2221,7 +2221,7 @@ describe('Image markdown conversion to html tag', () => {
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
     });
 
-    test('Single image with extra cached attribues', () => {
+    test('Single image with extra cached attributes', () => {
         const testString = '![test](https://example.com/image.jpg)';
         const resultString = '<img src="https://example.com/image.jpg" alt="test" data-expensify-height="100" data-expensify-width="100"/>';
         expect(parser.replace(testString, {
