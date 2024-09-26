@@ -560,6 +560,9 @@ test('Test code fencing with additional backticks inside', () => {
     expect(parser.replace(nestedBackticks)).toBe(
         '<pre>&#x60;This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)&#x60;<br /></pre>',
     );
+
+    nestedBackticks = '```\n`test`👋\n```';
+    expect(parser.replace(nestedBackticks)).toBe('<pre>&#x60;test&#x60;<emoji>👋</emoji><br /></pre>');
 });
 
 test('Test combination replacements', () => {
