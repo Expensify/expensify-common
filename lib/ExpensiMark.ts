@@ -1,5 +1,3 @@
-import str from "./str";
-
 'worklet';
 
 import Str from './str';
@@ -82,7 +80,6 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
 export default class ExpensiMark {
-
     getAttributeCache = (extras?: Extras) => {
         if (!extras) {
             return {attrCachingFn: undefined, attrCache: undefined};
@@ -90,7 +87,7 @@ export default class ExpensiMark {
 
         return {
             attrCachingFn: extras.mediaAttributeCachingFn ?? extras.cacheVideoAttributes,
-            attrCache: extras.mediaAttributeCache ?? extras.videoAttributeCache
+            attrCache: extras.mediaAttributeCache ?? extras.videoAttributeCache,
         };
     };
 
@@ -732,7 +729,7 @@ export default class ExpensiMark {
                         return `![${altText}](${imgSource})`;
                     }
                     return `!(${imgSource})`;
-                }
+                },
             },
 
             {
