@@ -6,7 +6,7 @@ import * as UrlPatterns from './Url';
 import Logger from './Logger';
 import * as Utils from './utils';
 
-type Extras = {
+export type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
     mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
