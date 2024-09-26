@@ -9,20 +9,24 @@ import * as Utils from './utils';
 type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
+
     /**
      * @deprecated Replaced with mediaAttributeCachingFn
      */
     cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
+
     /**
      * @deprecated Replaced with mediaAttributeCache
      */
     videoAttributeCache?: Record<string, string>;
+
     /**
      * Function used to cache HTML tag attributes during conversion to and from Markdown
      * @param mediaSource URI to media source
      * @param attrs Additional attributes to be cached
      */
     mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
+
     /**
      * Key/value cache for HTML tag attributes, where the key is media source URI, value is cached attributes
      */
@@ -700,7 +704,7 @@ export default class ExpensiMark {
                 regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(.*?)>(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 /**
                  * @param extras - The extras object
-                 * @param match - The full match
+                 * @param _match - The full match
                  * @param _g1 - The first capture group (the quote)
                  * @param imgSource - The second capture group - src attribute value
                  * @param imgAttrs - The third capture group - any attributes after src
