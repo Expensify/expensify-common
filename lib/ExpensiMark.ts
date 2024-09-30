@@ -303,7 +303,7 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
 
-                regex: /(?<![^ \n*~])(#[\p{Ll}0-9]{1,99})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
+                regex: /(?<![^ \n*~])(#[\p{Ll}0-9-]{1,99})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
                 replacement: '<mention-report>$1</mention-report>',
             },
 
