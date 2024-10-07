@@ -9,9 +9,31 @@ import * as Utils from './utils';
 type Extras = {
     reportIDToName?: Record<string, string>;
     accountIDToName?: Record<string, string>;
+
+    /**
+     * @deprecated Replaced with mediaAttributeCachingFn
+     */
     cacheVideoAttributes?: (vidSource: string, attrs: string) => void;
+
+    /**
+     * @deprecated Replaced with mediaAttributeCache
+     */
     videoAttributeCache?: Record<string, string>;
+
+    /**
+     * Function used to cache HTML tag attributes during conversion to and from Markdown
+     * @param mediaSource URI to media source
+     * @param attrs Additional attributes to be cached
+     */
+    mediaAttributeCachingFn?: (mediaSource: string, attrs: string) => void;
+
+    /**
+     * Key/value cache for HTML tag attributes, where the key is media source URI, value is cached attributes
+     */
+    mediaAttributeCache?: Record<string, string>;
 };
+export type {Extras};
+
 const EXTRAS_DEFAULT = {};
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
@@ -62,6 +84,17 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
 export default class ExpensiMark {
+    getAttributeCache = (extras?: Extras) => {
+        if (!extras) {
+            return {attrCachingFn: undefined, attrCache: undefined};
+        }
+
+        return {
+            attrCachingFn: extras.mediaAttributeCachingFn ?? extras.cacheVideoAttributes,
+            attrCache: extras.mediaAttributeCache ?? extras.videoAttributeCache,
+        };
+    };
+
     static Log = new Logger({
         serverLoggingCallback: () => undefined,
         // eslint-disable-next-line no-console
@@ -171,11 +204,13 @@ export default class ExpensiMark {
                  * @return Returns the HTML video tag
                  */
                 replacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
                 rawInputReplacement: (extras, _match, videoName, videoSource) => {
-                    const extraAttrs = extras && extras.videoAttributeCache && extras.videoAttributeCache[videoSource];
+                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
             },
@@ -245,13 +280,21 @@ export default class ExpensiMark {
              * tag.
              * Additional sanitization is done to the alt attribute to prevent parsing it further to html by later
              * rules.
+             * Additional tags from cache are applied to the result HTML.
              */
             {
                 name: 'image',
                 regex: MARKDOWN_IMAGE_REGEX,
-                replacement: (_extras, _match, g1, g2) => `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} />`,
-                rawInputReplacement: (_extras, _match, g1, g2) =>
-                    `<img src="${Str.sanitizeURL(g2)}"${g1 ? ` alt="${this.escapeAttributeContent(g1)}"` : ''} data-raw-href="${g2}" data-link-variant="${typeof g1 === 'string' ? 'labeled' : 'auto'}" />`,
+                replacement: (extras, _match, imgAlt, imgSource) => {
+                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const extraAttrs = attrCache && attrCache[imgSource];
+                    return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} ${extraAttrs || ''}/>`;
+                },
+                rawInputReplacement: (extras, _match, imgAlt, imgSource) => {
+                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const extraAttrs = attrCache && attrCache[imgSource];
+                    return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
+                },
             },
 
             /**
@@ -658,13 +701,38 @@ export default class ExpensiMark {
 
             {
                 name: 'image',
-                regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(?:[^><]*alt\s*=\s*(['"])(.*?)\3)?[^><]*>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
-                replacement: (_extras, _match, _g1, g2, _g3, g4) => {
-                    if (g4) {
-                        return `![${g4}](${g2})`;
+                regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(.*?)>(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
+                /**
+                 * @param extras - The extras object
+                 * @param _match - The full match
+                 * @param _g1 - The first capture group (the quote)
+                 * @param imgSource - The second capture group - src attribute value
+                 * @param imgAttrs - The third capture group - any attributes after src
+                 * @returns The markdown image tag
+                 */
+                replacement: (extras, _match, _g1, imgSource, imgAttrs) => {
+                    // Extract alt attribute from imgAttrs
+                    let altText = '';
+                    const altRegex = /alt\s*=\s*(['"])(.*?)\1/i;
+                    const altMatch = imgAttrs.match(altRegex);
+                    const attrCachingFn = this.getAttributeCache(extras).attrCachingFn;
+                    let attributes = imgAttrs;
+                    if (altMatch) {
+                        altText = altMatch[2];
+                        // Remove the alt attribute from imgAttrs
+                        attributes = attributes.replace(altRegex, '');
                     }
-
-                    return `!(${g2})`;
+                    // Remove trailing slash and extra whitespace
+                    attributes = attributes.replace(/\s*\/\s*$/, '').trim();
+                    // Cache attributes without alt and trailing slash
+                    if (imgAttrs && attrCachingFn && typeof attrCachingFn === 'function') {
+                        attrCachingFn(imgSource, attributes);
+                    }
+                    // Return the markdown image tag
+                    if (altText) {
+                        return `![${altText}](${imgSource})`;
+                    }
+                    return `!(${imgSource})`;
                 },
             },
 
@@ -681,8 +749,10 @@ export default class ExpensiMark {
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
-                    if (videoAttrs && extras && extras.cacheVideoAttributes && typeof extras.cacheVideoAttributes === 'function') {
-                        extras.cacheVideoAttributes(videoSource, videoAttrs);
+                    const attrCachingFn = this.getAttributeCache(extras).attrCachingFn;
+
+                    if (videoAttrs && attrCachingFn && typeof attrCachingFn === 'function') {
+                        attrCachingFn(videoSource, videoAttrs);
                     }
                     if (videoName) {
                         return `![${videoName}](${videoSource})`;

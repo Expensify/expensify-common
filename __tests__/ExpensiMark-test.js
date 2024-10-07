@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import ExpensiMark from '../lib/ExpensiMark';
 import * as Utils from '../lib/utils';
+import {any, string} from "prop-types";
 
 const parser = new ExpensiMark();
 
@@ -47,4 +48,56 @@ test('Test extract link from Markdown link syntax', () => {
     const comment = 'www.google.com https://www.google.com [Expensify](https://new.expensify.com/)';
     const links = ['https://new.expensify.com/'];
     expect(parser.extractLinksInMarkdownComment(comment)).toStrictEqual(links);
+});
+
+describe('Test ExpensiMark getAttributeCache', () => {
+    const expensiMark = new ExpensiMark();
+
+    describe('For attrCachingFn', () => {
+        test('If mediaAttributeCachingFn is provided, returns it', () => {
+            const extras = {
+                mediaAttributeCachingFn: jest.fn(),
+            }
+            expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(extras.mediaAttributeCachingFn);
+        })
+
+        test('If mediaAttributeCachingFn is not provided, returns cacheVideoAttributes', () => {
+            const extras = {
+                cacheVideoAttributes: jest.fn(),
+            }
+            expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(extras.cacheVideoAttributes);
+        })
+
+        test('If mediaAttributeCachingFn and cacheVideoAttributes are not provided, returns undefined', () => {
+            const extras = {}
+            expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(undefined);
+        })
+    });
+
+    describe('For attrCache', () => {
+        test('If mediaAttributeCache is provided, returns it', () => {
+            const extras = {
+                mediaAttributeCache: jest.fn(),
+            }
+            expect(expensiMark.getAttributeCache(extras).attrCache).toBe(extras.mediaAttributeCache);
+        })
+
+        test('If mediaAttributeCache is not provided, returns videoAttributeCache', () => {
+            const extras = {
+                videoAttributeCache: jest.fn(),
+            }
+            expect(expensiMark.getAttributeCache(extras).attrCache).toBe(extras.videoAttributeCache);
+        })
+
+        test('If mediaAttributeCache and videoAttributeCache are not provided, returns undefined', () => {
+            const extras = {}
+            expect(expensiMark.getAttributeCache(extras).attrCache).toBe(undefined);
+        })
+    });
+
+    test('If no extras are undefined, returns undefined for both attrCachingFn and attrCache', () => {
+        const {attrCachingFn, attrCache} = expensiMark.getAttributeCache(undefined);
+        expect(attrCachingFn).toBe(undefined);
+        expect(attrCache).toBe(undefined);
+    })
 });
