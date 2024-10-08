@@ -58,7 +58,7 @@
     "eslint": "^8.57.0",
     "eslint-config-expensify": "^2.0.59",
     "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-jest": "^28.8.2",
+    "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.14.0",
     "grunt": "1.6.1",
