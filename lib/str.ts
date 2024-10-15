@@ -971,15 +971,16 @@ const Str = {
      *  Formats a URL by converting the domain name to lowercase and adding the missing 'https://' protocol.
      *
      * @param url The URL to be formatted
+     * @param scheme The Scheme to use in the URL
      * @returns The formatted URL
      */
-    sanitizeURL(url: string): string {
+    sanitizeURL(url: string, scheme = 'https'): string {
         const regex = new RegExp(`^${UrlPatterns.URL_REGEX}$`, 'i');
         const match = regex.exec(url);
         if (!match) {
             return url;
         }
-        const website = match[3] ? match[2] : `https://${match[2]}`;
+        const website = match[3] ? match[2] : `${scheme}://${match[2]}`;
         return website.toLowerCase() + this.cutBefore(match[1], match[2]);
     },
 
