@@ -102,7 +102,8 @@ describe('Str.sanitizeURL', () => {
         expect(Str.sanitizeURL('google.com')).toBe('https://google.com');
         expect(Str.sanitizeURL('Https://google.com')).toBe('https://google.com');
         expect(Str.sanitizeURL('https://GOOgle.com')).toBe('https://google.com');
-        expect(Str.sanitizeURL('FOO.com/blah_BLAH')).toBe('https://foo.com/blah_BLAH');
+        +expect(Str.sanitizeURL('FOO.com/blah_BLAH', 'http')).toBe('http://foo.com/blah_BLAH');
+        +expect(Str.sanitizeURL('example.com', 'http')).toBe('http://example.com');
         expect(Str.sanitizeURL('http://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
         expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
     });
