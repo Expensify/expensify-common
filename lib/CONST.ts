@@ -576,6 +576,11 @@ const CONST = {
     PASSWORD_COMPLEXITY_REGEX_STRING: '^(?=.*[A-Z])(?=.*[0-9])(?=.*[a-z]).{8,}$',
 
     INTEGRATIONS: {
+        ACCOUNTING_METHOD: {
+            CASH: 'CASH',
+            ACCRUAL: 'ACCRUAL',
+        },
+
         /**
          * Constants that specify how to map (import) Integrations data to Expensify
          * Parallel to IntegrationEntityMappingTypeEnum in the IS
