@@ -435,46 +435,12 @@ export default class ExpensiMark {
                     return replacedText;
                 },
                 replacement: (_extras, g1) => {
-                    let isStartingWithSpace = false;
-                    const handleMatch = (_match: string, g2: string) => {
-                        isStartingWithSpace = !!g2;
-                        return '';
-                    };
-                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
-                    const filterRules = ['heading1'];
-                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
-                        filterRules.push('quote');
-                        this.currentQuoteDepth++;
-                    }
-                    const replacedText = this.replace(textToReplace, {
-                        filterRules,
-                        shouldEscapeText: false,
-                        shouldKeepRawInput: false,
-                    });
-                    this.currentQuoteDepth = 0;
+                    const {replacedText} = this.replaceQuoteText(g1, false);
                     return `<blockquote>${replacedText || ' '}</blockquote>`;
                 },
                 rawInputReplacement: (_extras, g1) => {
-                    let isStartingWithSpace = false;
-                    const handleMatch = (_match: string, g2: string) => {
-                        isStartingWithSpace = !!g2;
-                        return '';
-                    };
-                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
-                    const filterRules = ['heading1'];
-                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
-                        filterRules.push('quote');
-                        this.currentQuoteDepth++;
-                    }
-                    const replacedText = this.replace(textToReplace, {
-                        filterRules,
-                        shouldEscapeText: false,
-                        shouldKeepRawInput: true,
-                    });
-                    this.currentQuoteDepth = 0;
-                    return `<blockquote>${isStartingWithSpace ? ' ' : ''}${replacedText}</blockquote>`;
+                    const {replacedText, shouldAddSpace} = this.replaceQuoteText(g1, true);
+                    return `<blockquote>${shouldAddSpace ? ' ' : ''}${replacedText}</blockquote>`;
                 },
             },
             /**
@@ -1273,6 +1239,29 @@ export default class ExpensiMark {
             return replacement(EXTRAS_DEFAULT, textToFormat);
         }
         return textToCheck;
+    }
+
+    replaceQuoteText(text: string, shouldKeepRawInput: boolean): {replacedText: string; shouldAddSpace: boolean} {
+        let isStartingWithSpace = false;
+        const handleMatch = (_match: string, g2: string) => {
+            isStartingWithSpace = !!g2;
+            return '';
+        };
+        const textToReplace = text.replace(/^&gt;( )?/gm, handleMatch);
+        const filterRules = ['heading1'];
+        // if we don't reach the max quote depth we allow the recursive call to process possible quote
+        if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
+            filterRules.push('quote');
+            this.currentQuoteDepth++;
+        }
+        const replacedText = this.replace(textToReplace, {
+            filterRules,
+            shouldEscapeText: false,
+            shouldKeepRawInput,
+        });
+        this.currentQuoteDepth = 0;
+
+        return {replacedText, shouldAddSpace: isStartingWithSpace};
     }
 
     /**
