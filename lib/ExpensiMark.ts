@@ -421,37 +421,20 @@ export default class ExpensiMark {
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]+)/gm;
+                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
+
+                    let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
                     if (shouldKeepRawInput) {
-                        const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
-                        return this.replaceTextWithExtras(textToProcess, rawInputRegex, EXTRAS_DEFAULT, replacement);
+                        return replacedText;
                     }
-                    return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
+
+                    for (let i = this.maxQuoteDepth; i > 0; i--) {
+                        replacedText = replacedText.replaceAll(`${'</blockquote>'.repeat(i)}\n${'<blockquote>'.repeat(i)}`, '\n');
+                    }
+                    replacedText = replacedText.replaceAll('</blockquote>\n', '</blockquote>');
+                    return replacedText;
                 },
                 replacement: (_extras, g1) => {
-                    // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
-                    // To do this we need to parse body of the quote without first space
-                    const handleMatch = (match: string) => match;
-                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
-                    const filterRules = ['heading1'];
-
-                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1) {
-                        filterRules.push('quote');
-                        this.currentQuoteDepth++;
-                    }
-
-                    const replacedText = this.replace(textToReplace, {
-                        filterRules,
-                        shouldEscapeText: false,
-                        shouldKeepRawInput: false,
-                    });
-                    this.currentQuoteDepth = 0;
-                    return `<blockquote>${replacedText}</blockquote>`;
-                },
-                rawInputReplacement: (_extras, g1) => {
-                    // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
-                    // To do this we need to parse body of the quote without first space
                     let isStartingWithSpace = false;
                     const handleMatch = (_match: string, g2: string) => {
                         isStartingWithSpace = !!g2;
@@ -459,13 +442,32 @@ export default class ExpensiMark {
                     };
                     const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
                     const filterRules = ['heading1'];
-
                     // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 || isStartingWithSpace) {
+                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
                         filterRules.push('quote');
                         this.currentQuoteDepth++;
                     }
-
+                    const replacedText = this.replace(textToReplace, {
+                        filterRules,
+                        shouldEscapeText: false,
+                        shouldKeepRawInput: false,
+                    });
+                    this.currentQuoteDepth = 0;
+                    return `<blockquote>${replacedText || ' '}</blockquote>`;
+                },
+                rawInputReplacement: (_extras, g1) => {
+                    let isStartingWithSpace = false;
+                    const handleMatch = (_match: string, g2: string) => {
+                        isStartingWithSpace = !!g2;
+                        return '';
+                    };
+                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
+                    const filterRules = ['heading1'];
+                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
+                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
+                        filterRules.push('quote');
+                        this.currentQuoteDepth++;
+                    }
                     const replacedText = this.replace(textToReplace, {
                         filterRules,
                         shouldEscapeText: false,
