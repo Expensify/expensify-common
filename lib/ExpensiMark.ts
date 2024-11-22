@@ -1097,8 +1097,9 @@ export default class ExpensiMark {
                 return;
             }
 
+            const nextItem = splitText?.[index + 1];
             // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
-            if (text.match(/[\n|>][>]?[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            if ((nextItem && text.match(/>[\s]?$/) && !nextItem.startsWith('> ')) || text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
@@ -1111,20 +1112,22 @@ export default class ExpensiMark {
     }
 
     unpackNestedQuotes(text: string): string {
-        let parsedText = text.replace(/(<\/blockquote>)+/g, (match) => {
-            return `${match.slice(0, match.lastIndexOf('</blockquote>'))}</blockquote><br />`;
+        let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
+            return `${match}</split>`;
         });
-        const splittedText = parsedText.split('<br />');
+        const splittedText = parsedText.split('</split>');
         if (splittedText.length > 0 && splittedText[splittedText.length - 1] === '') {
             splittedText.pop();
         }
 
         let count = 0;
         parsedText = splittedText
-            .map((line, index, arr) => {
-                if (line === '') {
+            .map((l) => {
+                const hasBR = l.endsWith('<br />');
+                if (l === '' && count === 0) {
                     return '';
                 }
+                const line = l.replace(/(<br \/>)$/g, '');
 
                 if (line.startsWith('<blockquote>')) {
                     count += (line.match(/<blockquote>/g) || []).length;
@@ -1140,7 +1143,7 @@ export default class ExpensiMark {
                     return `${line}${'</blockquote>'}${'<blockquote>'.repeat(count)}`;
                 }
 
-                return line + (index < arr.length - 1 ? '<br />' : '');
+                return line + (hasBR ? '<br />' : '');
             })
             .join('');
 
