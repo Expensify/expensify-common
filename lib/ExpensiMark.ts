@@ -1110,6 +1110,43 @@ export default class ExpensiMark {
         return joinedText;
     }
 
+    unpackNestedQuotes(text: string): string {
+        let parsedText = text.replace(/(<\/blockquote>)+/g, (match) => {
+            return `${match.slice(0, match.lastIndexOf('</blockquote>'))}</blockquote><br />`;
+        });
+        const splittedText = parsedText.split('<br />');
+        if (splittedText.length > 0 && splittedText[splittedText.length - 1] === '') {
+            splittedText.pop();
+        }
+
+        let count = 0;
+        parsedText = splittedText
+            .map((line, index, arr) => {
+                if (line === '') {
+                    return '';
+                }
+
+                if (line.startsWith('<blockquote>')) {
+                    count += (line.match(/<blockquote>/g) || []).length;
+                }
+                if (line.endsWith('</blockquote>')) {
+                    count -= (line.match(/<\/blockquote>/g) || []).length;
+                    if (count > 0) {
+                        return `${line}${'<blockquote>'.repeat(count)}`;
+                    }
+                }
+
+                if (count > 0) {
+                    return `${line}${'</blockquote>'}${'<blockquote>'.repeat(count)}`;
+                }
+
+                return line + (index < arr.length - 1 ? '<br />' : '');
+            })
+            .join('');
+
+        return parsedText;
+    }
+
     /**
      * Replaces HTML with markdown
      */
@@ -1122,6 +1159,7 @@ export default class ExpensiMark {
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
         }
+        generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
         const processRule = (rule: RuleWithRegex) => {
             // Pre-processes input HTML before applying regex
