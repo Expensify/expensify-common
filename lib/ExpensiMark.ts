@@ -1111,6 +1111,9 @@ export default class ExpensiMark {
         return joinedText;
     }
 
+    /**
+     * Unpacks nested quotes HTML tags that have been packed by the 'quote' rule in this.rules for shouldKeepRawInput = false
+     */
     unpackNestedQuotes(text: string): string {
         let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
             return `${match}</split>`;
@@ -1122,28 +1125,28 @@ export default class ExpensiMark {
 
         let count = 0;
         parsedText = splittedText
-            .map((l) => {
-                const hasBR = l.endsWith('<br />');
-                if (l === '' && count === 0) {
+            .map((line) => {
+                const hasBR = line.endsWith('<br />');
+                if (line === '' && count === 0) {
                     return '';
                 }
-                const line = l.replace(/(<br \/>)$/g, '');
+                const textLine = line.replace(/(<br \/>)$/g, '');
 
-                if (line.startsWith('<blockquote>')) {
-                    count += (line.match(/<blockquote>/g) || []).length;
+                if (textLine.startsWith('<blockquote>')) {
+                    count += (textLine.match(/<blockquote>/g) || []).length;
                 }
-                if (line.endsWith('</blockquote>')) {
-                    count -= (line.match(/<\/blockquote>/g) || []).length;
+                if (textLine.endsWith('</blockquote>')) {
+                    count -= (textLine.match(/<\/blockquote>/g) || []).length;
                     if (count > 0) {
-                        return `${line}${'<blockquote>'.repeat(count)}`;
+                        return `${textLine}${'<blockquote>'.repeat(count)}`;
                     }
                 }
 
                 if (count > 0) {
-                    return `${line}${'</blockquote>'}${'<blockquote>'.repeat(count)}`;
+                    return `${textLine}${'</blockquote>'}${'<blockquote>'.repeat(count)}`;
                 }
 
-                return line + (hasBR ? '<br />' : '');
+                return textLine + (hasBR ? '<br />' : '');
             })
             .join('');
 
