@@ -1112,7 +1112,24 @@ export default class ExpensiMark {
     }
 
     /**
-     * Unpacks nested quotes HTML tags that have been packed by the 'quote' rule in this.rules for shouldKeepRawInput = false
+     * Unpacks nested quote HTML tags that have been packed by the 'quote' rule in this.rules for shouldKeepRawInput = false
+     *
+     * For example, it parses the following HTML:
+     * <blockquote>
+     *     quote 1
+     *    <blockquote>
+     *      quote 2
+     *    </blockquote>
+     *    quote 3
+     * </blockquote>
+     *
+     * into:
+     * <blockquote> quote 1</blockquote>
+     * <blockquote><blockquote> quote 2</blockquote>
+     * <blockquote> quote 3</blockquote>
+     *
+     * Note that there will always be only a single closing tag, even if multiple opening tags exist.
+     * Only one closing tag is needed to detect if a nested quote has ended.
      */
     unpackNestedQuotes(text: string): string {
         let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
@@ -1130,8 +1147,8 @@ export default class ExpensiMark {
                 if (line === '' && count === 0) {
                     return '';
                 }
-                const textLine = line.replace(/(<br \/>)$/g, '');
 
+                const textLine = line.replace(/(<br \/>)$/g, '');
                 if (textLine.startsWith('<blockquote>')) {
                     count += (textLine.match(/<blockquote>/g) || []).length;
                 }
@@ -1285,6 +1302,11 @@ export default class ExpensiMark {
         return textToCheck;
     }
 
+    /**
+     * Main text to html 'quote' parsing logic.
+     * Removes &gt;( ) from text and recursively calls replace function to process nested quotes and build blockquote HTML result.
+     * @param shouldKeepRawInput determines if the raw input should be kept for nested quotes.
+     */
     replaceQuoteText(text: string, shouldKeepRawInput: boolean): {replacedText: string; shouldAddSpace: boolean} {
         let isStartingWithSpace = false;
         const handleMatch = (_match: string, g2: string) => {
@@ -1293,7 +1315,7 @@ export default class ExpensiMark {
         };
         const textToReplace = text.replace(/^&gt;( )?/gm, handleMatch);
         const filterRules = ['heading1'];
-        // if we don't reach the max quote depth we allow the recursive call to process possible quote
+        // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
             filterRules.push('quote');
             this.currentQuoteDepth++;
