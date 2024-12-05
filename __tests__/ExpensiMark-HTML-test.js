@@ -1125,13 +1125,13 @@ test('Test quotes markdown replacement and removing <br/> from <br/><pre> and </
 
 test('Test quotes markdown replacement skipping blank quotes', () => {
     const testString = '> \n>';
-    const resultString = '&gt; <br />&gt;';
+    const resultString = '<blockquote> </blockquote>&gt;';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text starts with blank quote', () => {
     const testString = '> \ntest';
-    const resultString = '&gt; <br />test';
+    const resultString = '<blockquote> </blockquote>test';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1143,7 +1143,7 @@ test('Test quotes markdown replacement with quotes starts with blank quote row',
 
 test('Test quotes markdown replacement with quotes ends with blank quote rows', () => {
     const testString = '> test\n> \n>';
-    const resultString = '<blockquote>test<br /> <br /> </blockquote>';
+    const resultString = '<blockquote>test<br /> </blockquote>&gt;';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1162,14 +1162,14 @@ test('Test quotes markdown replacement with quotes includes multiple middle blan
 test('Test quotes markdown replacement with text includes blank quotes', () => {
     const testString = '> \n> quote1 line a\n> quote1 line b\ntest\n> \ntest\n> quote2 line a\n> \n> \n> quote2 line b with an empty line above';
     const resultString =
-        '<blockquote> <br />quote1 line a<br />quote1 line b</blockquote>test<br />&gt; <br />test<br /><blockquote>quote2 line a<br /> <br /> <br />quote2 line b with an empty line above</blockquote>';
+        '<blockquote> <br />quote1 line a<br />quote1 line b</blockquote>test<br /><blockquote> </blockquote>test<br /><blockquote>quote2 line a<br /> <br /> <br />quote2 line b with an empty line above</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test quotes markdown replacement with text includes multiple spaces', () => {
-    const quoteTestStartString = '>   Indented\n>No indent\n>   Indented  \n> >   Nested indented  \n>     Indented ';
+    const quoteTestStartString = '>   Indented\n>No indent\n>   Indented  \n>>   Nested indented  \n> >   Nested not indented  \n>     Indented ';
     const quoteTestReplacedString =
-        '<blockquote>  Indented</blockquote>&gt;No indent<br /><blockquote>  Indented  <br /><blockquote>  Nested indented  </blockquote>    Indented </blockquote>';
+        '<blockquote>  Indented</blockquote>&gt;No indent<br /><blockquote>  Indented  <br /><blockquote>  Nested indented  </blockquote>&gt;   Nested not indented  <br />    Indented </blockquote>';
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
 
@@ -1192,13 +1192,7 @@ test('Test markdown quotes without spaces after > should not be parsed', () => {
 
 test('Test markdown quotes without spaces after > should not be parsed', () => {
     const testString = '> > > test';
-    const resultString = '<blockquote><blockquote><blockquote>test</blockquote></blockquote></blockquote>';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test markdown quotes without spaces after > should not be parsed', () => {
-    const testString = '>>> test';
-    const resultString = '&gt;&gt;&gt; test';
+    const resultString = '<blockquote>&gt; &gt; test</blockquote>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -2027,54 +2021,54 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
 
 describe('multi-level blockquote', () => {
     test('test max level of blockquote (3)', () => {
-        const quoteTestStartString = '> > > > > Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>&gt; &gt; Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestStartString = '>>>>> Hello world';
+        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>&gt;&gt; Hello world</blockquote></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
     test('multi-level blockquote with single space', () => {
-        const quoteTestStartString = '> > > Hello world';
+        const quoteTestStartString = '>>> Hello world';
         const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello world</blockquote></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
     test('multi-level blockquote with multiple spaces', () => {
         const quoteTestStartString = '>  >   >      Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>     Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestReplacedString = '<blockquote> &gt;   &gt;      Hello world</blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multi-level blockquote with mixed spaces', () => {
         const quoteTestStartString = '>  > >   Hello world';
-        const quoteTestReplacedString = '<blockquote><blockquote><blockquote>  Hello world</blockquote></blockquote></blockquote>';
+        const quoteTestReplacedString = '<blockquote> &gt; &gt;   Hello world</blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multi-level blockquote with diffrent syntax', () => {
-        const quoteTestStartString = '> > _Hello_ *world*';
+        const quoteTestStartString = '>> _Hello_ *world*';
         const quoteTestReplacedString = '<blockquote><blockquote><em>Hello</em> <strong>world</strong></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multi-level blockquote with nested heading', () => {
-        const quoteTestStartString = '> > # Hello world';
+        const quoteTestStartString = '>> # Hello world';
         const quoteTestReplacedString = '<blockquote><blockquote><h1>Hello world</h1></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multiline multi-level blockquote', () => {
-        const quoteTestStartString = '> > Hello my\n> > beautiful\n> > world\n';
+        const quoteTestStartString = '>> Hello my\n>> beautiful\n>> world\n';
         const quoteTestReplacedString = '<blockquote><blockquote>Hello my<br />beautiful<br />world</blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
     });
 
     test('multiline blockquote with diffrent levels', () => {
-        const quoteTestStartString = '> > > Hello my\n> > beautiful\n> world\n';
+        const quoteTestStartString = '>>> Hello my\n>> beautiful\n> world\n';
         const quoteTestReplacedString = '<blockquote><blockquote><blockquote>Hello my</blockquote>beautiful</blockquote>world</blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);

@@ -421,58 +421,26 @@ export default class ExpensiMark {
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]+)/gm;
+                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
+
+                    let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
                     if (shouldKeepRawInput) {
-                        const rawInputRegex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
-                        return this.replaceTextWithExtras(textToProcess, rawInputRegex, EXTRAS_DEFAULT, replacement);
+                        return replacedText;
                     }
-                    return this.modifyTextForQuote(regex, textToProcess, replacement as ReplacementFn);
+
+                    for (let i = this.maxQuoteDepth; i > 0; i--) {
+                        replacedText = replacedText.replaceAll(`${'</blockquote>'.repeat(i)}\n${'<blockquote>'.repeat(i)}`, '\n');
+                    }
+                    replacedText = replacedText.replaceAll('</blockquote>\n', '</blockquote>');
+                    return replacedText;
                 },
                 replacement: (_extras, g1) => {
-                    // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
-                    // To do this we need to parse body of the quote without first space
-                    const handleMatch = (match: string) => match;
-                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
-                    const filterRules = ['heading1'];
-
-                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1) {
-                        filterRules.push('quote');
-                        this.currentQuoteDepth++;
-                    }
-
-                    const replacedText = this.replace(textToReplace, {
-                        filterRules,
-                        shouldEscapeText: false,
-                        shouldKeepRawInput: false,
-                    });
-                    this.currentQuoteDepth = 0;
-                    return `<blockquote>${replacedText}</blockquote>`;
+                    const {replacedText} = this.replaceQuoteText(g1, false);
+                    return `<blockquote>${replacedText || ' '}</blockquote>`;
                 },
                 rawInputReplacement: (_extras, g1) => {
-                    // We want to enable 2 options of nested heading inside the blockquote: "># heading" and "> # heading".
-                    // To do this we need to parse body of the quote without first space
-                    let isStartingWithSpace = false;
-                    const handleMatch = (_match: string, g2: string) => {
-                        isStartingWithSpace = !!g2;
-                        return '';
-                    };
-                    const textToReplace = g1.replace(/^&gt;( )?/gm, handleMatch);
-                    const filterRules = ['heading1'];
-
-                    // if we don't reach the max quote depth we allow the recursive call to process possible quote
-                    if (this.currentQuoteDepth < this.maxQuoteDepth - 1 || isStartingWithSpace) {
-                        filterRules.push('quote');
-                        this.currentQuoteDepth++;
-                    }
-
-                    const replacedText = this.replace(textToReplace, {
-                        filterRules,
-                        shouldEscapeText: false,
-                        shouldKeepRawInput: true,
-                    });
-                    this.currentQuoteDepth = 0;
-                    return `<blockquote>${isStartingWithSpace ? ' ' : ''}${replacedText}</blockquote>`;
+                    const {replacedText, shouldAddSpace} = this.replaceQuoteText(g1, true);
+                    return `<blockquote>${shouldAddSpace ? ' ' : ''}${replacedText}</blockquote>`;
                 },
             },
             /**
@@ -1129,8 +1097,9 @@ export default class ExpensiMark {
                 return;
             }
 
+            const nextItem = splitText?.[index + 1];
             // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
-            if (text.match(/[\n|>][>]?[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            if ((nextItem && text.match(/>[\s]?$/) && !nextItem.startsWith('> ')) || text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
@@ -1140,6 +1109,65 @@ export default class ExpensiMark {
         splitText.forEach(processText);
 
         return joinedText;
+    }
+
+    /**
+     * Unpacks nested quote HTML tags that have been packed by the 'quote' rule in this.rules for shouldKeepRawInput = false
+     *
+     * For example, it parses the following HTML:
+     * <blockquote>
+     *     quote 1
+     *    <blockquote>
+     *      quote 2
+     *    </blockquote>
+     *    quote 3
+     * </blockquote>
+     *
+     * into:
+     * <blockquote> quote 1</blockquote>
+     * <blockquote><blockquote> quote 2</blockquote>
+     * <blockquote> quote 3</blockquote>
+     *
+     * Note that there will always be only a single closing tag, even if multiple opening tags exist.
+     * Only one closing tag is needed to detect if a nested quote has ended.
+     */
+    unpackNestedQuotes(text: string): string {
+        let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
+            return `${match}</split>`;
+        });
+        const splittedText = parsedText.split('</split>');
+        if (splittedText.length > 0 && splittedText[splittedText.length - 1] === '') {
+            splittedText.pop();
+        }
+
+        let count = 0;
+        parsedText = splittedText
+            .map((line) => {
+                const hasBR = line.endsWith('<br />');
+                if (line === '' && count === 0) {
+                    return '';
+                }
+
+                const textLine = line.replace(/(<br \/>)$/g, '');
+                if (textLine.startsWith('<blockquote>')) {
+                    count += (textLine.match(/<blockquote>/g) || []).length;
+                }
+                if (textLine.endsWith('</blockquote>')) {
+                    count -= (textLine.match(/<\/blockquote>/g) || []).length;
+                    if (count > 0) {
+                        return `${textLine}${'<blockquote>'.repeat(count)}`;
+                    }
+                }
+
+                if (count > 0) {
+                    return `${textLine}${'</blockquote>'}${'<blockquote>'.repeat(count)}`;
+                }
+
+                return textLine + (hasBR ? '<br />' : '');
+            })
+            .join('');
+
+        return parsedText;
     }
 
     /**
@@ -1154,6 +1182,7 @@ export default class ExpensiMark {
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
         }
+        generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
         const processRule = (rule: RuleWithRegex) => {
             // Pre-processes input HTML before applying regex
@@ -1186,91 +1215,31 @@ export default class ExpensiMark {
     }
 
     /**
-     * Modify text for Quotes replacing chevrons with html elements
+     * Main text to html 'quote' parsing logic.
+     * Removes &gt;( ) from text and recursively calls replace function to process nested quotes and build blockquote HTML result.
+     * @param shouldKeepRawInput determines if the raw input should be kept for nested quotes.
      */
-    modifyTextForQuote(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
-        let replacedText = '';
-        let textToFormat = '';
-        const match = textToCheck.match(regex);
-
-        // If there's matches we need to modify the quotes
-        if (match !== null) {
-            let insideCodefence = false;
-
-            // Split the textToCheck in lines
-            const textSplitted = textToCheck.split('\n');
-
-            for (let i = 0; i < textSplitted.length; i++) {
-                if (!insideCodefence) {
-                    // We need to know when there is a start of codefence so we dont quote
-                    insideCodefence = Str.contains(textSplitted[i], '<pre>');
-                }
-
-                // Since the last space will be trimmed and would incorrectly disable a condition we check it manually
-                const isLastBlockquote = textSplitted[i] === '&gt;' && i === textSplitted.length - 1;
-
-                // We only want to modify lines starting with "&gt; " that is not codefence
-                if ((Str.startsWith(textSplitted[i], '&gt; ') || isLastBlockquote) && !insideCodefence) {
-                    if (textSplitted[i] === '&gt;') {
-                        textToFormat += `${textSplitted[i]} \n`;
-                        insideCodefence = true;
-                    } else {
-                        textToFormat += `${textSplitted[i]}\n`;
-                    }
-                } else {
-                    // Make sure we will only modify if we have Text needed to be formatted for quote
-                    if (textToFormat !== '') {
-                        replacedText += this.formatTextForQuote(regex, textToFormat, replacement);
-                        textToFormat = '';
-                    }
-
-                    // We dont want a \n after the textSplitted if it is the last row
-                    if (i === textSplitted.length - 1) {
-                        replacedText += `${textSplitted[i]}`;
-                    } else {
-                        replacedText += `${textSplitted[i]}\n`;
-                    }
-
-                    // We need to know when we are not inside codefence anymore
-                    if (insideCodefence) {
-                        insideCodefence = !Str.contains(textSplitted[i], '</pre>');
-                    }
-                }
-            }
-
-            // When loop ends we need the last quote to be formatted if we have quotes at last rows
-            if (textToFormat !== '') {
-                replacedText += this.formatTextForQuote(regex, textToFormat, replacement);
-            }
-        } else {
-            // If we doesn't have matches make sure the function will return the same textToCheck
-            replacedText = textToCheck;
+    replaceQuoteText(text: string, shouldKeepRawInput: boolean): {replacedText: string; shouldAddSpace: boolean} {
+        let isStartingWithSpace = false;
+        const handleMatch = (_match: string, g2: string) => {
+            isStartingWithSpace = !!g2;
+            return '';
+        };
+        const textToReplace = text.replace(/^&gt;( )?/gm, handleMatch);
+        const filterRules = ['heading1'];
+        // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
+        if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
+            filterRules.push('quote');
+            this.currentQuoteDepth++;
         }
-        return replacedText;
-    }
+        const replacedText = this.replace(textToReplace, {
+            filterRules,
+            shouldEscapeText: false,
+            shouldKeepRawInput,
+        });
+        this.currentQuoteDepth = 0;
 
-    /**
-     * Format the content of blockquote if the text matches the regex or else just return the original text
-     */
-    formatTextForQuote(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
-        if (textToCheck.match(regex)) {
-            // Remove '&gt;' and trim the spaces between nested quotes
-            const formatRow = (row: string) => {
-                let quoteContent = row[4] === ' ' ? row.substr(5) : row.substr(4);
-                if (row === '&gt; ') quoteContent = row.substr(4);
-
-                if (quoteContent.trimStart().startsWith('&gt;')) {
-                    return quoteContent.trimStart();
-                }
-                return quoteContent;
-            };
-            let textToFormat = textToCheck.split('\n').map(formatRow).join('\n');
-
-            // Remove leading and trailing line breaks
-            textToFormat = textToFormat.replace(/^\n+|\n+$/g, '');
-            return replacement(EXTRAS_DEFAULT, textToFormat);
-        }
-        return textToCheck;
+        return {replacedText, shouldAddSpace: isStartingWithSpace};
     }
 
     /**
