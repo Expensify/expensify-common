@@ -912,6 +912,10 @@ const CONST = {
             longFlightFare: 'economy',
             hotelStar: 'fourStars',
         },
+        PAYMENT_TYPE: {
+            PAY_AT_HOTEL: 'PAY_AT_HOTEL',
+            PAY_AT_VENDOR: 'PAY_AT_VENDOR',
+        },
     },
 
     // Expensify domains
