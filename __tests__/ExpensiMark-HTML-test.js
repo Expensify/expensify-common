@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len,no-useless-concat */
 import ExpensiMark from '../lib/ExpensiMark';
 
 const parser = new ExpensiMark();
@@ -931,6 +931,7 @@ test('Test urls autolinks correctly', () => {
         },
     ];
 
+    // Fixme @expensify.com is a now correct "possible" short mention
     testCases.forEach((testCase) => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
     });
@@ -1324,6 +1325,16 @@ test('Test for user mention with @username@domain.com', () => {
     const resultString = '<mention-user>@username@expensify.com</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 });
+// Todo
+// popraw psujący się @here testy
+// Todo wszystkie edge kejsy w których short mention jest ambiguous
+// short-mention -> possible-short-mention
+
+test('Test for short mention mention with @username@domain.com', () => {
+    const testString = '@john.doe';
+    const resultString = '<mention-short>@john.doe</mention-short>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
 
 test('Test for user mention with @@username@domain.com', () => {
     const testString = '@@username@expensify.com';
@@ -1376,7 +1387,7 @@ test('Test for user mention without leading whitespace', () => {
 
 test('Test for user mention with @username@expensify', () => {
     const testString = '@username@expensify';
-    const resultString = '@username@expensify';
+    const resultString = '<mention-short>@username</mention-short><mention-short>@expensify</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 

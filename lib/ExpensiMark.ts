@@ -418,6 +418,29 @@ export default class ExpensiMark {
             },
 
             {
+                name: 'shortMentions',
+                regex: new RegExp(
+                    "(@here|[a-zA-Z0-9.!$%&+=?^\\`{|}-]?)(@(?=((?=[\\w]+[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))",
+                    'gim',
+                ),
+                replacement: (_extras, match, g1, g2) => {
+                    if (!Str.isValidMention(match)) {
+                        return match;
+                    }
+                    return `${g1}<mention-short>${g2}</mention-short>`;
+                },
+                // rawInputReplacement: (_extras, match, g1, g2) => {
+                //     const phoneNumberRegex = new RegExp(`^${Constants.CONST.REG_EXP.PHONE_PART}$`);
+                //     const mention = g2.slice(1);
+                //     const mentionWithoutSMSDomain = str_1.default.removeSMSDomain(mention);
+                //     if (!str_1.default.isValidMention(match) || (phoneNumberRegex.test(mentionWithoutSMSDomain) && !str_1.default.isValidPhoneNumber(mentionWithoutSMSDomain))) {
+                //         return match;
+                //     }
+                //     return `${g1}<mention-user>${g2}</mention-user>`;
+                // },
+            },
+
+            {
                 name: 'quote',
 
                 // We also want to capture a blank line before or after the quote so that we do not add extra spaces.
