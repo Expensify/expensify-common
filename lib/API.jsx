@@ -433,20 +433,6 @@ export default function API(network, args) {
         },
 
         /**
-         * Resets the status of SMS delivery of a phone number
-         * @param {Object} parameters
-         * @param {String} parameters.email
-         * @returns {ExpensifyAPIDeferred}
-         */
-        resetSMSDeliveryFailureStatus(parameters) {
-            const commandName = 'ResetSMSDeliveryFailureStatus';
-            requireParameters(['email'], parameters, commandName);
-
-            const newParameters = {...parameters, api_setCookie: false};
-            return performPOSTRequest(commandName, newParameters);
-        },
-
-        /**
          * Sets the password for an account
          *
          * @param {Object} parameters
