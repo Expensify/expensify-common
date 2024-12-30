@@ -697,6 +697,7 @@ test('Test url replacements', () => {
         '@test.com <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ' +
         '@test.com @test.com ';
 
+    // Fixme [short-mention] this errors on "test.com</a> @test.com @test.com <a" - probably @test.com should be a legit short-mention candidate
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
 
@@ -931,7 +932,7 @@ test('Test urls autolinks correctly', () => {
         },
     ];
 
-    // Fixme @expensify.com is a now correct "possible" short mention
+    // Fixme [short-mention] @expensify.com should now be considered a short-mention "candidate"
     testCases.forEach((testCase) => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
     });
@@ -1325,12 +1326,8 @@ test('Test for user mention with @username@domain.com', () => {
     const resultString = '<mention-user>@username@expensify.com</mention-user>';
     expect(parser.replace(testString)).toBe(resultString);
 });
-// Todo
-// popraw psujący się @here testy
-// Todo wszystkie edge kejsy w których short mention jest ambiguous
-// short-mention -> possible-short-mention
 
-test('Test for short mention mention with @username@domain.com', () => {
+test('Test for short mention mention with @username', () => {
     const testString = '@john.doe';
     const resultString = '<mention-short>@john.doe</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
@@ -1519,6 +1516,7 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
         ' @here!' +
         ' @here?';
 
+    // Fixme [short-mention] these should now be short-mention candidates
     const resultString =
         '<mention-here>@here</mention-here>' +
         ' <em><mention-here>@here</mention-here></em>' +
