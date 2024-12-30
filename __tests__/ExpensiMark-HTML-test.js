@@ -472,14 +472,14 @@ test('Test inline code blocks', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
 });
 
-test('Test inline code blocks with double backticks', () => {
-    const inlineCodeStartString = 'My favorite language is ``JavaScript``. How about you?';
-    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;JavaScript&#x60;</code>. How about you?');
+test('Test double backticks', () => {
+    const testString = 'My favorite language is ``JavaScript``. How about you?';
+    expect(parser.replace(testString)).toBe('My favorite language is &#x60;&#x60;JavaScript&#x60;&#x60;. How about you?');
 });
 
 test('Test inline code blocks with triple backticks', () => {
     const inlineCodeStartString = 'My favorite language is ```JavaScript```. How about you?';
-    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>&#x60;&#x60;JavaScript&#x60;&#x60;</code>. How about you?');
+    expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is &#x60;&#x60;<code>JavaScript</code>&#x60;&#x60;. How about you?');
 });
 
 test('Test multiple inline codes in one line', () => {
@@ -487,14 +487,14 @@ test('Test multiple inline codes in one line', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you? I also like <code>Python</code>.');
 });
 
-test('Test inline code with one backtick as content', () => {
-    const inlineCodeStartString = '```';
-    expect(parser.replace(inlineCodeStartString)).toBe('&#x60;&#x60;&#x60;');
+test('Test triple backticks', () => {
+    const testString = '```';
+    expect(parser.replace(testString)).toBe('&#x60;&#x60;&#x60;');
 });
 
-test('Test inline code with multiple backtick symbols as content', () => {
-    const inlineCodeStartString = '``````';
-    expect(parser.replace(inlineCodeStartString)).toBe('&#x60;&#x60;&#x60;&#x60;&#x60;&#x60;');
+test('Test multiple backtick symbols', () => {
+    const testString = '``````';
+    expect(parser.replace(testString)).toBe('&#x60;&#x60;&#x60;&#x60;&#x60;&#x60;');
 });
 
 test('Test inline code blocks with ExpensiMark syntax inside', () => {
@@ -508,9 +508,9 @@ test('Test inline code blocks inside ExpensiMark', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Test inline code blocks with two backticks', () => {
+test('Test words enclosed in double backticks', () => {
     const testString = '``JavaScript``';
-    expect(parser.replace(testString)).toBe('<code>&#x60;JavaScript&#x60;</code>');
+    expect(parser.replace(testString)).toBe('&#x60;&#x60;JavaScript&#x60;&#x60;');
 });
 
 test('Test code fencing with ExpensiMark syntax inside', () => {
@@ -1240,10 +1240,9 @@ test('Test for backticks with complete escaped backtick characters inside it', (
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-// Backticks with only tab characters inside it are not replaced with <code>
-test('Test for backticks only tab characters inside it', () => {
+test('Test for inline code blocks with only tab characters as content', () => {
     const testString = '`\u0009`';
-    const resultString = '&#x60;\u0009&#x60;';
+    const resultString = '<code>	</code>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1254,10 +1253,15 @@ test('Test for backticks with only space characters as content', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-// Code-fence with spaces as content
 test('Test for inline code block with triple backtick with spaces as content', () => {
     const testString = '```   ```';
-    const resultString = '<code>&#x60;&#x60;   &#x60;&#x60;</code>';
+    const resultString = '&#x60;&#x60;<code>&nbsp;&nbsp;&nbsp;</code>&#x60;&#x60;';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test for a normal code block, an empty code block, followed by a word and a backtick', () => {
+    const testString = '`hello` `` hi`';
+    const resultString = '<code>hello</code> &#x60;&#x60; hi&#x60;';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
