@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len,no-useless-concat */
 import ExpensiMark from '../lib/ExpensiMark';
 
 const parser = new ExpensiMark();
@@ -697,6 +697,7 @@ test('Test url replacements', () => {
         '@test.com <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ' +
         '@test.com @test.com ';
 
+    // Fixme [short-mention] this errors on "test.com</a> @test.com @test.com <a" - probably @test.com should be a legit short-mention candidate
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
 
@@ -931,6 +932,7 @@ test('Test urls autolinks correctly', () => {
         },
     ];
 
+    // Fixme [short-mention] @expensify.com should now be considered a short-mention "candidate"
     testCases.forEach((testCase) => {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
     });
@@ -1325,6 +1327,12 @@ test('Test for user mention with @username@domain.com', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test for short mention mention with @username@domain.com', () => {
+    const testString = '@john.doe';
+    const resultString = '<mention-short>@john.doe</mention-short>';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
 test('Test for user mention with @@username@domain.com', () => {
     const testString = '@@username@expensify.com';
     const resultString = '@<mention-user>@username@expensify.com</mention-user>';
@@ -1376,7 +1384,7 @@ test('Test for user mention without leading whitespace', () => {
 
 test('Test for user mention with @username@expensify', () => {
     const testString = '@username@expensify';
-    const resultString = '@username@expensify';
+    const resultString = '<mention-short>@username</mention-short><mention-short>@expensify</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1508,6 +1516,7 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
         ' @here!' +
         ' @here?';
 
+    // Fixme [short-mention] these should now be short-mention candidates
     const resultString =
         '<mention-here>@here</mention-here>' +
         ' <em><mention-here>@here</mention-here></em>' +
