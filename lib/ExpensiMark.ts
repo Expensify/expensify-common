@@ -802,6 +802,16 @@ export default class ExpensiMark {
                 replacement: '[Attachment]',
             },
             {
+                name: 'video',
+                regex: /<video[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/video>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
+                replacement: '[Attachment]',
+            },
+            {
+                name: 'otherAttachments',
+                regex: /<a[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/a>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
+                replacement: '[Attachment]',
+            },
+            {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="(\d+)" *\/>/gi,
                 replacement: (extras, _match, g1, _offset, _string) => {

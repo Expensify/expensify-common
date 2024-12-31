@@ -195,7 +195,11 @@ test('Mention report html to text', () => {
     expect(parser.htmlToText(testString, extras)).toBe('#room-name');
 });
 
-test('Test replacement for <img> tags', () => {
+test('Test replacement for attachment tags', () => {
     const testString = '<img src="https://example.com/image.png" alt="Image description" />';
+    const testString2 = '<video data-expensify-source="https://www.expensify.com/chat-attachments/123/test.mp4" data-expensify-width=720 data-expensify-height=1640 data-expensify-duration=20>test.mp4</video>';
+    const testString3 = '<a href="https://www.expensify.com/chat-attachments/123/test.csv" data-expensify-source="https://www.expensify.com/chat-attachments/123/test.csv">test.csv</a>';
     expect(parser.htmlToText(testString)).toBe('[Attachment]');
+    expect(parser.htmlToText(testString2)).toBe('[Attachment]');
+    expect(parser.htmlToText(testString3)).toBe('[Attachment]');
 });
