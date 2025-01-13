@@ -232,6 +232,7 @@ export default class ExpensiMark {
                     const g2Value = g2.trim() === '' ? g2.replaceAll(' ', '&nbsp;') : g2;
                     return `${g1}<code>${g2Value}</code>${g3}`;
                 },
+                rawInputReplacement: (_extras, _match, g1, g2, g3) => `${g1}<code>${g2}</code>${g3}`,
             },
 
             /**
