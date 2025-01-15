@@ -228,14 +228,14 @@ export default class ExpensiMark {
                 // At least one non-whitespace character or a specific whitespace character (" " and "\u00A0")
                 // must be present inside the backticks.
                 regex: /(\B|_|)&#x60;(.*?)&#x60;(\B|_|)(?!(?!<pre>)[^<]*(?:<(?!pre>)[^<]*)*<\/pre>|[^<]*<\/video>)/gm,
-                replacement: (_extras, _match, g1, g2, g3) => {
+                replacement: (_extras, match, g1, g2, g3) => {
                     const g2Value = g2.trim() === '' ? g2.replaceAll(' ', '&nbsp;') : g2;
                     if (!g2Value) {
-                        return _match;
+                        return match;
                     }
                     return `${g1}<code>${g2Value}</code>${g3}`;
                 },
-                rawInputReplacement: (_extras, _match, g1, g2, g3) => `${g1}<code>${g2}</code>${g3}`,
+                rawInputReplacement: (_extras, match, g1, g2, g3) => (g2 ? `${g1}<code>${g2}</code>${g3}` : match),
             },
 
             /**
