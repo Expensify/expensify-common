@@ -419,6 +419,11 @@ const CONST = {
          */
         EMOJI_RULE:
             /[\p{Extended_Pictographic}](\u200D[\p{Extended_Pictographic}]|[\u{1F3FB}-\u{1F3FF}]|[\u{E0020}-\u{E007F}]|\uFE0F|\u20E3)*|[\u{1F1E6}-\u{1F1FF}]{2}|[#*0-9]\uFE0F?\u20E3/gu,
+
+        /**
+         * Regex to match a piece of text or @here, needed for both shortMention and userMention
+         */
+        PRE_MENTION_TEXT_PART: '(@here|[a-zA-Z0-9.!$%&+=?^\\`{|}-]?)',
     },
 
     REPORT: {
