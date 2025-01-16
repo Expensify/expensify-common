@@ -1978,6 +1978,34 @@ describe('when should keep raw input flag is enabled', () => {
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
     });
+
+    describe('inline code blocks', () => {
+        test('empty content', () => {
+            const testString = '``';
+            const resultString = '&#x60;&#x60;';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+        test('single whitespace as a content', () => {
+            const testString = '` `';
+            const resultString = '<code> </code>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+        test('multiple whitespaces as a content', () => {
+            const testString = '`     `';
+            const resultString = '<code>     </code>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+        test('text content', () => {
+            const testString = 'hello `world`';
+            const resultString = 'hello <code>world</code>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+        test('text and whitespaces as a content', () => {
+            const testString = '` hello   world `';
+            const resultString = '<code> hello   world </code>';
+            expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
+        });
+    });
 });
 
 test('Test code fence within inline code', () => {
