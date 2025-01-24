@@ -736,7 +736,7 @@ export default class ExpensiMark {
 
             {
                 name: 'reportMentions',
-                regex: /<mention-report reportID="(\d+)"(?: *\/>|><\/mention-report>)/gi,
+                regex: /<mention-report reportID="?(\d+)"?(?: *\/>|><\/mention-report>)/gi,
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
@@ -749,7 +749,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'userMention',
-                regex: /(?:<mention-user accountID="(\d+)"(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
+                regex: /(?:<mention-user accountID="?(\d+)"?(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
                 replacement: (extras, _match, g1, g2, _offset, _string) => {
                     if (g1) {
                         const accountToNameMap = extras.accountIDToName;
@@ -817,7 +817,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'reportMentions',
-                regex: /<mention-report reportID="(\d+)" *\/>/gi,
+                regex: /<mention-report reportID="?(\d+)"? *\/>/gi,
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
@@ -830,7 +830,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'userMention',
-                regex: /<mention-user accountID="(\d+)" *\/>/gi,
+                regex: /(?:<mention-user accountID="?(\d+)"?(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const accountToNameMap = extras.accountIDToName;
                     if (!accountToNameMap || !accountToNameMap[g1]) {
