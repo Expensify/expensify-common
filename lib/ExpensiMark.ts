@@ -831,13 +831,16 @@ export default class ExpensiMark {
             {
                 name: 'userMention',
                 regex: /(?:<mention-user accountID="?(\d+)"?(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
-                replacement: (extras, _match, g1, _offset, _string) => {
-                    const accountToNameMap = extras.accountIDToName;
-                    if (!accountToNameMap || !accountToNameMap[g1]) {
-                        ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
-                        return '@Hidden';
+                replacement: (extras, _match, g1, g2, _offset, _string) => {
+                    if (g1) {
+                        const accountToNameMap = extras.accountIDToName;
+                        if (!accountToNameMap || !accountToNameMap[g1]) {
+                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
+                            return '@Hidden';
+                        }
+                        return `@${Str.removeSMSDomain(extras.accountIDToName?.[g1] ?? '')}`;
                     }
-                    return `@${Str.removeSMSDomain(extras.accountIDToName?.[g1] ?? '')}`;
+                    return Str.removeSMSDomain(g2);
                 },
             },
             {
@@ -1214,17 +1217,27 @@ export default class ExpensiMark {
     /**
      * Convert HTML to text
      */
-    htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
+    htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT, log = false): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
             replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
+            if (log) {
+                console.log('htmlToText', rule.name, replacedText);
+            }
         };
 
         this.htmlToTextRules.forEach(processRule);
 
+        if (log) {
+            console.log('htmlToText', replacedText);
+        }
+
         // Unescaping because the text is escaped in 'replace' function
         // We use 'htmlDecode' instead of 'unescape' to replace entities like '&#32;'
         replacedText = Str.htmlDecode(replacedText);
+        if (log) {
+            console.log('htmlToText', 'unescape', replacedText);
+        }
         return replacedText;
     }
 

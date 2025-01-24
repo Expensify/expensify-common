@@ -161,6 +161,12 @@ test('Mention user html to text', () => {
     testString = '<mention-user accountID="1234" />';
     expect(parser.htmlToText(testString, extras)).toBe('@user@domain.com');
 
+    testString = '<mention-user accountID=1234></mention-user>';
+    expect(parser.htmlToText(testString, extras)).toBe('@user@domain.com');
+
+    testString = '<mention-user accountID=1234 />';
+    expect(parser.htmlToText(testString, extras)).toBe('@user@domain.com');
+
     extras.accountIDToName['1234'] = '+251924892738@expensify.sms';  
     testString = '<mention-user accountID="1234"/>';
     expect(parser.htmlToText(testString, extras)).toBe('@+251924892738');
@@ -192,6 +198,9 @@ test('Mention report html to text', () => {
     expect(parser.htmlToText(testString, extras)).toBe('#room-name');
 
     testString = '<mention-report reportID="1234" />';
+    expect(parser.htmlToText(testString, extras)).toBe('#room-name');
+
+    testString = '<mention-report reportID=1234/>';
     expect(parser.htmlToText(testString, extras)).toBe('#room-name');
 });
 
