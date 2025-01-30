@@ -817,7 +817,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'reportMentions',
-                regex: /<mention-report reportID="?(\d+)"? *\/>/gi,
+                regex: /<mention-report reportID="?(\d+)"?(?: *\/>|><\/mention-report>)/gi,
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
@@ -1217,27 +1217,17 @@ export default class ExpensiMark {
     /**
      * Convert HTML to text
      */
-    htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT, log = false): string {
+    htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
             replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
-            if (log) {
-                console.log('htmlToText', rule.name, replacedText);
-            }
         };
 
         this.htmlToTextRules.forEach(processRule);
 
-        if (log) {
-            console.log('htmlToText', replacedText);
-        }
-
         // Unescaping because the text is escaped in 'replace' function
         // We use 'htmlDecode' instead of 'unescape' to replace entities like '&#32;'
         replacedText = Str.htmlDecode(replacedText);
-        if (log) {
-            console.log('htmlToText', 'unescape', replacedText);
-        }
         return replacedText;
     }
 
