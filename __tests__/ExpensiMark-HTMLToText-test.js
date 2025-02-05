@@ -152,7 +152,7 @@ test('Mention user html to text', () => {
 
     const extras = {
         accountIDToName: {
-            '1234': 'user@domain.com',
+            1234: 'user@domain.com',
         },
     };
     testString = '<mention-user accountID="1234"/>';
@@ -167,7 +167,7 @@ test('Mention user html to text', () => {
     testString = '<mention-user accountID=1234 />';
     expect(parser.htmlToText(testString, extras)).toBe('@user@domain.com');
 
-    extras.accountIDToName['1234'] = '+251924892738@expensify.sms';  
+    extras.accountIDToName['1234'] = '+251924892738@expensify.sms';
     testString = '<mention-user accountID="1234"/>';
     expect(parser.htmlToText(testString, extras)).toBe('@+251924892738');
 });
@@ -191,7 +191,7 @@ test('Mention report html to text', () => {
 
     const extras = {
         reportIDToName: {
-            '1234': '#room-name',
+            1234: '#room-name',
         },
     };
     testString = '<mention-report reportID="1234"/>';
@@ -202,11 +202,18 @@ test('Mention report html to text', () => {
 
     testString = '<mention-report reportID=1234/>';
     expect(parser.htmlToText(testString, extras)).toBe('#room-name');
+
+    testString = '<mention-report reportID=1234></mention-report>';
+    expect(parser.htmlToText(testString, extras)).toBe('#room-name');
+
+    testString = '<mention-report reportID="1234"></mention-report>';
+    expect(parser.htmlToText(testString, extras)).toBe('#room-name');
 });
 
 test('Test replacement for attachment tags', () => {
     const testString = '<img src="https://example.com/image.png" alt="Image description" />';
-    const testString2 = '<video data-expensify-source="https://www.expensify.com/chat-attachments/123/test.mp4" data-expensify-width=720 data-expensify-height=1640 data-expensify-duration=20>test.mp4</video>';
+    const testString2 =
+        '<video data-expensify-source="https://www.expensify.com/chat-attachments/123/test.mp4" data-expensify-width=720 data-expensify-height=1640 data-expensify-duration=20>test.mp4</video>';
     const testString3 = '<a href="https://www.expensify.com/chat-attachments/123/test.csv" data-expensify-source="https://www.expensify.com/chat-attachments/123/test.csv">test.csv</a>';
     expect(parser.htmlToText(testString)).toBe('[Attachment]');
     expect(parser.htmlToText(testString2)).toBe('[Attachment]');
