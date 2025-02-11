@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import ExpensiMark from '../lib/ExpensiMark';
 import * as Utils from '../lib/utils';
-import {any, string} from "prop-types";
 
 const parser = new ExpensiMark();
 

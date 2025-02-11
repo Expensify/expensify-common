@@ -1,6 +1,9 @@
 module.exports = {
     extends: ['expensify', 'prettier'],
     parser: '@typescript-eslint/parser',
+    env: {
+        jest: true,
+    },
     overrides: [
         {
             files: ['*.js', '*.jsx'],
