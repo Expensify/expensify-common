@@ -366,7 +366,7 @@ export default class ExpensiMark {
             {
                 name: 'userMentions',
                 regex: new RegExp(
-                    `(@here|[a-zA-Z0-9.!$%&+=?^\`{|}-]?)(@${Constants.CONST.REG_EXP.EMAIL_PART}|@${Constants.CONST.REG_EXP.PHONE_PART})(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`,
+                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@${Constants.CONST.REG_EXP.EMAIL_PART}|@${Constants.CONST.REG_EXP.PHONE_PART})(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`,
                     'gim',
                 ),
                 replacement: (_extras, match, g1, g2) => {
@@ -483,6 +483,41 @@ export default class ExpensiMark {
                 regex: new RegExp(`([^\\w'#%+-]|^)${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}(?!((?:(?!<a).)+)?<\\/a>|[^<>]*<\\/(?!em|h1|blockquote))`, 'gim'),
                 replacement: '$1<a href="mailto:$2">$2</a>',
                 rawInputReplacement: '$1<a href="mailto:$2" data-raw-href="$2" data-link-variant="auto">$2</a>',
+            },
+
+            /**
+             * This regex matches a short user mention in a string.
+             * A short-mention is a string that starts with the '@' symbol and is followed by a valid user's primary login without the email domain part
+             * Ex: @john.doe, @user12345, but NOT @user@email.com
+             *
+             * Notes:
+             * Phone is not a valid short mention.
+             * In reality these "short-mentions" are just possible candidates, because the parser has no way of verifying if there exists a user named ex: @john.examplename.
+             * The actual verification whether these mentions are pointing to real users is done in specific projects using ExpensiMark.
+             * Nevertheless, "@john.examplename" is a correct possible short-mention, and so would be parsed.
+             * This behaviour is similar to treating every user@something as valid user login.
+             *
+             * This regex will correctly preserve any @here mentions, the same way as "userMention" rule.
+             */
+            {
+                name: 'shortMentions',
+
+                regex: new RegExp(
+                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@(?=((?=[\\w]+[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))(?!here)\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))`,
+                    'gim',
+                ),
+                replacement: (_extras, match, g1, g2) => {
+                    if (!Str.isValidMention(match)) {
+                        return match;
+                    }
+                    return `${g1}<mention-short>${g2}</mention-short>`;
+                },
+            },
+
+            {
+                name: 'hereMentionAfterShortMentions',
+                regex: /(<\/mention-short>)(@here)(?=\b)/gm,
+                replacement: '$1<mention-here>$2</mention-here>',
             },
 
             {

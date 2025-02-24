@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len,no-useless-concat */
 import ExpensiMark from '../lib/ExpensiMark';
 
 const parser = new ExpensiMark();
@@ -693,9 +693,9 @@ test('Test url replacements', () => {
         '<a href="http://example.com/foo/*/bar/*/test.txt" target="_blank" rel="noreferrer noopener">http://example.com/foo/*/bar/*/test.txt</a> ' +
         'test-.com ' +
         '-<a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ' +
-        '@test.com ' +
-        '@test.com <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ' +
-        '@test.com @test.com ';
+        '<mention-short>@test.com</mention-short> ' +
+        '<mention-short>@test.com</mention-short> <a href="https://test.com" target="_blank" rel="noreferrer noopener">test.com</a> ' +
+        '<mention-short>@test.com</mention-short> <mention-short>@test.com</mention-short> ';
 
     expect(parser.replace(urlTestStartString)).toBe(urlTestReplacedString);
 });
@@ -876,7 +876,7 @@ test('Test urls autolinks correctly', () => {
         {
             testString: 'expensify.com -expensify.com @expensify.com',
             resultString:
-                '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> -<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> @expensify.com',
+                '<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> -<a href="https://expensify.com" target="_blank" rel="noreferrer noopener">expensify.com</a> <mention-short>@expensify.com</mention-short>',
         },
         {
             testString: 'https//www.expensify.com',
@@ -1376,7 +1376,7 @@ test('Test for user mention without leading whitespace', () => {
 
 test('Test for user mention with @username@expensify', () => {
     const testString = '@username@expensify';
-    const resultString = '@username@expensify';
+    const resultString = '<mention-short>@username</mention-short><mention-short>@expensify</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -1450,6 +1450,26 @@ test('Test for @here mention with inlineCodeBlock style', () => {
     const testString = '`@here`';
     const resultString = '<code>@here</code>';
     expect(parser.replace(testString)).toBe(resultString);
+});
+
+describe('Tests for short mentions', () => {
+    test('short mentions should work for @username', () => {
+        const testString = '@johnny';
+        const resultString = '<mention-short>@johnny</mention-short>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('short mentions should work for @firstname.lastname', () => {
+        const testString = '@john.doe';
+        const resultString = '<mention-short>@john.doe</mention-short>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
+
+    test('short mentions should work and not break @here after mention', () => {
+        const testString = '@john.doe@here';
+        const resultString = '<mention-short>@john.doe</mention-short><mention-here>@here</mention-here>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
 
 // Examples that should match for here mentions:
@@ -1650,13 +1670,13 @@ test('Skip rendering invalid markdown', () => {
 
 test('Test for email with test+1@gmail.com@gmail.com', () => {
     const testString = 'test+1@gmail.com@gmail.com';
-    const resultString = '<a href="mailto:test+1@gmail.com">test+1@gmail.com</a>@gmail.com';
+    const resultString = '<a href="mailto:test+1@gmail.com">test+1@gmail.com</a><mention-short>@gmail.com</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
 test('Test for email with test@gmail.com@gmail.com', () => {
     const testString = 'test@gmail.com@gmail.com';
-    const resultString = '<a href="mailto:test@gmail.com">test@gmail.com</a>@gmail.com';
+    const resultString = '<a href="mailto:test@gmail.com">test@gmail.com</a><mention-short>@gmail.com</mention-short>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
