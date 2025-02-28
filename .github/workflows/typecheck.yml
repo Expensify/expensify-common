@@ -10,11 +10,14 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Setup Node
-              uses: actions/setup-node@v4
+            - name: Remove version from package-lock.json
+              run: jq 'del(.version, .packages[""].version)' package-lock.json > normalized-package-lock.json
+
+            - uses: actions/setup-node@v4
               with:
+                  node-version-file: '.nvmrc'
                   cache: npm
-                  cache-dependency-path: package-lock.json
+                  cache-dependency-path: normalized-package-lock.json
 
             - run: npm ci
 
