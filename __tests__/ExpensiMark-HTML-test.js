@@ -2069,6 +2069,10 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     testString = '~This~is~strikethrough~test~~~~';
     resultString = '<del>This~is~strikethrough~test</del>~~~';
     expect(parser.replace(testString)).toBe(resultString);
+
+    testString = '_**bold**_*bold*';
+    resultString = '<em>*<strong>bold</strong>*</em><strong>bold</strong>';
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
 describe('multi-level blockquote', () => {
