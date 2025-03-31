@@ -2328,7 +2328,7 @@ describe('room mentions', () => {
 
     test('room mention with leading word and no space', () => {
         const testString = 'hi all#room';
-        const resultString = 'hi all#room';
+        const resultString = 'hi all<mention-report>#room</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
