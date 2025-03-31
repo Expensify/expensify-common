@@ -2285,16 +2285,14 @@ describe('Image markdown conversion to html tag', () => {
     test('Single image with extra cached attributes using mediaAttributeCache', () => {
         const testString = '![test](https://example.com/image.jpg)';
         const resultString = '<img src="https://example.com/image.jpg" alt="test" data-expensify-height="100" data-expensify-width="100"/>';
-        expect(
-            parser.replace(testString, {
-                extras: {
-                    mediaAttributeCache: {
-                        'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"',
-                    },
-                },
-            }),
-        ).toBe(resultString);
-    });
+        expect(parser.replace(testString, {
+            extras: {
+                mediaAttributeCache: {
+                    'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"'
+                }
+            }
+        })).toBe(resultString);
+    })
 
     test('Single image with extra cached attributes using videAttributeCache', () => {
         const testString = '![test](https://example.com/image.jpg)';
