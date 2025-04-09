@@ -355,6 +355,13 @@ test('Test markdown replacement for composite emoji', () => {
     expect(parser.replace(testString)).toBe(result);
 });
 
+test('Test markdown replacement for custom emojis using Unicode Private Use Area', () => {
+    const testString = 'Replace custom emoji with an emoji tag ' + '\uE100';
+    const result = 'Replace custom emoji with an emoji tag ' + '<emoji>\uE100</emoji>';
+    expect(parser.replace(testString)).toBe(result);
+}
+);
+
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
     let testString =
