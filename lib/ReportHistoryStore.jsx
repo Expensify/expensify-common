@@ -204,7 +204,7 @@ export default class ReportHistoryStore {
 
     /**
      * Merges history items using the reportActionID into the cache and creates it if it doesn't yet exist.
-     * We then sorts them by timestamp and action name to ensure a consistent order if two report actions have the same timestamp
+     * We then sorts them by timestamp and then reprotActionID to ensure a consistent order if two report actions have the same timestamp
      *
      * @param {Number} reportID
      * @param {Object[]} newHistory
@@ -227,7 +227,7 @@ export default class ReportHistoryStore {
                 return b.reportActionTimestamp - a.reportActionTimestamp;
             }
 
-            return a.actionName.localeCompare(b.actionName);
+            return a.reportActionID.localeCompare(b.reportActionID);
         });
     }
 
