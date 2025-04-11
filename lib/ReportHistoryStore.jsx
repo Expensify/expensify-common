@@ -203,6 +203,35 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Merges history items using the reportActionID into the cache and creates it if it doesn't yet exist.
+     * We then sorts them by timestamp and action name to ensure a consistent order if two report actions have the same timestamp
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    mergeHistoryByReportActionID(reportID, newHistory) {
+        if (newHistory.length === 0) {
+            return;
+        }
+
+        const newCache = newHistory.reverse().reduce((prev, curr) => {
+            if (!prev.some((item) => item.reportActionID === curr.reportActionID)) {
+                prev.unshift(curr);
+            }
+            return prev;
+        }, this.cache[reportID] || []);
+
+        // Sort items in case they have become out of sync
+        this.cache[reportID] = newCache.sort((a, b) => {
+            if (b.reportActionTimestamp !== a.reportActionTimestamp) {
+                return b.reportActionTimestamp - a.reportActionTimestamp;
+            }
+
+            return a.actionName.localeCompare(b.actionName);
+        });
+    }
+
+    /**
      * Gets the history.
      *
      * @param {Number} reportID
@@ -248,6 +277,7 @@ export default class ReportHistoryStore {
      * @returns {Deferred}
      */
     getFlatHistory(reportID, ignoreCache) {
+        console.log("flat");
         const promise = new Deferred();
 
         // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
@@ -260,7 +290,7 @@ export default class ReportHistoryStore {
         })
             .done((recentHistory) => {
                 // Update history with new items fetched
-                this.mergeHistoryByTimestamp(reportID, recentHistory);
+                this.mergeHistoryByReportActionID(reportID, recentHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
