@@ -159,6 +159,16 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Updates the cache with new history containing all of the report's actions
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    updateCache(reportID, newHistory) {
+        this.cache[reportID] = newHistory;
+    }
+
+    /**
      * Merges history items into the cache and creates it if it doesn't yet exist.
      *
      * @param {Number} reportID
@@ -228,8 +238,13 @@ export default class ReportHistoryStore {
             offset: firstHistoryItem.sequenceNumber || 0,
         })
             .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeItems(reportID, recentHistory);
+                if (firstHistoryItem.sequenceNumber > 0) {
+                    // Update history with new items fetched
+                    this.mergeItems(reportID, recentHistory);
+                } else {
+                    // If offset is 0, don't do any merging as we've fetched all of the actions
+                    this.updateCache(reportID, recentHistory);
+                }
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
@@ -258,9 +273,8 @@ export default class ReportHistoryStore {
         this.API.Report_GetHistory({
             reportID,
         })
-            .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeHistoryByTimestamp(reportID, recentHistory);
+            .done((newHistory) => {
+                this.updateCache(reportID, newHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
