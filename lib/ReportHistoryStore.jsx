@@ -277,7 +277,6 @@ export default class ReportHistoryStore {
      * @returns {Deferred}
      */
     getFlatHistory(reportID, ignoreCache) {
-        console.log("flat");
         const promise = new Deferred();
 
         // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
