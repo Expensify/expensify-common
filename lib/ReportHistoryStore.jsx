@@ -159,6 +159,16 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Updates the cache with new history containing all of the report's actions
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    updateCache(reportID, newHistory) {
+        this.cache[reportID] = newHistory;
+    }
+
+    /**
      * Merges history items into the cache and creates it if it doesn't yet exist.
      *
      * @param {Number} reportID
@@ -203,35 +213,6 @@ export default class ReportHistoryStore {
     }
 
     /**
-     * Merges history items using the reportActionID into the cache and creates it if it doesn't yet exist.
-     * We then sorts them by timestamp and then reprotActionID to ensure a consistent order if two report actions have the same timestamp
-     *
-     * @param {Number} reportID
-     * @param {Object[]} newHistory
-     */
-    mergeHistoryByReportActionID(reportID, newHistory) {
-        if (newHistory.length === 0) {
-            return;
-        }
-
-        const newCache = newHistory.reverse().reduce((prev, curr) => {
-            if (!prev.some((item) => item.reportActionID === curr.reportActionID)) {
-                prev.unshift(curr);
-            }
-            return prev;
-        }, this.cache[reportID] || []);
-
-        // Sort items in case they have become out of sync
-        this.cache[reportID] = newCache.sort((a, b) => {
-            if (b.reportActionTimestamp !== a.reportActionTimestamp) {
-                return b.reportActionTimestamp - a.reportActionTimestamp;
-            }
-
-            return a.reportActionID.localeCompare(b.reportActionID);
-        });
-    }
-
-    /**
      * Gets the history.
      *
      * @param {Number} reportID
@@ -257,8 +238,13 @@ export default class ReportHistoryStore {
             offset: firstHistoryItem.sequenceNumber || 0,
         })
             .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeItems(reportID, recentHistory);
+                if (firstHistoryItem.sequenceNumber > 0) {
+                    // Update history with new items fetched
+                    this.mergeItems(reportID, recentHistory);
+                } else {
+                    // If offset is 0, don't do any merging as we've fetched all of the actions
+                    this.updateCache(reportID, recentHistory);
+                }
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
@@ -287,9 +273,8 @@ export default class ReportHistoryStore {
         this.API.Report_GetHistory({
             reportID,
         })
-            .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeHistoryByReportActionID(reportID, recentHistory);
+            .done((newHistory) => {
+                this.updateCache(reportID, newHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
