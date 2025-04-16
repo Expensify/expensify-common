@@ -203,6 +203,28 @@ export default class ReportHistoryStore {
     }
 
     /**
+     * Merges history items by reportActionID into the cache and creates it if it doesn't yet exist.
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    mergeHistoryByReportActionID(reportID, newHistory) {
+        if (newHistory.length === 0) {
+            return;
+        }
+
+        const newCache = newHistory.reverse().reduce((prev, curr) => {
+            if (!prev.some((item) => item.reportActionID === curr.reportActionID)) {
+                prev.unshift(curr);
+            }
+            return prev;
+        }, this.cache[reportID] || []);
+
+        // Sort items in case they have become out of sync
+        this.cache[reportID] = newCache.sort((a, b) => b.reportActionTimestamp - a.reportActionTimestamp);
+    }
+
+    /**
      * Gets the history.
      *
      * @param {Number} reportID
@@ -260,7 +282,7 @@ export default class ReportHistoryStore {
         })
             .done((recentHistory) => {
                 // Update history with new items fetched
-                this.mergeHistoryByTimestamp(reportID, recentHistory);
+                this.mergeHistoryByReportActionID(reportID, recentHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
