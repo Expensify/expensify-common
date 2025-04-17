@@ -1,6 +1,7 @@
 'worklet';
 
 /* eslint-disable no-control-regex */
+import $ from 'jquery';
 import {parsePhoneNumber} from 'awesome-phonenumber';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
@@ -100,6 +101,36 @@ const Str = {
      * @return string @p s HTML encoded.
      */
     htmlEncode(s: string) {
+        return HtmlEntities.encode(s);
+    },
+
+    /**
+     * Decodes the given HTML encoded string.
+     *
+     * @param s The string to decode.
+     * @returns The decoded string.
+     */
+    htmlDecodeWithJQueryOrNative(s: string) {
+        // Use jQuery if it exists or else use html-entities
+        if (typeof $ !== 'undefined') {
+            return $('<textarea/>').html(s).text();
+        }
+
+        return HtmlEntities.decode(s);
+    },
+
+    /**
+     * HTML encodes the given string.
+     *
+     * @param s The string to encode.
+     * @return string @p s HTML encoded.
+     */
+    htmlEncodeWithJQueryOrNative(s: string) {
+        // Use jQuery if it exists or else use html-entities
+        if (typeof $ !== 'undefined') {
+            return $('<textarea/>').text(s).html();
+        }
+
         return HtmlEntities.encode(s);
     },
 

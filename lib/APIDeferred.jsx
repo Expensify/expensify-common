@@ -73,7 +73,7 @@ export default function APIDeferred(promise, extractedProperty) {
 
         // Figure out if we need to extract a property from the response, and if it is there.
         const jsonCode = extractJSONCode(response);
-        const propertyRequested = !Number.isNull(extractedPropertyName);
+        const propertyRequested = extractedPropertyName && extractedPropertyName !== null;
         const requestedPropertyPresent = propertyRequested && response && response[extractedPropertyName] !== undefined;
         const propertyRequestedButMissing = propertyRequested && !requestedPropertyPresent;
 

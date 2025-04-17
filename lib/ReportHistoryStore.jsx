@@ -149,7 +149,7 @@ export default class ReportHistoryStore {
              * @param {String[]} events
              */
             bindCacheClearingEvents: (events) => {
-                events.each((event) => this.PubSub.subscribe(event, () => (this.cache = {})));
+                events.forEach((event) => this.PubSub.subscribe(event, () => (this.cache = {})));
             },
 
             // We need this to be publically available for cases where we get the report history

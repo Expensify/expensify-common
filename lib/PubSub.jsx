@@ -46,7 +46,7 @@ const PubSubModule = {
             return;
         }
 
-        const eventIDs = eventMap[eventName].keys();
+        const eventIDs = Object.keys(eventMap[eventName]);
         if (eventName === this.ERROR) {
             // Doing the split slice 2 because the 1st element of the stacktrace will always be from here (PubSub.publish)
             // When debugging, we just need to know who called PubSub.publish (so, all next elements in the stack)
