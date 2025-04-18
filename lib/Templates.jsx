@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import createTemplate from 'lodash/template';
 import * as Utils from './utils';
 
 /**
@@ -37,7 +37,7 @@ export default (function () {
          */
         get(data = {}) {
             if (!this.compiled) {
-                this.compiled = _.template(this.templateValue);
+                this.compiled = createTemplate(this.templateValue);
                 this.templateValue = '';
             }
             return this.compiled(data);
@@ -71,7 +71,7 @@ export default (function () {
             // eslint-disable-next-line no-undef
             dataToCompile.nestedTemplate = Templates.get;
             if (!this.compiled) {
-                this.compiled = _.template($(`#${this.id}`).html());
+                this.compiled = createTemplate($(`#${this.id}`).html());
             }
             return this.compiled(dataToCompile);
         }
