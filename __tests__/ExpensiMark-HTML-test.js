@@ -2437,4 +2437,10 @@ describe('room mentions', () => {
         const resultString = '<mention-report>#room-name123</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('italic with multiple underscores in the middle', () => {
+        const testString = '_test1__test2_';
+        const resultString = '<em>test1__test2</em>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
