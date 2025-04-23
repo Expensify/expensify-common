@@ -73,7 +73,7 @@ type TruncateOptions = {
     removeImageTag?: boolean;
 };
 
-const MARKDOWN_LINK_REGEX = new RegExp(`\\[((?!.*?<\\/blockquote>)[^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
+const MARKDOWN_LINK_REGEX = new RegExp(`\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 
 const MARKDOWN_VIDEO_REGEX = new RegExp(
@@ -278,36 +278,6 @@ export default class ExpensiMark {
                 replacement: '<h1>$1</h1>',
             },
 
-            {
-                name: 'quote',
-
-                // We also want to capture a blank line before or after the quote so that we do not add extra spaces.
-                // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
-                // inline code blocks. A single prepending space should be stripped if it exists
-                process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
-
-                    let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
-                    if (shouldKeepRawInput) {
-                        return replacedText;
-                    }
-
-                    for (let i = this.maxQuoteDepth; i > 0; i--) {
-                        replacedText = replacedText.replaceAll(`${'</blockquote>'.repeat(i)}\n${'<blockquote>'.repeat(i)}`, '\n');
-                    }
-                    replacedText = replacedText.replaceAll('</blockquote>\n', '</blockquote>');
-                    return replacedText;
-                },
-                replacement: (_extras, g1) => {
-                    const {replacedText} = this.replaceQuoteText(g1, false);
-                    return `<blockquote>${replacedText || ' '}</blockquote>`;
-                },
-                rawInputReplacement: (_extras, g1) => {
-                    const {replacedText, shouldAddSpace} = this.replaceQuoteText(g1, true);
-                    return `<blockquote>${shouldAddSpace ? ' ' : ''}${replacedText}</blockquote>`;
-                },
-            },
-
             /**
              * Converts markdown style images to image tags e.g. ![Expensify](https://www.expensify.com/attachment.png)
              * We need to convert before linking rules since they will not try to create a link from an existing img
@@ -434,10 +404,7 @@ export default class ExpensiMark {
                 name: 'autolink',
 
                 process: (textToProcess, replacement) => {
-                    const regex = new RegExp(
-                        `(?![^<]*>|[^<>]*<\\/(?!(?:h1>|blockquote>)))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`,
-                        'gi',
-                    );
+                    const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
                     return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn);
                 },
 
@@ -451,6 +418,35 @@ export default class ExpensiMark {
                 },
             },
 
+            {
+                name: 'quote',
+
+                // We also want to capture a blank line before or after the quote so that we do not add extra spaces.
+                // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
+                // inline code blocks. A single prepending space should be stripped if it exists
+                process: (textToProcess, replacement, shouldKeepRawInput = false) => {
+                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
+
+                    let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
+                    if (shouldKeepRawInput) {
+                        return replacedText;
+                    }
+
+                    for (let i = this.maxQuoteDepth; i > 0; i--) {
+                        replacedText = replacedText.replaceAll(`${'</blockquote>'.repeat(i)}\n${'<blockquote>'.repeat(i)}`, '\n');
+                    }
+                    replacedText = replacedText.replaceAll('</blockquote>\n', '</blockquote>');
+                    return replacedText;
+                },
+                replacement: (_extras, g1) => {
+                    const {replacedText} = this.replaceQuoteText(g1, false);
+                    return `<blockquote>${replacedText || ' '}</blockquote>`;
+                },
+                rawInputReplacement: (_extras, g1) => {
+                    const {replacedText, shouldAddSpace} = this.replaceQuoteText(g1, true);
+                    return `<blockquote>${shouldAddSpace ? ' ' : ''}${replacedText}</blockquote>`;
+                },
+            },
             /**
              * Use \b in this case because it will match on words, letters,
              * and _: https://www.rexegg.com/regex-boundaries.html#wordboundary
@@ -1071,7 +1067,7 @@ export default class ExpensiMark {
                 const linkText = urlRegex.test(match[1])
                     ? match[1]
                     : this.replace(match[1], {
-                          filterRules: ['bold', 'strikethrough', 'italic'],
+                          filterRules: ['bold', 'strikethrough', 'italic', 'newline'],
                           shouldEscapeText: false,
                       });
                 replacedText = replacedText.concat(replacement(EXTRAS_DEFAULT, match[0], linkText, url));
