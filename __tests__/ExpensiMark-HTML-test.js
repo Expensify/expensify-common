@@ -1751,6 +1751,26 @@ test('Test link with header before the alias multiline text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test markdown replacement for quoted multiline links', () => {
+    let testString = `> exa\nmple.com`;
+    let resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = `> [exa\nmple.com](https://example.com)`;
+    resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">exa<br />mple.com</a></blockquote>`
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Test nested link', () => {
+    let testString = `> example.com`;
+    let resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></blockquote>`
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = `# example.com`;
+    resultString = `<h1><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></h1>`
+    expect(parser.replace(testString)).toBe(resultString);
+})
+
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
     expect(parser.replace(testString)).toBe('~~<del>hello</del>~~');

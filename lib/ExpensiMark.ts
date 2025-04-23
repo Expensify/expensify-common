@@ -1067,7 +1067,7 @@ export default class ExpensiMark {
                 const linkText = urlRegex.test(match[1])
                     ? match[1]
                     : this.replace(match[1], {
-                          filterRules: ['bold', 'strikethrough', 'italic'],
+                          filterRules: ['bold', 'strikethrough', 'italic', 'newline'],
                           shouldEscapeText: false,
                       });
                 replacedText = replacedText.concat(replacement(EXTRAS_DEFAULT, match[0], linkText, url));
@@ -1080,7 +1080,6 @@ export default class ExpensiMark {
         if (startIndex < textToCheck.length) {
             replacedText = replacedText.concat(textToCheck.substr(startIndex));
         }
-
         return replacedText;
     }
 
