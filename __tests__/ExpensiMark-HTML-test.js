@@ -1751,18 +1751,29 @@ test('Test link with header before the alias multiline text part', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-
 test('Test markdown replacement for quoted multiline links', () => {
-    let testString = `> [exa\nmple.com](https://example.com)`;
-    let resultString = `<blockquote>[exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>](<a href="https://example.com" target="_blank" rel="noreferrer noopener">https://example.com</a>)`
+    let testString = `> exa\nmple.com`;
+    let resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
+    expect(parser.replace(testString)).toBe(resultString);
+
+    testString = `> exa\nmple.com`;
+    resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
     expect(parser.replace(testString)).toBe(resultString);
 
     testString = `> [exa\nmple.com](https://example.com)`;
-    resultString = `<blockquote> [exa</blockquote>\n<a href="https://mple.com" data-raw-href="mple.com" data-link-variant="auto" target="_blank" rel="noreferrer noopener">mple.com</a>](<a href="https://example.com" data-raw-href="https://example.com" data-link-variant="auto" target="_blank" rel="noreferrer noopener">https://example.com</a>)`
-    expect( parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString)
+    resultString = `<blockquote>[exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>](<a href="https://example.com" target="_blank" rel="noreferrer noopener">https://example.com</a>)`
+    expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Test nested link', () => {
+    let testString = `> example.com`;
+    let resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></blockquote>`
+    expect(parser.replace(testString)).toBe(resultString);
 
+    testString = `# example.com`;
+    resultString = `<h1><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></h1>`
+    expect(parser.replace(testString)).toBe(resultString);
+})
 
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
