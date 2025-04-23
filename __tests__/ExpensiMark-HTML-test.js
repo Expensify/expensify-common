@@ -1756,12 +1756,8 @@ test('Test markdown replacement for quoted multiline links', () => {
     let resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = `> exa\nmple.com`;
-    resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
-    expect(parser.replace(testString)).toBe(resultString);
-
     testString = `> [exa\nmple.com](https://example.com)`;
-    resultString = `<blockquote>[exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>](<a href="https://example.com" target="_blank" rel="noreferrer noopener">https://example.com</a>)`
+    resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">exa<br />mple.com</a></blockquote>`
     expect(parser.replace(testString)).toBe(resultString);
 });
 
