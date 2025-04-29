@@ -2351,6 +2351,11 @@ describe('room mentions', () => {
         const resultString = 'hi all <mention-report>#room</mention-report>';
         expect(parser.replace(testString)).toBe(resultString);
     });
+    test('room mention with : as leading character', () => {
+        const testString = ':#room';
+        const resultString = ':<mention-report>#room</mention-report>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 
     test('room mention with leading word and no space', () => {
         const testString = 'hi all#room';
