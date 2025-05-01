@@ -1224,7 +1224,7 @@ export default class ExpensiMark {
     /**
      * Replaces HTML with markdown
      */
-    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
+    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT, maxBodyLength = 0): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -1232,6 +1232,11 @@ export default class ExpensiMark {
         // If body tag is found then use the content of body rather than the whole HTML
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
+        }
+        if (maxBodyLength > 0) {
+            // Truncate the text after extracting the body tag, as some HTML sources (such as Microsoft Word)
+            // have headers larger than the typical maxLength of 10K even for a small body text.
+            generatedMarkdown = generatedMarkdown.slice(0, maxBodyLength);
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
