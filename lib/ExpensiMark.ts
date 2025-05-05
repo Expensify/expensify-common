@@ -1234,8 +1234,14 @@ export default class ExpensiMark {
             generatedMarkdown = parseBodyTag[2];
         }
         if (maxBodyLength > 0) {
-            // Truncate the text after extracting the body tag, as some HTML sources (such as Microsoft Word)
-            // have headers larger than the typical maxLength of 10K even for a small body text.
+            /*
+             * Some HTML sources (such as Microsoft Word) have headers larger than the typical maxLength of
+             * 10K even for a small body text. So the text is truncated after extracting the body element, to
+             * maximise the amount of body text that is included while still staying inside the length limit.
+             *
+             * The truncation happens before HTML to Markdown conversion, as the conversion is very slow for
+             * large input especially on mobile devices.
+             */
             generatedMarkdown = generatedMarkdown.slice(0, maxBodyLength);
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
