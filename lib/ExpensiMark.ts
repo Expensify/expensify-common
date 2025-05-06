@@ -454,8 +454,8 @@ export default class ExpensiMark {
              */
             {
                 name: 'italic',
-                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
-                replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
+                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(_*)(?![^\W_])(\b_+|\b)(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
+                replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores, extraLeadingUnderscoresEnd) => {
                     // Skip any <pre>, <code>, <a>, <mention-user>, <video> tag contents
                     if (html) {
                         return html;
@@ -467,9 +467,9 @@ export default class ExpensiMark {
                     }
 
                     if (String(textWithinUnderscores).match(`^${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}`)) {
-                        return `<em>${extraLeadingUnderscores}${textWithinUnderscores}</em>`;
+                        return `<em>${extraLeadingUnderscores}${textWithinUnderscores}</em>${extraLeadingUnderscoresEnd}`;
                     }
-                    return `${extraLeadingUnderscores}<em>${textWithinUnderscores}</em>`;
+                    return `${extraLeadingUnderscores}<em>${textWithinUnderscores}</em>${extraLeadingUnderscoresEnd}`;
                 },
             },
 
