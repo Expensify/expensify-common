@@ -454,7 +454,7 @@ export default class ExpensiMark {
              */
             {
                 name: 'italic',
-                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
+                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b|(?<=_)(?<!\b[^\W_]*_))_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
                 replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
                     // Skip any <pre>, <code>, <a>, <mention-user>, <video> tag contents
                     if (html) {
