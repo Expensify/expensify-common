@@ -98,6 +98,12 @@ test('Test italic markdown replacement with word boundary and undercores', () =>
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+test('Test italic markdown replacement with consecutive italicized strings with no space', () => {
+    const testString =  '_hello_world_ ' + '_hello__world_ ' + '_hello_';
+    const replacedString =  '<em>hello_world</em> ' + '<em>hello</em><em>world</em> ' + '<em>hello</em>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 test('Test quote markdown combined multi-line italic/bold/strikethrough markdown replacement', () => {
     let testString = '_test\n> test_';
     let replacedString = '_test<br /><blockquote>test_</blockquote>';
