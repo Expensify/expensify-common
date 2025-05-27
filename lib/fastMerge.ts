@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/prefer-for-of */
-
 'worklet';
+
+/* eslint-disable @typescript-eslint/prefer-for-of */
 
 // Mostly copied from https://medium.com/@lubaka.a/how-to-remove-lodash-performance-improvement-b306669ad0e1
 
