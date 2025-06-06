@@ -52,6 +52,7 @@ const CONST = {
         AU: 'AUD',
         UK: 'GBP',
         NZ: 'NZD',
+        EU: 'EUR',
     },
 
     STATES: {
