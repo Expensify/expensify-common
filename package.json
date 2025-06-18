@@ -17,6 +17,7 @@
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist",
+    "build:watch": "nodemon --watch lib --ext .js,.jsx,.ts,.tsx,.css --exec \"rm -f .build_complete && npm run build && npm pack && touch .build_complete\"",
     "test": "jest",
     "lint": "eslint lib/",
     "prettier": "prettier --write lib/",
@@ -43,6 +44,7 @@
     "ua-parser-js": "^1.0.38"
   },
   "devDependencies": {
+    "link": "2.1.1",
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-typescript": "^7.24.7",
     "@lwc/eslint-plugin-lwc": "^1.8.2",
@@ -68,7 +70,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "nodemon": "^3.1.10"
+
   },
   "browserify": {
     "transform": [
