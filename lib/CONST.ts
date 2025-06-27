@@ -52,6 +52,7 @@ const CONST = {
         AU: 'AUD',
         UK: 'GBP',
         NZ: 'NZD',
+        EU: 'EUR',
     },
 
     STATES: {
@@ -989,7 +990,10 @@ const UI = {
     DIALOG_Z_INDEX: 4000,
 } as const;
 
-// List of most frequently used public domains
+/**
+ * List of most frequently used public domains
+ * @deprecated use PUBLIC_DOMAINS_SET instead
+ */
 const PUBLIC_DOMAINS = [
     'accountant.com',
     'afis.ch',
@@ -1064,4 +1068,6 @@ const PUBLIC_DOMAINS = [
     'ymail.com',
 ] as const;
 
-export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS};
+const PUBLIC_DOMAINS_SET = new Set<string>(PUBLIC_DOMAINS);
+
+export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET, PUBLIC_DOMAINS};

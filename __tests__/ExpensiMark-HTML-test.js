@@ -98,6 +98,12 @@ test('Test italic markdown replacement with word boundary and undercores', () =>
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
+test('Test italic markdown replacement with consecutive italicized strings with no space', () => {
+    const testString =  '_hello_world_ ' + '_hello__world_ ' + '_hello_';
+    const replacedString =  '<em>hello_world</em> ' + '<em>hello</em><em>world</em> ' + '<em>hello</em>';
+    expect(parser.replace(testString)).toBe(replacedString);
+});
+
 test('Test quote markdown combined multi-line italic/bold/strikethrough markdown replacement', () => {
     let testString = '_test\n> test_';
     let replacedString = '_test<br /><blockquote>test_</blockquote>';
@@ -759,10 +765,21 @@ test('Test a period at the end of a link autolinks correctly', () => {
 });
 
 test('Test a url ending with a question mark autolinks correctly', () => {
-    const testString = 'https://github.com/Expensify/ReactNativeChat/pull/645?';
-    const resultString =
-        '<a href="https://github.com/Expensify/ReactNativeChat/pull/645?" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645?</a>';
-    expect(parser.replace(testString)).toBe(resultString);
+    const testCases = [
+        {
+            testString: 'https://github.com/Expensify/ReactNativeChat/pull/645?',
+            resultString:
+                '<a href="https://github.com/Expensify/ReactNativeChat/pull/645" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645</a>?',
+        },
+        {
+            testString: 'https://github.com/Expensify/ReactNativeChat/pull/645?test',
+            resultString:
+                '<a href="https://github.com/Expensify/ReactNativeChat/pull/645?test" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645?test</a>',
+        },
+    ];
+    testCases.forEach((testCase) => {
+        expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
+    });
 });
 
 test('Test urls with unmatched closing parentheses autolinks correctly', () => {
