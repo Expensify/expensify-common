@@ -164,6 +164,31 @@ export default class ExpensiMark {
             },
 
             /**
+             * Apply the mermaid-chart rule before the generic code-fence to process Mermaid code blocks specifically
+             * Converts ```mermaid blocks to mermaid-chart tags
+             */
+            {
+                name: 'mermaidChart',
+
+                // &#x60; is a backtick symbol we are matching on three of them, followed by 'mermaid', then content, then closing backticks
+                regex: /(&#x60;&#x60;&#x60;mermaid.*?(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
+
+                // Extract the chart content and create a mermaid-chart tag with the content as an attribute
+                replacement: (_extras, _match, _g1, _g2, chartContent) => {
+                    // Clean up the chart content and escape it for use as an attribute
+                    const cleanContent = chartContent.trim();
+                    const escapedContent = this.escapeAttributeContent(cleanContent);
+                    return `<mermaid-chart data-mermaid-chart="${escapedContent}"></mermaid-chart>`;
+                },
+                rawInputReplacement: (_extras, _match, _g1, newLineCharacter, chartContent) => {
+                    // Clean up the chart content and escape it for use as an attribute
+                    const cleanContent = chartContent.trim();
+                    const escapedContent = this.escapeAttributeContent(cleanContent);
+                    return `<mermaid-chart data-mermaid-chart="${escapedContent}"></mermaid-chart>`;
+                },
+            },
+
+            /**
              * Apply the code-fence to avoid replacing anything inside of it that we're not supposed to
              * (aka any rule with the '(?![^<]*<\/pre>)' avoidance in it
              */
