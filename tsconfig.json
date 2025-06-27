@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
       "target": "es2015",
-      "module": "commonjs",
+      "module": "ES2022",
       "types": ["react", "jest", "node"],
       "lib": ["esnext"],
       "allowJs": true,

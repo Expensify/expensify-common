@@ -3,7 +3,18 @@
  * WIP, This is in the process of migration from web-e. Please add methods to this as is needed.|
  * ----------------------------------------------------------------------------------------------
  */
-import once from 'lodash/once';
+// Native JavaScript replacement for lodash.once
+const once = (fn) => {
+    let called = false;
+    let result;
+    return function(...args) {
+        if (!called) {
+            called = true;
+            result = fn.apply(this, args);
+        }
+        return result;
+    };
+};
 import * as Utils from './utils';
 import * as Func from './Func';
 

@@ -13,22 +13,34 @@ function isMergeableObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Merges the source object into the target object.
- * @param target - The target object.
- * @param source - The source object.
- * @param shouldRemoveNestedNulls - If true, null object values will be removed.
- * @returns - The merged object.
+ * Merges two objects and removes null values if "shouldRemoveNullObjectValues" is set to true
+ *
+ * We generally want to remove null values from objects written to disk and cache, because it decreases the amount of data stored in memory and on disk.
+ * On native, when merging an existing value with new changes, SQLite will use JSON_PATCH, which removes top-level nullish values.
+ * To be consistent with the behaviour for merge, we'll also want to remove null values for "set" operations.
  */
-function mergeObject<TObject extends Record<string, unknown>>(target: TObject, source: TObject, shouldRemoveNullObjectValues = true): TObject {
+function fastMerge<TObject>(target: TObject, source: TObject, shouldRemoveNullObjectValues = true): TObject {
+    // We have to ignore arrays and nullish values here,
+    // otherwise merging will throw an error,
+    // because it expects an object as "source"
+    if (Array.isArray(source) || source === null || source === undefined) {
+        return source;
+    }
+
+    // If source is not an object, return it as-is
+    if (!isMergeableObject(source)) {
+        return source;
+    }
+
     const destination: Record<string, unknown> = {};
 
+    // Process target object properties first
     if (isMergeableObject(target)) {
-        // lodash adds a small overhead so we don't use it here
-        const targetKeys = Object.keys(target);
+        const targetKeys = Object.keys(target as Record<string, unknown>);
         for (let i = 0; i < targetKeys.length; ++i) {
             const key = targetKeys[i];
-            const sourceValue = source?.[key];
-            const targetValue = target?.[key];
+            const sourceValue = (source as Record<string, unknown>)?.[key];
+            const targetValue = (target as Record<string, unknown>)?.[key];
 
             // If shouldRemoveNullObjectValues is true, we want to remove null values from the merged object
             const isSourceOrTargetNull = targetValue === null || sourceValue === null;
@@ -40,12 +52,12 @@ function mergeObject<TObject extends Record<string, unknown>>(target: TObject, s
         }
     }
 
-    // lodash adds a small overhead so we don't use it here
-    const sourceKeys = Object.keys(source);
+    // Process source object properties
+    const sourceKeys = Object.keys(source as Record<string, unknown>);
     for (let i = 0; i < sourceKeys.length; ++i) {
         const key = sourceKeys[i];
-        const sourceValue = source?.[key];
-        const targetValue = target?.[key];
+        const sourceValue = (source as Record<string, unknown>)?.[key];
+        const targetValue = (target as Record<string, unknown>)?.[key];
 
         // If shouldRemoveNullObjectValues is true, we want to remove null values from the merged object
         const shouldOmitSourceKey = shouldRemoveNullObjectValues && sourceValue === null;
@@ -58,8 +70,8 @@ function mergeObject<TObject extends Record<string, unknown>>(target: TObject, s
 
             if (isSourceKeyMergable && targetValue) {
                 if (!shouldRemoveNullObjectValues || isSourceKeyMergable) {
-                    // eslint-disable-next-line no-use-before-define
-                    destination[key] = fastMerge(targetValue as TObject, sourceValue, shouldRemoveNullObjectValues);
+                    // Recursive call - since we're within the same function, this works
+                    destination[key] = fastMerge(targetValue, sourceValue, shouldRemoveNullObjectValues);
                 }
             } else if (!shouldRemoveNullObjectValues || sourceValue !== null) {
                 destination[key] = sourceValue;
@@ -68,23 +80,6 @@ function mergeObject<TObject extends Record<string, unknown>>(target: TObject, s
     }
 
     return destination as TObject;
-}
-
-/**
- * Merges two objects and removes null values if "shouldRemoveNullObjectValues" is set to true
- *
- * We generally want to remove null values from objects written to disk and cache, because it decreases the amount of data stored in memory and on disk.
- * On native, when merging an existing value with new changes, SQLite will use JSON_PATCH, which removes top-level nullish values.
- * To be consistent with the behaviour for merge, we'll also want to remove null values for "set" operations.
- */
-function fastMerge<TObject>(target: TObject, source: TObject, shouldRemoveNullObjectValues = true): TObject {
-    // We have to ignore arrays and nullish values here,
-    // otherwise "mergeObject" will throw an error,
-    // because it expects an object as "source"
-    if (Array.isArray(source) || source === null || source === undefined) {
-        return source;
-    }
-    return mergeObject(target as Record<string, unknown>, source as Record<string, unknown>, shouldRemoveNullObjectValues) as TObject;
 }
 
 export default fastMerge;

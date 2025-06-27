@@ -1,5 +1,34 @@
 import $ from 'jquery';
-import createTemplate from 'lodash/template';
+// Native JavaScript replacement for lodash.template
+const createTemplate = (templateString) => {
+    return (data) => {
+        let result = templateString;
+        
+        // Replace <%= variable %> patterns
+        result = result.replace(/<%=\s*([^%>]+)\s*%>/g, (match, variable) => {
+            const keys = variable.trim().split('.');
+            let value = data;
+            for (const key of keys) {
+                value = value && value[key];
+            }
+            return value !== undefined ? value : '';
+        });
+        
+        // Replace <% code %> patterns (simple evaluation)
+        result = result.replace(/<%\s*([^%>]+)\s*%>/g, (match, code) => {
+            try {
+                // Simple code evaluation - be careful with this in production
+                const func = new Function('data', `with(data) { ${code} }`);
+                const output = func(data);
+                return output !== undefined ? output : '';
+            } catch (e) {
+                return '';
+            }
+        });
+        
+        return result;
+    };
+};
 import * as Utils from './utils';
 
 /**

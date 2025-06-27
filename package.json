@@ -43,7 +43,9 @@
     "ua-parser-js": "^1.0.38"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.26.0",
+    "@babel/core": "^7.27.7",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.24.7",
     "@lwc/eslint-plugin-lwc": "^1.8.2",
     "@types/jest": "^29.5.13",
@@ -54,6 +56,7 @@
     "@typescript-eslint/eslint-plugin": "^8.26.1",
     "@typescript-eslint/parser": "^8.24.1",
     "babel-jest": "^29.0.0",
+    "babel-loader": "^10.0.0",
     "babelify": "10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-expensify": "^2.0.59",
@@ -68,7 +71,10 @@
     "jest-environment-jsdom": "^29.7.0",
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.7.2"
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.2",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
   },
   "browserify": {
     "transform": [

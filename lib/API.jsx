@@ -6,7 +6,8 @@
 
 // Use this deferred lib so we don't have a dependency on jQuery (so we can use this module in mobile)
 import {Deferred} from 'simply-deferred';
-import has from 'lodash/has';
+// Native JavaScript replacement for lodash.has
+const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
 import ExpensifyAPIDeferred from './APIDeferred';
 import * as Utils from './utils';
 

@@ -1,5 +1,16 @@
-import has from 'lodash/has';
-import once from 'lodash/once';
+// Native JavaScript replacements for lodash functions
+const has = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+const once = (fn) => {
+    let called = false;
+    let result;
+    return function(...args) {
+        if (!called) {
+            called = true;
+            result = fn.apply(this, args);
+        }
+        return result;
+    };
+};
 import Log from './Log';
 import * as Utils from './utils';
 

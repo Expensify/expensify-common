@@ -175,15 +175,19 @@ export default class ExpensiMark {
 
                 // Extract the chart content and create a mermaid-chart tag with the content as an attribute
                 replacement: (_extras, _match, _g1, _g2, chartContent) => {
-                    // Clean up the chart content and escape it for use as an attribute
+                    // Clean up the chart content and preserve newlines by encoding them
                     const cleanContent = chartContent.trim();
-                    const escapedContent = this.escapeAttributeContent(cleanContent);
+                    // Replace newlines with a placeholder that won't be stripped by escapeAttributeContent
+                    const contentWithEncodedNewlines = cleanContent.replace(/\r?\n/g, '__MERMAID_NEWLINE__');
+                    const escapedContent = this.escapeAttributeContent(contentWithEncodedNewlines);
                     return `<mermaid-chart data-mermaid-chart="${escapedContent}"></mermaid-chart>`;
                 },
                 rawInputReplacement: (_extras, _match, _g1, newLineCharacter, chartContent) => {
-                    // Clean up the chart content and escape it for use as an attribute
+                    // Clean up the chart content and preserve newlines by encoding them
                     const cleanContent = chartContent.trim();
-                    const escapedContent = this.escapeAttributeContent(cleanContent);
+                    // Replace newlines with a placeholder that won't be stripped by escapeAttributeContent
+                    const contentWithEncodedNewlines = cleanContent.replace(/\r?\n/g, '__MERMAID_NEWLINE__');
+                    const escapedContent = this.escapeAttributeContent(contentWithEncodedNewlines);
                     return `<mermaid-chart data-mermaid-chart="${escapedContent}"></mermaid-chart>`;
                 },
             },
