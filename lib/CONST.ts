@@ -16,7 +16,7 @@ const g_cloudFront = 'https://d2k5nsl2zxldvw.cloudfront.net';
 const g_cloudFrontImg = `${g_cloudFront}/images/`;
 
 const CONST = {
-    CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: ['USD', 'GBP', 'EUR', 'AUD', 'CAD'],
+    CORPAY_DIRECT_REIMBURSEMENT_CURRENCIES: ['USD', 'GBP', 'EUR', 'AUD', 'CAD', 'SGD'],
 
     /**
      * Default max ACH limit. It can be overwritten by a private NVP
