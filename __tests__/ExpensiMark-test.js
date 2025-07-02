@@ -16,6 +16,30 @@ test('Test text is unescaped', () => {
     expect(parser.htmlToText(htmlString)).toBe(resultString);
 });
 
+describe('codeFence', () => {
+
+    test('Test standard code fence', () => {
+        const markdownString = '```\ncodeblock\nsecond line\n```';
+        const htmlString = '<pre>codeblock<br />second&#32;line<br /></pre>';
+        const rawInputHtmlString = '<pre>\ncodeblock\nsecond&#32;line\n</pre>';
+        expect(parser.replace(markdownString)).toBe(htmlString);
+        expect(parser.htmlToMarkdown(htmlString)).toBe(markdownString);
+        expect(parser.replace(markdownString, {shouldKeepRawInput: true})).toBe(rawInputHtmlString);
+        expect(parser.htmlToMarkdown(htmlString)).toBe(markdownString);
+    });
+
+    test('Test code fence with code variant', () => {
+        const markdownString = '\n```bash\ncodeblock\nsecond line\n```';
+        const htmlString = '<br /><pre data-info-string="bash">codeblock<br />second&#32;line<br /></pre>';
+        const rawInputHtmlString = '\n<pre data-info-string="bash">\ncodeblock\nsecond&#32;line\n</pre>';
+
+        expect(parser.replace(markdownString)).toBe(htmlString);
+        expect(parser.htmlToMarkdown(htmlString)).toBe(markdownString);
+        expect(parser.replace(markdownString, {shouldKeepRawInput: true})).toBe(rawInputHtmlString);
+        expect(parser.htmlToMarkdown(htmlString)).toBe(markdownString);
+    });
+});
+
 test('Test with regex Maximum regex stack depth reached error', () => {
     const testString =
         '<h1>heading</h1> asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfisjksksjsjssskssjskskssksksksksskdkddkddkdksskskdkdkdksskskskdkdkdkdkekeekdkddenejeodxkdndekkdjddkeemdjxkdenendkdjddekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdicdjejajasjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjcdidjjcdkekdiccjdkejdjcjxisdjjdkedncicdjejejcckdsijcjdsodjcicdkejdi.cdjd';
@@ -56,47 +80,47 @@ describe('Test ExpensiMark getAttributeCache', () => {
         test('If mediaAttributeCachingFn is provided, returns it', () => {
             const extras = {
                 mediaAttributeCachingFn: jest.fn(),
-            }
+            };
             expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(extras.mediaAttributeCachingFn);
-        })
+        });
 
         test('If mediaAttributeCachingFn is not provided, returns cacheVideoAttributes', () => {
             const extras = {
                 cacheVideoAttributes: jest.fn(),
-            }
+            };
             expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(extras.cacheVideoAttributes);
-        })
+        });
 
         test('If mediaAttributeCachingFn and cacheVideoAttributes are not provided, returns undefined', () => {
-            const extras = {}
+            const extras = {};
             expect(expensiMark.getAttributeCache(extras).attrCachingFn).toBe(undefined);
-        })
+        });
     });
 
     describe('For attrCache', () => {
         test('If mediaAttributeCache is provided, returns it', () => {
             const extras = {
                 mediaAttributeCache: jest.fn(),
-            }
+            };
             expect(expensiMark.getAttributeCache(extras).attrCache).toBe(extras.mediaAttributeCache);
-        })
+        });
 
         test('If mediaAttributeCache is not provided, returns videoAttributeCache', () => {
             const extras = {
                 videoAttributeCache: jest.fn(),
-            }
+            };
             expect(expensiMark.getAttributeCache(extras).attrCache).toBe(extras.videoAttributeCache);
-        })
+        });
 
         test('If mediaAttributeCache and videoAttributeCache are not provided, returns undefined', () => {
-            const extras = {}
+            const extras = {};
             expect(expensiMark.getAttributeCache(extras).attrCache).toBe(undefined);
-        })
+        });
     });
 
     test('If no extras are undefined, returns undefined for both attrCachingFn and attrCache', () => {
         const {attrCachingFn, attrCache} = expensiMark.getAttributeCache(undefined);
         expect(attrCachingFn).toBe(undefined);
         expect(attrCache).toBe(undefined);
-    })
+    });
 });

@@ -9,3 +9,9 @@ dist
 
 # Published package
 *.tgz
+.build_complete
+
+# jest
+/coverage
+
+
