@@ -98,9 +98,10 @@ const Str = {
      * HTML encodes the given string.
      *
      * @param s The string to encode.
+     * @param fromOldDot Whether this requests is coming from oldDot or not.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s: string, fromOldDot: boolean = false) {
+    htmlEncode(s: string, fromOldDot = false) {
         if (fromOldDot && typeof jQuery !== 'undefined') {
             return jQuery('<textarea/>').text(s).html();
         }
