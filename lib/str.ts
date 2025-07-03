@@ -100,7 +100,10 @@ const Str = {
      * @param s The string to encode.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s: string) {
+    htmlEncode(s: string, fromOldDot: boolean = false) {
+        if (fromOldDot && typeof jQuery !== 'undefined') {
+            return jQuery('<textarea/>').text(s).html();
+        }
         return HtmlEntities.encode(s);
     },
 
