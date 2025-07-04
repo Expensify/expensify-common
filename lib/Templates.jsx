@@ -39,6 +39,8 @@ export default (function () {
             if (!this.compiled) {
                 this.compiled = createTemplate(this.templateValue, {
                     imports: {
+                        // Here we ignore the eslint rule because _ is imported from OD which does not exist in this repo
+                        // eslint-disable-next-line no-undef
                         _: _,
                     },
                 });
@@ -77,6 +79,8 @@ export default (function () {
             if (!this.compiled) {
                 this.compiled = createTemplate($(`#${this.id}`).html(), {
                     imports: {
+                        // Here we ignore the eslint rule because _ is imported from OD which does not exist in this repo
+                        // eslint-disable-next-line no-undef
                         '_': _,
                     },
                 });
