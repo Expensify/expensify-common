@@ -81,7 +81,7 @@ export default (function () {
                     imports: {
                         // Here we ignore the eslint rule because _ is imported from OD which does not exist in this repo
                         // eslint-disable-next-line no-undef, object-shorthand
-                        '_': _,
+                        _: _,
                     },
                 });
             }
