@@ -171,7 +171,7 @@ export default class ExpensiMark {
                 name: 'codeFence',
 
                 // &#x60; is a backtick symbol we are matching on three of them before then after a new line character
-                regex: /(&#x60;&#x60;&#x60;.*?(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
+                regex: /(?<![^^\r\n])(&#x60;&#x60;&#x60;(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
 
                 // We're using a function here to perform an additional replace on the content
                 // inside the backticks because Android is not able to use <pre> tags and does
@@ -1222,7 +1222,7 @@ export default class ExpensiMark {
     /**
      * Replaces HTML with markdown
      */
-    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT, maxBodyLength = 0): string {
+    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -1230,17 +1230,6 @@ export default class ExpensiMark {
         // If body tag is found then use the content of body rather than the whole HTML
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
-        }
-        if (maxBodyLength > 0) {
-            /*
-             * Some HTML sources (such as Microsoft Word) have headers larger than the typical maxLength of
-             * 10K even for a small body text. So the text is truncated after extracting the body element, to
-             * maximise the amount of body text that is included while still staying inside the length limit.
-             *
-             * The truncation happens before HTML to Markdown conversion, as the conversion is very slow for
-             * large input especially on mobile devices.
-             */
-            generatedMarkdown = generatedMarkdown.slice(0, maxBodyLength);
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
