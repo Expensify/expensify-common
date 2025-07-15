@@ -659,7 +659,6 @@ export default class ExpensiMark {
                     let resultString: string[] | string = g2
                         .replace(/\n?(<h1># )/g, '$1')
                         .replace(/(<h1>|<\/h1>)+/g, '\n')
-                        .trim()
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
@@ -1148,9 +1147,8 @@ export default class ExpensiMark {
                 return;
             }
 
-            const nextItem = splitText?.[index + 1];
-            // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
-            if ((nextItem && text.match(/>[\s]?$/) && !nextItem.startsWith('> ')) || text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            // Insert '\n' unless it ends with '\n' or it's the last element, or if it's a header ('# ') with a space.
+            if (text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
