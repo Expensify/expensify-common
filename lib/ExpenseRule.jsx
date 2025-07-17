@@ -2,7 +2,7 @@ export default class ExpenseRule {
     /**
      * Creates a new instance of this class.
      *
-     * @param {Object} ruleArray
+     * @param {Object|Array} ruleArray
      */
     constructor(ruleArray) {
         // It's not 100% certain that `ruleArray` is an array or an object, so support both of them so the app doesn't crash
