@@ -659,7 +659,8 @@ export default class ExpensiMark {
                     let resultString: string[] | string = g2
                         .replace(/\n?(<h1># )/g, '$1')
                         .replace(/(<h1>|<\/h1>)+/g, '\n')
-                        .trim()
+                        // Replace trim() with manually removing line breaks at the beginning and end of the string to avoid adding extra lines
+                        .replace(/^(\n)+|(\n)+$/g, '')
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
@@ -673,7 +674,9 @@ export default class ExpensiMark {
                             let depth;
                             do {
                                 depth = (modifiedText.match(/<blockquote>/gi) || []).length;
-                                modifiedText = modifiedText.replace(/<blockquote>/gi, '');
+                                // Need (\s)? because the server usually sends a space character after <blockquote> so we need to consume it,
+                                // avoid being redundant because it is added in the return part
+                                modifiedText = modifiedText.replace(/<blockquote>(\s)?/gi, '');
                                 modifiedText = modifiedText.replace(/<\/blockquote>/gi, '');
                             } while (/<blockquote>/i.test(modifiedText));
                             return `${'>'.repeat(depth)} ${modifiedText}`;
@@ -1123,14 +1126,19 @@ export default class ExpensiMark {
      * replace block element with '\n' if :
      * 1. We have text within the element.
      * 2. The text does not end with a new line.
-     * 3. The text does not have quote mark '>' .
-     * 4. It's not the last element in the string.
+     * 3. It's not the last element in the string.
      */
     replaceBlockElementWithNewLine(htmlString: string): string {
         // eslint-disable-next-line max-len
-        let splitText = htmlString.split(
-            /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
-        );
+        let splitText = htmlString
+            // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
+            .replaceAll(
+                /<blockquote>> (<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>)/gi,
+                '<blockquote>> ',
+            )
+            .split(
+                /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
+            );
         const stripHTML = (text: string) => Str.stripHTML(text);
         splitText = splitText.map(stripHTML);
         let joinedText = '';
@@ -1148,9 +1156,8 @@ export default class ExpensiMark {
                 return;
             }
 
-            const nextItem = splitText?.[index + 1];
-            // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
-            if ((nextItem && text.match(/>[\s]?$/) && !nextItem.startsWith('> ')) || text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            // Insert '\n' unless it ends with '\n' or it's the last element, or if it's a header ('# ') with a space.
+            if (text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
