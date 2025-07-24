@@ -8,6 +8,7 @@ import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
 import * as Utils from './utils';
 import Log from './Log';
+import Punnycode from './punnycode';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
@@ -405,6 +406,10 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
+        const unicodeVersion = Punnycode.toUnicode(str);
+        if (Constants.CONST.REG_EXP.EMOJI_RULE.test(unicodeVersion)) {
+            return false;
+        }
         return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
     },
 
