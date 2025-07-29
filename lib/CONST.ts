@@ -991,10 +991,9 @@ const UI = {
 } as const;
 
 /**
- * List of most frequently used public domains
- * @deprecated use PUBLIC_DOMAINS_SET instead
+ * Set of most frequently used public domains
  */
-const PUBLIC_DOMAINS = [
+const PUBLIC_DOMAINS_SET = new Set<string>([
     'accountant.com',
     'afis.ch',
     'aol.com',
@@ -1066,8 +1065,6 @@ const PUBLIC_DOMAINS = [
     'yahoo.com',
     'yahoo.com.br',
     'ymail.com',
-] as const;
+]);
 
-const PUBLIC_DOMAINS_SET = new Set<string>(PUBLIC_DOMAINS);
-
-export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET, PUBLIC_DOMAINS};
+export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET};

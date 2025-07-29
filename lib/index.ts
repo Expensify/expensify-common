@@ -2,7 +2,7 @@
 export {default as API} from './API';
 export {default as APIDeferred} from './APIDeferred';
 export {default as BrowserDetect} from './BrowserDetect';
-export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET, PUBLIC_DOMAINS} from './CONST';
+export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET} from './CONST';
 
 export {default as Cookie} from './Cookie';
 export {default as CredentialsWrapper, LOGIN_PARTNER_DETAILS} from './CredentialsWrapper';
