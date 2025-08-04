@@ -26,6 +26,12 @@ const CONST = {
     ACH_DEFAULT_MAX_AMOUNT_LIMIT: 2000000,
 
     /**
+     * This is set in main.html and is derived from a PHP template variable
+     * @type {String}
+     */
+    URL_TO_SECURE_WEBSITE: '',
+
+    /**
      * IRS remimbursement rate for mileage
      * WARNING ! UPDATE THE PHP CONSTANT VERSION WHEN UPDATING THIS ONE
      *
@@ -42,7 +48,9 @@ const CONST = {
 
     COUNTRY: {
         US: 'US',
+        MX: 'MX',
         AU: 'AU',
+        CA: 'CA',
         UK: 'UK',
         NZ: 'NZ',
     },
@@ -447,6 +455,11 @@ const CONST = {
         MAX_AGE_SAME_COMMENT: 300,
 
         SMARTREPORT_AGENT_EMAIL: 'smartreports@expensify.com',
+
+        /**
+         * Email to submit smart reports to (alias for consistency)
+         */
+        SMART_REPORT_AGENT_EMAIL: 'smartreports@expensify.com',
     },
 
     /**
@@ -571,6 +584,23 @@ const CONST = {
     BANK_ACCOUNT: {
         VERIFICATION_MAX_ATTEMPTS: 7,
     },
+
+    // The number of days that certain banks limit their transaction imports to
+    // see https://stackoverflow.com/c/expensify/questions/1289/1290#1290 for more about this.
+    // If a bank isn't on this list, we default to 90 days
+    BANK_IMPORT_DAY_LIMITS: {
+        'americanexpress.com': 30,
+        'oauth.bankofamerica.com': 30,
+        'oauth.capitalone.com': 90,
+        'oauth.chase.com': 90,
+        'discover.com': 30,
+        'admin.pexcard.com': 30,
+        svbdirect: 75,
+        'oauth.wellsfargo.com': 30,
+    },
+    DEFAULT_BANK_IMPORT_DAYS: 90,
+    PERSONAL_CARD_START_DATE_TOOLTIP:
+        'Expensify will automatically import the earliest available transactions from this card. If a start date is selected, transactions with a posted date prior to this will not be included.',
 
     /**
      * Emails that the user shouldn't be interacting with from the front-end interface
