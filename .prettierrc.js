@@ -6,4 +6,5 @@ module.exports = {
     arrowParens: 'always',
     printWidth: 190,
     singleAttributePerLine: true,
+    quoteProps: 'consistent',
 };

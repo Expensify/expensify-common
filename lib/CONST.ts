@@ -595,7 +595,7 @@ const CONST = {
         'oauth.chase.com': 90,
         'discover.com': 30,
         'admin.pexcard.com': 30,
-        svbdirect: 75,
+        'svbdirect': 75,
         'oauth.wellsfargo.com': 30,
     },
     DEFAULT_BANK_IMPORT_DAYS: 90,
