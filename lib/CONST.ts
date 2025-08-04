@@ -70,7 +70,6 @@ const CONST = {
 
     CURRENCIES: {
         AU: 'AUD',
-        GB: 'GBP',
         US: 'USD',
         NZ: 'NZD',
         UK: 'GBP',
