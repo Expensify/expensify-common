@@ -32,19 +32,6 @@ const CONST = {
     URL_TO_SECURE_WEBSITE: '',
 
     /**
-     * This is the maximum number of transactions that can be exported to quickbooks
-     *
-     * @type {Number}
-     */
-    QUICKBOOKS_EXPORT_LIMIT: 1500,
-
-    /**
-     * UNUSED, BY KEPT FOR "STORAGE"
-     * This key is only valid for URLs in the https://www.expensify.com/ realm.
-     */
-    GOOGLE_API_KEY: 'ABQIAAAAjtisvqrcGboNGaMCOuZ0ohQhhEh1oy_9rMnViic8Bkkf7v7oORR3gYYz-G4SlC7hy72TbmOpwIHAtg',
-
-    /**
      * IRS remimbursement rate for mileage
      * WARNING ! UPDATE THE PHP CONSTANT VERSION WHEN UPDATING THIS ONE
      *
@@ -69,10 +56,10 @@ const CONST = {
     },
 
     CURRENCIES: {
-        AU: 'AUD',
         US: 'USD',
-        NZ: 'NZD',
+        AU: 'AUD',
         UK: 'GBP',
+        NZ: 'NZD',
         EU: 'EUR',
     },
 
@@ -510,13 +497,6 @@ const CONST = {
          * @type {String}
          */
         MOMENT_DATE_TIME: 'YYYY-MM-DD HH:mm',
-
-        /**
-         * This is a typical format of the date plus the time and seconds
-         *
-         * @type {String}
-         */
-        MOMENT_DATE_TIME_WITH_SECONDS: 'YYYY-MM-DD HH:mm:ss',
 
         /**
          * Pretty format used for report history items
