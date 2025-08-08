@@ -144,6 +144,8 @@ describe('Str.isValidEmail', () => {
 
         // xn-- style domain name
         expect(Str.isValidEmail('test@xn--diseolatinoamericano-76b.com')).toBeTruthy();
+        // domain name with emoji must be false
+        expect(Str.isValidEmail('test@xn--sjdgjckjg-4b26h.com')).toBeFalsy(); // test@sjdgj😂ckjg.com
 
         // Unusual but valid prefixes
         expect(Str.isValidEmail('-test@example.com')).toBeTruthy();

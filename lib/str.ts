@@ -3,6 +3,7 @@
 /* eslint-disable no-control-regex */
 import $ from 'jquery';
 import {parsePhoneNumber} from 'awesome-phonenumber';
+import Punycode from 'punycode/';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
@@ -405,6 +406,10 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
+        const unicodeVersion = Punycode.toUnicode(str);
+        if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
+            return false;
+        }
         return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
     },
 
