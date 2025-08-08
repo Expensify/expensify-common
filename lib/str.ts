@@ -3,12 +3,12 @@
 /* eslint-disable no-control-regex */
 import $ from 'jquery';
 import {parsePhoneNumber} from 'awesome-phonenumber';
+import Punycode from 'punycode/';
 import * as HtmlEntities from 'html-entities';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
 import * as Utils from './utils';
 import Log from './Log';
-import Punycode from 'punycode/';
 
 const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
 
