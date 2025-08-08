@@ -19,6 +19,7 @@ function isMergeableObject(value: unknown): value is Record<string, unknown> {
  * On native, when merging an existing value with new changes, SQLite will use JSON_PATCH, which removes top-level nullish values.
  * To be consistent with the behaviour for merge, we'll also want to remove null values for "set" operations.
  */
+function fastMerge<TObject>(target: TObject, source: TObject, shouldRemoveNullObjectValues?: boolean): TObject;
 function fastMerge<TObject extends Record<string, unknown>>(target: TObject, source: TObject, shouldRemoveNullObjectValues = true): TObject {
     // We have to ignore arrays and nullish values here,
     // otherwise "mergeObject" will throw an error,
