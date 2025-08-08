@@ -407,7 +407,7 @@ const Str = {
      */
     isValidEmail(str: string): boolean {
         const unicodeVersion = Punycode.toUnicode(str);
-        if (Constants.CONST.REG_EXP.EMOJI_RULE.test(unicodeVersion)) {
+        if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
             return false;
         }
         return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
