@@ -67,6 +67,14 @@ test('Test quote markdown replacement', () => {
     expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
 });
 
+test('Test quote markdown replacement with shouldEscapeText set as false', () => {
+    const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+    const quoteTestReplacedString =
+        '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a >quote that did not<br /><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />>it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
+
+    expect(parser.replace(quoteTestStartString, {shouldEscapeText: false})).toBe(quoteTestReplacedString);
+});
+
 // Words wrapped in _ successfully replaced with <em></em>
 test('Test italic markdown replacement', () => {
     const italicTestStartString = 'This is a _sentence,_ and it has some _punctuation, words, and spaces_. ___ _italic__ _test_ _ testing_ test_test_test. _ test _ _test _';
@@ -454,12 +462,23 @@ test('Test code fencing', () => {
     expect(parser.replace(codeFenceExampleMarkdown)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br /></pre>');
 });
 
+test('Test code fencing with shouldEscapeText set to false', () => {
+    const codeFenceExampleMarkdown = "```\nconst javaScript = 'javaScript'\n```";
+    expect(parser.replace(codeFenceExampleMarkdown, {shouldEscapeText: false})).toBe("<pre>const&#32;javaScript&#32;=&#32;'javaScript'<br /></pre>");
+});
+
 test('Test code fencing with spaces and new lines', () => {
     let codeFenceExample = "```\nconst javaScript = 'javaScript'\n    const php = 'php'\n```";
     expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;<br /></pre>');
 
+    codeFenceExample = "```\nconst javaScript = 'javaScript'\n    const php = 'php'\n```";
+    expect(parser.replace(codeFenceExample, {shouldEscapeText: false})).toBe("<pre>const&#32;javaScript&#32;=&#32;'javaScript'<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;'php'<br /></pre>");
+
     codeFenceExample = '```\n\n# test\n\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
+
+    codeFenceExample = '```\n\n# test\n\n```';
+    expect(parser.replace(codeFenceExample, {shouldEscapeText: false})).toBe('<pre><br />#&#32;test<br /><br /></pre>');
 
     codeFenceExample = '```\n\n\n# test\n\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br /><br />#&#32;test<br /><br /></pre>');
@@ -485,6 +504,11 @@ test('Test inline code blocks', () => {
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you?');
 });
 
+test('Test inline code blocks with shouldEscapeText set to false', () => {
+    const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you?';
+    expect(parser.replace(inlineCodeStartString, {shouldEscapeText: false})).toBe('My favorite language is <code>JavaScript</code>. How about you?');
+});
+
 test('Test double backticks', () => {
     const testString = 'My favorite language is ``JavaScript``. How about you?';
     expect(parser.replace(testString)).toBe('My favorite language is &#x60;&#x60;JavaScript&#x60;&#x60;. How about you?');
@@ -498,6 +522,11 @@ test('Test inline code blocks with triple backticks', () => {
 test('Test multiple inline codes in one line', () => {
     const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you? I also like `Python`.';
     expect(parser.replace(inlineCodeStartString)).toBe('My favorite language is <code>JavaScript</code>. How about you? I also like <code>Python</code>.');
+});
+
+test('Test multiple inline codes in one line with shouldEscapeText set to false', () => {
+    const inlineCodeStartString = 'My favorite language is `JavaScript`. How about you? I also like `Python`.';
+    expect(parser.replace(inlineCodeStartString, {shouldEscapeText: false})).toBe('My favorite language is <code>JavaScript</code>. How about you? I also like <code>Python</code>.');
 });
 
 test('Test triple backticks', () => {
@@ -529,6 +558,13 @@ test('Test words enclosed in double backticks', () => {
 test('Test code fencing with ExpensiMark syntax inside', () => {
     const codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
     expect(parser.replace(codeFenceExample)).toBe(
+        '<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)<br /></pre>',
+    );
+});
+
+test('Test code fencing with ExpensiMark syntax inside and shouldEscapeText set to false', () => {
+    const codeFenceExample = '```\nThis is how you can write ~strikethrough~, *bold*, _italics_, and [links](https://www.expensify.com)\n```';
+    expect(parser.replace(codeFenceExample, {shouldEscapeText: false})).toBe(
         '<pre>This&#32;is&#32;how&#32;you&#32;can&#32;write&#32;~strikethrough~,&#32;*bold*,&#32;_italics_,&#32;and&#32;[links](https://www.expensify.com)<br /></pre>',
     );
 });

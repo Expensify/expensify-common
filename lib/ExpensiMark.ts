@@ -171,7 +171,7 @@ export default class ExpensiMark {
                 name: 'codeFence',
 
                 // &#x60; is a backtick symbol we are matching on three of them before then after a new line character
-                regex: /(?<![^^\r\n])(&#x60;&#x60;&#x60;(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
+                regex: /(?<![^^\r\n])((?:&#x60;&#x60;&#x60;|```)(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?(?:&#x60;&#x60;&#x60;|```)(?!&#x60;|`))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;|```)/g,
 
                 // We're using a function here to perform an additional replace on the content
                 // inside the backticks because Android is not able to use <pre> tags and does
@@ -227,7 +227,7 @@ export default class ExpensiMark {
                 // but we should not replace backtick symbols if they include <pre> tags between them.
                 // At least one non-whitespace character or a specific whitespace character (" " and "\u00A0")
                 // must be present inside the backticks.
-                regex: /(\B|_|)&#x60;(.*?)&#x60;(\B|_|)(?!(?!<pre>)[^<]*(?:<(?!pre>)[^<]*)*<\/pre>|[^<]*<\/video>)/gm,
+                regex: /(\B|_|)(?:&#x60;|`)(.*?)(?:&#x60;|`)(\B|_|)(?!(?!<pre>)[^<]*(?:<(?!pre>)[^<]*)*<\/pre>|[^<]*<\/video>)/gm,
                 replacement: (_extras, match, g1, g2, g3) => {
                     const g2Value = g2.trim() === '' ? g2.replaceAll(' ', '&nbsp;') : g2;
                     if (!g2Value) {
@@ -425,7 +425,7 @@ export default class ExpensiMark {
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
+                    const regex = /^(?:&gt;|>)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
 
                     let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
                     if (shouldKeepRawInput) {
@@ -1283,7 +1283,7 @@ export default class ExpensiMark {
             isStartingWithSpace = !!g2;
             return '';
         };
-        const textToReplace = text.replace(/^&gt;( )?/gm, handleMatch);
+        const textToReplace = text.replace(/^(?:&gt;|>)( )?/gm, handleMatch);
         const filterRules = ['heading1'];
         // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
