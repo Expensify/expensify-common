@@ -503,7 +503,7 @@ export default class ExpensiMark {
                 name: 'shortMentions',
 
                 regex: new RegExp(
-                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@(?=((?=[\\w]+[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))(?!here)\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))`,
+                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@(?=((?=[\\w]+[\\w'#%+-]*(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))(?!here)\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))`,
                     'gim',
                 ),
                 replacement: (_extras, match, g1, g2) => {
