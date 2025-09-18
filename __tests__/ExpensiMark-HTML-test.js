@@ -1530,6 +1530,12 @@ describe('Tests for short mentions', () => {
         const resultString = '<mention-short>@john.doe</mention-short><mention-here>@here</mention-here>';
         expect(parser.replace(testString)).toBe(resultString);
     });
+
+    test('short mentions should work for single character followed by dot', () => {
+        const testString = '@j.doe';
+        const resultString = '<mention-short>@j.doe</mention-short>';
+        expect(parser.replace(testString)).toBe(resultString);
+    });
 });
 
 // Examples that should match for here mentions:
