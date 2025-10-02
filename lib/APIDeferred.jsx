@@ -49,7 +49,7 @@ export default function APIDeferred(promise, extractedProperty) {
      */
     function handleError(jsonCode, response) {
         // Look for handlers for this error code
-        const handlers = errorHandlers[jsonCode];
+        const handlers = errorHandlers[jsonCode] ?? [];
         if (handlers.length > 0) {
             Func.bulkInvoke(handlers, [jsonCode, response]);
         } else {

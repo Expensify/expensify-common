@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.136",
+  "version": "2.0.160",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -36,6 +36,7 @@
     "localforage": "^1.10.0",
     "lodash": "4.17.21",
     "prop-types": "15.8.1",
+    "punycode": "^2.3.1",
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "semver": "^7.6.3",
@@ -49,6 +50,7 @@
     "@types/jest": "^29.5.13",
     "@types/jquery": "^3.5.30",
     "@types/lodash": "^4.17.10",
+    "@types/punycode": "^2.1.4",
     "@types/react-dom": "^18.3.5",
     "@types/ua-parser-js": "^0.7.39",
     "@typescript-eslint/eslint-plugin": "^8.26.1",

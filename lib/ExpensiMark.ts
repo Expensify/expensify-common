@@ -171,7 +171,7 @@ export default class ExpensiMark {
                 name: 'codeFence',
 
                 // &#x60; is a backtick symbol we are matching on three of them before then after a new line character
-                regex: /(&#x60;&#x60;&#x60;.*?(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?&#x60;&#x60;&#x60;(?!&#x60;))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;)/g,
+                regex: /(?<![^^\r\n])((?:&#x60;&#x60;&#x60;|```)(\r\n|\n))((?:\s*?(?!(?:\r\n|\n)?(?:&#x60;&#x60;&#x60;|```)(?!&#x60;|`))[\S])+\s*?(?:\r\n|\n))(&#x60;&#x60;&#x60;|```)/g,
 
                 // We're using a function here to perform an additional replace on the content
                 // inside the backticks because Android is not able to use <pre> tags and does
@@ -227,7 +227,7 @@ export default class ExpensiMark {
                 // but we should not replace backtick symbols if they include <pre> tags between them.
                 // At least one non-whitespace character or a specific whitespace character (" " and "\u00A0")
                 // must be present inside the backticks.
-                regex: /(\B|_|)&#x60;(.*?)&#x60;(\B|_|)(?!(?!<pre>)[^<]*(?:<(?!pre>)[^<]*)*<\/pre>|[^<]*<\/video>)/gm,
+                regex: /(\B|_|)(?:&#x60;|`)(.*?)(?:&#x60;|`)(\B|_|)(?!(?!<pre>)[^<]*(?:<(?!pre>)[^<]*)*<\/pre>|[^<]*<\/video>)/gm,
                 replacement: (_extras, match, g1, g2, g3) => {
                     const g2Value = g2.trim() === '' ? g2.replaceAll(' ', '&nbsp;') : g2;
                     if (!g2Value) {
@@ -425,7 +425,7 @@ export default class ExpensiMark {
                 // block quotes naturally appear on their own line. Blockquotes should not appear in code fences or
                 // inline code blocks. A single prepending space should be stripped if it exists
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
-                    const regex = /^(?:&gt;)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
+                    const regex = /^(?:&gt;|>)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
 
                     let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
                     if (shouldKeepRawInput) {
@@ -454,7 +454,7 @@ export default class ExpensiMark {
              */
             {
                 name: 'italic',
-                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b)_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
+                regex: /(<(pre|code|a|mention-user|video)[^>]*>(.*?)<\/\2>)|((\b_+|\b|(?<=_)(?<!\b[^\W_]*_))_((?![\s_])[\s\S]*?[^\s_](?<!\s))_(?![^\W_])(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/mention-user>|<\/video>)))/g,
                 replacement: (_extras, match, html, tag, content, text, extraLeadingUnderscores, textWithinUnderscores) => {
                     // Skip any <pre>, <code>, <a>, <mention-user>, <video> tag contents
                     if (html) {
@@ -503,7 +503,7 @@ export default class ExpensiMark {
                 name: 'shortMentions',
 
                 regex: new RegExp(
-                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@(?=((?=[\\w]+[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))(?!here)\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))`,
+                    `${Constants.CONST.REG_EXP.PRE_MENTION_TEXT_PART}(@(?=((?=[\\w]+[\\w'#%+-]*(?:\\.[\\w'#%+-]+)*)[\\w\\.'#%+-]{1,64}(?= |_|\\b))(?!([:\\/\\\\]))(?<end>.*))(?!here)\\S{3,254}(?=\\k<end>$))(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>|<\\/mention-user>|<\\/mention-here>))`,
                     'gim',
                 ),
                 replacement: (_extras, match, g1, g2) => {
@@ -659,7 +659,8 @@ export default class ExpensiMark {
                     let resultString: string[] | string = g2
                         .replace(/\n?(<h1># )/g, '$1')
                         .replace(/(<h1>|<\/h1>)+/g, '\n')
-                        .trim()
+                        // Replace trim() with manually removing line breaks at the beginning and end of the string to avoid adding extra lines
+                        .replace(/^(\n)+|(\n)+$/g, '')
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
@@ -673,7 +674,9 @@ export default class ExpensiMark {
                             let depth;
                             do {
                                 depth = (modifiedText.match(/<blockquote>/gi) || []).length;
-                                modifiedText = modifiedText.replace(/<blockquote>/gi, '');
+                                // Need (\s)? because the server usually sends a space character after <blockquote> so we need to consume it,
+                                // avoid being redundant because it is added in the return part
+                                modifiedText = modifiedText.replace(/<blockquote>(\s)?/gi, '');
                                 modifiedText = modifiedText.replace(/<\/blockquote>/gi, '');
                             } while (/<blockquote>/i.test(modifiedText));
                             return `${'>'.repeat(depth)} ${modifiedText}`;
@@ -1123,14 +1126,19 @@ export default class ExpensiMark {
      * replace block element with '\n' if :
      * 1. We have text within the element.
      * 2. The text does not end with a new line.
-     * 3. The text does not have quote mark '>' .
-     * 4. It's not the last element in the string.
+     * 3. It's not the last element in the string.
      */
     replaceBlockElementWithNewLine(htmlString: string): string {
         // eslint-disable-next-line max-len
-        let splitText = htmlString.split(
-            /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
-        );
+        let splitText = htmlString
+            // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
+            .replaceAll(
+                /<blockquote>> (<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>)/gi,
+                '<blockquote>> ',
+            )
+            .split(
+                /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
+            );
         const stripHTML = (text: string) => Str.stripHTML(text);
         splitText = splitText.map(stripHTML);
         let joinedText = '';
@@ -1148,9 +1156,8 @@ export default class ExpensiMark {
                 return;
             }
 
-            const nextItem = splitText?.[index + 1];
-            // Insert '\n' unless it ends with '\n' or '>' or it's the last element, or if it's a header ('# ') with a space.
-            if ((nextItem && text.match(/>[\s]?$/) && !nextItem.startsWith('> ')) || text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            // Insert '\n' unless it ends with '\n' or it's the last element, or if it's a header ('# ') with a space.
+            if (text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
                 joinedText += text;
             } else {
                 joinedText += `${text}\n`;
@@ -1224,7 +1231,7 @@ export default class ExpensiMark {
     /**
      * Replaces HTML with markdown
      */
-    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT, maxBodyLength = 0): string {
+    htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
@@ -1232,17 +1239,6 @@ export default class ExpensiMark {
         // If body tag is found then use the content of body rather than the whole HTML
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
-        }
-        if (maxBodyLength > 0) {
-            /*
-             * Some HTML sources (such as Microsoft Word) have headers larger than the typical maxLength of
-             * 10K even for a small body text. So the text is truncated after extracting the body element, to
-             * maximise the amount of body text that is included while still staying inside the length limit.
-             *
-             * The truncation happens before HTML to Markdown conversion, as the conversion is very slow for
-             * large input especially on mobile devices.
-             */
-            generatedMarkdown = generatedMarkdown.slice(0, maxBodyLength);
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
@@ -1287,7 +1283,7 @@ export default class ExpensiMark {
             isStartingWithSpace = !!g2;
             return '';
         };
-        const textToReplace = text.replace(/^&gt;( )?/gm, handleMatch);
+        const textToReplace = text.replace(/^(?:&gt;|>)( )?/gm, handleMatch);
         const filterRules = ['heading1'];
         // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {

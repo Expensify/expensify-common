@@ -3,7 +3,7 @@ type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
 type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 type ClientLoggingCallBack = (message: string, extraData: Parameters) => void;
 type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date};
-type LoggerOptions = {serverLoggingCallback: ServerLoggingCallback; isDebug: boolean; clientLoggingCallback: ClientLoggingCallBack};
+type LoggerOptions = {serverLoggingCallback: ServerLoggingCallback; isDebug: boolean; clientLoggingCallback: ClientLoggingCallBack; maxLogLinesBeforeFlush?: number};
 
 const MAX_LOG_LINES_BEFORE_FLUSH = 50;
 
@@ -16,12 +16,15 @@ export default class Logger {
 
     isDebug: boolean;
 
-    constructor({serverLoggingCallback, isDebug, clientLoggingCallback}: LoggerOptions) {
+    maxLogLinesBeforeFlush: number;
+
+    constructor({serverLoggingCallback, isDebug, clientLoggingCallback, maxLogLinesBeforeFlush}: LoggerOptions) {
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
         this.logLines = [];
         this.serverLoggingCallback = serverLoggingCallback;
         this.clientLoggingCallback = clientLoggingCallback;
         this.isDebug = isDebug;
+        this.maxLogLinesBeforeFlush = maxLogLinesBeforeFlush || MAX_LOG_LINES_BEFORE_FLUSH;
 
         // Public Methods
         this.info = this.info.bind(this);
@@ -79,7 +82,7 @@ export default class Logger {
         }
 
         // If we're over the limit, flush the logs
-        if (length > MAX_LOG_LINES_BEFORE_FLUSH || forceFlushToServer) {
+        if (length > this.maxLogLinesBeforeFlush || forceFlushToServer) {
             this.logToServer();
         }
     }

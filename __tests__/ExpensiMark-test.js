@@ -100,3 +100,31 @@ describe('Test ExpensiMark getAttributeCache', () => {
         expect(attrCache).toBe(undefined);
     })
 });
+
+describe('Test ExpensiMark replaceBlockElementWithNewLine', () => {
+    const blockElement = ['div', 'comment', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li'];
+    describe.each(blockElement)('replace <%s> block exactly', (blockName) => {
+        test('without blockquote', () => {
+            const input = `textLine1<${blockName}>textLine2</${blockName}>textLine3   <${blockName}>textLine4\n</${blockName}><${blockName}># </${blockName}><${blockName}>textLine6</${blockName}>`;
+            const expected = 'textLine1\ntextLine2\ntextLine3   \ntextLine4\n# textLine6';
+            expect(parser.replaceBlockElementWithNewLine(input)).toBe(expected);
+        });
+        test('with blockquote', () => {
+            const input = `<blockquote>> <${blockName}>textLine</${blockName}></blockquote>`;
+            const expected = '> textLine';
+            expect(parser.replaceBlockElementWithNewLine(input)).toBe(expected);
+        });
+    });
+
+    test('replace <blockquote> block exactly', () => {
+        const input = `<blockquote>> textLine1 </blockquote><blockquote>> textLine2\n</blockquote><blockquote>> textLine3</blockquote>`;
+        const expected = '> textLine1 \n> textLine2\n> textLine3';
+        expect(parser.replaceBlockElementWithNewLine(input)).toBe(expected);
+    });
+
+    test('replace multi block exactly', () => {
+        const input = `<blockquote>> textLine1 </blockquote><blockquote>> <p>textLine2\n<p><div>textLine3</div></blockquote><h1>textLine4</h1><div><p><comment>textLine5\n\n</comment></p></div><li><p>textLine6</p></li>`;
+        const expected = '> textLine1 \n> textLine2\ntextLine3\ntextLine4\ntextLine5\ntextLine6';
+        expect(parser.replaceBlockElementWithNewLine(input)).toBe(expected);
+    });
+});
