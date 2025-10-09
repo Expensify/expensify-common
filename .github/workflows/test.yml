@@ -8,12 +8,14 @@ jobs:
     test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            # v5.0.0
+            - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
 
             - name: Remove version from package-lock.json
               run: jq 'del(.version, .packages[""].version)' package-lock.json > normalized-package-lock.json
 
-            - uses: actions/setup-node@v4
+            # v5.0.0
+            - uses: actions/setup-node@13427813f706a0f6c9b74603b31103c40ab1c35a
               with:
                   node-version-file: '.nvmrc'
                   cache: npm
