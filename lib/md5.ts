@@ -1,4 +1,5 @@
-/* global -md5 */
+/* eslint-disable one-var, no-var, no-param-reassign, no-bitwise, eqeqeq, no-inner-declarations, @typescript-eslint/no-unused-vars, no-shadow */
+
 /**
  * md5 hash implementation
  * http://www.myersdaily.org/joseph/javascript/md5-text.html
