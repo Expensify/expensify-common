@@ -19,3 +19,4 @@ export * as Url from './Url';
 export {default as fastMerge} from './fastMerge';
 export {default as Str} from './str';
 export {default as TLD_REGEX} from './tlds';
+export {default as md5} from "./md5";
