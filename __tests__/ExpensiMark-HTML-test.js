@@ -223,24 +223,6 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     expect(parser.replace(testInput)).toBe(result);
 });
 
-test('Test markdown replacement for multiline email hyperlinks', () => {
-    let testInput = '[test\ntest](test@test.com)';
-    let result = '<a href="mailto:test@test.com">test<br />test</a>';
-    expect(parser.replace(testInput)).toBe(result);
-
-    testInput = '[test\n\n\n](test@test.com)';
-    result = '<a href="mailto:test@test.com">test</a>';
-    expect(parser.replace(testInput)).toBe(result);
-
-    testInput = '[test\ntest](test.com)';
-    result = '<a href="https://test.com" target="_blank" rel="noreferrer noopener">test<br />test</a>';
-    expect(parser.replace(testInput)).toBe(result);
-
-    testInput = 'test@gmail.com';
-    result = '<a href="mailto:test@gmail.com">test@gmail.com</a>';
-    expect(parser.replace(testInput)).toBe(result);
-});
-
 // Check emails within other markdown
 test('Test emails within other markdown', () => {
     const testString =
@@ -1807,16 +1789,6 @@ test('Test link with header before the alias multiline text part', () => {
     const testString = '# [google\ngoogle\ngoogle](https://google.com)';
 
     const resultString = '<h1>[google</h1>google<br />google](<a href="https://google.com" target="_blank" rel="noreferrer noopener">https://google.com</a>)';
-    expect(parser.replace(testString)).toBe(resultString);
-});
-
-test('Test markdown replacement for quoted multiline links', () => {
-    let testString = `> exa\nmple.com`;
-    let resultString = `<blockquote>exa</blockquote><a href="https://mple.com" target="_blank" rel="noreferrer noopener">mple.com</a>`
-    expect(parser.replace(testString)).toBe(resultString);
-
-    testString = `> [exa\nmple.com](https://example.com)`;
-    resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">exa<br />mple.com</a></blockquote>`
     expect(parser.replace(testString)).toBe(resultString);
 });
 

@@ -10,6 +10,25 @@ test('Test text is escaped', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
+test('Disallow multiline markdown links (label and URL)', () => {
+    // Multiline label inside [] should not form a link; URL is auto-linked inside parentheses
+    let testString = 'Text with multiline label [Expensi\nfy](https://www.expensify.com) end.';
+    let resultString = 'Text with multiline label [Expensi<br />fy](<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>) end.';
+    expect(parser.replace(testString)).toBe(resultString);
+
+    // Windows-style newline in label -> auto-link URL inside parentheses
+    testString = 'Text with CRLF label [Expen\r\nsify](https://www.expensify.com) end.';
+    resultString = 'Text with CRLF label [Expen<br />sify](<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>) end.';
+    expect(parser.replace(testString)).toBe(resultString);
+});
+
+test('Do not extract links from multiline markdown link', () => {
+    const commentLabel = 'Before [Expen\nsify](https://example.com) after';
+    const commentURL = 'Before [Expensify](https://exa\nmple.com) after';
+    expect(parser.extractLinksInMarkdownComment(commentLabel)).toStrictEqual([]);
+    expect(parser.extractLinksInMarkdownComment(commentURL)).toStrictEqual([]);
+});
+
 test('Test text is unescaped', () => {
     const htmlString = '&amp;&#32;&amp;amp;&#32;&amp;lt;&#32;&lt;';
     const resultString = '& &amp; &lt; <';

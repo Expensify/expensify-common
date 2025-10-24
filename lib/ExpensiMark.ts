@@ -73,7 +73,7 @@ type TruncateOptions = {
     removeImageTag?: boolean;
 };
 
-const MARKDOWN_LINK_REGEX = new RegExp(`\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
+const MARKDOWN_LINK_REGEX = new RegExp(`\\[((?:[^\\[\\]\\r\\n]*(?:\\[[^\\[\\]\\r\\n]*][^\\[\\]\\r\\n]*)*))]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 
 const MARKDOWN_VIDEO_REGEX = new RegExp(
