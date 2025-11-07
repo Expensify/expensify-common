@@ -15,7 +15,7 @@ function getOSAndName(): DeviceInfo {
     // Detection logic inspired by UAParser guide on iOS 26:
     // https://docs.uaparser.dev/guides/how-to-detect-ios-26-using-javascript.html
     const [osMajor, osMinor] = (os.version ?? '').split('.');
-    if (browser.name === 'Mobile Safari' && browser.major === '26' && os.name === 'iOS' && parseInt(osMajor) >= 18 && parseInt(osMinor) >= 6) {
+    if (browser.name === 'Mobile Safari' && browser.major === '26' && os.name === 'iOS' && parseInt(osMajor, 10) >= 18 && parseInt(osMinor, 10) >= 6) {
         osVersion = '26';
     }
 
