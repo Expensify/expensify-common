@@ -8,7 +8,7 @@ import * as Utils from './utils';
  * Templates is a global namespace for each template, HTML ones or inlines ones.
  *
  * @type Module
- * @constructor
+ * @class
  */
 export default (function () {
     const templateStore = {};
@@ -93,13 +93,13 @@ export default (function () {
      * Returns the template
      *
      * @param {Array} templatePath
-     * @return {InlineTemplate|undefined}
+     * @returns {InlineTemplate|undefined}
      */
     function getTemplate(templatePath) {
         let template = templateStore;
-        templatePath.forEach((pathname) => {
+        for (const pathname of templatePath) {
             template = template[pathname];
-        });
+        }
         return template;
     }
 
@@ -108,14 +108,11 @@ export default (function () {
      * used to augment the template object
      *
      * @param {Array} wantedNamespace Array of string reprensenting the namespace
-     * @return {Object} Referene to the object holding the namespace
+     * @returns {Object} Referene to the object holding the namespace
      */
     function getTemplateNamespace(wantedNamespace) {
         let namespace = templateStore;
-        let currentArgument;
-        for (let argumentNumber = 0; argumentNumber < wantedNamespace.length; argumentNumber++) {
-            currentArgument = wantedNamespace[argumentNumber];
-
+        for (const currentArgument of wantedNamespace) {
             if (namespace[currentArgument] === undefined) {
                 namespace[currentArgument] = {};
             }
@@ -130,7 +127,7 @@ export default (function () {
          *
          * @param {Array} templatePath
          * @param {Object} [data] Information that need to be injected into the template
-         * @return {String}
+         * @returns {String}
          */
         get(templatePath, data = {}) {
             const template = getTemplate(templatePath);
@@ -150,7 +147,7 @@ export default (function () {
         /**
          * Given a templatePath, does it have a registered template?
          * @param  {Array} templatePath
-         * @return {Boolean}
+         * @returns {Boolean}
          */
         has(templatePath) {
             return getTemplate(templatePath) !== undefined;
@@ -161,7 +158,7 @@ export default (function () {
          */
         init() {
             // Read the DOM to find all the templates, and make them available to the code
-            // eslint-disable-next-line rulesdir/prefer-underscore-method
+
             $('.js_template').each((__, $el) => {
                 const namespaceElements = $el.id.split('_');
                 const id = namespaceElements.pop();
@@ -181,19 +178,19 @@ export default (function () {
          */
         register(wantedNamespace, templateData) {
             const namespace = getTemplateNamespace(wantedNamespace);
-            Object.keys(templateData).forEach((key) => {
+            for (const key of Object.keys(templateData)) {
                 const template = templateData[key];
 
                 if (Utils.isObject(template)) {
                     // If the template is an object, add templates for all keys
                     namespace[key] = {};
-                    Object.keys(template).forEach((templateKey) => {
+                    for (const templateKey of Object.keys(template)) {
                         namespace[key][templateKey] = new InlineTemplate(template[templateKey]);
-                    });
+                    }
                 } else {
                     namespace[key] = new InlineTemplate(template);
                 }
-            });
+            }
         },
 
         /**

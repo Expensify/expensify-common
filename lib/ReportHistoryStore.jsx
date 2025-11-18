@@ -149,7 +149,7 @@ export default class ReportHistoryStore {
              * @param {String[]} events
              */
             bindCacheClearingEvents: (events) => {
-                events.forEach((event) => this.PubSub.subscribe(event, () => (this.cache = {})));
+                for (const event of events) this.PubSub.subscribe(event, () => (this.cache = {}));
             },
 
             // We need this to be publically available for cases where we get the report history
@@ -297,7 +297,7 @@ export default class ReportHistoryStore {
      *
      * @param {Number} reportID
      *
-     * @return {Deferrred}
+     * @returns {Deferrred}
      */
     getFromCache(reportID) {
         const promise = new Deferred();

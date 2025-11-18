@@ -65,7 +65,7 @@ function set(name, value, expiredays) {
  * Detects if cookies are currently enabled in the browser
  * by trying to create a cookie, see if it exists, and delete it afterwards again.
  *
- * @return {Boolean} True if cookies are enabled, otherwise false.
+ * @returns {Boolean} True if cookies are enabled, otherwise false.
  */
 function enabled() {
     // Check they have cookies enabled
@@ -83,7 +83,7 @@ function enabled() {
  * Fetches the value of a cookie.
  *
  * @param  {String} name The name of the cookie to fetch.
- * @return {String|null} The value of the cookie.
+ * @returns {String|null} The value of the cookie.
  */
 function get(name) {
     if (!name || document.cookie.length <= 0) {
@@ -110,14 +110,14 @@ function get(name) {
  * @param {String} name
  * @param {Any|null} defaultValue
  *
- * @return {Any|null}
+ * @returns {Any|null}
  */
 function getJSON(name, defaultValue = null) {
     let data;
 
     try {
         data = JSON.parse(get(name));
-    } catch (err) {
+    } catch {
         data = defaultValue;
     }
 
@@ -128,7 +128,7 @@ function getJSON(name, defaultValue = null) {
  * Find a cookie that has been set.
  *
  * @param {String} name Name of the cookie to find
- * @return {Boolean} Whether or not the cookie is set
+ * @returns {Boolean} Whether or not the cookie is set
  */
 function has(name) {
     return get(name) !== null;
@@ -137,7 +137,7 @@ function has(name) {
 /**
  * Returns help link when cookies are enabled or null.
  *
- * @return {(String|null)}
+ * @returns {(String|null)}
  */
 function getHelpLink() {
     if (enabled()) {

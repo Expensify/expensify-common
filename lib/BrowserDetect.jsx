@@ -63,15 +63,15 @@ function searchString() {
     let dataString;
     let dataProp;
 
-    for (let i = 0; i < data.length; i++) {
-        dataString = data[i].string;
-        dataProp = data[i].prop;
+    for (const item of data) {
+        dataString = item.string;
+        dataProp = item.prop;
         if (dataString) {
-            if (dataString.indexOf(data[i].subString) !== -1) {
-                return data[i].identity;
+            if (dataString.indexOf(item.subString) !== -1) {
+                return item.identity;
             }
         } else if (dataProp) {
-            return data[i].identity;
+            return item.identity;
         }
     }
     return '';
@@ -94,10 +94,9 @@ function getMobileDevice() {
     ];
     const dataString = navigator.userAgent;
 
-    for (let i = 0; i < data.length; i++) {
-        const {devices, identity} = data[i];
-        for (let j = 0; j < devices.length; j++) {
-            if (dataString.indexOf(devices[j]) !== -1) {
+    for (const {devices, identity} of data) {
+        for (const device of devices) {
+            if (dataString.indexOf(device) !== -1) {
                 return identity;
             }
         }

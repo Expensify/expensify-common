@@ -11,7 +11,7 @@ import * as Utils from './utils';
  * @param {Object} params
  * @param {Object} params.parameters
  * @param {String} params.message
- * @return {Promise}
+ * @returns {Promise}
  */
 function serverLoggingCallback(logger, params) {
     return API(Network('/api/')).logToServer(params);

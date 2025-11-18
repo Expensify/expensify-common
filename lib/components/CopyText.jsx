@@ -14,6 +14,7 @@ const propTypes = {
 };
 
 const defaultProps = {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     onSuccess: () => {},
     textContent: '',
 };

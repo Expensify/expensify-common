@@ -104,7 +104,7 @@ export default class ExpensiMark {
 
     /**
      * Set the logger to use for logging inside of the ExpensiMark class
-     * @param logger - The logger object to use
+     * @param {Logger} logger - The logger object to use
      */
     static setLogger(logger: Logger) {
         ExpensiMark.Log = logger;
@@ -180,11 +180,11 @@ export default class ExpensiMark {
                 // want to do this anywhere else since that would break HTML.
                 // &nbsp; will create styling issues so use &#32;
                 replacement: (_extras, _match, _g1, _g2, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
                 rawInputReplacement: (_extras, _match, _g1, newLineCharacter, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;').replaceAll(/<emoji>|<\/emoji>/g, '');
                     return `<pre>${newLineCharacter}${group}</pre>`;
                 },
             },
@@ -198,10 +198,11 @@ export default class ExpensiMark {
                 name: 'video',
                 regex: MARKDOWN_VIDEO_REGEX,
                 /**
-                 * @param extras - The extras object
-                 * @param videoName - The first capture group - video name
-                 * @param videoSource - The second capture group - video URL
-                 * @return Returns the HTML video tag
+                 * @param {Object} extras - The extras object
+                 * @param {string} _match
+                 * @param {string} videoName - The first capture group - video name
+                 * @param {string} videoSource - The second capture group - video URL
+                 * @returns Returns the HTML video tag
                  */
                 replacement: (extras, _match, videoName, videoSource) => {
                     const attrCache = this.getAttributeCache(extras).attrCache;
@@ -588,7 +589,7 @@ export default class ExpensiMark {
                     inputString
                         .replace('<br></br>', '<br/>')
                         .replace('<br><br/>', '<br/>')
-                        .replace(/(<tr.*?<\/tr>)/g, '$1<br/>')
+                        .replaceAll(/(<tr.*?<\/tr>)/g, '$1<br/>')
                         .replace('<br/></tbody>', '')
                         .replace(SLACK_SPAN_NEW_LINE_TAG + SLACK_SPAN_NEW_LINE_TAG, '<br/><br/><br/>')
                         .replace(SLACK_SPAN_NEW_LINE_TAG, '<br/><br/>'),
@@ -620,7 +621,7 @@ export default class ExpensiMark {
                 replacement: (extras, match, tagName, innerContent) => {
                     // To check if style attribute contains bold font-weight
                     const isBoldFromStyle = (style: string | null) => {
-                        return style ? style.replace(/\s/g, '').includes('font-weight:bold;') || style.replace(/\s/g, '').includes('font-weight:700;') : false;
+                        return style ? style.replaceAll(/\s/g, '').includes('font-weight:bold;') || style.replaceAll(/\s/g, '').includes('font-weight:700;') : false;
                     };
 
                     const updateSpacesAndWrapWithAsterisksIfBold = (content: string, isBold: boolean) => {
@@ -637,7 +638,7 @@ export default class ExpensiMark {
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
 
                     // Process nested spans with potential bold style
-                    const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
+                    const processedInnerContent = innerContent.replaceAll(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
                         const nestedStyleMatch = nestedMatch.match(fontWeightRegex);
                         const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
                         return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
@@ -657,10 +658,10 @@ export default class ExpensiMark {
                 replacement: (_extras, _match, _g1, g2) => {
                     // We remove the line break before heading inside quote to avoid adding extra line
                     let resultString: string[] | string = g2
-                        .replace(/\n?(<h1># )/g, '$1')
-                        .replace(/(<h1>|<\/h1>)+/g, '\n')
+                        .replaceAll(/\n?(<h1># )/g, '$1')
+                        .replaceAll(/(<h1>|<\/h1>)+/g, '\n')
                         // Replace trim() with manually removing line breaks at the beginning and end of the string to avoid adding extra lines
-                        .replace(/^(\n)+|(\n)+$/g, '')
+                        .replaceAll(/^(\n)+|(\n)+$/g, '')
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
@@ -676,8 +677,8 @@ export default class ExpensiMark {
                                 depth = (modifiedText.match(/<blockquote>/gi) || []).length;
                                 // Need (\s)? because the server usually sends a space character after <blockquote> so we need to consume it,
                                 // avoid being redundant because it is added in the return part
-                                modifiedText = modifiedText.replace(/<blockquote>(\s)?/gi, '');
-                                modifiedText = modifiedText.replace(/<\/blockquote>/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<blockquote>(\s)?/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<\/blockquote>/gi, '');
                             } while (/<blockquote>/i.test(modifiedText));
                             return `${'>'.repeat(depth)} ${modifiedText}`;
                         })
@@ -713,11 +714,11 @@ export default class ExpensiMark {
                 name: 'image',
                 regex: /<img[^><]*src\s*=\s*(['"])(.*?)\1(.*?)>(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 /**
-                 * @param extras - The extras object
-                 * @param _match - The full match
-                 * @param _g1 - The first capture group (the quote)
-                 * @param imgSource - The second capture group - src attribute value
-                 * @param imgAttrs - The third capture group - any attributes after src
+                 * @param {Object} extras - The extras object
+                 * @param {string} _match - The full match
+                 * @param {string} _g1 - The first capture group (the quote)
+                 * @param {string} imgSource - The second capture group - src attribute value
+                 * @param {string} imgAttrs - The third capture group - any attributes after src
                  * @returns The markdown image tag
                  */
                 replacement: (extras, _match, _g1, imgSource, imgAttrs) => {
@@ -750,12 +751,12 @@ export default class ExpensiMark {
                 name: 'video',
                 regex: /<video[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/video>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 /**
-                 * @param extras - The extras object
-                 * @param match The full match
-                 * @param _g1 The first capture group
-                 * @param videoSource - the second capture group - video source (video URL)
-                 * @param videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
-                 * @param videoName - the fourth capture group will be the video file name (the text between opening and closing video tags)
+                 * @param {Object} extras - The extras object
+                 * @param {string} _match - The full match
+                 * @param {string} _g1 - The first capture group
+                 * @param {string} videoSource - the second capture group - video source (video URL)
+                 * @param {string} videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
+                 * @param {string} videoName - the fourth capture group will be the video file name (the text between opening and closing video tags)
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
@@ -895,7 +896,7 @@ export default class ExpensiMark {
 
         /**
          * The list of rules that have to be applied when shouldKeepWhitespace flag is true.
-         * @param rule - The rule to check.
+         * @param {Rule} rule - The rule to check.
          * @returns true if the rule should be applied, otherwise false.
          */
         this.filterRules = (rule: Rule) => !this.whitespaceRulesToDisable.includes(rule.name);
@@ -919,9 +920,9 @@ export default class ExpensiMark {
 
     /**
      * Retrieves the HTML ruleset based on the provided filter rules, disabled rules, and shouldKeepRawInput flag.
-     * @param filterRules - An array of rule names to filter the ruleset.
-     * @param disabledRules - An array of rule names to disable in the ruleset.
-     * @param shouldKeepRawInput - A boolean flag indicating whether to keep raw input.
+     * @param {string[]} filterRules - An array of rule names to filter the ruleset.
+     * @param {string[]} disabledRules - An array of rule names to disable in the ruleset.
+     * @param {boolean} shouldKeepRawInput - A boolean flag indicating whether to keep raw input.
      */
     getHtmlRuleset(filterRules: string[], disabledRules: string[], shouldKeepRawInput: boolean) {
         let rules = this.rules;
@@ -942,13 +943,15 @@ export default class ExpensiMark {
     /**
      * Replaces markdown with html elements
      *
-     * @param text - Text to parse as markdown
-     * @param [options] - Options to customize the markdown parser
-     * @param [options.filterRules=[]] - An array of name of rules as defined in this class.
+     * @param {string} text - Text to parse as markdown
+     * @param {Object} [options] - Options to customize the markdown parser
+     * @param {string[]} [options.filterRules=[]] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied.
-     * @param [options.shouldEscapeText=true] - Whether or not the text should be escaped
-     * @param [options.disabledRules=[]] - An array of name of rules as defined in this class.
+     * @param {boolean} [options.shouldEscapeText=true] - Whether or not the text should be escaped
+     * @param {string[]} [options.disabledRules=[]] - An array of name of rules as defined in this class.
      * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
+     * @param {boolean} options.shouldKeepRawInput
+     * @param {Object} options.extras
      */
     replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = [], extras = EXTRAS_DEFAULT}: ReplaceOptions = {}): string {
         // This ensures that any html the user puts into the comment field shows as raw html
@@ -973,7 +976,9 @@ export default class ExpensiMark {
             }
         };
         try {
-            rules.forEach(processRule);
+            for (const rule of rules) {
+                processRule(rule);
+            }
         } catch (e) {
             ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
 
@@ -986,6 +991,9 @@ export default class ExpensiMark {
 
     /**
      * Checks matched URLs for validity and replace valid links with html elements
+     * @param {RegExp} regex
+     * @param {string} textToCheck
+     * @param {ReplacementFn} replacement
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
         let match = regex.exec(textToCheck);
@@ -1088,6 +1096,10 @@ export default class ExpensiMark {
 
     /**
      * Checks matched Emails for validity and replace valid links with html elements
+     * @param {RegExp} regex
+     * @param {string} textToCheck
+     * @param {ReplacementFn} replacement
+     * @param {boolean} shouldKeepRawInput
      */
     modifyTextForEmailLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldKeepRawInput: boolean): string {
         let match = regex.exec(textToCheck);
@@ -1127,9 +1139,9 @@ export default class ExpensiMark {
      * 1. We have text within the element.
      * 2. The text does not end with a new line.
      * 3. It's not the last element in the string.
+     * @param {string} htmlString
      */
     replaceBlockElementWithNewLine(htmlString: string): string {
-        // eslint-disable-next-line max-len
         let splitText = htmlString
             // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
             .replaceAll(
@@ -1164,7 +1176,9 @@ export default class ExpensiMark {
             }
         };
 
-        splitText.forEach(processText);
+        for (let index = 0; index < splitText.length; index++) {
+            processText(splitText[index], index);
+        }
 
         return joinedText;
     }
@@ -1188,9 +1202,10 @@ export default class ExpensiMark {
      *
      * Note that there will always be only a single closing tag, even if multiple opening tags exist.
      * Only one closing tag is needed to detect if a nested quote has ended.
+     * @param {string} text
      */
     unpackNestedQuotes(text: string): string {
-        let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
+        let parsedText = text.replaceAll(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
             return `${match}</split>`;
         });
         const splittedText = parsedText.split('</split>');
@@ -1206,7 +1221,7 @@ export default class ExpensiMark {
                     return '';
                 }
 
-                const textLine = line.replace(/(<br \/>)$/g, '');
+                const textLine = line.replaceAll(/(<br \/>)$/g, '');
                 if (textLine.startsWith('<blockquote>')) {
                     count += (textLine.match(/<blockquote>/g) || []).length;
                 }
@@ -1230,6 +1245,8 @@ export default class ExpensiMark {
 
     /**
      * Replaces HTML with markdown
+     * @param {string} htmlString
+     * @param {Extras} extras
      */
     htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let generatedMarkdown = htmlString;
@@ -1251,12 +1268,16 @@ export default class ExpensiMark {
             generatedMarkdown = this.replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToMarkdownRules.forEach(processRule);
+        for (const rule of this.htmlToMarkdownRules) {
+            processRule(rule);
+        }
         return Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
     }
 
     /**
      * Convert HTML to text
+     * @param {string} htmlString
+     * @param {Extras} extras
      */
     htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let replacedText = htmlString;
@@ -1264,7 +1285,9 @@ export default class ExpensiMark {
             replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToTextRules.forEach(processRule);
+        for (const rule of this.htmlToTextRules) {
+            processRule(rule);
+        }
 
         // Unescaping because the text is escaped in 'replace' function
         // We use 'htmlDecode' instead of 'unescape' to replace entities like '&#32;'
@@ -1275,7 +1298,8 @@ export default class ExpensiMark {
     /**
      * Main text to html 'quote' parsing logic.
      * Removes &gt;( ) from text and recursively calls replace function to process nested quotes and build blockquote HTML result.
-     * @param shouldKeepRawInput determines if the raw input should be kept for nested quotes.
+     * @param {string} text
+     * @param {boolean} shouldKeepRawInput determines if the raw input should be kept for nested quotes.
      */
     replaceQuoteText(text: string, shouldKeepRawInput: boolean): {replacedText: string; shouldAddSpace: boolean} {
         let isStartingWithSpace = false;
@@ -1283,7 +1307,7 @@ export default class ExpensiMark {
             isStartingWithSpace = !!g2;
             return '';
         };
-        const textToReplace = text.replace(/^(?:&gt;|>)( )?/gm, handleMatch);
+        const textToReplace = text.replaceAll(/^(?:&gt;|>)( )?/gm, handleMatch);
         const filterRules = ['heading1'];
         // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
@@ -1302,6 +1326,7 @@ export default class ExpensiMark {
 
     /**
      * Check if the input text includes only the open or the close tag of an element.
+     * @param {string} textToCheck
      */
     containsNonPairTag(textToCheck: string): boolean {
         // Create a regular expression to match HTML tags
@@ -1336,6 +1361,7 @@ export default class ExpensiMark {
     }
 
     /**
+     * @param {string} comment
      * @returns array or undefined if exception occurs when executing regex matching
      */
     extractLinksInMarkdownComment(comment: string): string[] | undefined {
@@ -1357,6 +1383,8 @@ export default class ExpensiMark {
 
     /**
      * Compares two markdown comments and returns a list of the links removed in a new comment.
+     * @param {string} oldComment
+     * @param {string} newComment
      */
     getRemovedMarkdownLinks(oldComment: string, newComment: string): string[] {
         const linksInOld = this.extractLinksInMarkdownComment(oldComment);
@@ -1366,7 +1394,7 @@ export default class ExpensiMark {
 
     /**
      * Escapes the content of an HTML attribute value
-     * @param content - string content that possible contains HTML
+     * @param {string} content - string content that possible contains HTML
      * @returns original MD content escaped for use in HTML attribute value
      */
     escapeAttributeContent(content: string): string {
@@ -1575,10 +1603,10 @@ export default class ExpensiMark {
 
     /**
      * Replaces text with a replacement based on a regex
-     * @param text - The text to replace
-     * @param regexp - The regex to match
-     * @param extras - The extras object
-     * @param replacement - The replacement string or function
+     * @param {string} text - The text to replace
+     * @param {RegExp} regexp - The regex to match
+     * @param {Extras} extras - The extras object
+     * @param {Replacement} replacement - The replacement string or function
      * @returns The replaced text
      */
     replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, replacement: Replacement): string {

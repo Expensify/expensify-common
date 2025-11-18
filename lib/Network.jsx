@@ -86,9 +86,9 @@ export default function Network(endpoint) {
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
             // the ajax settings accordingly
-            Object.entries(parameters).forEach(([key, value]) => {
+            for (const [key, value] of Object.entries(parameters)) {
                 if (!value) {
-                    return;
+                    continue;
                 }
 
                 // Populate formData in case we need it
@@ -96,7 +96,7 @@ export default function Network(endpoint) {
                 if (value instanceof File || value instanceof Blob) {
                     shouldUseFormData = true;
                 }
-            });
+            }
 
             if (shouldUseFormData) {
                 settings.processData = false;
@@ -132,24 +132,24 @@ export default function Network(endpoint) {
 
             // Add our data as form data
             const formData = new FormData();
-            Object.entries(parameters).forEach(([key, value]) => {
+            for (const [key, value] of Object.entries(parameters)) {
                 if (value === undefined) {
-                    return;
+                    continue;
                 }
                 if (Array.isArray(value)) {
-                    value.forEach((valueItem, i) => {
+                    for (const [i, valueItem] of value.entries()) {
                         if (Utils.isObject(valueItem)) {
-                            Object.entries(valueItem).forEach(([valueItemObjectKey, valueItemObjectValue]) => {
+                            for (const [valueItemObjectKey, valueItemObjectValue] of Object.entries(valueItem)) {
                                 formData.append(`${key}[${i}][${valueItemObjectKey}]`, valueItemObjectValue);
-                            });
+                            }
                         } else {
                             formData.append(`${key}[${i}]`, valueItem);
                         }
-                    });
+                    }
                 } else {
                     formData.append(key, value);
                 }
-            });
+            }
             settings.body = formData;
 
             // Make our request via the fetch API but return it in the form of a jQuery promise

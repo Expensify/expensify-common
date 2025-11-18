@@ -67,6 +67,7 @@ const defaultProps = {
     label: '',
     labelOnRight: false,
     labelClasses: null,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     onChangeCallback: () => {},
     children: null,
     preventEdit: false,
@@ -189,7 +190,7 @@ class OnOffSwitch extends Component {
         return (
             <div>
                 {/* For 100% a11y compliance we'd need to move the <input> into the <label> element */}
-                {/* eslint-disable jsx-a11y/label-has-for */}
+                {}
                 {this.props.label && !this.props.labelOnRight && (
                     <label
                         className={cn(this.props.labelClasses)}

@@ -25,9 +25,10 @@ const reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
  * Converts the characters "&", "<", ">", '"', and "'" in `string` to their
  * corresponding HTML entities.
  * Source: https://github.com/lodash/lodash/blob/main/src/escape.ts
+ * @param {string} string
  */
 function escapeText(string: string): string {
-    return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
+    return string && reHasUnescapedHtml.test(string) ? string.replaceAll(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
 }
 
 const htmlUnescapes = {
@@ -48,9 +49,10 @@ const reHasEscapedHtml = RegExp(reEscapedHtml.source);
  * `&amp;`, `&lt;`, `&gt;`, `&quot;` and `&#39;` in `string` to
  * their corresponding characters.
  * Source: https://github.com/lodash/lodash/blob/main/src/unescape.ts
+ * @param {string} string
  * */
 function unescapeText(string: string): string {
-    return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
+    return string && reHasEscapedHtml.test(string) ? string.replaceAll(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
 }
 
 /**

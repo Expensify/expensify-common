@@ -1,9 +1,11 @@
-/* eslint-disable one-var, no-var, no-param-reassign, no-bitwise, eqeqeq, no-inner-declarations, @typescript-eslint/no-unused-vars, no-shadow */
+/* eslint-disable one-var, no-var, no-param-reassign, no-bitwise, eqeqeq, @typescript-eslint/no-unused-vars, no-shadow */
 
 /**
  * md5 hash implementation
  * http://www.myersdaily.org/joseph/javascript/md5-text.html
  *
+ * @param {number[]} x
+ * @param {number[]} k
  */
 function md5cycle(x: number[], k: number[]) {
     var a = x[0],

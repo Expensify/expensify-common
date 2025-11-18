@@ -44,9 +44,9 @@ const PubSubMixin = {
      * When the component is unmounted, we want to subscribe from all of our event IDs
      */
     componentWillUnmount() {
-        this.eventIds.forEach((eventId) => {
+        for (const eventId of this.eventIds) {
             PubSub.unsubscribe(eventId);
-        });
+        }
     },
 };
 
