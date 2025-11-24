@@ -192,6 +192,12 @@ describe('Str.isValidEmail', () => {
         // TLD too long
         expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl')).toBeFalsy();
     });
+
+    it('Handles undefined and null values gracefully', () => {
+        expect(Str.isValidEmail(undefined)).toBeFalsy();
+        expect(Str.isValidEmail(null)).toBeFalsy();
+        expect(Str.isValidEmail('')).toBeFalsy();
+    });
 });
 
 describe('Str.isValidPhoneFormat', () => {

@@ -406,6 +406,9 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
+        if (!str || typeof str !== 'string') {
+            return false;
+        }
         const unicodeVersion = Punycode.toUnicode(str);
         if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
             return false;
