@@ -113,6 +113,12 @@ describe('Str.sanitizeURL', () => {
 describe('Str.isValidEmail', () => {
     it('Correctly identifies valid emails', () => {
         expect(Str.isValidEmail('abc@gmail.com')).toBeTruthy();
+
+        // Real-world examples from production testing
+        expect(Str.isValidEmail('zz@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmail('zz+1@gmail.com')).toBeTruthy();
+        expect(Str.isValidEmail('dabeamanator+20251120@gmail.com')).toBeTruthy();
+
         expect(Str.isValidEmail('test@gmail')).toBeFalsy();
         expect(Str.isValidEmail('@gmail.com')).toBeFalsy();
         expect(Str.isValidEmail('usernamelongerthan64charactersshouldnotworkaccordingtorfc822whichisusedbyphp@gmail.com')).toBeFalsy();
@@ -191,6 +197,12 @@ describe('Str.isValidEmail', () => {
 
         // TLD too long
         expect(Str.isValidEmail('a@a.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkl')).toBeFalsy();
+    });
+
+    it('Handles undefined and null values gracefully', () => {
+        expect(Str.isValidEmail(undefined)).toBeFalsy();
+        expect(Str.isValidEmail(null)).toBeFalsy();
+        expect(Str.isValidEmail('')).toBeFalsy();
     });
 });
 
