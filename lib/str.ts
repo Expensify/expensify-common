@@ -406,24 +406,10 @@ const Str = {
      * @returns True if the string is an email
      */
     isValidEmail(str: string): boolean {
-        // Return false if str is undefined, null, or not a string
         if (!str || typeof str !== 'string') {
             return false;
         }
-        
-        // Safely convert to unicode using punycode, handling any errors
-        let unicodeVersion: string | undefined;
-        try {
-            unicodeVersion = Punycode.toUnicode(str);
-            // Ensure unicodeVersion is a valid string before using it
-            if (!unicodeVersion || typeof unicodeVersion !== 'string') {
-                unicodeVersion = str;
-            }
-        } catch (error) {
-            // If punycode conversion fails, fall back to original string
-            unicodeVersion = str;
-        }
-        
+        const unicodeVersion = Punycode.toUnicode(str);
         if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
             return false;
         }
