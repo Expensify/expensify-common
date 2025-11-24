@@ -58,7 +58,7 @@
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
     "eslint": "^8.57.1",
-    "eslint-config-expensify": "^2.0.59",
+    "eslint-config-expensify": "^2.0.89",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-jest": "^28.8.2",
     "eslint-plugin-prettier": "^5.2.1",
