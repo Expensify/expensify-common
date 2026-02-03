@@ -30,8 +30,8 @@ test('Test Log.info()', () => {
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
-        {message: "[info] Test1", parameters: "",},
-        {message: "[info] Test2", parameters: "",},
+        {message: "[info] Test1", parameters: "", email: null},
+        {message: "[info] Test2", parameters: "", email: null},
     ]);
 
     // Test the case where `isDebug` is `true` in `Log` instance and we pass `extraData` parameter
@@ -53,7 +53,7 @@ test('Test Log.alert()', () => {
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[alrt] Test2", parameters: {}}]);
+    expect(packet).toEqual([{message: "[alrt] Test2", parameters: {}, email: null}]);
 });
 
 test('Test Log.warn()', () => {
@@ -69,7 +69,7 @@ test('Test Log.warn()', () => {
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[warn] Test2", parameters: ''}]);
+    expect(packet).toEqual([{message: "[warn] Test2", parameters: '', email: null}]);
 });
 
 test('Test Log.hmmm()', () => {
@@ -88,8 +88,8 @@ test('Test Log.hmmm()', () => {
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
-        {message: "[hmmm] Test", parameters: ''},
-        {message: "[info] Test", parameters: ''}
+        {message: "[hmmm] Test", parameters: '', email: null},
+        {message: "[info] Test", parameters: '', email: null}
     ]);
 });
 
