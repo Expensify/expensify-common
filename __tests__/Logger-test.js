@@ -114,3 +114,22 @@ test('Test getContextEmail captures email per log line', () => {
     delete packet[0].timestamp;
     expect(packet).toEqual([{message: "[info] Test message", parameters: '', email: 'test@example.com'}]);
 });
+
+test('Test getContextEmail throwing does not break logging', () => {
+    const mockCallback = jest.fn();
+    const LogWithThrowingEmail = new Logger({
+        serverLoggingCallback: mockCallback,
+        clientLoggingCallback: jest.fn(),
+        getContextEmail: () => {
+            throw new Error('Failed to get email');
+        },
+    });
+
+    // Should not throw
+    LogWithThrowingEmail.info('Test message', true);
+    expect(mockCallback).toHaveBeenCalled();
+
+    const packet = JSON.parse(mockCallback.mock.calls[0][1].logPacket);
+    delete packet[0].timestamp;
+    expect(packet).toEqual([{message: "[info] Test message", parameters: '', email: null}]);
+});
