@@ -2,8 +2,14 @@ type Parameters = string | Record<string, unknown> | Array<Record<string, unknow
 type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
 type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 type ClientLoggingCallBack = (message: string, extraData: Parameters) => void;
-type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date};
-type LoggerOptions = {serverLoggingCallback: ServerLoggingCallback; isDebug: boolean; clientLoggingCallback: ClientLoggingCallBack; maxLogLinesBeforeFlush?: number};
+type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date; email?: string | null};
+type LoggerOptions = {
+    serverLoggingCallback: ServerLoggingCallback;
+    isDebug: boolean;
+    clientLoggingCallback: ClientLoggingCallBack;
+    maxLogLinesBeforeFlush?: number;
+    getContextEmail?: () => string | null;
+};
 
 const MAX_LOG_LINES_BEFORE_FLUSH = 50;
 
@@ -18,13 +24,16 @@ export default class Logger {
 
     maxLogLinesBeforeFlush: number;
 
-    constructor({serverLoggingCallback, isDebug, clientLoggingCallback, maxLogLinesBeforeFlush}: LoggerOptions) {
+    getContextEmail?: () => string | null;
+
+    constructor({serverLoggingCallback, isDebug, clientLoggingCallback, maxLogLinesBeforeFlush, getContextEmail}: LoggerOptions) {
         // An array of log lines that limits itself to a certain number of entries (deleting the oldest)
         this.logLines = [];
         this.serverLoggingCallback = serverLoggingCallback;
         this.clientLoggingCallback = clientLoggingCallback;
         this.isDebug = isDebug;
         this.maxLogLinesBeforeFlush = maxLogLinesBeforeFlush || MAX_LOG_LINES_BEFORE_FLUSH;
+        this.getContextEmail = getContextEmail;
 
         // Public Methods
         this.info = this.info.bind(this);
@@ -70,11 +79,21 @@ export default class Logger {
      * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
      */
     add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false, extraData: Parameters = '') {
+        // Capture the user's email at the moment this specific log line is created
+        // This ensures the log retains user context even if the session is cleared before sending
+        let email: string | null = null;
+        try {
+            email = this.getContextEmail ? this.getContextEmail() : null;
+        } catch {
+            // Silently fail if getContextEmail throws - logging should not crash
+        }
+
         const length = this.logLines.push({
             message,
             parameters,
             onlyFlushWithOthers,
             timestamp: new Date(),
+            email,
         });
 
         if (this.isDebug) {
