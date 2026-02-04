@@ -81,7 +81,12 @@ export default class Logger {
     add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false, extraData: Parameters = '') {
         // Capture the user's email at the moment this specific log line is created
         // This ensures the log retains user context even if the session is cleared before sending
-        const email = this.getContextEmail ? this.getContextEmail() : null;
+        let email: string | null = null;
+        try {
+            email = this.getContextEmail ? this.getContextEmail() : null;
+        } catch {
+            // Silently fail if getContextEmail throws - logging should not crash
+        }
 
         const length = this.logLines.push({
             message,
