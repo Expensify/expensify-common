@@ -98,3 +98,19 @@ test('Test Log.client()', () => {
     expect(mockClientLoggingCallback).toHaveBeenCalled();
     expect(mockClientLoggingCallback).toHaveBeenCalledWith('Test', '');
 });
+
+test('Test getContextEmail captures email per log line', () => {
+    const mockCallback = jest.fn();
+    const LogWithEmail = new Logger({
+        serverLoggingCallback: mockCallback,
+        clientLoggingCallback: jest.fn(),
+        getContextEmail: () => 'test@example.com',
+    });
+
+    LogWithEmail.info('Test message', true);
+    expect(mockCallback).toHaveBeenCalled();
+
+    const packet = JSON.parse(mockCallback.mock.calls[0][1].logPacket);
+    delete packet[0].timestamp;
+    expect(packet).toEqual([{message: "[info] Test message", parameters: '', email: 'test@example.com'}]);
+});
