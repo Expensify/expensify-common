@@ -10,22 +10,24 @@ test('Test text is escaped', () => {
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Disallow multiline markdown links (label and URL)', () => {
-    // Multiline label inside [] should not form a link; URL is auto-linked inside parentheses
+test('Allow multiline markdown links (label with newlines)', () => {
+    // Multiline label inside [] should form a link; newlines in label become <br />
     let testString = 'Text with multiline label [Expensi\nfy](https://www.expensify.com) end.';
-    let resultString = 'Text with multiline label [Expensi<br />fy](<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>) end.';
+    let resultString = 'Text with multiline label <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expensi<br />fy</a> end.';
     expect(parser.replace(testString)).toBe(resultString);
 
-    // Windows-style newline in label -> auto-link URL inside parentheses
+    // Windows-style newline in label -> link is created, newlines become <br />
     testString = 'Text with CRLF label [Expen\r\nsify](https://www.expensify.com) end.';
-    resultString = 'Text with CRLF label [Expen<br />sify](<a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">https://www.expensify.com</a>) end.';
+    resultString = 'Text with CRLF label <a href="https://www.expensify.com" target="_blank" rel="noreferrer noopener">Expen<br />sify</a> end.';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
-test('Do not extract links from multiline markdown link', () => {
+test('Extract links from multiline markdown link with multiline label', () => {
     const commentLabel = 'Before [Expen\nsify](https://example.com) after';
     const commentURL = 'Before [Expensify](https://exa\nmple.com) after';
-    expect(parser.extractLinksInMarkdownComment(commentLabel)).toStrictEqual([]);
+    // Multiline label links should now be extracted
+    expect(parser.extractLinksInMarkdownComment(commentLabel)).toStrictEqual(['https://example.com']);
+    // Multiline URLs are still not valid links
     expect(parser.extractLinksInMarkdownComment(commentURL)).toStrictEqual([]);
 });
 
@@ -114,7 +116,7 @@ describe('Test ExpensiMark getAttributeCache', () => {
     });
 
     test('If no extras are undefined, returns undefined for both attrCachingFn and attrCache', () => {
-        const {attrCachingFn, attrCache} = expensiMark.getAttributeCache(undefined);
+        const { attrCachingFn, attrCache } = expensiMark.getAttributeCache(undefined);
         expect(attrCachingFn).toBe(undefined);
         expect(attrCache).toBe(undefined);
     })
