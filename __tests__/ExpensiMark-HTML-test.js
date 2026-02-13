@@ -5,7 +5,7 @@ const parser = new ExpensiMark();
 
 // Words wrapped in * successfully replaced with <strong></strong>
 test('Test bold markdown replacement', () => {
-    const boldTestStartString = 'This is a *sentence,* and it has some *punctuation, words, and spaces*. ' + '*test* * testing* test*test*test. * testing * *testing *';
+    const boldTestStartString = 'This is a **sentence,** and it has some **punctuation, words, and spaces**. ' + '**test** * testing* test*test*test. * testing * *testing *';
     const boldTestReplacedString =
         'This is a <strong>sentence,</strong> and it has some <strong>punctuation, words, and spaces</strong>. ' + '<strong>test</strong> * testing* test*test*test. * testing * *testing *';
 
@@ -14,32 +14,32 @@ test('Test bold markdown replacement', () => {
 
 // Multi-line text wrapped in * is successfully replaced with <strong></strong>
 test('Test multi-line bold markdown replacement', () => {
-    const testString = '*Here is a multi-line\ncomment that should\nbe bold*';
+    const testString = '**Here is a multi-line\ncomment that should\nbe bold**';
     const replacedString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
 
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
 test('Test bold within code blocks is skipped', () => {
-    const testString = 'bold\n```\n*not a bold*\n```\nThis is *bold*';
+    const testString = 'bold\n```\n*not a bold*\n```\nThis is **bold**';
     const replacedString = 'bold<br /><pre>*not&#32;a&#32;bold*<br /></pre>This is <strong>bold</strong>';
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
 test('Test special character plus _ ahead asterisk still result in bold', () => {
-    const testString = 'This is a !_*bold*';
+    const testString = 'This is a !_**bold**';
     const replacedString = 'This is a !_<strong>bold</strong>';
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
 test('Test a word plus _ ahead asterisk not result in bold', () => {
-    const testString = 'This is not a_*bold*';
-    const replacedString = 'This is not a_*bold*';
+    const testString = 'This is not a_**bold**';
+    const replacedString = 'This is not a_**bold**';
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
 test('Test _ ahead asterisk still result in bold', () => {
-    const testString = 'This is a ~_*bold*';
+    const testString = 'This is a ~_**bold**';
     const replacedString = 'This is a ~_<strong>bold</strong>';
     expect(parser.replace(testString)).toBe(replacedString);
 });
@@ -60,7 +60,7 @@ test('Test heading markdown replacement', () => {
 
 // Sections starting with > are successfully wrapped with <blockquote></blockquote>
 test('Test quote markdown replacement', () => {
-    const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+    const quoteTestStartString = '> This is a **quote** that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
     const quoteTestReplacedString =
         '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a &gt;quote that did not<br /><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />&gt;it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
 
@@ -68,7 +68,7 @@ test('Test quote markdown replacement', () => {
 });
 
 test('Test quote markdown replacement with shouldEscapeText set as false', () => {
-    const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+    const quoteTestStartString = '> This is a **quote** that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
     const quoteTestReplacedString =
         '<blockquote>This is a <strong>quote</strong> that started on a new line.</blockquote>Here is a >quote that did not<br /><pre>here&#32;is&#32;a&#32;codefenced&#32;quote<br />>it&#32;should&#32;not&#32;be&#32;quoted<br /></pre>';
 
@@ -118,8 +118,8 @@ test('Test quote markdown combined multi-line italic/bold/strikethrough markdown
 
     expect(parser.replace(testString)).toBe(replacedString);
 
-    testString = '*test\n> test*';
-    replacedString = '*test<br /><blockquote>test*</blockquote>';
+    testString = '**test\n> test**';
+    replacedString = '**test<br /><blockquote>test**</blockquote>';
 
     expect(parser.replace(testString)).toBe(replacedString);
 
@@ -159,25 +159,25 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     let testInput = '~abc@gmail.com~';
     expect(parser.replace(testInput)).toBe('<del><a href="mailto:abc@gmail.com">abc@gmail.com</a></del>');
 
-    testInput = '*abc@gmail.com*';
+    testInput = '**abc@gmail.com**';
     expect(parser.replace(testInput)).toBe('<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a></strong>');
 
     testInput = '_abc@gmail.com_';
     expect(parser.replace(testInput)).toBe('<em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em>');
 
-    testInput = '~*_abc@gmail.com_*~';
+    testInput = '~**_abc@gmail.com_**~';
     expect(parser.replace(testInput)).toBe('<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em></strong></del>');
 
     testInput = '[text](~abc@gmail.com~)';
     expect(parser.replace(testInput)).toBe('[text](<del><a href="mailto:abc@gmail.com">abc@gmail.com</a></del>)');
 
-    testInput = '[text](*abc@gmail.com*)';
+    testInput = '[text](**abc@gmail.com**)';
     expect(parser.replace(testInput)).toBe('[text](<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a></strong>)');
 
     testInput = '[text](_abc@gmail.com_)';
     expect(parser.replace(testInput)).toBe('[text](<em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em>)');
 
-    testInput = '[text](~*_abc@gmail.com_*~)';
+    testInput = '[text](~**_abc@gmail.com_**~)';
     expect(parser.replace(testInput)).toBe('[text](<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a></em></strong></del>)');
 });
 
@@ -187,7 +187,7 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     let result = '<del><a href="mailto:abc@gmail.com">abc@gmail.com</a><br />' + '<a href="mailto:def@gmail.com">def@gmail.com</a></del>';
     expect(parser.replace(testInput)).toBe(result);
 
-    testInput = '*abc@gmail.com\ndef@gmail.com*';
+    testInput = '**abc@gmail.com\ndef@gmail.com**';
     result = '<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a><br />' + '<a href="mailto:def@gmail.com">def@gmail.com</a></strong>';
     expect(parser.replace(testInput)).toBe(result);
 
@@ -195,7 +195,7 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     result = '<em><a href="mailto:abc@gmail.com">abc@gmail.com</a><br />' + '<a href="mailto:def@gmail.com">def@gmail.com</a></em>';
     expect(parser.replace(testInput)).toBe(result);
 
-    testInput = '~*_abc@gmail.com\ndef@gmail.com_*~';
+    testInput = '~**_abc@gmail.com\ndef@gmail.com_**~';
     result = '<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a><br />' + '<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>';
     expect(parser.replace(testInput)).toBe(result);
 
@@ -377,9 +377,9 @@ test('Test markdown style links', () => {
 test('Test critical markdown style links', () => {
     const testString =
         'Testing ' +
-        '[~strikethrough~ *bold* _italic_](expensify.com) ' +
-        '[~strikethrough~ *bold* _italic_ test.com](expensify.com) ' +
-        '[~strikethrough~ *bold* _italic_ https://test.com](https://expensify.com) ' +
+        '[~strikethrough~ **bold** _italic_](expensify.com) ' +
+        '[~strikethrough~ **bold** _italic_ test.com](expensify.com) ' +
+        '[~strikethrough~ **bold** _italic_ https://test.com](https://expensify.com) ' +
         '[https://www.text.com/_root_folder/1](https://www.text.com/_root_folder/1) ' +
         '[first](https://www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) ' +
         '[first no https://](www.expensify.com/_devportal/tools/logSearch/#query=request_id:(%22Ufjjim%22)+AND+timestamp:[2021-01-08T03:48:10.389Z+TO+2021-01-08T05:48:10.389Z]&index=logs_expensify-008878) ' +
@@ -555,9 +555,9 @@ test('Test code fencing with ExpensiMark syntax outside', () => {
     let codeFenceExample = '# Test1 ```\ncode\n``` Test2';
     expect(parser.replace(codeFenceExample)).toBe('<h1>Test1 &#x60;&#x60;&#x60;</h1>code<br />&#x60;&#x60;&#x60; Test2');
 
-    codeFenceExample = '*Test1\n```\ncode\n```\nTest2*';
-    expect(parser.replace(codeFenceExample)).toBe('*Test1<br /><pre>code<br /></pre>Test2*');
-    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('*Test1\n<pre>\ncode\n</pre>\nTest2*');
+    codeFenceExample = '**Test1\n```\ncode\n```\nTest2**';
+    expect(parser.replace(codeFenceExample)).toBe('**Test1<br /><pre>code<br /></pre>Test2**');
+    expect(parser.replace(codeFenceExample, {shouldKeepRawInput: true})).toBe('**Test1\n<pre>\ncode\n</pre>\nTest2**');
 
     codeFenceExample = '_Test1\n```\ncode\n```\nTest2_';
     expect(parser.replace(codeFenceExample)).toBe('_Test1<br /><pre>code<br /></pre>Test2_');
@@ -598,7 +598,7 @@ test('Test code fencing with additional backticks inside', () => {
 
 test('Test combination replacements', () => {
     const urlTestStartString =
-        '<em>Here</em> is a _combination test_ that <marquee>sees</marquee> if ~https://www.example.com~ https://otherexample.com links get rendered first followed by *other markup* or if _*two work together*_ as well. This sentence also has a newline \n Yep just had one.';
+        '<em>Here</em> is a _combination test_ that <marquee>sees</marquee> if ~https://www.example.com~ https://otherexample.com links get rendered first followed by **other markup** or if _**two work together**_ as well. This sentence also has a newline \n Yep just had one.';
     const urlTestReplacedString =
         '&lt;em&gt;Here&lt;/em&gt; is a <em>combination test</em> that &lt;marquee&gt;sees&lt;/marquee&gt; if <del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <a href="https://otherexample.com"' +
         ' target="_blank" rel="noreferrer noopener">https://otherexample.com</a> links get rendered first followed by <strong>other markup</strong> or if <em><strong>two work together</strong></em> as well. This sentence also has a newline <br /> Yep just had one.';
@@ -606,7 +606,7 @@ test('Test combination replacements', () => {
 });
 
 test('Test wrapped URLs', () => {
-    const wrappedUrlTestStartString = '~https://www.example.com~ _http://www.test.com_ *http://www.asdf.com/_test*';
+    const wrappedUrlTestStartString = '~https://www.example.com~ _http://www.test.com_ **http://www.asdf.com/_test**';
     const wrappedUrlTestReplacedString =
         '<del><a href="https://www.example.com" target="_blank" rel="noreferrer noopener">https://www.example.com</a></del> <em><a href="http://www.test.com" target="_blank" rel="noreferrer noopener">http://www.test.com</a></em>' +
         ' <strong><a href="http://www.asdf.com/_test" target="_blank" rel="noreferrer noopener">http://www.asdf.com/_test</a></strong>';
@@ -735,7 +735,7 @@ test('Test markdown style link with various styles', () => {
     const testString =
         'Go to ~[Expensify](https://www.expensify.com)~ ' +
         '_[Expensify](https://www.expensify.com)_ ' +
-        '*[Expensify](https://www.expensify.com)* ' +
+        '**[Expensify](https://www.expensify.com)** ' +
         '[Expensify!](https://www.expensify.com) ' +
         '[Expensify?](https://www.expensify.com) ' +
         '[Expensify](https://www.expensify-test.com) ' +
@@ -982,7 +982,7 @@ test('Test markdown style email link with various styles', () => {
     const testString =
         'Go to ~[Expensify](concierge@expensify.com)~ ' +
         '_[Expensify](concierge@expensify.com)_ ' +
-        '*[Expensify](concierge@expensify.com)* ' +
+        '**[Expensify](concierge@expensify.com)** ' +
         '[Expensify!](no-concierge1@expensify.com) ' +
         '[Applause](applausetester+qaabecciv@applause.expensifail.com) ' +
         '[](concierge@expensify.com)' + // only parse autoEmail in ()
@@ -1099,15 +1099,15 @@ test('Test link: Keep spaces at both end for shouldKeepRawInput=true', () => {
 
 test('Test autolink replacement to avoid parsing nested links', () => {
     const testString =
-        '[click google.com *here*](google.com) ' +
+        '[click google.com **here**](google.com) ' +
         '[click google.com ~here~](google.com) ' +
         '[click google.com _here_](google.com) ' +
         '[click google.com `here`](google.com) ' +
-        '[*click* google.com here](google.com) ' +
+        '[**click** google.com here](google.com) ' +
         '[~click~ google.com here](google.com) ' +
         '[_click_ google.com here](google.com) ' +
         '[`click` google.com here](google.com) ' +
-        '[`click` google.com *here*](google.com)';
+        '[`click` google.com **here**](google.com)';
 
     const resultString =
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">click google.com <strong>here</strong></a> ' +
@@ -1354,7 +1354,7 @@ test('Test heading1 markdown replacement with line break before or after the hea
 });
 
 test('Test heading1 markdown replacement when heading appear after the quote', () => {
-    const testString = '> quote \n# heading 1 after the quote.\nHere is a multi-line\ncomment that contains *bold* string.';
+    const testString = '> quote \n# heading 1 after the quote.\nHere is a multi-line\ncomment that contains **bold** string.';
     expect(parser.replace(testString)).toBe(
         '<blockquote>quote </blockquote><h1>heading 1 after the quote.</h1>Here is a multi-line<br />comment that contains <strong>bold</strong> string.',
     );
@@ -1380,7 +1380,7 @@ test('Test for user mention with @phoneNumber', () => {
 });
 
 test('Test for user mention with bold style', () => {
-    const testString = '*@username@expensify.com*';
+    const testString = '**@username@expensify.com**';
     const resultString = '<strong><mention-user>@username@expensify.com</mention-user></strong>';
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1562,7 +1562,7 @@ test('Test for @here mention with italic, bold and strikethrough styles', () => 
     const testString =
         '@here' +
         ' _@here_' +
-        ' *@here*' +
+        ' **@here**' +
         ' ~@here~' +
         ' [@here](google.com)' +
         ' @here_123' +
@@ -1709,17 +1709,17 @@ test('Test for mention inside link and email markdown', () => {
 });
 
 test('Skip rendering invalid markdown', () => {
-    let testString = '_*test_*';
-    expect(parser.replace(testString)).toBe('<em>*test</em>*');
+    let testString = '_**test_**';
+    expect(parser.replace(testString)).toBe('<em>**test</em>**');
 
-    testString = '*_test*_';
-    expect(parser.replace(testString)).toBe('*<em>test*</em>');
+    testString = '**_test**_';
+    expect(parser.replace(testString)).toBe('**<em>test**</em>');
 
-    testString = '~*test~*';
+    testString = '~**test~**';
     expect(parser.replace(testString)).toBe('~<strong>test~</strong>');
 
-    testString = '> *This is multiline\nbold text*';
-    expect(parser.replace(testString)).toBe('<blockquote>*This is multiline</blockquote>bold text*');
+    testString = '> **This is multiline\nbold text**';
+    expect(parser.replace(testString)).toBe('<blockquote>**This is multiline</blockquote>bold text**');
 });
 
 test('Test for email with test+1@gmail.com@gmail.com', () => {
@@ -2003,7 +2003,7 @@ describe('when should keep raw input flag is enabled', () => {
     });
 
     test('quote with other markdowns', () => {
-        const quoteTestStartString = '> This is a *quote* that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
+        const quoteTestStartString = '> This is a **quote** that started on a new line.\nHere is a >quote that did not\n```\nhere is a codefenced quote\n>it should not be quoted\n```';
         const quoteTestReplacedString =
             '<blockquote> This is a <strong>quote</strong> that started on a new line.</blockquote>\nHere is a &gt;quote that did not\n<pre>\nhere&#32;is&#32;a&#32;codefenced&#32;quote\n&gt;it&#32;should&#32;not&#32;be&#32;quoted\n</pre>';
 
@@ -2045,7 +2045,7 @@ describe('when should keep raw input flag is enabled', () => {
         });
 
         test('labeled mail with styled label', () => {
-            const testString = '[*mail*](mailto:mail@mail.com)';
+            const testString = '[**mail**](mailto:mail@mail.com)';
             const resultString = '<a href="mailto:mail@mail.com" data-raw-href="mailto:mail@mail.com" data-link-variant="labeled"><strong>mail</strong></a>';
             expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
         });
@@ -2117,7 +2117,7 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     let resultString = '<em>This_is_italic_test</em>';
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = '*This*is*bold*test*';
+    testString = '**This*is*bold*test**';
     resultString = '<strong>This*is*bold*test</strong>';
     expect(parser.replace(testString)).toBe(resultString);
 
@@ -2129,7 +2129,7 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     resultString = '<em>This_is_italic_test</em>___';
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = '*This*is*bold*test****';
+    testString = '**This*is*bold*test*****';
     resultString = '<strong>This*is*bold*test</strong>***';
     expect(parser.replace(testString)).toBe(resultString);
 
@@ -2137,8 +2137,8 @@ test('Test italic/bold/strikethrough markdown to keep consistency', () => {
     resultString = '<del>This~is~strikethrough~test</del>~~~';
     expect(parser.replace(testString)).toBe(resultString);
 
-    testString = '_**bold**_*bold*';
-    resultString = '<em>*<strong>bold</strong>*</em><strong>bold</strong>';
+    testString = '_**bold**_**bold**';
+    resultString = '<em><strong>bold</strong></em><strong>bold</strong>';
     expect(parser.replace(testString)).toBe(resultString);
 });
 
@@ -2170,7 +2170,7 @@ describe('multi-level blockquote', () => {
     });
 
     test('multi-level blockquote with diffrent syntax', () => {
-        const quoteTestStartString = '>> _Hello_ *world*';
+        const quoteTestStartString = '>> _Hello_ **world**';
         const quoteTestReplacedString = '<blockquote><blockquote><em>Hello</em> <strong>world</strong></blockquote></blockquote>';
 
         expect(parser.replace(quoteTestStartString)).toBe(quoteTestReplacedString);
@@ -2416,7 +2416,7 @@ describe('room mentions', () => {
     });
 
     test("room mention shouldn't be parsed when rule is disabled", () => {
-        const testString = '*hello* @user@mail.com in #room!';
+        const testString = '**hello** @user@mail.com in #room!';
         const resultString = '<strong>hello</strong> <mention-user>@user@mail.com</mention-user> in #room!';
         const disabledRules = ['reportMentions'];
         expect(parser.replace(testString, {disabledRules})).toBe(resultString);
@@ -2426,7 +2426,7 @@ describe('room mentions', () => {
         const testString =
             '#room' +
             ' _#room_' +
-            ' *#room*' +
+            ' **#room**' +
             ' ~#room~' +
             ' [#room](google.com)' +
             ' #room abc' +

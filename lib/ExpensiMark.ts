@@ -525,7 +525,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                regex: /(?<!<[^>]*)(\b_|\B)\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
+                regex: /(?<!<[^>]*)(\b_|\B)\*\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s])[\s\S]*?[^\s](?<!\s))\*\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -627,7 +627,7 @@ export default class ExpensiMark {
                         const trimmedContent = content.trim();
                         const leadingSpace = content.startsWith(' ') ? ' ' : '';
                         const trailingSpace = content.endsWith(' ') ? ' ' : '';
-                        return isBold ? `${leadingSpace}*${trimmedContent}*${trailingSpace}` : content;
+                        return isBold ? `${leadingSpace}**${trimmedContent}**${trailingSpace}` : content;
                     };
 
                     // Determine if the outer tag is bold

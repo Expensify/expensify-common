@@ -9,25 +9,25 @@ test('Test bold HTML replacement', () => {
         + 'This is a <b>sentence,</b> and it has some <b>punctuation, words, and spaces</b>. '
         + 'This is a <b style="font-size: 20px;">bold sentence with style</b> '
         + '<b>test</b> * testing* test*test*test. * testing * *testing *';
-    const boldTestReplacedString = 'This is a *sentence,* and it has some *punctuation, words, and spaces*. '
-        + '*test* * testing* test*test*test. * testing * *testing * '
-        + 'This is a *sentence,* and it has some *punctuation, words, and spaces*. '
-        + 'This is a *bold sentence with style* '
-        + '*test* * testing* test*test*test. * testing * *testing *';
+    const boldTestReplacedString = 'This is a **sentence,** and it has some **punctuation, words, and spaces**. '
+        + '**test** * testing* test*test*test. * testing * *testing * '
+        + 'This is a **sentence,** and it has some **punctuation, words, and spaces**. '
+        + 'This is a **bold sentence with style** '
+        + '**test** * testing* test*test*test. * testing * *testing *';
 
     expect(parser.htmlToMarkdown(boldTestStartString)).toBe(boldTestReplacedString);
 });
 
 test('Test multi-line bold HTML replacement', () => {
     const testString = '<strong>Here is a multi-line<br />comment that should<br />be bold</strong>';
-    const replacedString = '*Here is a multi-line\ncomment that should\nbe bold*';
+    const replacedString = '**Here is a multi-line\ncomment that should\nbe bold**';
 
     expect(parser.htmlToMarkdown(testString)).toBe(replacedString);
 });
 
 test('Converts <b> tags with font-weight 700 inline style in between to markdown bold', () => {
     const input = '<b><span style="font-weight:400;">This is a text with </span><span style="font-weight:700;">nested bold</span><span style="font-weight:400;"> content</span></b>';
-    const expected = 'This is a text with *nested bold* content';
+    const expected = 'This is a text with **nested bold** content';
     expect(parser.htmlToMarkdown(input)).toBe(expected);
 });
 
@@ -68,7 +68,7 @@ test('Test multi-line strikethrough HTML replacement', () => {
 
 test('Test Mixed HTML strings', () => {
     const rawHTMLTestStartString = '<em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del> <div>HTML</div>.';
-    const rawHTMLTestReplacedString = '_This is_ a *test*. None of \nthese strings\n should display ~as~ \nHTML\n.';
+    const rawHTMLTestReplacedString = '_This is_ a **test**. None of \nthese strings\n should display ~as~ \nHTML\n.';
     expect(parser.htmlToMarkdown(rawHTMLTestStartString)).toBe(rawHTMLTestReplacedString);
 });
 
@@ -95,7 +95,7 @@ test('Test HTML string with seperate closing tags (<br><br/>) to markdown ', () 
 
 test('Test HTML string with attributes', () => {
     const testString = '<em style="color:red;">This is</em><br style="border-color:red;"> a <button disabled>test</button>. None of <strong data-link=\'bad\'>these strings</strong>.';
-    const resultString = '_This is_\n a test. None of *these strings*.';
+    const resultString = '_This is_\n a test. None of **these strings**.';
 
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
@@ -179,7 +179,7 @@ test('Test HTML string with InlineCodeBlock', () => {
 test('Test wrapped anchor tags', () => {
     const wrappedUrlTestStartString = '<del><a href="https://www.example.com" target="_blank">https://www.example.com</a></del> <em><a href="http://www.test.com" target="_blank">http://www.test.com</a></em>'
         + ' <strong><a href="http://www.asdf.com/_test" target="_blank">http://www.asdf.com/_test</a></strong>';
-    const wrappedUrlTestReplacedString = '~[https://www.example.com](https://www.example.com)~ _[http://www.test.com](http://www.test.com)_ *[http://www.asdf.com/_test](http://www.asdf.com/_test)*';
+    const wrappedUrlTestReplacedString = '~[https://www.example.com](https://www.example.com)~ _[http://www.test.com](http://www.test.com)_ **[http://www.asdf.com/_test](http://www.asdf.com/_test)**';
     expect(parser.htmlToMarkdown(wrappedUrlTestStartString)).toBe(wrappedUrlTestReplacedString);
 });
 
@@ -200,11 +200,11 @@ test('Test acnchor tags convesion to markdown style link with various styles', (
 
     const resultString = 'Go to ~[Expensify](https://www.expensify.com)~ '
         + '_[Expensify](https://www.expensify.com)_ '
-        + '*[Expensify](https://www.expensify.com)* '
+        + '**[Expensify](https://www.expensify.com)** '
         + '[Expensify!](https://www.expensify.com) '
         + '[Expensify?](https://www.expensify.com) '
         + '[Expensify](https://www.expensify-test.com) '
-        + '[*Expensify*](https://www.expensify-test.com) '
+        + '[**Expensify**](https://www.expensify-test.com) '
         + '[test.com](https://www.expensify-test.com) '
         + '[_italic_ ~strikethrough~ test.com](https://www.expensify-test.com) '
         + '[https://www.text.com/_root_folder/1](https://www.text.com/_root_folder/1) '
@@ -259,7 +259,7 @@ test('Test anchor tags where links are markdown style email link with various st
 
     const resultString = 'Go to ~[Expensify](concierge@expensify.com)~ '
         + '_[Expensify](concierge@expensify.com)_ '
-        + '*[Expensify](concierge@expensify.com)* '
+        + '**[Expensify](concierge@expensify.com)** '
         + '[Expensify!](no-concierge1@expensify.com) '
         + '[Expensify?](concierge?@expensify.com) '
         + '[Applause](applausetester+qaabecciv@applause.expensifail.com) '
@@ -490,13 +490,13 @@ test('Map div to newline with empty div before string', () => {
 
 test('map div with bold and italics', () => {
     const testString = '<div><strong>line 1</strong><div></div><em>line 2</em></div>';
-    const resultString = '*line 1*\n_line 2_';
+    const resultString = '**line 1**\n_line 2_';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
 test('map div with mixed html strings', () => {
     const testString = '<div><em>This is</em> a <strong>test</strong>. None of <h2>these strings</h2> should display <del>as</del><div>HTML</div><div></div><em>line 3</em></div>';
-    const resultString = '_This is_ a *test*. None of \nthese strings\n should display ~as~\nHTML\n_line 3_';
+    const resultString = '_This is_ a **test**. None of \nthese strings\n should display ~as~\nHTML\n_line 3_';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -580,7 +580,7 @@ test('Test html string to heading1 markdown', () => {
 
 test('Test html to heading1 markdown when there are other tags inside h1 tag', () => {
     const testString = '<h1>This is a <strong>heading1</strong></h1>';
-    const resultString = '# This is a *heading1*';
+    const resultString = '# This is a **heading1**';
     expect(parser.htmlToMarkdown(testString)).toBe(resultString);
 });
 
@@ -704,7 +704,7 @@ test('Test blockquote linebreak handling with text, block and inline elements', 
     expect(parser.htmlToMarkdown(testStringSurroundedByText)).toBe('text a\n> quote a\n\n> quote b\ntext b\n\ntext c\n> quote c\ntext c');
 
     const testStringSurroundedByInlineElement = '<em>italic a</em><br /><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><strong>bold b</strong><br /><br /><em>italic c</em><br /><blockquote>quote c</blockquote><strong>bold c</strong>';
-    expect(parser.htmlToMarkdown(testStringSurroundedByInlineElement)).toBe('_italic a_\n> quote a\n\n> quote b\n*bold b*\n\n_italic c_\n> quote c\n*bold c*');
+    expect(parser.htmlToMarkdown(testStringSurroundedByInlineElement)).toBe('_italic a_\n> quote a\n\n> quote b\n**bold b**\n\n_italic c_\n> quote c\n**bold c**');
 
     const testStringSurroundedByBlockElementCodeFence = '<pre>code fence a</pre><blockquote>quote a</blockquote><br /><blockquote>quote b</blockquote><pre>code fence b</pre><br /><pre>code fence c</pre><blockquote>quote c</blockquote><pre>code fence c</pre>';
     expect(parser.htmlToMarkdown(testStringSurroundedByBlockElementCodeFence)).toBe('```\ncode fence a\n```\n> quote a\n\n> quote b\n```\ncode fence b\n```\n\n```\ncode fence c\n```\n> quote c\n```\ncode fence c\n```');
@@ -965,13 +965,13 @@ describe('Tag names starting with common charaters', () => {
 
     test('Blockquote and bold', () => {
         const testString = '<blockquote> quote <b>bold</b></blockquote>';
-        const resultString = '> quote *bold*';
+        const resultString = '> quote **bold**';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
 
     test('Line break and bold', () => {
         const testString = '<br/><b>bold</b>';
-        const resultString = '\n*bold*';
+        const resultString = '\n**bold**';
         expect(parser.htmlToMarkdown(testString)).toBe(resultString);
     });
 });
@@ -1730,7 +1730,7 @@ div.WordSection1
 
 </html>
     `;
-    const resultString = '\n\nNormal text *body text*\n\n\n*Line 2*\n\n\n';
+    const resultString = '\n\nNormal text **body text**\n\n\n**Line 2**\n\n\n';
 
     expect(parser.htmlToMarkdown(testStringDoc, {}, 500)).toBe(resultString);
 });
