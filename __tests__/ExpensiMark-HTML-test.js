@@ -210,7 +210,7 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     result = '[text](<del><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />' + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></del>)';
     expect(parser.replace(testInput)).toBe(result);
 
-    testInput = '[text](*abc@gmail.com)\n[text](def@gmail.com*)';
+    testInput = '[text](**abc@gmail.com)\n[text](def@gmail.com**)';
     result = '[text](<strong><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />' + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></strong>)';
     expect(parser.replace(testInput)).toBe(result);
 
@@ -218,7 +218,7 @@ test('Test markdown replacement for emails wrapped in bold/strikethrough/italic 
     result = '<a href="mailto:_abc@gmail.com">text</a><br />' + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a>_)';
     expect(parser.replace(testInput)).toBe(result);
 
-    testInput = '[text](~*_abc@gmail.com)\n[text](def@gmail.com_*~)';
+    testInput = '[text](~**_abc@gmail.com)\n[text](def@gmail.com_**~)';
     result = '[text](<del><strong><em><a href="mailto:abc@gmail.com">abc@gmail.com</a>)<br />' + '[text](<a href="mailto:def@gmail.com">def@gmail.com</a></em></strong></del>)';
     expect(parser.replace(testInput)).toBe(result);
 });
@@ -527,7 +527,7 @@ test('Test inline code blocks with ExpensiMark syntax inside', () => {
 });
 
 test('Test inline code blocks inside ExpensiMark', () => {
-    const testString = '_`test`_' + '*`test`*' + '~`test`~';
+    const testString = '_`test`_' + '**`test`**' + '~`test`~';
     const resultString = '<em><code>test</code></em>' + '<strong><code>test</code></strong>' + '<del><code>test</code></del>';
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1239,7 +1239,7 @@ test('Test markdown quotes without spaces after > should not be parsed', () => {
 });
 
 test('Single char matching', () => {
-    const testString = ' *1* char _1_ char ~1~ char';
+    const testString = ' **1** char _1_ char ~1~ char';
     const resultString = ' <strong>1</strong> char <em>1</em> char <del>1</del> char';
     expect(parser.replace(testString)).toBe(resultString);
 });
@@ -1664,22 +1664,22 @@ test('Test for mention inside link and email markdown', () => {
     const testString =
         '[@username@expensify.com](expensify.com) ' +
         '[_@username@expensify.com_](expensify.com) ' +
-        '[*@username@expensify.com*](expensify.com) ' +
+        '[**@username@expensify.com**](expensify.com) ' +
         '[~@username@expensify.com~](expensify.com) ' +
         '[`@username@expensify.com`](expensify.com) ' +
         '[@here](expensify.com) ' +
         '[_@here_](expensify.com) ' +
-        '[*@here*](expensify.com) ' +
+        '[**@here**](expensify.com) ' +
         '[~@here~](expensify.com) ' +
         '[`@here`](expensify.com) ' +
         '[@username@expensify.com](username@expensify.com) ' +
         '[_@username@expensify.com_](username@expensify.com) ' +
-        '[*@username@expensify.com*](username@expensify.com) ' +
+        '[**@username@expensify.com**](username@expensify.com) ' +
         '[~@username@expensify.com~](username@expensify.com) ' +
         '[`@username@expensify.com`](username@expensify.com) ' +
         '[@here](username@expensify.com) ' +
         '[_@here_](username@expensify.com) ' +
-        '[*@here*](username@expensify.com) ' +
+        '[**@here**](username@expensify.com) ' +
         '[~@here~](username@expensify.com) ' +
         '[`@here`](username@expensify.com)';
 
