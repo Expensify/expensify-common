@@ -955,19 +955,20 @@ export default class ExpensiMark {
         let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
-        const endTime1 = performance.now();
-
         const processRule = (rule: Rule) => {
             const startTime = performance.now();
 
             // Pre-process text before applying regex
+            // PRE and POST Arent making it slow
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
+                console.log('Using process function for rule: ', rule.name);
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
             } else {
+                console.log('Using regex replacement for rule: ', rule.name);
                 replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
             }
 
@@ -990,10 +991,10 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        // video: 6.8
-        // link: 8.1
-        // image: 6.3
-        // autolink: 8.1
+        // video: 6.8 - Uses regex
+        // link: 8.1 - uses process
+        // image: 6.3 - uses regex
+        // autolink: 8.1 - uses process
 
         return replacedText;
     }
