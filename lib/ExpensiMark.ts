@@ -214,10 +214,9 @@ export default class ExpensiMark {
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
                 shouldSkipProcessing: (textToCheck) => {
-                    const hasOpeningBracket = textToCheck.includes('![');
-                    const hasClosingBracket = textToCheck.includes('](');
-                    const hasVideoExtension = Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
-                    return !(hasOpeningBracket && hasClosingBracket && hasVideoExtension);
+                    const missingSpecialCharacters = !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
+                    const missingVideoExtension = !Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
+                    return missingSpecialCharacters || missingVideoExtension;
                 },
             },
 
@@ -306,9 +305,7 @@ export default class ExpensiMark {
                     return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
                 },
                 shouldSkipProcessing: (textToCheck) => {
-                    const hasOpeningBracket = textToCheck.includes('![');
-                    const hasClosingBracket = textToCheck.includes('](');
-                    return !(hasOpeningBracket && hasClosingBracket);
+                    return !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
                 },
             },
 
@@ -333,7 +330,7 @@ export default class ExpensiMark {
                     return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1}</a>`;
                 },
                 shouldSkipProcessing: (textToCheck) => {
-                    return !textToCheck.includes('.') || !textToCheck.includes('://');
+                    return !textToCheck.includes('.');
                 },
             },
 
@@ -430,7 +427,7 @@ export default class ExpensiMark {
                     return `${g1}<a href="${href}" data-raw-href="${g2}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
                 },
                 shouldSkipProcessing: (textToCheck) => {
-                    return !textToCheck.includes('.') || !textToCheck.includes('://');
+                    return !textToCheck.includes('.');
                 },
             },
 
