@@ -969,6 +969,7 @@ export default class ExpensiMark {
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
         const processRule = (rule: Rule) => {
+            // Pre-process text before applying regex
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
