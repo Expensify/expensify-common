@@ -951,6 +951,10 @@ export default class ExpensiMark {
      * If not provided, all available rules will be applied. If provided, the rules in the array will be skipped.
      */
     replace(text: string, {filterRules = [], shouldEscapeText = true, shouldKeepRawInput = false, disabledRules = [], extras = EXTRAS_DEFAULT}: ReplaceOptions = {}): string {
+        if (!text) {
+            return '';
+        }
+
         // This ensures that any html the user puts into the comment field shows as raw html
         let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
@@ -1232,6 +1236,10 @@ export default class ExpensiMark {
      * Replaces HTML with markdown
      */
     htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
+        if (!htmlString) {
+            return '';
+        }
+
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
