@@ -955,7 +955,11 @@ export default class ExpensiMark {
         let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
+        const endTime1 = performance.now();
+
         const processRule = (rule: Rule) => {
+            const startTime = performance.now();
+
             // Pre-process text before applying regex
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
@@ -971,7 +975,12 @@ export default class ExpensiMark {
             if (rule.post) {
                 replacedText = rule.post(replacedText);
             }
+
+            const endTime = performance.now();
+            const timeTaken = endTime - startTime;
+            console.info(`[ExpensiMark] Time taken to apply rule "${rule.name}": ${timeTaken} ms`);
         };
+
         try {
             rules.forEach(processRule);
         } catch (e) {
@@ -980,6 +989,11 @@ export default class ExpensiMark {
             // We want to return text without applying rules if exception occurs during replacing
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
+
+        // video: 6.8
+        // link: 8.1
+        // image: 6.3
+        // autolink: 8.1
 
         return replacedText;
     }

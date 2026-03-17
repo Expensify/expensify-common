@@ -1,3 +1,5 @@
+import ExpensiMark from './ExpensiMark';
+
 // eslint-disable-next-line rulesdir/no-api-in-views
 export {default as API} from './API';
 export {default as APIDeferred} from './APIDeferred';
@@ -20,3 +22,7 @@ export {default as fastMerge} from './fastMerge';
 export {default as Str} from './str';
 export {default as TLD_REGEX} from './tlds';
 export {default as md5} from './md5';
+
+const expensimark = new ExpensiMark();
+
+expensimark.replace('<h1>Hello world</h1>');
