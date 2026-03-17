@@ -197,6 +197,12 @@ export default class ExpensiMark {
             {
                 name: 'video',
                 regex: MARKDOWN_VIDEO_REGEX,
+                shouldSkip: (textToCheck) => {
+                    const hasOpeningBracket = textToCheck.includes('![');
+                    const hasClosingBracket = textToCheck.includes('](');
+                    const hasVideoExtension = Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
+                    return !(hasOpeningBracket && hasClosingBracket && hasVideoExtension);
+                },
                 /**
                  * @param extras - The extras object
                  * @param videoName - The first capture group - video name
