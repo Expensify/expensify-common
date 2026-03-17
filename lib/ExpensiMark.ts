@@ -46,7 +46,7 @@ type CommonRule = {
     rawInputReplacement?: Replacement;
     pre?: (input: string) => string;
     post?: (input: string) => string;
-    shouldSkip?: (textToCheck: string) => boolean;
+    shouldSkipProcessing?: (textToCheck: string) => boolean;
 };
 
 type RuleWithRegex = CommonRule & {
@@ -197,12 +197,6 @@ export default class ExpensiMark {
             {
                 name: 'video',
                 regex: MARKDOWN_VIDEO_REGEX,
-                shouldSkip: (textToCheck) => {
-                    const hasOpeningBracket = textToCheck.includes('![');
-                    const hasClosingBracket = textToCheck.includes('](');
-                    const hasVideoExtension = Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
-                    return !(hasOpeningBracket && hasClosingBracket && hasVideoExtension);
-                },
                 /**
                  * @param extras - The extras object
                  * @param videoName - The first capture group - video name
@@ -218,6 +212,12 @@ export default class ExpensiMark {
                     const attrCache = this.getAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
+                },
+                shouldSkipProcessing: (textToCheck) => {
+                    const hasOpeningBracket = textToCheck.includes('![');
+                    const hasClosingBracket = textToCheck.includes('](');
+                    const hasVideoExtension = Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
+                    return !(hasOpeningBracket && hasClosingBracket && hasVideoExtension);
                 },
             },
 
@@ -304,6 +304,11 @@ export default class ExpensiMark {
                     const attrCache = this.getAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[imgSource];
                     return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
+                },
+                shouldSkipProcessing: (textToCheck) => {
+                    const hasOpeningBracket = textToCheck.includes('![');
+                    const hasClosingBracket = textToCheck.includes('](');
+                    return !(hasOpeningBracket && hasClosingBracket);
                 },
             },
 
@@ -974,7 +979,7 @@ export default class ExpensiMark {
                 replacedText = rule.pre(replacedText);
             }
 
-            if (rule.shouldSkip && rule.shouldSkip(replacedText)) {
+            if (rule.shouldSkipProcessing && rule.shouldSkipProcessing(replacedText)) {
                 return;
             }
 
