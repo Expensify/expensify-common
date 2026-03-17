@@ -46,6 +46,7 @@ type CommonRule = {
     rawInputReplacement?: Replacement;
     pre?: (input: string) => string;
     post?: (input: string) => string;
+    shouldSkip?: (textToCheck: string) => boolean;
 };
 
 type RuleWithRegex = CommonRule & {
@@ -75,7 +76,6 @@ type TruncateOptions = {
 
 const MARKDOWN_LINK_REGEX = new RegExp(`\\[((?:[^\\[\\]\\r\\n]*(?:\\[[^\\[\\]\\r\\n]*][^\\[\\]\\r\\n]*)*))]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
-
 const MARKDOWN_VIDEO_REGEX = new RegExp(
     `\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(((${UrlPatterns.MARKDOWN_URL_REGEX})\\.(?:${Constants.CONST.VIDEO_EXTENSIONS.join('|')}))\\)(?![^<]*(<\\/pre>|<\\/code>))`,
     'gi',
@@ -967,6 +967,11 @@ export default class ExpensiMark {
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
+
+            if (rule.shouldSkip && rule.shouldSkip(replacedText)) {
+                return;
+            }
+
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
