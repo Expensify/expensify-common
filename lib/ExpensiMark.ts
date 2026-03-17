@@ -332,6 +332,9 @@ export default class ExpensiMark {
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1}</a>`;
                 },
+                shouldSkipProcessing: (textToCheck) => {
+                    return !textToCheck.includes('.') || !textToCheck.includes('://');
+                },
             },
 
             /**
@@ -360,7 +363,6 @@ export default class ExpensiMark {
              */
             {
                 name: 'reportMentions',
-
                 regex: /(?<=^[*~_:]?|[ \n][*~_:]?|[:#])(#[\p{Ll}0-9-]{1,99})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
                 replacement: '<mention-report>$1</mention-report>',
             },
@@ -426,6 +428,9 @@ export default class ExpensiMark {
                 rawInputReplacement: (_extras, _match, g1, g2) => {
                     const href = Str.sanitizeURL(g2);
                     return `${g1}<a href="${href}" data-raw-href="${g2}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
+                },
+                shouldSkipProcessing: (textToCheck) => {
+                    return !textToCheck.includes('.') || !textToCheck.includes('://');
                 },
             },
 
@@ -997,7 +1002,7 @@ export default class ExpensiMark {
 
             const endTime = performance.now();
             const timeTaken = endTime - startTime;
-            if (timeTaken > 5) {
+            if (timeTaken > 0.5) {
                 console.info(`[ExpensiMark] Time taken to apply rule "${rule.name}": ${timeTaken} ms`);
             }
         };
@@ -1018,10 +1023,6 @@ export default class ExpensiMark {
      * Checks matched URLs for validity and replace valid links with html elements
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
-        if (!textToCheck.includes('.') && !textToCheck.includes('://')) {
-            return textToCheck;
-        }
-
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
