@@ -972,14 +972,6 @@ export default class ExpensiMark {
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
         const processRule = (rule: Rule) => {
-            const startTime = performance.now();
-
-            // Pre-process text before applying regex
-            // PRE and POST Arent making it slow
-            // video: 6.8 - Uses regex
-            // link: 8.1 - uses process
-            // image: 6.3 - uses regex
-            // autolink: 8.1 - uses process
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
@@ -999,14 +991,7 @@ export default class ExpensiMark {
             if (rule.post) {
                 replacedText = rule.post(replacedText);
             }
-
-            const endTime = performance.now();
-            const timeTaken = endTime - startTime;
-            if (timeTaken > 0.5) {
-                console.info(`[ExpensiMark] Time taken to apply rule "${rule.name}": ${timeTaken} ms`);
-            }
         };
-
         try {
             rules.forEach(processRule);
         } catch (e) {
