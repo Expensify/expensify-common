@@ -960,15 +960,17 @@ export default class ExpensiMark {
 
             // Pre-process text before applying regex
             // PRE and POST Arent making it slow
+            // video: 6.8 - Uses regex
+            // link: 8.1 - uses process
+            // image: 6.3 - uses regex
+            // autolink: 8.1 - uses process
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
-                console.log('Using process function for rule: ', rule.name);
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
             } else {
-                console.log('Using regex replacement for rule: ', rule.name);
                 replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
             }
 
@@ -979,7 +981,9 @@ export default class ExpensiMark {
 
             const endTime = performance.now();
             const timeTaken = endTime - startTime;
-            console.info(`[ExpensiMark] Time taken to apply rule "${rule.name}": ${timeTaken} ms`);
+            if (timeTaken > 5) {
+                console.info(`[ExpensiMark] Time taken to apply rule "${rule.name}": ${timeTaken} ms`);
+            }
         };
 
         try {
@@ -991,11 +995,6 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        // video: 6.8 - Uses regex
-        // link: 8.1 - uses process
-        // image: 6.3 - uses regex
-        // autolink: 8.1 - uses process
-
         return replacedText;
     }
 
@@ -1003,6 +1002,10 @@ export default class ExpensiMark {
      * Checks matched URLs for validity and replace valid links with html elements
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
+        if (!textToCheck.includes('.') && !textToCheck.includes('://')) {
+            return textToCheck;
+        }
+
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
