@@ -1237,6 +1237,10 @@ export default class ExpensiMark {
      * Replaces HTML with markdown
      */
     htmlToMarkdown(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
+        if (!htmlString) {
+            return '';
+        }
+
         let generatedMarkdown = htmlString;
         const body = /<(body)(?:"[^"]*"|'[^']*'|[^'"><])*>(?:\n|\r\n)?([\s\S]*?)(?:\n|\r\n)?<\/\1>(?![^<]*(<\/pre>|<\/code>))/im;
         const parseBodyTag = generatedMarkdown.match(body);
