@@ -991,7 +991,6 @@ export default class ExpensiMark {
     /**
      * Checks matched URLs for validity and replace valid links with html elements
      */
-    // TODO
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
         let match = regex.exec(textToCheck);
         let replacedText = '';
