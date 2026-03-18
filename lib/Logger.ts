@@ -63,7 +63,7 @@ export default class Logger {
         if (!promise) {
             return;
         }
-        // eslint-disable-next-line rulesdir/prefer-early-return
+
         promise.then((response) => {
             if (!response.requestID) {
                 return;
@@ -74,9 +74,11 @@ export default class Logger {
 
     /**
      * Add a message to the list
+     * @param message
      * @param parameters The parameters associated with the message
      * @param forceFlushToServer Should we force flushing all logs to server?
      * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param extraData
      */
     add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false, extraData: Parameters = '') {
         // Capture the user's email at the moment this specific log line is created
@@ -114,6 +116,7 @@ export default class Logger {
      * @param sendNow if true, the message will be sent right away.
      * @param parameters The parameters to send along with the message
      * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param extraData
      */
     info(message: string, sendNow = false, parameters: Parameters = '', onlyFlushWithOthers = false, extraData: Parameters = '') {
         const msg = `[info] ${message}`;
@@ -164,6 +167,7 @@ export default class Logger {
      * Logs a message in the browser console.
      *
      * @param message The message to log.
+     * @param extraData
      */
     client(message: string, extraData: Parameters = '') {
         if (!this.clientLoggingCallback) {

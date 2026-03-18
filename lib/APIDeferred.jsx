@@ -166,16 +166,16 @@ export default function APIDeferred(promise, extractedProperty) {
          */
         handle(jsonCodes, callback) {
             if (Utils.isFunction(callback)) {
-                jsonCodes.forEach((code) => {
+                for (const code of jsonCodes) {
                     if (code === 200) {
-                        return;
+                        continue;
                     }
 
                     if (!errorHandlers[code]) {
                         errorHandlers[code] = [];
                     }
                     errorHandlers[code].push(once(callback));
-                });
+                }
 
                 ensureFutureCallbacksFire();
             }

@@ -16,6 +16,7 @@ const REMOVE_SMS_DOMAIN_PATTERN = /@expensify\.sms/gi;
  * Checks if parameter is a string or function
  * if it is a function then we will call it with
  * any additional arguments.
+ * @param parameter
  */
 function resultFn(parameter: string): string;
 function resultFn<R, A extends unknown[]>(parameter: (...args: A) => R, ...args: A): R;
@@ -51,9 +52,9 @@ const Str = {
      * @returns The cent value of the @p amountStr.
      */
     fromUSDToNumber(amountStr: string, allowFraction: boolean): number {
-        let amount: string | number = String(amountStr).replace(/[^\d.\-()]+/g, '');
+        let amount: string | number = String(amountStr).replaceAll(/[^\d.\-()]+/g, '');
         if (amount.match(/\(.*\)/)) {
-            const modifiedAmount = amount.replace(/[()]/g, '');
+            const modifiedAmount = amount.replaceAll(/[()]/g, '');
             amount = `-${modifiedAmount}`;
         }
         amount = Number(amount) * 100;
@@ -64,6 +65,8 @@ const Str = {
 
     /**
      * Truncates the middle section of a string based on the max allowed length
+     * @param fullStr
+     * @param maxLength
      */
     truncateInMiddle(fullStr: string, maxLength: number): string {
         if (fullStr.length <= maxLength) {
@@ -80,9 +83,10 @@ const Str = {
 
     /**
      * Convert new line to <br />
+     * @param str
      */
     nl2br(str: string): string {
-        return str.replace(/\n/g, '<br />');
+        return str.replaceAll('\n', '<br />');
     },
 
     /**
@@ -99,7 +103,7 @@ const Str = {
      * HTML encodes the given string.
      *
      * @param s The string to encode.
-     * @return string @p s HTML encoded.
+     * @returns string @p s HTML encoded.
      */
     htmlEncode(s: string) {
         return HtmlEntities.encode(s);
@@ -124,7 +128,7 @@ const Str = {
      * HTML encodes the given string.
      *
      * @param s The string to encode.
-     * @return string @p s HTML encoded.
+     * @returns string @p s HTML encoded.
      */
     htmlEncodeWithJQueryOrNative(s: string) {
         // Use jQuery if it exists or else use html-entities
@@ -164,7 +168,7 @@ const Str = {
      */
     makeID(str: string): string {
         const modifiedString = String(str)
-            .replace(/[^A-Za-z0-9]/g, '_')
+            .replaceAll(/[^A-Za-z0-9]/g, '_')
             .toUpperCase();
         return `id_${modifiedString}`;
     },
@@ -198,7 +202,7 @@ const Str = {
         function recap_callback(t: unknown, a: string, b: string) {
             return a + b.toUpperCase();
         }
-        return str.replace(
+        return str.replaceAll(
             // **NOTE: Match to _libfop.php
             /([^A-Za-z'.0-9])([a-z])/g,
             recap_callback,
@@ -207,24 +211,27 @@ const Str = {
 
     /**
      * Replace all the non alphanumerical character by _
+     * @param input
      */
     sanitizeToAlphaNumeric(input: string): string {
-        return String(input).replace(/[^\d\w]/g, '_');
+        return String(input).replaceAll(/[^\d\w]/g, '_');
     },
 
     /**
      * Strip out all the non numerical characters
+     * @param input
      */
     stripNonNumeric(input: string): string {
-        return String(input).replace(/[^\d]/g, '');
+        return String(input).replaceAll(/[^\d]/g, '');
     },
 
     /**
      * Strips all non ascii characters from a string
+     * @param input
      * @returns The ascii version of the string.
      */
     stripNonASCIICharacters(input: string): string {
-        return String(input).replace(/[\u0000-\u0019\u0080-\uffff]/g, '');
+        return String(input).replaceAll(/[\u0000-\u0019\u0080-\uffff]/g, '');
     },
 
     /**
@@ -239,7 +246,7 @@ const Str = {
      */
     shortenText(val: string, length: number): string {
         // Remove extra spaces because they don't show up in html anyway.
-        const text = String(val).replace(/\s+/g, ' ');
+        const text = String(val).replaceAll(/\s+/g, ' ');
         const truncatedText = text.substr(0, length - 3);
         return text.length > length ? `${truncatedText}...` : text;
     },
@@ -280,6 +287,7 @@ const Str = {
 
     /**
      * Gets the length of a string in bytes, including non-ASCII characters
+     * @param input
      * @returns The number of bytes used by string
      */
     getByteLength(input: string): number {
@@ -291,6 +299,7 @@ const Str = {
 
     /**
      * Shortens the input by max byte size instead of by character length
+     * @param input
      * @param maxSize The max size in bytes, e.g. 256
      * @returns Returns a shorted input if the input size exceeds the max
      */
@@ -330,7 +339,7 @@ const Str = {
             return '';
         }
 
-        return str.replace(/<[^>]*>?/gm, '');
+        return str.replaceAll(/<[^>]*>?/gm, '');
     },
 
     /**
@@ -391,6 +400,7 @@ const Str = {
     /**
      * Checks that the string is a valid url
      *
+     * @param str
      * @returns True if the string is a valid hyperlink
      */
     isValidURL(str: string): boolean {
@@ -435,7 +445,7 @@ const Str = {
      * @returns string with the trailing comma removed
      */
     removeTrailingComma(str: string): string {
-        return str.trim().replace(/(,$)/g, '');
+        return str.trim().replaceAll(/(,$)/g, '');
     },
 
     /**
@@ -458,6 +468,7 @@ const Str = {
 
     /**
      * Extract the email addresses from a string
+     * @param str
      */
     extractEmail(str: string): RegExpMatchArray | null {
         return String(str).match(Constants.CONST.REG_EXP.EMAIL_SEARCH);
@@ -511,14 +522,16 @@ const Str = {
 
     /**
      * Sanitize phone number to return only numbers. Return null if non valid phone number.
+     * @param str
      */
     sanitizePhoneNumber(str: string): string | null {
-        const string = str.replace(/(?!^\+)\D/g, '');
+        const string = str.replaceAll(/(?!^\+)\D/g, '');
         return string.length <= 15 && string.length >= 10 ? string : null;
     },
 
     /**
      * Sanitize email. Return null if non valid email.
+     * @param str
      */
     sanitizeEmail(str: string): string | null {
         const string = str.toLowerCase().trim();
@@ -533,7 +546,7 @@ const Str = {
      * @returns The escaped string
      */
     escapeForRegExp(str: string): string {
-        return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+        return str.replaceAll(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     },
 
     /**
@@ -543,7 +556,7 @@ const Str = {
      * @returns The escaped string
      */
     escapeForExpenseRule(str: string): string {
-        return str.replace(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
+        return str.replaceAll(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
     },
 
     /**
@@ -554,20 +567,24 @@ const Str = {
      * @returns The escaped string
      */
     addBackslashBeforeColonsForTagNamesComingFromQBD(str: string): string {
-        return str.replace(/([^\\]):/g, '$1\\:');
+        return str.replaceAll(/([^\\]):/g, '$1\\:');
     },
 
     /**
      * Removes backslashes from string
      * eg: myString\[\]\* -> myString[]*
+     * @param str
      */
     stripBackslashes(str: string): string {
-        return str.replace(/\\/g, '');
+        return str.replaceAll('\\', '');
     },
 
     /**
      * Checks if a string's length is in the specified range
      *
+     * @param str
+     * @param minimumLength
+     * @param maximumLength
      * @returns true if the length is in the range, false otherwise
      */
     isOfLength(str: string, minimumLength: number, maximumLength: number): boolean {
@@ -627,7 +644,7 @@ const Str = {
      */
     ucwords(str: string): string {
         const capitalize = ($1: string) => $1.toUpperCase();
-        return String(str).replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
+        return String(str).replaceAll(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
     },
 
     /**
@@ -704,6 +721,7 @@ const Str = {
 
     /**
      * Check if a file extension is supported by SmartReports
+     * @param filename
      */
     isFileExtensionSmartReportsValid(filename: string): boolean {
         // Allowed extensions. Make sure to keep them in sync with those defined
@@ -744,6 +762,7 @@ const Str = {
     /**
      * Checks if something is a string
      * Stolen from underscore
+     * @param obj
      */
     isString(obj: unknown): obj is string {
         return this.isTypeOf(obj, 'String');
@@ -761,6 +780,8 @@ const Str = {
     /**
      * Checks if something is a certain type
      * Stolen from underscore
+     * @param obj
+     * @param type
      */
     isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean {
         return Object.prototype.toString.call(obj) === `[object ${type}]`;
@@ -769,6 +790,7 @@ const Str = {
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
+     * @param obj
      */
     isUndefined(obj: unknown): boolean {
         // eslint-disable-next-line no-void
@@ -790,11 +812,12 @@ const Str = {
             return str;
         }
 
-        return str.substring(0, num).replace(/./g, mask) + str.substring(num);
+        return str.substring(0, num).replaceAll(/./g, mask) + str.substring(num);
     },
 
     /**
      * Trim a string
+     * @param str
      */
     trim(str: string) {
         return str.trim();
@@ -810,6 +833,7 @@ const Str = {
 
     /**
      * Remove all the spaces from a string
+     * @param input
      */
     removeSpaces(input: string): string {
         return String(input).replace(' ', '');
@@ -855,6 +879,7 @@ const Str = {
 
     /**
      * Converts a value to boolean, case-insensitive.
+     * @param value
      */
     toBool(value: unknown): boolean {
         if (this.isString(value)) {
@@ -891,6 +916,8 @@ const Str = {
 
     /**
      * Bold any word matching the regexp in the text.
+     * @param text
+     * @param regexp
      */
     boldify(text: string, regexp: RegExp): string {
         return text.replace(regexp, '<strong>$1</strong>');
@@ -898,6 +925,7 @@ const Str = {
 
     /**
      * Check for whether a phone number is valid.
+     * @param phone
      * @deprecated use isValidE164Phone to validate E.164 phone numbers or isValidPhoneFormat to validate phone numbers in general
      */
     isValidPhone(phone: string): boolean {
@@ -906,6 +934,7 @@ const Str = {
 
     /**
      * Check for whether a phone number is valid.
+     * @param phone
      */
     isValidPhoneNumber(phone: string): boolean {
         return parsePhoneNumber(phone).possible;
@@ -913,6 +942,7 @@ const Str = {
 
     /**
      * Check for whether a phone number is valid according to E.164 standard.
+     * @param phone
      */
     isValidE164Phone(phone: string): boolean {
         return Constants.CONST.SMS.E164_REGEX.test(phone);
@@ -925,6 +955,7 @@ const Str = {
      * e164: +14404589784
      * national: (440) 458-9784
      * 123.456.7890
+     * @param phone
      */
     isValidPhoneFormat(phone: string): boolean {
         return Constants.CONST.REG_EXP.GENERAL_PHONE_PART.test(phone);
@@ -932,6 +963,7 @@ const Str = {
 
     /**
      * We validate mentions by checking if it's first character is an allowed character.
+     * @param mention
      */
     isValidMention(mention: string): boolean {
         // Mentions can start @ proceeded by a space, eg "ping @user@domain.tld"
@@ -948,13 +980,15 @@ const Str = {
 
     /**
      * Returns text without our SMS domain
+     * @param text
      */
     removeSMSDomain(text: string): string {
-        return text.replace(REMOVE_SMS_DOMAIN_PATTERN, '');
+        return text.replaceAll(REMOVE_SMS_DOMAIN_PATTERN, '');
     },
 
     /**
      * Returns true if the text is a valid E.164 phone number with our SMS domain removed
+     * @param text
      */
     isSMSLogin(text: string): boolean {
         return this.isValidE164Phone(this.removeSMSDomain(text));
@@ -965,6 +999,8 @@ const Str = {
      * JS yet, so this is a good way of doing it according to
      * https://github.com/airbnb/javascript/issues/1439#issuecomment-306297399 and doesn't get us in trouble with
      * linting rules.
+     * @param str
+     * @param regex
      */
     matchAll(str: string, regex: RegExp): Array<RegExpMatchArray & {input: string; index: number}> {
         const matches: Array<RegExpMatchArray & {input: string; index: number}> = [];
@@ -1033,6 +1069,7 @@ const Str = {
     /**
      * Get file extension for a given url with or
      * without query parameters
+     * @param url
      */
     getExtension(url: string): string | undefined {
         if (typeof url !== 'string') {
@@ -1059,6 +1096,7 @@ const Str = {
      * supported by all platforms.
      *
      * https://reactnative.dev/docs/image#source
+     * @param url
      */
     isImage(url: string): boolean {
         const extension = this.getExtension(url);
@@ -1078,6 +1116,7 @@ const Str = {
      * https://developer.android.com/media/platform/supported-formats#video-formats
      * https://developer.apple.com/documentation/coremedia/1564239-video_codec_constants
      * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
+     * @param url
      */
     isVideo(url: string): boolean {
         const extension = this.getExtension(url);
@@ -1093,6 +1132,7 @@ const Str = {
      * Checks whether the given string is a +@ domain email account, such as
      * +@domain.com
      *
+     * @param email
      * @returns True if is a domain account email, otherwise false.
      */
     isDomainEmail(email: string): boolean {
@@ -1101,6 +1141,9 @@ const Str = {
 
     /**
      * Polyfill for String.prototype.replaceAll
+     * @param text
+     * @param searchValue
+     * @param replaceValue
      */
     replaceAll(text: string, searchValue: string | RegExp, replaceValue: string | ((...args: unknown[]) => string)): string {
         return String.prototype.replaceAll.call(text, searchValue, replaceValue as (...args: unknown[]) => string);

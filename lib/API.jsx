@@ -75,17 +75,17 @@ export default function API(network, args) {
      * @param {String} apiDeferred
      */
     function attachJSONCodeCallbacks(apiDeferred) {
-        Object.entries(defaultHandlers).forEach(([code, callbacks]) => {
+        for (const [code, callbacks] of Object.entries(defaultHandlers)) {
             // The key, `code`, is returned as a string, so we must cast it to an Integer
             const jsonCode = parseInt(code, 10);
-            callbacks.forEach((callback) => {
+            for (const callback of callbacks) {
                 if (jsonCode === 200) {
                     apiDeferred.done(callback);
                 } else {
                     apiDeferred.handle([jsonCode], callback);
                 }
-            });
-        });
+            }
+        }
     }
 
     /**
@@ -151,10 +151,10 @@ export default function API(network, args) {
      * @param {String} commandName The name of the API command
      */
     function requireParameters(parameterNames, parameters, commandName) {
-        // eslint-disable-next-line rulesdir/prefer-early-return
-        parameterNames.forEach((parameterName) => {
+         
+        for (const parameterName of parameterNames) {
             if (has(parameters, parameterName) && parameters[parameterName] !== null && parameters[parameterName] !== undefined) {
-                return;
+                continue;
             }
 
             const parametersCopy = {...parameters};
@@ -166,7 +166,7 @@ export default function API(network, args) {
             }
             const keys = Object.keys(parametersCopy).join(', ') || 'none';
             throw new Error(`Parameter ${parameterName} is required for "${commandName}". Supplied parameters: ${keys}`);
-        });
+        }
     }
 
     return {
@@ -179,12 +179,12 @@ export default function API(network, args) {
                 return;
             }
 
-            jsonCodes.forEach((jsonCode) => {
+            for (const jsonCode of jsonCodes) {
                 if (!defaultHandlers[jsonCode]) {
                     defaultHandlers[jsonCode] = [];
                 }
                 defaultHandlers[jsonCode].push(callback);
-            });
+            }
         },
 
         /**
@@ -223,7 +223,7 @@ export default function API(network, args) {
          * @param {String} [data.returnedPropertyType]
          * @param {Boolean} [data.checkCodeRevision]
          *
-         * @return {Function}
+         * @returns {Function}
          */
         extendMethod: (data) => {
             if (!data.commandName) {
@@ -242,7 +242,7 @@ export default function API(network, args) {
         },
 
         /**
-         * @return {Network}
+         * @returns {Network}
          */
         getNetwork() {
             return network;
@@ -250,7 +250,7 @@ export default function API(network, args) {
 
         /**
          * @param  {Object} parameters
-         * @return {ExpensifyAPIDeferred}
+         * @returns {ExpensifyAPIDeferred}
          */
         logToServer(parameters) {
             const commandName = 'Log';
@@ -260,7 +260,7 @@ export default function API(network, args) {
         /**
          * @param  {Object} parameters
          * @param  {String} parameters.email
-         * @return {ExpensifyAPIDeferred}
+         * @returns {ExpensifyAPIDeferred}
          */
         getAccountStatus(parameters) {
             const commandName = 'GetAccountStatus';
@@ -275,7 +275,7 @@ export default function API(network, args) {
         /**
          * @param  {Object} parameters
          * @param  {String} parameters.email
-         * @return {ExpensifyAPIDeferred}
+         * @returns {ExpensifyAPIDeferred}
          */
         Domain_RequestAccess(parameters) {
             const commandName = 'Domain_RequestAccess';
@@ -394,7 +394,7 @@ export default function API(network, args) {
          * @param {Object} parameters
          * @param {String} [parameters.email]
          *
-         * @return {ExpensifyAPIDeferred}
+         * @returns {ExpensifyAPIDeferred}
          */
         resendValidateCode(parameters = {}) {
             const commandName = 'ResendValidateCode';
@@ -410,7 +410,7 @@ export default function API(network, args) {
          * @param {Object} parameters
          * @param {String} parameters.email
          *
-         * @return {ExpensifyAPIDeferred}
+         * @returns {ExpensifyAPIDeferred}
          */
         reopenAccount(parameters) {
             const commandName = 'User_ReopenAccount';
@@ -531,7 +531,7 @@ export default function API(network, args) {
          * Performs API command GetRequestCountryCode
          * Fetches the country code based on the location of the request
          *
-         * @return {APIDeferred}
+         * @returns {APIDeferred}
          */
         getRequestCountryCode() {
             const commandName = 'GetRequestCountryCode';

@@ -7,7 +7,7 @@ import PubSub from './PubSub';
  *
  * @param {String} eventName Name of the event to listen to
  * @param {Function} callback Function to fire
- * @constructor
+ * @class
  */
 export default function (eventName, callback) {
     let id = null;
