@@ -74,11 +74,11 @@ export default class Logger {
 
     /**
      * Add a message to the list
-     * @param message
-     * @param parameters The parameters associated with the message
-     * @param forceFlushToServer Should we force flushing all logs to server?
-     * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
-     * @param extraData
+     * @param {string} message
+     * @param {Parameters} parameters The parameters associated with the message
+     * @param {boolean} forceFlushToServer Should we force flushing all logs to server?
+     * @param {boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param {Parameters} extraData
      */
     add(message: string, parameters: Parameters, forceFlushToServer: boolean, onlyFlushWithOthers = false, extraData: Parameters = '') {
         // Capture the user's email at the moment this specific log line is created
@@ -112,11 +112,11 @@ export default class Logger {
      * Caches an informational message locally, to be sent to the server if
      * needed later.
      *
-     * @param message The message to log.
-     * @param sendNow if true, the message will be sent right away.
-     * @param parameters The parameters to send along with the message
-     * @param onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
-     * @param extraData
+     * @param {string} message The message to log.
+     * @param {boolean} sendNow if true, the message will be sent right away.
+     * @param {Parameters} parameters The parameters to send along with the message
+     * @param {boolean} onlyFlushWithOthers A request will never be sent to the server if all loglines have this set to true
+     * @param {Parameters} extraData
      */
     info(message: string, sendNow = false, parameters: Parameters = '', onlyFlushWithOthers = false, extraData: Parameters = '') {
         const msg = `[info] ${message}`;
@@ -126,9 +126,9 @@ export default class Logger {
     /**
      * Logs an alert.
      *
-     * @param message The message to alert.
-     * @param parameters The parameters to send along with the message
-     * @param includeStackTrace Must be disabled for testing
+     * @param {string} message The message to alert.
+     * @param {Parameters} parameters The parameters to send along with the message
+     * @param {boolean} includeStackTrace Must be disabled for testing
      */
     alert(message: string, parameters: Parameters = {}, includeStackTrace = true) {
         const msg = `[alrt] ${message}`;
@@ -155,8 +155,8 @@ export default class Logger {
     /**
      * Logs a hmmm.
      *
-     * @param message The message to hmmm.
-     * @param parameters The parameters to send along with the message
+     * @param {string} message The message to hmmm.
+     * @param {Parameters} parameters The parameters to send along with the message
      */
     hmmm(message: string, parameters: Parameters = '') {
         const msg = `[hmmm] ${message}`;
@@ -166,8 +166,8 @@ export default class Logger {
     /**
      * Logs a message in the browser console.
      *
-     * @param message The message to log.
-     * @param extraData
+     * @param {string} message The message to log.
+     * @param {Parameters} extraData
      */
     client(message: string, extraData: Parameters = '') {
         if (!this.clientLoggingCallback) {

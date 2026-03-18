@@ -6,7 +6,7 @@
 
 /**
  * Checks whether the given value can be merged. It has to be an object, but not an array, RegExp or Date.
- * @param value
+ * @param {unknown} value
  */
 function isMergeableObject(value: unknown): value is Record<string, unknown> {
     const nonNullObject = value != null ? typeof value === 'object' : false;
@@ -19,9 +19,9 @@ function isMergeableObject(value: unknown): value is Record<string, unknown> {
  * We generally want to remove null values from objects written to disk and cache, because it decreases the amount of data stored in memory and on disk.
  * On native, when merging an existing value with new changes, SQLite will use JSON_PATCH, which removes top-level nullish values.
  * To be consistent with the behaviour for merge, we'll also want to remove null values for "set" operations.
- * @param target
- * @param source
- * @param shouldRemoveNullObjectValues
+ * @param {TObject} target
+ * @param {TObject} source
+ * @param {boolean} shouldRemoveNullObjectValues
  */
 function fastMerge<TObject>(target: TObject, source: TObject, shouldRemoveNullObjectValues?: boolean): TObject;
 function fastMerge<TObject extends Record<string, unknown>>(target: TObject, source: TObject, shouldRemoveNullObjectValues = true): TObject {

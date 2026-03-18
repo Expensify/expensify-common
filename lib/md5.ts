@@ -4,8 +4,8 @@
  * md5 hash implementation
  * http://www.myersdaily.org/joseph/javascript/md5-text.html
  *
- * @param x
- * @param k
+ * @param {number[]} x
+ * @param {number[]} k
  */
 function md5cycle(x: number[], k: number[]) {
     var a = x[0],

@@ -117,6 +117,7 @@ function getJSON(name, defaultValue = null) {
 
     try {
         data = JSON.parse(get(name));
+        // eslint-disable-next-line no-unused-vars
     } catch (err) {
         data = defaultValue;
     }

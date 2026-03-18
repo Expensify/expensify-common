@@ -323,8 +323,8 @@ export default function API(network, args) {
          * Performs API command "Get"
          *
          * @param {Object} parameters The API call parameters, must contain "returnValueList"
-         * @param {Domain} [domain] If you want to run this command as the domain account of this domain
-         * @param {DomainMember} [domainMember] If you want to run this command as specified domain member
+         * param {Domain} [domain] If you want to run this command as the domain account of this domain
+         * param {DomainMember} [domainMember] If you want to run this command as specified domain member
          *
          * @returns {APIDeferred} An APIDeferred representing the promise of this request
          */
@@ -451,8 +451,8 @@ export default function API(network, args) {
          * Validate a user
          *
          * @param {Object} parameters
-         * @param {String} validateCode
-         * @param {Number} accountID
+         * param {String} validateCode
+         * param {Number} accountID
          * @returns {ExpensifyAPIDeferred}
          */
         validateEmail(parameters) {
