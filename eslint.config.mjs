@@ -118,6 +118,8 @@ export default defineConfig([
             'react/jsx-props-no-spreading': 'off',
             'react/require-default-props': 'off',
             'valid-jsdoc': 'off',
+            'jsdoc/require-param-type': 'off',
+            'jsdoc/require-returns-type': 'off',
             'es/no-optional-chaining': 'off',
             'es/no-nullish-coalescing-operators': 'off',
 
