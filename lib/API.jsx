@@ -151,7 +151,6 @@ export default function API(network, args) {
      * @param {String} commandName The name of the API command
      */
     function requireParameters(parameterNames, parameters, commandName) {
-         
         for (const parameterName of parameterNames) {
             if (has(parameters, parameterName) && parameters[parameterName] !== null && parameters[parameterName] !== undefined) {
                 continue;
