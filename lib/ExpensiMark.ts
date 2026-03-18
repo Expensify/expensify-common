@@ -752,8 +752,7 @@ export default class ExpensiMark {
                 regex: /<video[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/video>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 /**
                  * @param extras - The extras object
-                 * @param match The full match
-                 * @param _match
+                 * @param _match The full match
                  * @param _g1 The first capture group
                  * @param videoSource - the second capture group - video source (video URL)
                  * @param videoAttrs - the third capture group - video attributes (data-expensify-width, data-expensify-height, etc...)
@@ -981,6 +980,7 @@ export default class ExpensiMark {
             }
         };
         try {
+            // eslint-disable-next-line unicorn/no-array-for-each
             rules.forEach(processRule);
         } catch (e) {
             ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
@@ -1179,6 +1179,7 @@ export default class ExpensiMark {
             }
         };
 
+        // eslint-disable-next-line unicorn/no-array-for-each
         splitText.forEach(processText);
 
         return joinedText;
@@ -1273,6 +1274,7 @@ export default class ExpensiMark {
             generatedMarkdown = this.replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
         };
 
+        // eslint-disable-next-line unicorn/no-array-for-each
         this.htmlToMarkdownRules.forEach(processRule);
         return Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
     }
@@ -1288,6 +1290,7 @@ export default class ExpensiMark {
             replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
         };
 
+        // eslint-disable-next-line unicorn/no-array-for-each
         this.htmlToTextRules.forEach(processRule);
 
         // Unescaping because the text is escaped in 'replace' function
