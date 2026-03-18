@@ -46,6 +46,7 @@ type CommonRule = {
     rawInputReplacement?: Replacement;
     pre?: (input: string) => string;
     post?: (input: string) => string;
+    shouldSkipProcessing?: (textToCheck: string) => boolean;
 };
 
 type RuleWithRegex = CommonRule & {
@@ -75,7 +76,6 @@ type TruncateOptions = {
 
 const MARKDOWN_LINK_REGEX = new RegExp(`\\[((?:[^\\[\\]\\r\\n]*(?:\\[[^\\[\\]\\r\\n]*][^\\[\\]\\r\\n]*)*))]\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
 const MARKDOWN_IMAGE_REGEX = new RegExp(`\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(${UrlPatterns.MARKDOWN_URL_REGEX}\\)(?![^<]*(<\\/pre>|<\\/code>))`, 'gi');
-
 const MARKDOWN_VIDEO_REGEX = new RegExp(
     `\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(((${UrlPatterns.MARKDOWN_URL_REGEX})\\.(?:${Constants.CONST.VIDEO_EXTENSIONS.join('|')}))\\)(?![^<]*(<\\/pre>|<\\/code>))`,
     'gi',
@@ -214,6 +214,11 @@ export default class ExpensiMark {
                     const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
+                shouldSkipProcessing: (textToCheck) => {
+                    const missingSpecialCharacters = !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
+                    const missingVideoExtension = !Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.toLowerCase().includes(`.${extension.toLowerCase()}`));
+                    return missingSpecialCharacters || missingVideoExtension;
+                },
             },
 
             /**
@@ -300,6 +305,9 @@ export default class ExpensiMark {
                     const extraAttrs = attrCache && attrCache[imgSource];
                     return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
                 },
+                shouldSkipProcessing: (textToCheck) => {
+                    return !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
+                },
             },
 
             /**
@@ -321,6 +329,9 @@ export default class ExpensiMark {
                         return match;
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1}</a>`;
+                },
+                shouldSkipProcessing: (textToCheck) => {
+                    return !textToCheck.includes('.');
                 },
             },
 
@@ -350,7 +361,6 @@ export default class ExpensiMark {
              */
             {
                 name: 'reportMentions',
-
                 regex: /(?<=^[*~_:]?|[ \n][*~_:]?|[:#])(#[\p{Ll}0-9-]{1,99})(?![^<]*(?:<\/pre>|<\/code>|<\/a>))/gimu,
                 replacement: '<mention-report>$1</mention-report>',
             },
@@ -416,6 +426,9 @@ export default class ExpensiMark {
                 rawInputReplacement: (_extras, _match, g1, g2) => {
                     const href = Str.sanitizeURL(g2);
                     return `${g1}<a href="${href}" data-raw-href="${g2}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
+                },
+                shouldSkipProcessing: (textToCheck) => {
+                    return !textToCheck.includes('.');
                 },
             },
 
@@ -967,6 +980,11 @@ export default class ExpensiMark {
             if (rule.pre) {
                 replacedText = rule.pre(replacedText);
             }
+
+            if (rule.shouldSkipProcessing && rule.shouldSkipProcessing(replacedText)) {
+                return;
+            }
+
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
