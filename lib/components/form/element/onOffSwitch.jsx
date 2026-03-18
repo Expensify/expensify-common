@@ -189,7 +189,7 @@ class OnOffSwitch extends Component {
         return (
             <div>
                 {/* For 100% a11y compliance we'd need to move the <input> into the <label> element */}
-                { }
+                {}
                 {this.props.label && !this.props.labelOnRight && (
                     <label
                         className={cn(this.props.labelClasses)}
