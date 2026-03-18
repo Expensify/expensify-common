@@ -215,7 +215,7 @@ export default class ExpensiMark {
                 },
                 shouldSkipProcessing: (textToCheck) => {
                     const missingSpecialCharacters = !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
-                    const missingVideoExtension = !Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.includes(`.${extension}`));
+                    const missingVideoExtension = !Constants.CONST.VIDEO_EXTENSIONS.some((extension) => textToCheck.toLowerCase().includes(`.${extension.toLowerCase()}`));
                     return missingSpecialCharacters || missingVideoExtension;
                 },
             },
