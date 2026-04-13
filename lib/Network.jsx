@@ -87,7 +87,7 @@ export default function Network(endpoint) {
             // If it does, we should use formData instead of parameters and update
             // the ajax settings accordingly
             Object.entries(parameters).forEach(([key, value]) => {
-                if (!value) {
+                if (value === undefined) {
                     return;
                 }
 
