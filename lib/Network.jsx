@@ -127,8 +127,16 @@ export default function Network(endpoint) {
             };
             let url = endpoint;
 
-            // Add the API command to our URL (for console debugging purposes)
-            url = addCommandToUrl(parameters.command, url);
+            if (isNewURLFormat) {
+                // Remove command from parameters and use it in the URL
+                const command = parameters.command;
+                // eslint-disable-next-line no-param-reassign
+                delete parameters.command;
+                url = `${endpoint}${command}`;
+            } else {
+                // Add the API command to our URL (for console debugging purposes)
+                url = addCommandToUrl(parameters.command, url);
+            }
 
             // Add our data as form data
             const formData = new FormData();
