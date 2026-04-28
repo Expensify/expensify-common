@@ -902,6 +902,13 @@ const CONST = {
         MOBILE: 'device',
     },
 
+    VALIDATE_CODE_REASONS: {
+        SIGN_IN: 'sign_in',
+        ADD_CONTACT_METHOD: 'add_contact_method',
+        VALIDATE_ACCOUNT: 'validate_account',
+        REVEAL_CARD_DETAILS: 'reveal_card_details',
+    },
+
     EXPENSIFY_CARD: {
         FEED_NAME: 'Expensify Card',
 
