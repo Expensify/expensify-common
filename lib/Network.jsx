@@ -2,25 +2,18 @@ import $ from 'jquery';
 import * as Utils from './utils';
 
 /**
- * Adds our API command to the URL so the API call is more easily identified in the
- * network tab of the JS console
+ * Appends the API command as a path segment to the URL, producing URLs of the form `/api/CommandName`.
  *
  * @param {string} command
  * @param {string} url
  * @returns {string}
  */
 function addCommandToUrl(command, url) {
-    let newUrl = url;
-
-    if (command) {
-        // Add a ? to the end of the URL if there isn't one already
-        if (newUrl.indexOf('?') === -1) {
-            newUrl = `${newUrl}?`;
-        }
-        newUrl = `${newUrl}&command=${command}`;
+    if (!command) {
+        return url;
     }
-
-    return newUrl;
+    const separator = url.endsWith('/') ? '' : '/';
+    return `${url}${separator}${command}`;
 }
 
 /**
@@ -31,9 +24,6 @@ function addCommandToUrl(command, url) {
 export default function Network(endpoint) {
     // A flag that turns true when the user navigates away
     let isNavigatingAway = false;
-
-    // If URL ends in `/` we're using /api/{command} format.
-    const isNewURLFormat = endpoint[endpoint.length - 1] === '/';
 
     if (!endpoint) {
         throw new Error('Cannot instantiate Network without an url endpoint');
@@ -61,27 +51,18 @@ export default function Network(endpoint) {
          * @returns {$.Deferred}
          */
         post(parameters) {
-            // Build request
-            let newURL = endpoint;
-            if (isNewURLFormat) {
-                // Remove command from parameters and use it in the URL
-                const command = parameters.command;
-                // eslint-disable-next-line no-param-reassign
-                delete parameters.command;
-                newURL = `${endpoint}${command}`;
-            }
-
             const settings = {
-                url: newURL,
+                url: addCommandToUrl(parameters.command, endpoint),
                 type: 'POST',
                 data: parameters,
             };
+            // The command is encoded in the URL path, so it does not need to
+            // also travel in the request body.
+            // eslint-disable-next-line no-param-reassign
+            delete parameters.command;
+
             const formData = new FormData();
             let shouldUseFormData = false;
-
-            // Add the API command to our URL (for console debugging purposes)
-            // Note that parameters.command is empty if we're using the new API format and this will do nothing.
-            settings.url = addCommandToUrl(parameters.command, settings.url);
 
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
@@ -125,10 +106,11 @@ export default function Network(endpoint) {
                 keepalive: true,
                 credentials: 'same-origin',
             };
-            let url = endpoint;
-
-            // Add the API command to our URL (for console debugging purposes)
-            url = addCommandToUrl(parameters.command, url);
+            const url = addCommandToUrl(parameters.command, endpoint);
+            // The command is encoded in the URL path, so it does not need to
+            // also travel in the request body.
+            // eslint-disable-next-line no-param-reassign
+            delete parameters.command;
 
             // Add our data as form data
             const formData = new FormData();
