@@ -981,8 +981,10 @@ const CONST = {
     },
     VIDEO_EXTENSIONS: ['mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm', '3gp', 'm4v', 'mpg', 'mpeg', 'ogv'],
 
-    // Sources: https://github.com/Expensify/App/issues/14958#issuecomment-1442138427
-    // https://github.com/Expensify/App/issues/14958#issuecomment-1456026810
+    // Country keys are ISO 3166-1 alpha-2 codes: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+    // Per-country zip regex sources:
+    // - https://github.com/FormatterKit/PostalCodeValidator/blob/master/Sources/PostalCodeValidator/PostalCodeValidator.swift
+    // - https://en.wikipedia.org/wiki/List_of_postal_codes
     COUNTRY_ZIP_REGEX_DATA: {
         AC: {
             regex: /^ASCN 1ZZ$/,
