@@ -2504,9 +2504,7 @@ describe('room mentions', () => {
     });
 });
 
-// VirtualCFO charts are embedded directly into reportAction.message.html as <VictoryChart> blocks.
-// The chart fragment (and its inner Victory* tags) must survive htmlToMarkdown and the trusted-input
-// path of the markdown-to-html replace step so round-tripping doesn't strip or escape the markup.
+// VirtualCFO charts must preserve their VictoryChart markup during HTML/markdown conversion.
 describe('VictoryChart round-trip', () => {
     const chart =
         '<VictoryChart domainPadding="20">' +
