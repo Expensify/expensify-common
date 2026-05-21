@@ -83,7 +83,36 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
+// VictoryChart and its inner tags are preserved verbatim through `replace` and `htmlToMarkdown`
+// so that server-rendered VirtualCFO charts in `reportAction.message.html` round-trip without
+// their inner markup being escaped or stripped. The outer <VictoryChart>...</VictoryChart> match
+// also protects every nested child (VictoryBar/Line/Pie/Axis/Label/Legend/Tooltip/Group) as part
+// of the captured block; the alternation handles the rare case of a stray child tag at top level.
+// Case-insensitive matching covers both the PascalCase emitted by the server (<VictoryChart>)
+// and the lowercase form react-native-render-html uses internally (<victorychart>).
+const VICTORY_TAG_NAMES = 'VictoryChart|VictoryBar|VictoryLine|VictoryPie|VictoryAxis|VictoryLabel|VictoryLegend|VictoryTooltip|VictoryGroup';
+const PASSTHROUGH_TAGS_REGEX = new RegExp(`<(?:${VICTORY_TAG_NAMES})\\b[^>]*/>|<(${VICTORY_TAG_NAMES})\\b[^>]*>[\\s\\S]*?<\\/\\1>`, 'gi');
+const PASSTHROUGH_PLACEHOLDER_REGEX = /EXMK_PT_(\d+)/g;
+const buildPassthroughPlaceholder = (index: number): string => `EXMK_PT_${index}`;
+
 export default class ExpensiMark {
+    extractPassthroughTags = (text: string): {text: string; tags: string[]} => {
+        const tags: string[] = [];
+        const out = text.replace(PASSTHROUGH_TAGS_REGEX, (match) => {
+            const placeholder = buildPassthroughPlaceholder(tags.length);
+            tags.push(match);
+            return placeholder;
+        });
+        return {text: out, tags};
+    };
+
+    restorePassthroughTags = (text: string, tags: string[]): string => {
+        if (tags.length === 0) {
+            return text;
+        }
+        return text.replace(PASSTHROUGH_PLACEHOLDER_REGEX, (match, idx) => tags[Number(idx)] ?? match);
+    };
+
     getAttributeCache = (extras?: Extras) => {
         if (!extras) {
             return {attrCachingFn: undefined, attrCache: undefined};
@@ -862,6 +891,11 @@ export default class ExpensiMark {
                 replacement: '[Attachment]',
             },
             {
+                name: 'victoryChart',
+                regex: /<VictoryChart\b[^>]*\/>|<VictoryChart\b[^>]*>[\s\S]*?<\/VictoryChart>/gi,
+                replacement: '[chart]',
+            },
+            {
                 name: 'otherAttachments',
                 regex: /<a[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/a>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 replacement: '[Attachment]',
@@ -968,8 +1002,12 @@ export default class ExpensiMark {
             return '';
         }
 
+        // Lift out <VictoryChart> blocks before processing so neither escaping nor markdown rules
+        // disturb their inner markup (JSON in attributes, special chars, etc.). Restored at the end.
+        const {text: textWithPlaceholders, tags: passthroughTags} = this.extractPassthroughTags(text);
+
         // This ensures that any html the user puts into the comment field shows as raw html
-        let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
+        let replacedText = shouldEscapeText ? Utils.escapeText(textWithPlaceholders) : textWithPlaceholders;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
         const processRule = (rule: Rule) => {
@@ -1003,7 +1041,7 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        return replacedText;
+        return this.restorePassthroughTags(replacedText, passthroughTags);
     }
 
     /**
@@ -1268,6 +1306,11 @@ export default class ExpensiMark {
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
+        // Lift out <VictoryChart> blocks before replaceBlockElementWithNewLine's stripHTML would
+        // erase them. Restored after rule processing so the chart fragment survives the round-trip.
+        const {text: textWithPlaceholders, tags: passthroughTags} = this.extractPassthroughTags(generatedMarkdown);
+        generatedMarkdown = textWithPlaceholders;
+
         const processRule = (rule: RuleWithRegex) => {
             // Pre-processes input HTML before applying regex
             if (rule.pre) {
@@ -1278,7 +1321,8 @@ export default class ExpensiMark {
         };
 
         this.htmlToMarkdownRules.forEach(processRule);
-        return Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
+        const decoded = Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
+        return this.restorePassthroughTags(decoded, passthroughTags);
     }
 
     /**

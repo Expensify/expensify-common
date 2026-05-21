@@ -2503,3 +2503,83 @@ describe('room mentions', () => {
         expect(parser.replace(testString)).toBe(resultString);
     });
 });
+
+// VirtualCFO charts are embedded directly into reportAction.message.html as <VictoryChart> blocks.
+// The chart fragment (and its inner Victory* tags) must survive both htmlToMarkdown and the
+// markdown-to-html replace step so editing/round-tripping doesn't strip or escape the markup.
+describe('VictoryChart round-trip', () => {
+    const chart =
+        '<VictoryChart domainPadding="20">' +
+        "\n  <VictoryBar data=\"[ {x: 'Jan', y: 3}, {x: 'Feb', y: 5}, {x: 'Mar', y: 2}, {x: 'Apr', y: 7} ]\" />" +
+        "\n  <VictoryLine data=\"[ {x: 'Jan', y: 1}, {x: 'Feb', y: 7}, {x: 'Mar', y: 3}, {x: 'Apr', y: 5} ]\" />" +
+        '\n</VictoryChart>';
+
+    test('htmlToMarkdown preserves the <VictoryChart> fragment verbatim', () => {
+        expect(parser.htmlToMarkdown(chart)).toBe(chart);
+    });
+
+    test('markdown-to-html (replace) preserves the <VictoryChart> fragment verbatim', () => {
+        // The chart text is what htmlToMarkdown produces, so feed it through replace as user-visible markdown.
+        expect(parser.replace(chart)).toBe(chart);
+    });
+
+    test('full round-trip htmlToMarkdown -> replace yields the original fragment', () => {
+        const md = parser.htmlToMarkdown(chart);
+        expect(parser.replace(md)).toBe(chart);
+    });
+
+    test('round-trip preserves chart when wrapped in surrounding narrative text', () => {
+        const input = `Here's the spend trend: ${chart} See breakdown below.`;
+        const md = parser.htmlToMarkdown(input);
+        expect(md).toContain(chart);
+        expect(md).toContain("Here's the spend trend:");
+        expect(md).toContain('See breakdown below.');
+    });
+
+    test('round-trip handles lowercase tag names (react-native-render-html internal form)', () => {
+        const lowercaseChart = '<victorychart><victorybar data="[{x: 1, y: 2}]" /></victorychart>';
+        expect(parser.htmlToMarkdown(lowercaseChart)).toBe(lowercaseChart);
+        expect(parser.replace(lowercaseChart)).toBe(lowercaseChart);
+    });
+
+    test('self-closing <VictoryChart /> survives round-trip', () => {
+        expect(parser.htmlToMarkdown('<VictoryChart />')).toBe('<VictoryChart />');
+        expect(parser.replace('<VictoryChart />')).toBe('<VictoryChart />');
+    });
+
+    test('every inner Victory tag is preserved when nested in <VictoryChart>', () => {
+        const full =
+            '<VictoryChart>' +
+            '<VictoryLabel text="Monthly spend" />' +
+            '<VictoryAxis tickValues="[1, 2, 3]" />' +
+            '<VictoryBar data="[{x: 1, y: 10}]" />' +
+            '<VictoryLine data="[{x: 1, y: 5}]" />' +
+            '<VictoryPie data="[{x: \'a\', y: 1}]" />' +
+            '<VictoryLegend data="[{name: \'a\'}]" />' +
+            '<VictoryGroup horizontal="true" offset="18"><VictoryBar data="[]" /></VictoryGroup>' +
+            '<VictoryTooltip />' +
+            '</VictoryChart>';
+        expect(parser.htmlToMarkdown(full)).toBe(full);
+        expect(parser.replace(full)).toBe(full);
+    });
+
+    test('replace still escapes unrelated user-typed HTML (passthrough is opt-in)', () => {
+        expect(parser.replace('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
+    });
+
+    test('markdown rules around a chart still apply', () => {
+        const input = `*bold* ${chart} _italic_`;
+        expect(parser.replace(input)).toBe(`<strong>bold</strong> ${chart} <em>italic</em>`);
+    });
+
+    test('htmlToText emits [chart] for <VictoryChart> (notification fallback per R1.2)', () => {
+        expect(parser.htmlToText(chart)).toBe('[chart]');
+        expect(parser.htmlToText('<VictoryChart />')).toBe('[chart]');
+    });
+
+    test('stray placeholder-looking text in user input is not mistakenly restored', () => {
+        const text = 'reference EXMK_PT_0 in body';
+        expect(parser.htmlToMarkdown(text)).toBe('reference EXMK_PT_0 in body');
+        expect(parser.replace(text)).toBe('reference EXMK_PT_0 in body');
+    });
+});
