@@ -83,7 +83,33 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
+// Preserve VirtualCFO chart blocks by matching the outer <VictoryChart> container.
+// This captures all nested Victory components and prevents markup escaping during conversion.
+const VICTORY_CHART_REGEX = /<VictoryChart\b[^>]*\/>|<VictoryChart\b[^>]*>[\s\S]*?<\/VictoryChart>/gi;
+
+// Chart placeholders use NUL characters as delimiters to prevent conflicts with user content.
+const VICTORY_CHART_PLACEHOLDER_DELIMITER = String.fromCharCode(0);
+const VICTORY_CHART_PLACEHOLDER_PATTERN = new RegExp(`${VICTORY_CHART_PLACEHOLDER_DELIMITER}(\\d+)${VICTORY_CHART_PLACEHOLDER_DELIMITER}`, 'g');
+const createVictoryChartPlaceholder = (index: number): string => `${VICTORY_CHART_PLACEHOLDER_DELIMITER}${index}${VICTORY_CHART_PLACEHOLDER_DELIMITER}`;
+
 export default class ExpensiMark {
+    extractVictoryChartTags = (text: string): {text: string; tags: string[]} => {
+        const tags: string[] = [];
+        const out = text.replace(VICTORY_CHART_REGEX, (match) => {
+            const placeholder = createVictoryChartPlaceholder(tags.length);
+            tags.push(match);
+            return placeholder;
+        });
+        return {text: out, tags};
+    };
+
+    restoreVictoryChartTags = (text: string, tags: string[]): string => {
+        if (tags.length === 0) {
+            return text;
+        }
+        return text.replace(VICTORY_CHART_PLACEHOLDER_PATTERN, (match, idx) => tags[Number(idx)] ?? match);
+    };
+
     getAttributeCache = (extras?: Extras) => {
         if (!extras) {
             return {attrCachingFn: undefined, attrCache: undefined};
@@ -862,6 +888,11 @@ export default class ExpensiMark {
                 replacement: '[Attachment]',
             },
             {
+                name: 'victoryChart',
+                regex: /<VictoryChart\b[^>]*\/>|<VictoryChart\b[^>]*>[\s\S]*?<\/VictoryChart>/gi,
+                replacement: '[chart]',
+            },
+            {
                 name: 'otherAttachments',
                 regex: /<a[^><]*data-expensify-source\s*=\s*(['"])(\S*?)\1(.*?)>([^><]*)<\/a>*(?![^<][\s\S]*?(<\/pre>|<\/code>))/gi,
                 replacement: '[Attachment]',
@@ -968,8 +999,12 @@ export default class ExpensiMark {
             return '';
         }
 
+        // Extract VictoryChart blocks to preserve their markup during processing.
+        // Only safe for trusted server input - user input must be escaped to prevent XSS.
+        const {text: textWithPlaceholders, tags: victoryChartTags} = shouldEscapeText ? {text, tags: [] as string[]} : this.extractVictoryChartTags(text);
+
         // This ensures that any html the user puts into the comment field shows as raw html
-        let replacedText = shouldEscapeText ? Utils.escapeText(text) : text;
+        let replacedText = shouldEscapeText ? Utils.escapeText(textWithPlaceholders) : textWithPlaceholders;
         const rules = this.getHtmlRuleset(filterRules, disabledRules, shouldKeepRawInput);
 
         const processRule = (rule: Rule) => {
@@ -1003,7 +1038,7 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        return replacedText;
+        return this.restoreVictoryChartTags(replacedText, victoryChartTags);
     }
 
     /**
@@ -1268,6 +1303,10 @@ export default class ExpensiMark {
         }
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
+        // Extract VictoryChart blocks before HTML stripping, then restore them.
+        const {text: textWithPlaceholders, tags: victoryChartTags} = this.extractVictoryChartTags(generatedMarkdown);
+        generatedMarkdown = textWithPlaceholders;
+
         const processRule = (rule: RuleWithRegex) => {
             // Pre-processes input HTML before applying regex
             if (rule.pre) {
@@ -1278,7 +1317,8 @@ export default class ExpensiMark {
         };
 
         this.htmlToMarkdownRules.forEach(processRule);
-        return Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
+        const decoded = Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
+        return this.restoreVictoryChartTags(decoded, victoryChartTags);
     }
 
     /**
