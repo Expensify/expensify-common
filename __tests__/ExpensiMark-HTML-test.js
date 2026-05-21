@@ -2505,8 +2505,8 @@ describe('room mentions', () => {
 });
 
 // VirtualCFO charts are embedded directly into reportAction.message.html as <VictoryChart> blocks.
-// The chart fragment (and its inner Victory* tags) must survive both htmlToMarkdown and the
-// markdown-to-html replace step so editing/round-tripping doesn't strip or escape the markup.
+// The chart fragment (and its inner Victory* tags) must survive htmlToMarkdown and the trusted-input
+// path of the markdown-to-html replace step so round-tripping doesn't strip or escape the markup.
 describe('VictoryChart round-trip', () => {
     const chart =
         '<VictoryChart domainPadding="20">' +
@@ -2518,14 +2518,15 @@ describe('VictoryChart round-trip', () => {
         expect(parser.htmlToMarkdown(chart)).toBe(chart);
     });
 
-    test('markdown-to-html (replace) preserves the <VictoryChart> fragment verbatim', () => {
-        // The chart text is what htmlToMarkdown produces, so feed it through replace as user-visible markdown.
-        expect(parser.replace(chart)).toBe(chart);
+    test('markdown-to-html (replace) preserves the <VictoryChart> fragment for trusted input', () => {
+        // Charts only ever originate from trusted server HTML, so replace is called with
+        // shouldEscapeText: false. See the XSS test below for the user-typed (untrusted) path.
+        expect(parser.replace(chart, {shouldEscapeText: false})).toBe(chart);
     });
 
     test('full round-trip htmlToMarkdown -> replace yields the original fragment', () => {
         const md = parser.htmlToMarkdown(chart);
-        expect(parser.replace(md)).toBe(chart);
+        expect(parser.replace(md, {shouldEscapeText: false})).toBe(chart);
     });
 
     test('round-trip preserves chart when wrapped in surrounding narrative text', () => {
@@ -2539,12 +2540,12 @@ describe('VictoryChart round-trip', () => {
     test('round-trip handles lowercase tag names (react-native-render-html internal form)', () => {
         const lowercaseChart = '<victorychart><victorybar data="[{x: 1, y: 2}]" /></victorychart>';
         expect(parser.htmlToMarkdown(lowercaseChart)).toBe(lowercaseChart);
-        expect(parser.replace(lowercaseChart)).toBe(lowercaseChart);
+        expect(parser.replace(lowercaseChart, {shouldEscapeText: false})).toBe(lowercaseChart);
     });
 
     test('self-closing <VictoryChart /> survives round-trip', () => {
         expect(parser.htmlToMarkdown('<VictoryChart />')).toBe('<VictoryChart />');
-        expect(parser.replace('<VictoryChart />')).toBe('<VictoryChart />');
+        expect(parser.replace('<VictoryChart />', {shouldEscapeText: false})).toBe('<VictoryChart />');
     });
 
     test('every inner Victory tag is preserved when nested in <VictoryChart>', () => {
@@ -2560,16 +2561,36 @@ describe('VictoryChart round-trip', () => {
             '<VictoryTooltip />' +
             '</VictoryChart>';
         expect(parser.htmlToMarkdown(full)).toBe(full);
-        expect(parser.replace(full)).toBe(full);
+        expect(parser.replace(full, {shouldEscapeText: false})).toBe(full);
     });
 
-    test('replace still escapes unrelated user-typed HTML (passthrough is opt-in)', () => {
+    test('nested same-name tags (<VictoryGroup>) inside the chart survive intact', () => {
+        const nested = '<VictoryChart>' + '<VictoryGroup offset="20"><VictoryGroup><VictoryBar data="[]" /></VictoryGroup></VictoryGroup>' + '</VictoryChart>';
+        expect(parser.htmlToMarkdown(nested)).toBe(nested);
+        expect(parser.replace(nested, {shouldEscapeText: false})).toBe(nested);
+    });
+
+    test('multiple charts in one message each survive the round-trip', () => {
+        const input = `${chart} divider ${chart}`;
+        expect(parser.htmlToMarkdown(input)).toBe(input);
+    });
+
+    test('user-typed chart markup is escaped, not passed through (XSS guard)', () => {
+        // shouldEscapeText defaults to true: untrusted input must not bypass escaping via a chart tag.
+        const malicious = '<VictoryChart><img src=x onerror="alert(1)"></VictoryChart>';
+        const result = parser.replace(malicious);
+        expect(result).not.toContain('<img');
+        expect(result).not.toContain('<VictoryChart>');
+        expect(result).toContain('&lt;VictoryChart&gt;');
+    });
+
+    test('replace still escapes unrelated user-typed HTML', () => {
         expect(parser.replace('<script>alert(1)</script>')).toBe('&lt;script&gt;alert(1)&lt;/script&gt;');
     });
 
-    test('markdown rules around a chart still apply', () => {
+    test('markdown rules around a chart still apply (trusted input)', () => {
         const input = `*bold* ${chart} _italic_`;
-        expect(parser.replace(input)).toBe(`<strong>bold</strong> ${chart} <em>italic</em>`);
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(`<strong>bold</strong> ${chart} <em>italic</em>`);
     });
 
     test('htmlToText emits [chart] for <VictoryChart> (notification fallback per R1.2)', () => {
@@ -2577,9 +2598,16 @@ describe('VictoryChart round-trip', () => {
         expect(parser.htmlToText('<VictoryChart />')).toBe('[chart]');
     });
 
-    test('stray placeholder-looking text in user input is not mistakenly restored', () => {
-        const text = 'reference EXMK_PT_0 in body';
-        expect(parser.htmlToMarkdown(text)).toBe('reference EXMK_PT_0 in body');
-        expect(parser.replace(text)).toBe('reference EXMK_PT_0 in body');
+    test('narrative text adjacent to a chart is never corrupted by placeholder restoration', () => {
+        // The internal placeholder is NUL-sentinel wrapped, so no string a user can type collides with it.
+        const input = `prior text ${chart} trailing text`;
+        const md = parser.htmlToMarkdown(input);
+        expect(md).toBe(input);
+    });
+
+    const html = `<victorychart domain="{x: [0.5, 12.5], y: [0, 2000]}" domainpadding="{x: 18, y: 0}" height="430" width="680" padding="{top: 126, bottom: 108, left: 96, right: 32}" style="{parent: { backgroundColor: '#F7F2EF', borderRadius: 16, width: '100%', maxWidth: 680}}"><victorylabel x="32" y="40" text='Monthly spend' style="{ fill: '#002E22', fontSize: 17, fontWeight: 700, fontFamily: 'Expensify Neue', }"/><victorylabel x="32" y="62" text='As of: May 6, 12:49 PM PT' style="{ fill: '#73857E', fontSize: 11, fontWeight: 400, fontFamily: 'Expensify Neue', }"/><victorybar barwidth="11" cornerradius="{top: 6, bottom: 6}" style="{data: {fill: '#1E90F2'}}" data="[ {x: 1.13, y: 1080}, {x: 2.13, y: 1225}, {x: 3.13, y: 1375}, {x: 4.13, y: 1600}, {x: 5.13, y: 1630}, {x: 6.13, y: 1725}, {x: 7.13, y: 1400}, {x: 8.13, y: 1685}, {x: 9.13, y: 1725}, {x: 10.13, y: 1800}, {x: 11.13, y: 1800}, {x: 12.13, y: 1800}, ]" labels="[ 'Jan 2025: $1,080', 'Feb 2025: $1,225', 'Mar 2025: $1,375', 'Apr 2025: $1,600', 'May 2025: $1,630', 'Jun 2025: $1,725', 'Jul 2025: $1,400', 'Aug 2025: $1,685', 'Sep 2025: $1,725', 'Oct 2025: $1,800', 'Nov 2025: $1,800', 'Dec 2025: $1,800', ]"/><victorybar barwidth="11" cornerradius="{top: 6, bottom: 6}" style="{data: {fill: '#13C96B'}}" data="[ {x: 0.87, y: 1200}, {x: 1.87, y: 1320}, {x: 2.87, y: 1570}, ]" labels="['Jan 2026: $1,200', 'Feb 2026: $1,320', 'Mar 2026: $1,570']"/><victorybar barwidth="11" cornerradius="{top: 6, bottom: 6}" style="{data: {fill: '#FF6A00'}}" data="[{x: 3.87, y: 1820}]" labels="['Apr 2026: $1,820']"/><victoryaxis tickvalues="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]" tickformat="['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']" style="{ axis: {stroke: '#E6E1DA', strokeWidth: 1}, ticks: {stroke: 'transparent'}, tickLabels: { fill: '#73857E', fontSize: 11, fontWeight: 500, fontFamily: 'Expensify Neue', padding: 16, }, }"/><victoryaxis dependentaxis tickvalues="[0, 500, 1000, 1500, 2000]" tickformat="['$0', '$500', '$1,000', '$1,500', '$2,000']" style="{ axis: {stroke: 'transparent'}, ticks: {stroke: 'transparent'}, grid: {stroke: '#E6E1DA', strokeWidth: 1}, tickLabels: { fill: '#73857E', fontSize: 11, fontWeight: 500, fontFamily: 'Expensify Neue', padding: 28, }, }"/><victorylegend x="150" y="378" orientation="horizontal" gutter="34" symbolspacer="10" style="{ labels: { fill: '#002E22', fontSize: 13, fontWeight: 500, fontFamily: 'Expensify Neue', }, }" data="[ {name: '2026 spend', symbol: {type: 'circle', fill: '#13C96B', size: 6}}, {name: '2025 spend', symbol: {type: 'circle', fill: '#1E90F2', size: 6}}, {name: 'Last month', symbol: {type: 'circle', fill: '#FF6A00', size: 6}}, ]"/></victorychart>`;
+    test('complex real-world chart example round-trips intact', () => {
+        expect(parser.htmlToMarkdown(html)).toBe(html);
+        expect(parser.replace(html, {shouldEscapeText: false})).toBe(html);
     });
 });

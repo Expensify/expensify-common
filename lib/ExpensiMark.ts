@@ -83,17 +83,24 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
-// VictoryChart and its inner tags are preserved verbatim through `replace` and `htmlToMarkdown`
-// so that server-rendered VirtualCFO charts in `reportAction.message.html` round-trip without
-// their inner markup being escaped or stripped. The outer <VictoryChart>...</VictoryChart> match
-// also protects every nested child (VictoryBar/Line/Pie/Axis/Label/Legend/Tooltip/Group) as part
-// of the captured block; the alternation handles the rare case of a stray child tag at top level.
-// Case-insensitive matching covers both the PascalCase emitted by the server (<VictoryChart>)
-// and the lowercase form react-native-render-html uses internally (<victorychart>).
-const VICTORY_TAG_NAMES = 'VictoryChart|VictoryBar|VictoryLine|VictoryPie|VictoryAxis|VictoryLabel|VictoryLegend|VictoryTooltip|VictoryGroup';
-const PASSTHROUGH_TAGS_REGEX = new RegExp(`<(?:${VICTORY_TAG_NAMES})\\b[^>]*/>|<(${VICTORY_TAG_NAMES})\\b[^>]*>[\\s\\S]*?<\\/\\1>`, 'gi');
-const PASSTHROUGH_PLACEHOLDER_REGEX = /EXMK_PT_(\d+)/g;
-const buildPassthroughPlaceholder = (index: number): string => `EXMK_PT_${index}`;
+// Server-rendered VirtualCFO charts are embedded in `reportAction.message.html` as a single
+// <VictoryChart> block. We preserve that whole block verbatim through `htmlToMarkdown` (and the
+// trusted-input path of `replace`) so the chart round-trips without its inner markup being
+// escaped or stripped. Matching only the outer <VictoryChart> container is deliberate:
+//  - every other Victory tag (VictoryBar/Line/Pie/Axis/Label/Legend/Tooltip/Group) is always
+//    nested inside it, so it is preserved as part of the captured block - no separate rule needed;
+//  - it avoids the unbalanced-nesting failure a lazy `[\s\S]*?` would hit if a self-nesting tag
+//    such as <VictoryGroup> were matched on its own.
+// Case-insensitive matching covers both the PascalCase the server emits (<VictoryChart>) and the
+// lowercase form react-native-render-html uses internally (<victorychart>).
+const PASSTHROUGH_TAGS_REGEX = /<VictoryChart\b[^>]*\/>|<VictoryChart\b[^>]*>[\s\S]*?<\/VictoryChart>/gi;
+// Placeholders are wrapped in a NUL sentinel. NUL never occurs in real HTML/markdown text, so a
+// chart placeholder can never collide with user-typed content, and the numeric core carries no
+// markdown-significant characters that other rules could mangle. Built via String.fromCharCode
+// so no control character is ever stored literally in this source file.
+const PASSTHROUGH_SENTINEL = String.fromCharCode(0);
+const PASSTHROUGH_PLACEHOLDER_REGEX = new RegExp(`${PASSTHROUGH_SENTINEL}(\\d+)${PASSTHROUGH_SENTINEL}`, 'g');
+const buildPassthroughPlaceholder = (index: number): string => `${PASSTHROUGH_SENTINEL}${index}${PASSTHROUGH_SENTINEL}`;
 
 export default class ExpensiMark {
     extractPassthroughTags = (text: string): {text: string; tags: string[]} => {
@@ -1004,7 +1011,13 @@ export default class ExpensiMark {
 
         // Lift out <VictoryChart> blocks before processing so neither escaping nor markdown rules
         // disturb their inner markup (JSON in attributes, special chars, etc.). Restored at the end.
-        const {text: textWithPlaceholders, tags: passthroughTags} = this.extractPassthroughTags(text);
+        //
+        // This is gated on `!shouldEscapeText`: passthrough is only safe for trusted input (server
+        // HTML re-parsed with shouldEscapeText === false). When shouldEscapeText is true the input
+        // is user-typed markdown, and a chart tag must be escaped like any other HTML - otherwise a
+        // user could smuggle arbitrary markup (e.g. <VictoryChart><img onerror=...></VictoryChart>)
+        // straight past escaping.
+        const {text: textWithPlaceholders, tags: passthroughTags} = shouldEscapeText ? {text, tags: [] as string[]} : this.extractPassthroughTags(text);
 
         // This ensures that any html the user puts into the comment field shows as raw html
         let replacedText = shouldEscapeText ? Utils.escapeText(textWithPlaceholders) : textWithPlaceholders;
