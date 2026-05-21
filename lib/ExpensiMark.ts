@@ -1038,7 +1038,7 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        return this.restoreVictoryChartTags(replacedText, passthroughTags);
+        return this.restoreVictoryChartTags(replacedText, victoryChartTags);
     }
 
     /**
@@ -1304,7 +1304,7 @@ export default class ExpensiMark {
         generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
 
         // Extract VictoryChart blocks before HTML stripping, then restore them.
-        const {text: textWithPlaceholders, tags: passthroughTags} = this.extractVictoryChartTags(generatedMarkdown);
+        const {text: textWithPlaceholders, tags: victoryChartTags} = this.extractVictoryChartTags(generatedMarkdown);
         generatedMarkdown = textWithPlaceholders;
 
         const processRule = (rule: RuleWithRegex) => {
