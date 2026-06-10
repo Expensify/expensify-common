@@ -58,6 +58,8 @@ module.exports = {
         project: "./tsconfig.json",
       },
       rules: {
+        "no-continue": "off",
+        "@lwc/lwc/no-async-await": "off",
         "prefer-regex-literals": "off",
         "rulesdir/prefer-underscore-method": "off",
         "react/jsx-props-no-spreading": "off",
