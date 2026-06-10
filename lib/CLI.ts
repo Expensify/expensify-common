@@ -5,6 +5,7 @@
  */
 import * as readline from 'readline';
 import type {NonEmptyObject, NonEmptyTuple, ValueOf, Writable} from 'type-fest';
+import SafeString from './SafeString';
 
 /**
  * A base CLI arg has only a description, which we will use in the help/usage message (built-in to any CLI).
@@ -102,26 +103,6 @@ type ParsedPositionalArgs<PositionalArgs extends CLIConfig['positionalArgs']> = 
         ? string[]
         : InferStringArgParsedValue<K>;
 };
-
-function formatDefaultValue(value: unknown): string {
-    if (value === undefined || value === null) {
-        return '';
-    }
-
-    const valueType = typeof value;
-    if (valueType === 'string') {
-        return value as string;
-    }
-    if (valueType === 'object') {
-        try {
-            return JSON.stringify(value);
-        } catch {
-            return String(value);
-        }
-    }
-
-    return String(value);
-}
 
 /**
  * Utility to parse command-line arguments to a script.
@@ -363,7 +344,7 @@ class CLI<TConfig extends CLIConfig> {
         if (Object.keys(namedArgs).length > 0) {
             console.log('Named Arguments:');
             for (const [name, spec] of Object.entries(namedArgs)) {
-                const defaultLabel = spec.default !== undefined ? ` (default: ${formatDefaultValue(spec.default)})` : '';
+                const defaultLabel = spec.default !== undefined ? ` (default: ${SafeString(spec.default)})` : '';
                 const supersededLabel = spec.supersedes && spec.supersedes.length > 0 ? ` (supersedes: ${spec.supersedes.join(', ')})` : '';
                 console.log(`  --${name.padEnd(20)} ${spec.description}${defaultLabel}${supersededLabel}`);
             }
@@ -373,7 +354,7 @@ class CLI<TConfig extends CLIConfig> {
         if (positionalArgs.length > 0) {
             console.log('Positional Arguments:');
             for (const arg of positionalArgs) {
-                const defaultLabel = arg.default !== undefined ? ` (default: ${formatDefaultValue(arg.default)})` : '';
+                const defaultLabel = arg.default !== undefined ? ` (default: ${SafeString(arg.default)})` : '';
                 console.log(`  ${arg.name.padEnd(22)} ${arg.description}${defaultLabel}`);
             }
             console.log('');
