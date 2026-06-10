@@ -70,7 +70,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.3",
-    "type-fest": "^4.41.0",
+    "type-fest": "5.7.0",
     "typescript": "^5.7.2"
   },
   "browserify": {
