@@ -1,7 +1,5 @@
 'worklet';
 
-/* eslint-disable @typescript-eslint/prefer-for-of */
-
 // Mostly copied from https://medium.com/@lubaka.a/how-to-remove-lodash-performance-improvement-b306669ad0e1
 
 /**
@@ -66,7 +64,6 @@ function fastMerge<TObject extends Record<string, unknown>>(target: TObject, sou
 
             if (isSourceKeyMergable && targetValue) {
                 if (!shouldRemoveNullObjectValues || isSourceKeyMergable) {
-                    // eslint-disable-next-line no-use-before-define
                     destination[key] = fastMerge(targetValue as TObject, sourceValue, shouldRemoveNullObjectValues);
                 }
             } else if (!shouldRemoveNullObjectValues || sourceValue !== null) {

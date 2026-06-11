@@ -1,4 +1,4 @@
-/* eslint-disable one-var, no-var, no-param-reassign, no-bitwise, eqeqeq, no-inner-declarations, @typescript-eslint/no-unused-vars, no-shadow */
+/* eslint-disable one-var, no-var, no-param-reassign, no-bitwise, eqeqeq, @typescript-eslint/no-unused-vars, no-shadow */
 
 /**
  * md5 hash implementation

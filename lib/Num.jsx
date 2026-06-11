@@ -155,7 +155,7 @@ export default {
      * Returns how many decimals to display (used for currencies).
      *
      * @param {Number} rate
-     * @return {Number}
+     * @returns {Number}
      */
     getDisplayDecimals(rate) {
         if (rate % 1 === 0) {

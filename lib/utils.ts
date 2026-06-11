@@ -27,7 +27,7 @@ const reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
  * Source: https://github.com/lodash/lodash/blob/main/src/escape.ts
  */
 function escapeText(string: string): string {
-    return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
+    return string && reHasUnescapedHtml.test(string) ? string.replaceAll(reUnescapedHtml, (chr) => htmlEscapes[chr as keyof typeof htmlEscapes]) : string || '';
 }
 
 const htmlUnescapes = {
@@ -50,13 +50,13 @@ const reHasEscapedHtml = RegExp(reEscapedHtml.source);
  * Source: https://github.com/lodash/lodash/blob/main/src/unescape.ts
  * */
 function unescapeText(string: string): string {
-    return string && reHasEscapedHtml.test(string) ? string.replace(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
+    return string && reHasEscapedHtml.test(string) ? string.replaceAll(reEscapedHtml, (entity) => htmlUnescapes[entity as keyof typeof htmlUnescapes] || "'") : string || '';
 }
 
 /**
  * Checks if the given variable is a function
- * @param {*} variableToCheck
- * @returns {boolean}
+ * @param variableToCheck
+ * @returns
  */
 function isFunction(variableToCheck: unknown): boolean {
     return variableToCheck instanceof Function;
@@ -64,8 +64,8 @@ function isFunction(variableToCheck: unknown): boolean {
 
 /**
  * Checks if the given variable is an object
- * @param {*} obj
- * @returns {boolean}
+ * @param obj
+ * @returns
  */
 function isObject(obj: unknown): boolean {
     const type = typeof obj;
