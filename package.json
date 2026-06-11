@@ -60,6 +60,7 @@
     "eslint": "^9.36.0",
     "eslint-config-expensify": "4.0.1",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-jest": "^28.8.2",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.14.0",

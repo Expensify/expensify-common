@@ -49,7 +49,9 @@ function invokeAsync(callback, args, scope) {
  * @param {Array} [args]
  */
 function bulkInvoke(callbacks, args) {
-    for (const callback of callbacks) invoke(callback, args);
+    for (const callback of callbacks) {
+        invoke(callback, args);
+    }
 }
 
 /**

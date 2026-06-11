@@ -49,7 +49,7 @@ export default class ExpenseRule {
         for (const conditions of this.applyWhen) {
             switch (conditions.field) {
                 case 'category':
-                    if (!this.checkCondition(conditions.condition, conditions.value, expense.getCategory())) {
+                    if (!ExpenseRule.checkCondition(conditions.condition, conditions.value, expense.getCategory())) {
                         isMatch = false;
                     }
                     break;
@@ -69,7 +69,7 @@ export default class ExpenseRule {
      * @param {Mixed} transactionValue
      * @returns {boolean}
      */
-    checkCondition(condition, ruleValue, transactionValue) {
+    static checkCondition(condition, ruleValue, transactionValue) {
         // Add more condition types (Greater than, Less than, Contains) below
         switch (condition) {
             case 'matches':

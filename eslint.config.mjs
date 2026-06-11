@@ -19,13 +19,11 @@ export default defineConfig([
     ...browserConfig,
     ...reactConfig,
     ...tsExpensifyConfig,
-    ...compat.extends('prettier'),
     {
         languageOptions: {
             globals: globals.jest,
         },
         rules: {
-            'class-methods-use-this': 'off',
             'no-console': ['error', {allow: ['debug', 'error']}],
         },
     },
@@ -38,7 +36,7 @@ export default defineConfig([
                 babelOptions: {
                     babelrc: false,
                     configFile: false,
-                    presets: ['@babel/preset-env', '@babel/preset-react'],
+                    presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
                 },
                 ecmaFeatures: {
                     jsx: true,
@@ -58,29 +56,18 @@ export default defineConfig([
         },
         settings: {
             'import/resolver': {
+                typescript: {
+                    alwaysTryTypes: true,
+                    project: './tsconfig.json',
+                },
                 node: {
                     extensions: ['.js', '.jsx', '.ts', '.tsx'],
                 },
             },
         },
-        rules: {
-            'no-constructor-return': 'off',
-            'max-classes-per-file': 'off',
-            'arrow-body-style': 'off',
-            'import/no-named-as-default': 'off',
-            'import/no-named-as-default-member': 'off',
-        },
     },
-    ...compat.extends('plugin:import/typescript', 'prettier', 'plugin:prettier/recommended').map((config) => ({
+    ...compat.extends('plugin:import/typescript').map((config) => ({
         ...config,
         files: ['**/*.ts', '**/*.tsx'],
     })),
-    {
-        files: ['**/*.ts', '**/*.tsx'],
-        rules: {
-            'prefer-regex-literals': 'off',
-            'no-use-before-define': 'off',
-            '@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
-        },
-    },
 ]);
