@@ -1,4 +1,5 @@
 import { FlatCompat } from "@eslint/eslintrc";
+import babelParser from "@babel/eslint-parser";
 import browserConfig from "eslint-config-expensify/browser";
 import reactConfig from "eslint-config-expensify/react";
 import tsExpensifyConfig from "eslint-config-expensify/typescript";
@@ -29,12 +30,30 @@ export default defineConfig([
     },
   },
   {
-    files: ["**/*.js", "**/*.jsx"],
+    files: ["lib/components/**/*.{js,jsx}"],
     languageOptions: {
+      parser: babelParser,
       parserOptions: {
+        requireConfigFile: false,
+        babelOptions: {
+          babelrc: false,
+          configFile: false,
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        },
         ecmaFeatures: {
           jsx: true,
         },
+      },
+      globals: {
+        ...globals.jquery,
+      },
+    },
+  },
+  {
+    files: ["**/*.js", "**/*.jsx"],
+    languageOptions: {
+      globals: {
+        ...globals.jquery,
       },
     },
     settings: {
@@ -62,6 +81,8 @@ export default defineConfig([
           tsx: "never",
         },
       ],
+      "import/no-named-as-default": "off",
+      "import/no-named-as-default-member": "off",
     },
   },
   ...compat
