@@ -95,7 +95,7 @@ const createVictoryChartPlaceholder = (index: number): string => `${VICTORY_CHAR
 export default class ExpensiMark {
     extractVictoryChartTags = (text: string): {text: string; tags: string[]} => {
         const tags: string[] = [];
-        const out = text.replace(VICTORY_CHART_REGEX, (match) => {
+        const out = text.replaceAll(VICTORY_CHART_REGEX, (match) => {
             const placeholder = createVictoryChartPlaceholder(tags.length);
             tags.push(match);
             return placeholder;
@@ -107,7 +107,7 @@ export default class ExpensiMark {
         if (tags.length === 0) {
             return text;
         }
-        return text.replace(VICTORY_CHART_PLACEHOLDER_PATTERN, (match, idx) => tags[Number(idx)] ?? match);
+        return text.replaceAll(VICTORY_CHART_PLACEHOLDER_PATTERN, (match, idx) => tags[Number(idx)] ?? match);
     };
 
     getAttributeCache = (extras?: Extras) => {
@@ -206,11 +206,11 @@ export default class ExpensiMark {
                 // want to do this anywhere else since that would break HTML.
                 // &nbsp; will create styling issues so use &#32;
                 replacement: (_extras, _match, _g1, _g2, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
                 rawInputReplacement: (_extras, _match, _g1, newLineCharacter, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;').replaceAll(/<emoji>|<\/emoji>/g, '');
                     return `<pre>${newLineCharacter}${group}</pre>`;
                 },
             },
@@ -627,7 +627,7 @@ export default class ExpensiMark {
                     inputString
                         .replace('<br></br>', '<br/>')
                         .replace('<br><br/>', '<br/>')
-                        .replace(/(<tr.*?<\/tr>)/g, '$1<br/>')
+                        .replaceAll(/(<tr.*?<\/tr>)/g, '$1<br/>')
                         .replace('<br/></tbody>', '')
                         .replace(SLACK_SPAN_NEW_LINE_TAG + SLACK_SPAN_NEW_LINE_TAG, '<br/><br/><br/>')
                         .replace(SLACK_SPAN_NEW_LINE_TAG, '<br/><br/>'),
@@ -659,7 +659,7 @@ export default class ExpensiMark {
                 replacement: (extras, match, tagName, innerContent) => {
                     // To check if style attribute contains bold font-weight
                     const isBoldFromStyle = (style: string | null) => {
-                        return style ? style.replace(/\s/g, '').includes('font-weight:bold;') || style.replace(/\s/g, '').includes('font-weight:700;') : false;
+                        return style ? style.replaceAll(/\s/g, '').includes('font-weight:bold;') || style.replaceAll(/\s/g, '').includes('font-weight:700;') : false;
                     };
 
                     const updateSpacesAndWrapWithAsterisksIfBold = (content: string, isBold: boolean) => {
@@ -676,7 +676,7 @@ export default class ExpensiMark {
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
 
                     // Process nested spans with potential bold style
-                    const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
+                    const processedInnerContent = innerContent.replaceAll(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
                         const nestedStyleMatch = nestedMatch.match(fontWeightRegex);
                         const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
                         return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
@@ -696,10 +696,10 @@ export default class ExpensiMark {
                 replacement: (_extras, _match, _g1, g2) => {
                     // We remove the line break before heading inside quote to avoid adding extra line
                     let resultString: string[] | string = g2
-                        .replace(/\n?(<h1># )/g, '$1')
-                        .replace(/(<h1>|<\/h1>)+/g, '\n')
+                        .replaceAll(/\n?(<h1># )/g, '$1')
+                        .replaceAll(/(<h1>|<\/h1>)+/g, '\n')
                         // Replace trim() with manually removing line breaks at the beginning and end of the string to avoid adding extra lines
-                        .replace(/^(\n)+|(\n)+$/g, '')
+                        .replaceAll(/^(\n)+|(\n)+$/g, '')
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
@@ -715,8 +715,8 @@ export default class ExpensiMark {
                                 depth = (modifiedText.match(/<blockquote>/gi) || []).length;
                                 // Need (\s)? because the server usually sends a space character after <blockquote> so we need to consume it,
                                 // avoid being redundant because it is added in the return part
-                                modifiedText = modifiedText.replace(/<blockquote>(\s)?/gi, '');
-                                modifiedText = modifiedText.replace(/<\/blockquote>/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<blockquote>(\s)?/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<\/blockquote>/gi, '');
                             } while (/<blockquote>/i.test(modifiedText));
                             return `${'>'.repeat(depth)} ${modifiedText}`;
                         })
@@ -817,7 +817,9 @@ export default class ExpensiMark {
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
-                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
+                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {
+                            reportID: g1,
+                        });
                         return '#Hidden';
                     }
 
@@ -831,7 +833,9 @@ export default class ExpensiMark {
                     if (g1) {
                         const accountToNameMap = extras.accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
-                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
+                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {
+                                accountID: g1,
+                            });
                             return '@Hidden';
                         }
 
@@ -903,7 +907,9 @@ export default class ExpensiMark {
                 replacement: (extras, _match, g1, _offset, _string) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
-                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
+                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {
+                            reportID: g1,
+                        });
                         return '#Hidden';
                     }
 
@@ -917,7 +923,9 @@ export default class ExpensiMark {
                     if (g1) {
                         const accountToNameMap = extras.accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
-                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
+                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {
+                                accountID: g1,
+                            });
                             return '@Hidden';
                         }
                         return `@${Str.removeSMSDomain(extras.accountIDToName?.[g1] ?? '')}`;
@@ -1030,7 +1038,9 @@ export default class ExpensiMark {
             }
         };
         try {
-            rules.forEach(processRule);
+            for (const rule of rules) {
+                processRule(rule);
+            }
         } catch (e) {
             ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
 
@@ -1168,7 +1178,10 @@ export default class ExpensiMark {
 
             // Line breaks (`\n`) followed by empty contents are already removed
             // but line breaks inside contents should be parsed to <br/> to skip `autoEmail` rule
-            replacedText = this.replace(replacedText, {filterRules: ['newline'], shouldEscapeText: false});
+            replacedText = this.replace(replacedText, {
+                filterRules: ['newline'],
+                shouldEscapeText: false,
+            });
 
             // Now we move to the next match that the js regex found in the text
             match = regex.exec(textToCheck);
@@ -1186,7 +1199,6 @@ export default class ExpensiMark {
      * 3. It's not the last element in the string.
      */
     replaceBlockElementWithNewLine(htmlString: string): string {
-        // eslint-disable-next-line max-len
         let splitText = htmlString
             // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
             .replaceAll(
@@ -1221,7 +1233,9 @@ export default class ExpensiMark {
             }
         };
 
-        splitText.forEach(processText);
+        for (const [index, text] of splitText.entries()) {
+            processText(text, index);
+        }
 
         return joinedText;
     }
@@ -1247,7 +1261,7 @@ export default class ExpensiMark {
      * Only one closing tag is needed to detect if a nested quote has ended.
      */
     unpackNestedQuotes(text: string): string {
-        let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
+        let parsedText = text.replaceAll(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
             return `${match}</split>`;
         });
         const splittedText = parsedText.split('</split>');
@@ -1263,7 +1277,7 @@ export default class ExpensiMark {
                     return '';
                 }
 
-                const textLine = line.replace(/(<br \/>)$/g, '');
+                const textLine = line.replaceAll(/(<br \/>)$/g, '');
                 if (textLine.startsWith('<blockquote>')) {
                     count += (textLine.match(/<blockquote>/g) || []).length;
                 }
@@ -1316,7 +1330,9 @@ export default class ExpensiMark {
             generatedMarkdown = this.replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToMarkdownRules.forEach(processRule);
+        for (const rule of this.htmlToMarkdownRules) {
+            processRule(rule);
+        }
         const decoded = Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
         return this.restoreVictoryChartTags(decoded, victoryChartTags);
     }
@@ -1330,7 +1346,9 @@ export default class ExpensiMark {
             replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToTextRules.forEach(processRule);
+        for (const rule of this.htmlToTextRules) {
+            processRule(rule);
+        }
 
         // Unescaping because the text is escaped in 'replace' function
         // We use 'htmlDecode' instead of 'unescape' to replace entities like '&#32;'
@@ -1349,7 +1367,7 @@ export default class ExpensiMark {
             isStartingWithSpace = !!g2;
             return '';
         };
-        const textToReplace = text.replace(/^(?:&gt;|>)( )?/gm, handleMatch);
+        const textToReplace = text.replaceAll(/^(?:&gt;|>)( )?/gm, handleMatch);
         const filterRules = ['heading1'];
         // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
@@ -1450,12 +1468,12 @@ export default class ExpensiMark {
     /**
      * Determines the end position to truncate the HTML content while considering word boundaries.
      *
-     * @param {string} content - The HTML content to be truncated.
-     * @param {number} tailPosition - The position up to which the content should be considered.
-     * @param {number} maxLength - The maximum length of the truncated content.
-     * @param {number} totalLength - The length of the content processed so far.
-     * @param {Object} opts - Options to customize the truncation.
-     * @returns {number} The calculated position to truncate the content.
+     * @param content - The HTML content to be truncated.
+     * @param tailPosition - The position up to which the content should be considered.
+     * @param maxLength - The maximum length of the truncated content.
+     * @param totalLength - The length of the content processed so far.
+     * @param opts - Options to customize the truncation.
+     * @returns The calculated position to truncate the content.
      */
     getEndPosition(content: string, tailPosition: number | undefined, maxLength: number, totalLength: number, opts: TruncateOptions) {
         const WORD_BREAK_REGEX = /\W+/g;
@@ -1521,10 +1539,10 @@ export default class ExpensiMark {
      * Truncate HTML string and keep tag safe.
      * pulled from https://github.com/huang47/nodejs-html-truncate/blob/master/lib/truncate.js
      *
-     * @param {string} html - The string that needs to be truncated
-     * @param {number} maxLength - Length of truncated string
-     * @param {Object} [options] - Optional configuration options
-     * @returns {string} The truncated string
+     * @param html - The string that needs to be truncated
+     * @param maxLength - Length of truncated string
+     * @param [options] - Optional configuration options
+     * @returns The truncated string
      */
     truncateHTML(html: string, maxLength: number, options?: TruncateOptions) {
         const EMPTY_STRING = '';
