@@ -3,6 +3,7 @@
  * WIP, This is in the process of migration from web-e. Please add methods to this as is needed.|
  * ----------------------------------------------------------------------------------------------
  */
+import get from 'lodash/get';
 import once from 'lodash/once';
 import * as Utils from './utils';
 import * as Func from './Func';
@@ -49,7 +50,7 @@ export default function APIDeferred(promise, extractedProperty) {
      */
     function handleError(jsonCode, response) {
         // Look for handlers for this error code
-        const handlers = errorHandlers[jsonCode] ?? [];
+        const handlers = get(errorHandlers, jsonCode, []);
         if (handlers.length > 0) {
             Func.bulkInvoke(handlers, [jsonCode, response]);
         } else {

@@ -69,8 +69,6 @@ export default defineConfig([
             'no-constructor-return': 'off',
             'max-classes-per-file': 'off',
             'arrow-body-style': 'off',
-            'es/no-nullish-coalescing-operators': 'off',
-            'es/no-optional-chaining': 'off',
             'import/extensions': [
                 'error',
                 'ignorePackages',
@@ -95,9 +93,6 @@ export default defineConfig([
             'prefer-regex-literals': 'off',
             'react/jsx-props-no-spreading': 'off',
             'react/require-default-props': 'off',
-            'valid-jsdoc': 'off',
-            'es/no-optional-chaining': 'off',
-            'es/no-nullish-coalescing-operators': 'off',
             'react/jsx-filename-extension': ['error', {extensions: ['.tsx', '.jsx']}],
             'import/no-unresolved': 'error',
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
