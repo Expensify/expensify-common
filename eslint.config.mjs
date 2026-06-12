@@ -23,9 +23,6 @@ export default defineConfig([
         languageOptions: {
             globals: globals.jest,
         },
-        rules: {
-            'no-console': ['error', {allow: ['debug', 'error']}],
-        },
     },
     {
         files: ['lib/components/**/*.{js,jsx}'],
