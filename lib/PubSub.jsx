@@ -17,7 +17,7 @@ let counter = 0;
 /**
  * Create a unique ID for each event subscriber
  * @param {String} eventName Name of the event to listen to
- * @return {String} unique ID
+ * @returns {String} unique ID
  */
 const generateID = (eventName) => {
     counter++;
@@ -27,7 +27,7 @@ const generateID = (eventName) => {
 /**
  * Find the name of the event from the ID
  * @param {string} eventID
- * @return {String}
+ * @returns {String}
  */
 const extractEventName = (eventID = '') => eventID.substring(0, eventID.indexOf('@#@'));
 
@@ -53,12 +53,12 @@ const PubSubModule = {
             Log.hmmm('Error published', 0, {tplt: param.tplt, stackTrace: new Error().stack.split(' at ').slice(2)});
         }
 
-        eventIDs.forEach((eventID) => {
+        for (const eventID of eventIDs) {
             const subscriber = eventMap[eventName][eventID];
             if (subscriber) {
                 subscriber.callback.call(subscriber.scope, param);
             }
-        });
+        }
 
         return this;
     },
@@ -87,7 +87,7 @@ const PubSubModule = {
      * @param {String} eventName Name of the event to listen
      * @param {Function} optionalCallback Callback function to call when event occur
      * @param {Object} optionalScope
-     * @return {String} event identifier that should be used to unsubscribe
+     * @returns {String} event identifier that should be used to unsubscribe
      */
     subscribe(eventName, optionalCallback, optionalScope) {
         if (!eventName) {
@@ -117,12 +117,12 @@ const PubSubModule = {
      */
     unsubscribe(bindID) {
         const IDs = Array.isArray(bindID) ? bindID : [bindID];
-        IDs.forEach((id) => {
+        for (const id of IDs) {
             const eventName = extractEventName(id);
             if (has(eventMap, `${eventName}.${id}`)) {
                 delete eventMap[eventName][id];
             }
-        });
+        }
     },
 };
 

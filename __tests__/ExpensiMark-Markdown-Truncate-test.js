@@ -48,7 +48,7 @@ describe('truncateHTML', () => {
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: true});
         expect(result).toBe(
-            `This is a text with <a href=\"https://example.com\" target=\"_blank\" rel=\"noreferrer noopener\">a link</a> that exceeds the limit. The link should be preserved in the truncated text. Additionally, it includes <a href=\"https://example.org\" target=\"_blank\" rel=\"noreferrer noopener\">another link</a>...`,
+            `This is a text with <a href="https://example.com" target="_blank" rel="noreferrer noopener">a link</a> that exceeds the limit. The link should be preserved in the truncated text. Additionally, it includes <a href="https://example.org" target="_blank" rel="noreferrer noopener">another link</a>...`,
         );
     });
 
@@ -86,7 +86,9 @@ describe('truncateHTML', () => {
         const limit = 250; // Increased to accommodate full lists
         const html = parser.replace(markdown);
         const result = parser.truncateHTML(html, limit, {ellipsis: false});
-        expect(result).toBe(`<br />    This is a text with lists. Here are examples:<br />    <br />    Unordered list:<br />    - Item 1<br />    - Item 2<br />    - Item 3<br />    <br />    Ordered list:<br />    1. First item<br />    2. Second item<br />    3. Third item<br />    `);
+        expect(result).toBe(
+            `<br />    This is a text with lists. Here are examples:<br />    <br />    Unordered list:<br />    - Item 1<br />    - Item 2<br />    - Item 3<br />    <br />    Ordered list:<br />    1. First item<br />    2. Second item<br />    3. Third item<br />    `,
+        );
     });
 
     test('should handle HTML with horizontal rules', () => {

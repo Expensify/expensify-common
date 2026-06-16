@@ -1,8 +1,17 @@
 type Parameters = string | Record<string, unknown> | Array<Record<string, unknown>> | Error;
-type ServerLoggingCallbackOptions = {api_setCookie: boolean; logPacket: string};
+type ServerLoggingCallbackOptions = {
+    api_setCookie: boolean;
+    logPacket: string;
+};
 type ServerLoggingCallback = (logger: Logger, options: ServerLoggingCallbackOptions) => Promise<{requestID: string}> | undefined;
 type ClientLoggingCallBack = (message: string, extraData: Parameters) => void;
-type LogLine = {message: string; parameters: Parameters; onlyFlushWithOthers?: boolean; timestamp: Date; email?: string | null};
+type LogLine = {
+    message: string;
+    parameters: Parameters;
+    onlyFlushWithOthers?: boolean;
+    timestamp: Date;
+    email?: string | null;
+};
 type LoggerOptions = {
     serverLoggingCallback: ServerLoggingCallback;
     isDebug: boolean;
@@ -59,11 +68,13 @@ export default class Logger {
             return l;
         });
         this.logLines = [];
-        const promise = this.serverLoggingCallback(this, {api_setCookie: false, logPacket: JSON.stringify(linesToLog)});
+        const promise = this.serverLoggingCallback(this, {
+            api_setCookie: false,
+            logPacket: JSON.stringify(linesToLog),
+        });
         if (!promise) {
             return;
         }
-        // eslint-disable-next-line rulesdir/prefer-early-return
         promise.then((response) => {
             if (!response.requestID) {
                 return;
@@ -141,8 +152,8 @@ export default class Logger {
     /**
      * Logs a warn.
      *
-     * @param {String} message The message to warn.
-     * @param {Object|String} parameters The parameters to send along with the message
+     * @param message The message to warn.
+     * @param parameters The parameters to send along with the message
      */
     warn(message: string, parameters: Parameters = '') {
         const msg = `[warn] ${message}`;

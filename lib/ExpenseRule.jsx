@@ -7,13 +7,13 @@ export default class ExpenseRule {
     constructor(ruleArray) {
         // It's not 100% certain that `ruleArray` is an array or an object, so support both of them so the app doesn't crash
         if (Array.isArray(ruleArray)) {
-            ruleArray.forEach((value, key) => {
+            for (const [key, value] of ruleArray.entries()) {
                 this[key] = value;
-            });
+            }
         } else if (ruleArray && typeof ruleArray === 'object') {
-            Object.keys(ruleArray).forEach((key) => {
+            for (const key of Object.keys(ruleArray)) {
                 this[key] = ruleArray[key];
-            });
+            }
         }
     }
 
@@ -23,7 +23,7 @@ export default class ExpenseRule {
      *
      * @param {string} field
      *
-     * @return {Object}
+     * @returns {Object}
      */
     getApplyWhenByField(field) {
         return this.applyWhen.find((conditions) => conditions.field === field) || {};
@@ -46,17 +46,17 @@ export default class ExpenseRule {
      */
     isMatch(expense) {
         let isMatch = true;
-        this.applyWhen.forEach((conditions) => {
+        for (const conditions of this.applyWhen) {
             switch (conditions.field) {
                 case 'category':
-                    if (!this.checkCondition(conditions.condition, conditions.value, expense.getCategory())) {
+                    if (!ExpenseRule.checkCondition(conditions.condition, conditions.value, expense.getCategory())) {
                         isMatch = false;
                     }
                     break;
                 default:
                     break;
             }
-        });
+        }
 
         return isMatch;
     }
@@ -69,7 +69,7 @@ export default class ExpenseRule {
      * @param {Mixed} transactionValue
      * @returns {boolean}
      */
-    checkCondition(condition, ruleValue, transactionValue) {
+    static checkCondition(condition, ruleValue, transactionValue) {
         // Add more condition types (Greater than, Less than, Contains) below
         switch (condition) {
             case 'matches':
