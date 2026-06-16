@@ -3,6 +3,7 @@ import babelParser from '@babel/eslint-parser';
 import browserConfig from 'eslint-config-expensify/browser';
 import reactConfig from 'eslint-config-expensify/react';
 import tsExpensifyConfig from 'eslint-config-expensify/typescript';
+import jestConfig from 'eslint-config-expensify/jest';
 import {defineConfig, globalIgnores} from 'eslint/config';
 import globals from 'globals';
 import path from 'node:path';
@@ -19,11 +20,7 @@ export default defineConfig([
     ...browserConfig,
     ...reactConfig,
     ...tsExpensifyConfig,
-    {
-        languageOptions: {
-            globals: globals.jest,
-        },
-    },
+    ...jestConfig,
     {
         files: ['lib/components/**/*.{js,jsx}'],
         languageOptions: {

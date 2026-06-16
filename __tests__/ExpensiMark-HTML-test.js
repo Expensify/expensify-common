@@ -1,4 +1,4 @@
-/* eslint-disable max-len,no-useless-concat */
+/* eslint-disable no-useless-concat */
 import ExpensiMark from '../lib/ExpensiMark';
 
 const parser = new ExpensiMark();
@@ -107,8 +107,8 @@ test('Test italic markdown replacement with word boundary and undercores', () =>
 });
 
 test('Test italic markdown replacement with consecutive italicized strings with no space', () => {
-    const testString =  '_hello_world_ ' + '_hello__world_ ' + '_hello_';
-    const replacedString =  '<em>hello_world</em> ' + '<em>hello</em><em>world</em> ' + '<em>hello</em>';
+    const testString = '_hello_world_ ' + '_hello__world_ ' + '_hello_';
+    const replacedString = '<em>hello_world</em> ' + '<em>hello</em><em>world</em> ' + '<em>hello</em>';
     expect(parser.replace(testString)).toBe(replacedString);
 });
 
@@ -336,7 +336,7 @@ test('Test markdown replacement for emojis with emails', () => {
         '[😄 abc@gmail.com ](abc@gmail.com) ';
     const result =
         'Replace the emoji with link ' +
-        '<a href=\"mailto:abc@gmail.com\"><emoji>😄</emoji></a> ' +
+        '<a href="mailto:abc@gmail.com"><emoji>😄</emoji></a> ' +
         '[<emoji>😄</emoji>]( <a href="mailto:abc@gmail.com">abc@gmail.com</a>) ' +
         '[<emoji>😄</emoji>] <a href="mailto:abc@gmail.com">abc@gmail.com</a> ' +
         '[<emoji>😄</emoji>]((<a href="mailto:abc@gmail.com">abc@gmail.com</a>)) ' +
@@ -355,8 +355,7 @@ test('Test markdown replacement for custom emojis using Unicode Private Use Area
     const testString = 'Replace custom emoji with an emoji tag ' + '\uE100';
     const result = 'Replace custom emoji with an emoji tag ' + '<emoji>\uE100</emoji>';
     expect(parser.replace(testString)).toBe(result);
-}
-);
+});
 
 // Markdown style links replaced successfully
 test('Test markdown style links', () => {
@@ -454,7 +453,9 @@ test('Test code fencing with spaces and new lines', () => {
     expect(parser.replace(codeFenceExample)).toBe('<pre>const&#32;javaScript&#32;=&#32;&#x27;javaScript&#x27;<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;&#x27;php&#x27;<br /></pre>');
 
     codeFenceExample = "```\nconst javaScript = 'javaScript'\n    const php = 'php'\n```";
-    expect(parser.replace(codeFenceExample, {shouldEscapeText: false})).toBe("<pre>const&#32;javaScript&#32;=&#32;'javaScript'<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;'php'<br /></pre>");
+    expect(parser.replace(codeFenceExample, {shouldEscapeText: false})).toBe(
+        "<pre>const&#32;javaScript&#32;=&#32;'javaScript'<br />&#32;&#32;&#32;&#32;const&#32;php&#32;=&#32;'php'<br /></pre>",
+    );
 
     codeFenceExample = '```\n\n# test\n\n```';
     expect(parser.replace(codeFenceExample)).toBe('<pre><br />#&#32;test<br /><br /></pre>');
@@ -795,9 +796,9 @@ test('Test a url ending with a question mark autolinks correctly', () => {
                 '<a href="https://github.com/Expensify/ReactNativeChat/pull/645?test" target="_blank" rel="noreferrer noopener">https://github.com/Expensify/ReactNativeChat/pull/645?test</a>',
         },
     ];
-    testCases.forEach((testCase) => {
+    for (const testCase of testCases) {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
-    });
+    }
 });
 
 test('Test urls with unmatched closing parentheses autolinks correctly', () => {
@@ -817,9 +818,9 @@ test('Test urls with unmatched closing parentheses autolinks correctly', () => {
             resultString: '<a href="https://google.com/(toto)" target="_blank" rel="noreferrer noopener">google.com/(toto)</a>)titi)',
         },
     ];
-    testCases.forEach((testCase) => {
+    for (const testCase of testCases) {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
-    });
+    }
 });
 
 test('Test urls ending with special characters followed by unmatched closing parentheses autolinks correctly', () => {
@@ -973,9 +974,9 @@ test('Test urls autolinks correctly', () => {
         },
     ];
 
-    testCases.forEach((testCase) => {
+    for (const testCase of testCases) {
         expect(parser.replace(testCase.testString)).toBe(testCase.resultString);
-    });
+    }
 });
 
 test('Test markdown style email link with various styles', () => {
@@ -1093,7 +1094,7 @@ test('Test markdown and url links with inconsistent starting and closing parens'
 
 test('Test link: Keep spaces at both end for shouldKeepRawInput=true', () => {
     const testString = '[ link ](https://www.expensify.com)';
-    const resultString = '<a href=\"https://www.expensify.com\" data-raw-href=\"https://www.expensify.com\" data-link-variant=\"labeled\" target=\"_blank\" rel=\"noreferrer noopener\"> link </a>';
+    const resultString = '<a href="https://www.expensify.com" data-raw-href="https://www.expensify.com" data-link-variant="labeled" target="_blank" rel="noreferrer noopener"> link </a>';
     expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
 });
 
@@ -1800,13 +1801,13 @@ test('Test link with header before the alias multiline text part', () => {
 
 test('Test nested link', () => {
     let testString = `> example.com`;
-    let resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></blockquote>`
+    let resultString = `<blockquote><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></blockquote>`;
     expect(parser.replace(testString)).toBe(resultString);
 
     testString = `# example.com`;
-    resultString = `<h1><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></h1>`
+    resultString = `<h1><a href="https://example.com" target="_blank" rel="noreferrer noopener">example.com</a></h1>`;
     expect(parser.replace(testString)).toBe(resultString);
-})
+});
 
 test('Test strikethrough with multiple tilde characters', () => {
     let testString = '~~~hello~~~';
@@ -1871,9 +1872,9 @@ test('Linebreak between end of text and start of code block should be remained',
             resultString: 'text1<br /><pre><br />code<br /><br /><br /></pre>text2',
         },
     ];
-    testCases.forEach(({testString, resultString}) => {
+    for (const {testString, resultString} of testCases) {
         expect(parser.replace(testString)).toBe(resultString);
-    });
+    }
 });
 
 test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em> tag', () => {
@@ -1891,7 +1892,7 @@ test('Test autoEmail with markdown of <pre>, <code>, <a>, <mention-user> and <em
         '[test italic style wrap email _test@gmail.com_ inside a link](https://google.com) ';
 
     const resultString =
-        '<code>code</code><a href=\"mailto:test@gmail.com\">test@gmail.com</a><br />' +
+        '<code>code</code><a href="mailto:test@gmail.com">test@gmail.com</a><br />' +
         '<pre>code&#32;block<br /></pre> <a href="mailto:test@gmail.com">test@gmail.com</a> ' +
         '<a href="https://google.com" target="_blank" rel="noreferrer noopener">Google</a><a href="mailto:test@gmail.com">test@gmail.com</a> ' +
         '<em><a href="mailto:test@gmail.com">test@gmail.com</a></em> ' +
@@ -2207,7 +2208,8 @@ describe('Video markdown conversion to html tag', () => {
 
     test('Text containing videos', () => {
         const testString = 'A video of a banana: ![banana](https://example.com/banana.mp4) a video without name: !(https://example.com/developer.mp4)';
-        const resultString = 'A video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video> a video without name: <video data-expensify-source="https://example.com/developer.mp4" ></video>';
+        const resultString =
+            'A video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video> a video without name: <video data-expensify-source="https://example.com/developer.mp4" ></video>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -2215,35 +2217,40 @@ describe('Video markdown conversion to html tag', () => {
         const testString = '![test](https://example.com/video.mp4)';
         const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-raw-href="https://example.com/video.mp4" data-link-variant="labeled" >test</video>';
         expect(parser.replace(testString, {shouldKeepRawInput: true})).toBe(resultString);
-    })
+    });
 
     test('Single video with extra cached attributes with videoAttributeCache', () => {
         const testString = '![test](https://example.com/video.mp4)';
         const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-height="100" data-expensify-width="100">test</video>';
-        expect(parser.replace(testString, {
-            extras: {
-                videoAttributeCache: {
-                    'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"'
-                }
-            }
-        })).toBe(resultString);
-    })
+        expect(
+            parser.replace(testString, {
+                extras: {
+                    videoAttributeCache: {
+                        'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"',
+                    },
+                },
+            }),
+        ).toBe(resultString);
+    });
 
     test('Single video with extra cached attributes with mediaAttributeCache', () => {
         const testString = '![test](https://example.com/video.mp4)';
         const resultString = '<video data-expensify-source="https://example.com/video.mp4" data-expensify-height="100" data-expensify-width="100">test</video>';
-        expect(parser.replace(testString, {
-            extras: {
-                mediaAttributeCache: {
-                    'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"'
-                }
-            }
-        })).toBe(resultString);
-    })
+        expect(
+            parser.replace(testString, {
+                extras: {
+                    mediaAttributeCache: {
+                        'https://example.com/video.mp4': 'data-expensify-height="100" data-expensify-width="100"',
+                    },
+                },
+            }),
+        ).toBe(resultString);
+    });
 
     test('Text containing image and video', () => {
         const testString = 'An image of a banana: ![banana](https://example.com/banana.png) and a video of a banana: ![banana](https://example.com/banana.mp4)';
-        const resultString = 'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> and a video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video>';
+        const resultString =
+            'An image of a banana: <img src="https://example.com/banana.png" alt="banana" /> and a video of a banana: <video data-expensify-source="https://example.com/banana.mp4" >banana</video>';
         expect(parser.replace(testString)).toBe(resultString);
     });
 
@@ -2264,9 +2271,7 @@ describe('Video markdown conversion to html tag', () => {
         const resultString = '<video data-expensify-source="https://example.com/video.mp4" >&#x60;&#x60;&#x60;test&#x60;&#x60;&#x60;</video>';
         expect(parser.replace(testString)).toBe(resultString);
     });
-
-
-})
+});
 
 describe('Image markdown conversion to html tag', () => {
     test('Single image with alt text', () => {
@@ -2356,27 +2361,30 @@ describe('Image markdown conversion to html tag', () => {
     test('Single image with extra cached attributes using mediaAttributeCache', () => {
         const testString = '![test](https://example.com/image.jpg)';
         const resultString = '<img src="https://example.com/image.jpg" alt="test" data-expensify-height="100" data-expensify-width="100"/>';
-        expect(parser.replace(testString, {
-            extras: {
-                mediaAttributeCache: {
-                    'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"'
-                }
-            }
-        })).toBe(resultString);
-    })
+        expect(
+            parser.replace(testString, {
+                extras: {
+                    mediaAttributeCache: {
+                        'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"',
+                    },
+                },
+            }),
+        ).toBe(resultString);
+    });
 
     test('Single image with extra cached attributes using videAttributeCache', () => {
         const testString = '![test](https://example.com/image.jpg)';
         const resultString = '<img src="https://example.com/image.jpg" alt="test" data-expensify-height="100" data-expensify-width="100"/>';
-        expect(parser.replace(testString, {
-            extras: {
-                videoAttributeCache: {
-                    'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"'
-                }
-            }
-        })).toBe(resultString);
-    })
-
+        expect(
+            parser.replace(testString, {
+                extras: {
+                    videoAttributeCache: {
+                        'https://example.com/image.jpg': 'data-expensify-height="100" data-expensify-width="100"',
+                    },
+                },
+            }),
+        ).toBe(resultString);
+    });
 });
 
 describe('room mentions', () => {

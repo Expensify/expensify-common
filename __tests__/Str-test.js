@@ -1,6 +1,6 @@
 import Str from '../lib/str';
 
-const buildTestURLForType = type => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
+const buildTestURLForType = (type) => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
 
 describe('Str.isImage', () => {
     it('Correctly identifies all valid image types', () => {
@@ -91,7 +91,7 @@ describe('Str.isValidMention', () => {
         expect(Str.isValidMention('~@username@expensify.com~')).toBeTruthy();
         expect(Str.isValidMention('_@username@expensify.com_')).toBeTruthy();
         expect(Str.isValidMention('`@username@expensify.com`')).toBeFalsy();
-        expect(Str.isValidMention('\'@username@expensify.com\'')).toBeTruthy();
+        expect(Str.isValidMention("'@username@expensify.com'")).toBeTruthy();
         expect(Str.isValidMention('"@username@expensify.com"')).toBeTruthy();
     });
 });
@@ -102,8 +102,8 @@ describe('Str.sanitizeURL', () => {
         expect(Str.sanitizeURL('google.com')).toBe('https://google.com');
         expect(Str.sanitizeURL('Https://google.com')).toBe('https://google.com');
         expect(Str.sanitizeURL('https://GOOgle.com')).toBe('https://google.com');
-        +expect(Str.sanitizeURL('FOO.com/blah_BLAH', 'http')).toBe('http://foo.com/blah_BLAH');
-        +expect(Str.sanitizeURL('example.com', 'http')).toBe('http://example.com');
+        expect(Str.sanitizeURL('FOO.com/blah_BLAH', 'http')).toBe('http://foo.com/blah_BLAH');
+        expect(Str.sanitizeURL('example.com', 'http')).toBe('http://example.com');
         expect(Str.sanitizeURL('https://example.com', 'http')).toBe('https://example.com');
         expect(Str.sanitizeURL('http://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
         expect(Str.sanitizeURL('HTtp://FOO.com/blah_BLAH')).toBe('http://foo.com/blah_BLAH');
@@ -126,14 +126,24 @@ describe('Str.isValidEmail', () => {
         expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@test.com')).toBeTruthy();
 
         // Overall length (254 chars)
-        expect(Str.isValidEmail('averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com')).toBeTruthy();
+        expect(
+            Str.isValidEmail(
+                'averylongaddresspartthatalmostwillreachthelimitofcharsperaddress@nowwejustneedaverylongdomainpartthatwill.reachthetotallengthlimitforthewholeemailaddress.whichis254charsaccordingtothePHPvalidate-email-filter.extendingthetestlongeruntilwereachtheright.com',
+            ),
+        ).toBeTruthy();
 
         // Domain with lots of dashes
-        expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee')).toBeTruthy();
+        expect(
+            Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asj-j-s-sjdjdjdjd-jdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdke.com.ab.net.aa.bb.cc.dd.ee'),
+        ).toBeTruthy();
         expect(Str.isValidEmail('abc@g---m--ai-l.com')).toBeTruthy();
 
         // Domain with repeated labels of 63 chars
-        expect(Str.isValidEmail('test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com')).toBeTruthy();
+        expect(
+            Str.isValidEmail(
+                'test@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekasgasgasgasgashfnfn.com',
+            ),
+        ).toBeTruthy();
 
         // TLD >=2 chars
         expect(Str.isValidEmail('abc@gmail.co')).toBeTruthy();
@@ -180,7 +190,11 @@ describe('Str.isValidEmail', () => {
         expect(Str.isValidEmail('averylongaddresspartoftheemailthatwillgovoerthelimitasitismorethan64chars@example.com')).toBeFalsy();
 
         // Overall length too long
-        expect(Str.isValidEmail('sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa')).toBeFalsy();
+        expect(
+            Str.isValidEmail(
+                'sjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcjab@asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.com.a.aa.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjdkekejdcjdkeekcj.asjjssjdjdjdjdjdjjeiwiwiwowkdjdjdieikdjfidekjcjasfffa',
+            ),
+        ).toBeFalsy();
 
         // Incorrect domains start/end
         expect(Str.isValidEmail('test@example-.com')).toBeFalsy();

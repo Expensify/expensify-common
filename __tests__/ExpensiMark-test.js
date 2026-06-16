@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 import ExpensiMark from '../lib/ExpensiMark';
 import * as Utils from '../lib/utils';
 
