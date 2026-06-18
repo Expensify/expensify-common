@@ -2,6 +2,7 @@ import {FlatCompat} from '@eslint/eslintrc';
 import babelParser from '@babel/eslint-parser';
 import browserConfig from 'eslint-config-expensify/browser';
 import reactConfig from 'eslint-config-expensify/react';
+import scriptsConfig from 'eslint-config-expensify/scripts';
 import tsExpensifyConfig from 'eslint-config-expensify/typescript';
 import jestConfig from 'eslint-config-expensify/jest';
 import {defineConfig, globalIgnores} from 'eslint/config';
@@ -21,6 +22,10 @@ export default defineConfig([
     ...reactConfig,
     ...tsExpensifyConfig,
     ...jestConfig,
+    ...scriptsConfig.map((config) => ({
+        ...config,
+        files: [...(Array.isArray(config.files) ? config.files : [config.files]), 'lib/CLI.ts'],
+    })),
     {
         files: ['lib/components/**/*.{js,jsx}'],
         languageOptions: {
