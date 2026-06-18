@@ -16,7 +16,6 @@ export default function SafeString(value: unknown): string {
         return value as string;
     }
     if (valueType === 'number' || valueType === 'boolean' || valueType === 'function' || valueType === 'bigint' || valueType === 'symbol') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         const primitive = value as number | boolean | Function | bigint | symbol;
         return String(primitive);
     }

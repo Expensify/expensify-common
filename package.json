@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.182",
+  "version": "2.0.183",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist",
     "test": "jest",
-    "lint": "eslint lib/",
+    "lint": "eslint lib/ __tests__/",
     "prettier": "prettier --write lib/",
     "patch": "npm --no-git-tag-version version patch",
     "update-tlds": "echo \"$(curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- )|SJC|RNO|LAX\" | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
@@ -44,23 +44,23 @@
     "ua-parser-js": "^1.0.38"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.4",
     "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.0",
     "@babel/preset-typescript": "^7.24.7",
-    "@lwc/eslint-plugin-lwc": "^1.8.2",
+    "@eslint/eslintrc": "^3.3.1",
     "@types/jest": "^29.5.13",
     "@types/jquery": "^3.5.30",
     "@types/lodash": "^4.17.10",
     "@types/punycode": "^2.1.4",
     "@types/react-dom": "^18.3.5",
     "@types/ua-parser-js": "^0.7.39",
-    "@typescript-eslint/eslint-plugin": "^8.26.1",
-    "@typescript-eslint/parser": "^8.24.1",
     "babel-jest": "^29.0.0",
     "babelify": "10.0.0",
-    "eslint": "^8.57.1",
-    "eslint-config-expensify": "^2.0.35",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-jest": "^28.8.2",
+    "eslint": "^9.36.0",
+    "eslint-config-expensify": "4.0.3",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.14.0",
     "grunt": "1.6.2",
@@ -71,7 +71,8 @@
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.3",
     "type-fest": "5.7.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.61.0"
   },
   "browserify": {
     "transform": [

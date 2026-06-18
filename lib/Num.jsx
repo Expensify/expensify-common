@@ -55,7 +55,8 @@ export default {
         let i = null;
         let j = null;
 
-        a = Math.round(a * 10 ** b) / 10 ** b;
+        const multiplier = 10 ** b;
+        a = Math.round(a * multiplier) / multiplier;
 
         if (a < 0) {
             a *= -1;
@@ -82,7 +83,8 @@ export default {
             h = f[0];
             f[0] = '';
             for (j = 3; j < h.length; j += 3) {
-                i = h.slice(h.length - j, h.length - j + 3);
+                const sliceStart = h.length - j;
+                i = h.slice(sliceStart, sliceStart + 3);
                 f[0] = `${d}${i}${f[0]}`;
             }
             j = h.substr(0, h.length % 3 === 0 ? 3 : h.length % 3);
@@ -155,7 +157,7 @@ export default {
      * Returns how many decimals to display (used for currencies).
      *
      * @param {Number} rate
-     * @return {Number}
+     * @returns {Number}
      */
     getDisplayDecimals(rate) {
         if (rate % 1 === 0) {
@@ -191,7 +193,8 @@ export default {
          * @returns {number} The amount of tax
          */
         calculateTaxFromPercentage(total, percentage) {
-            const divisor = percentage ? Str.percentageStringToNumber(percentage) / 100 + 1 : 1;
+            const percentageAsDecimal = Str.percentageStringToNumber(percentage) / 100;
+            const divisor = percentage ? percentageAsDecimal + 1 : 1;
             return this.calculateTaxFromDivisor(total, divisor);
         },
 
@@ -204,7 +207,8 @@ export default {
          * @returns {number} The amount of tax
          */
         calculateTaxFromDivisor(total, divisor) {
-            return parseInt(Math.round(total - total / divisor), 10);
+            const amountExcludingTax = total / divisor;
+            return parseInt(Math.round(total - amountExcludingTax), 10);
         },
     },
 };

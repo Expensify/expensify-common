@@ -92,35 +92,286 @@ const VICTORY_CHART_PLACEHOLDER_DELIMITER = String.fromCharCode(0);
 const VICTORY_CHART_PLACEHOLDER_PATTERN = new RegExp(`${VICTORY_CHART_PLACEHOLDER_DELIMITER}(\\d+)${VICTORY_CHART_PLACEHOLDER_DELIMITER}`, 'g');
 const createVictoryChartPlaceholder = (index: number): string => `${VICTORY_CHART_PLACEHOLDER_DELIMITER}${index}${VICTORY_CHART_PLACEHOLDER_DELIMITER}`;
 
+function extractVictoryChartTags(text: string): {
+    text: string;
+    tags: string[];
+} {
+    const tags: string[] = [];
+    const out = text.replaceAll(VICTORY_CHART_REGEX, (match) => {
+        const placeholder = createVictoryChartPlaceholder(tags.length);
+        tags.push(match);
+        return placeholder;
+    });
+    return {text: out, tags};
+}
+
+function restoreVictoryChartTags(text: string, tags: string[]): string {
+    if (tags.length === 0) {
+        return text;
+    }
+    return text.replaceAll(VICTORY_CHART_PLACEHOLDER_PATTERN, (match, idx) => tags[Number(idx)] ?? match);
+}
+
+function resolveAttributeCache(extras?: Extras) {
+    if (!extras) {
+        return {attrCachingFn: undefined, attrCache: undefined};
+    }
+
+    return {
+        attrCachingFn: extras.mediaAttributeCachingFn ?? extras.cacheVideoAttributes,
+        attrCache: extras.mediaAttributeCache ?? extras.videoAttributeCache,
+    };
+}
+
+function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, replacement: Replacement): string {
+    if (typeof replacement === 'function') {
+        return text.replace(regexp, (...args) => replacement(extras, ...args));
+    }
+    return text.replace(regexp, replacement);
+}
+
+/**
+ * replace block element with '\n' if :
+ * 1. We have text within the element.
+ * 2. The text does not end with a new line.
+ * 3. It's not the last element in the string.
+ */
+function replaceBlockElementWithNewLine(htmlString: string): string {
+    let splitText = htmlString
+        // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
+        .replaceAll(
+            /<blockquote>> (<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>)/gi,
+            '<blockquote>> ',
+        )
+        .split(
+            /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
+        );
+    const stripHTML = (text: string) => Str.stripHTML(text);
+    splitText = splitText.map(stripHTML);
+    let joinedText = '';
+
+    // Delete whitespace at the end
+    while (splitText.length) {
+        if (splitText[splitText.length - 1].trim().length > 0 || splitText[splitText.length - 1].match(/\n/)) {
+            break;
+        }
+        splitText.pop();
+    }
+
+    const processText = (text: string, index: number) => {
+        if (text.trim().length === 0 && !text.match(/\n/)) {
+            return;
+        }
+
+        // Insert '\n' unless it ends with '\n' or it's the last element, or if it's a header ('# ') with a space.
+        if (text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
+            joinedText += text;
+        } else {
+            joinedText += `${text}\n`;
+        }
+    };
+
+    for (const [index, text] of splitText.entries()) {
+        processText(text, index);
+    }
+
+    return joinedText;
+}
+
+/** Check if the input text includes only the open or the close tag of an element. */
+function containsNonPairTag(textToCheck: string): boolean {
+    // Create a regular expression to match HTML tags
+    const tagRegExp = /<([a-z][a-z0-9-]*)\b[^>]*>|<\/([a-z][a-z0-9-]*)\s*>/gi;
+
+    // Use a stack to keep track of opening tags
+    const tagStack = [];
+
+    // Match all HTML tags in the string
+    let match = tagRegExp.exec(textToCheck);
+    while (match) {
+        const openingTag = match[1];
+        const closingTag = match[2];
+
+        if (openingTag && openingTag !== 'br') {
+            // If it's an opening tag, push it onto the stack
+            tagStack.push(openingTag);
+        } else if (closingTag) {
+            // If it's a closing tag, pop the top of the stack
+            const expectedTag = tagStack.pop();
+
+            // If the closing tag doesn't match the expected opening tag, return false
+            if (closingTag !== expectedTag) {
+                return true;
+            }
+        }
+        match = tagRegExp.exec(textToCheck);
+    }
+
+    // If there are any tags left in the stack, they're unclosed
+    return tagStack.length !== 0;
+}
+
+/**
+ * Determines the end position to truncate the HTML content while considering word boundaries.
+ */
+function getEndPosition(content: string, tailPosition: number | undefined, maxLength: number, totalLength: number, opts: TruncateOptions) {
+    const WORD_BREAK_REGEX = /\W+/g;
+    const defaultPosition = maxLength - totalLength;
+    const slop = opts.slop;
+    if (!slop) {
+        return defaultPosition;
+    }
+
+    let position = defaultPosition;
+    const isShort = defaultPosition < slop;
+    const slopPos = isShort ? defaultPosition : slop - 1;
+    const substr = content.slice(isShort ? 0 : defaultPosition - slop, tailPosition !== undefined ? tailPosition : defaultPosition + slop);
+    const wordBreakMatch = WORD_BREAK_REGEX.exec(substr);
+
+    if (!opts.truncateLastWord) {
+        if (tailPosition && substr.length <= tailPosition) {
+            position = substr.length;
+        } else {
+            while (wordBreakMatch !== null) {
+                if (wordBreakMatch.index < slopPos) {
+                    position = defaultPosition - (slopPos - wordBreakMatch.index);
+                    if (wordBreakMatch.index === 0 && defaultPosition <= 1) {
+                        break;
+                    }
+                } else if (wordBreakMatch.index === slopPos) {
+                    position = defaultPosition;
+                    break;
+                } else {
+                    position = defaultPosition + (wordBreakMatch.index - slopPos);
+                    break;
+                }
+            }
+        }
+        if (content.charAt(position - 1).match(/\s$/)) {
+            position--;
+        }
+    }
+
+    return position;
+}
+
+/**
+ * Truncate HTML string and keep tag safe.
+ * pulled from https://github.com/huang47/nodejs-html-truncate/blob/master/lib/truncate.js
+ */
+function truncateHTML(html: string, maxLength: number, options?: TruncateOptions) {
+    const EMPTY_STRING = '';
+    const DEFAULT_TRUNCATE_SYMBOL = '...';
+    const DEFAULT_SLOP = Math.min(10, maxLength);
+    const tagsStack = [];
+    const KEY_VALUE_REGEX = '((?:\\s+(?:\\w+|-)+(?:\\s*=\\s*(?:"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|[^\'">\\s]+))?)*)';
+    const IS_CLOSE_REGEX = '\\s*\\/?\\s*';
+    const CLOSE_REGEX = '\\s*\\/\\s*';
+    const SELF_CLOSE_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
+    const HTML_TAG_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${IS_CLOSE_REGEX}>`);
+    const URL_REGEX = /(((ftp|https?):\/\/)[\\-\w@:%_\\+.~#?,&\\/\\/=]+)|((mailto:)?[_.\w\\-]+@([\w][\w\\-]+\.)+[a-zA-Z]{2,3})/g;
+    const IMAGE_TAG_REGEX = new RegExp(`<img\\s*${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
+    let truncatedContent = EMPTY_STRING;
+    let totalLength = 0;
+    let matches = HTML_TAG_REGEX.exec(html);
+    let endResult;
+    let index;
+    let tag;
+    let selfClose = null;
+    let htmlString = html;
+
+    const opts = {
+        ellipsis: DEFAULT_TRUNCATE_SYMBOL,
+        truncateLastWord: true,
+        slop: DEFAULT_SLOP,
+        ...options,
+    };
+
+    function removeImageTag(content: string): string {
+        const match = IMAGE_TAG_REGEX.exec(content);
+        if (!match) {
+            return content;
+        }
+
+        const matchIndex = match.index;
+        const matchLength = match[0].length;
+
+        return content.substring(0, matchIndex) + content.substring(matchIndex + matchLength);
+    }
+
+    function closeTags(tags: string[]): string {
+        return tags
+            .reverse()
+            .map((mappedTag) => `</${mappedTag}>`)
+            .join('');
+    }
+
+    while (matches) {
+        matches = HTML_TAG_REGEX.exec(htmlString);
+
+        if (!matches) {
+            if (totalLength >= maxLength) {
+                break;
+            }
+
+            matches = URL_REGEX.exec(htmlString);
+            if (!matches || matches.index >= maxLength) {
+                truncatedContent += htmlString.substring(0, getEndPosition(htmlString, undefined, maxLength, totalLength, opts));
+                break;
+            }
+
+            while (matches) {
+                endResult = matches[0];
+                if (endResult !== null) {
+                    index = matches.index;
+                    const truncateEnd = index + endResult.length;
+                    truncatedContent += htmlString.substring(0, truncateEnd - totalLength);
+                    htmlString = htmlString.substring(index + endResult.length);
+                    matches = URL_REGEX.exec(htmlString);
+                }
+            }
+            break;
+        }
+
+        endResult = matches[0];
+        index = matches.index;
+
+        if (totalLength + index > maxLength) {
+            truncatedContent += htmlString.substring(0, getEndPosition(htmlString, index, maxLength, totalLength, opts));
+            break;
+        } else {
+            totalLength += index;
+            truncatedContent += htmlString.substring(0, index);
+        }
+
+        if (endResult[1] === '/') {
+            tagsStack.pop();
+            selfClose = null;
+        } else {
+            selfClose = SELF_CLOSE_REGEX.exec(endResult);
+            if (!selfClose) {
+                tag = matches[1];
+                tagsStack.push(tag);
+            }
+        }
+
+        truncatedContent += selfClose ? selfClose[0] : endResult;
+        htmlString = htmlString.substring(index + endResult.length);
+    }
+
+    if (htmlString.length > maxLength - totalLength && opts.ellipsis) {
+        truncatedContent += opts.ellipsis ? '...' : '';
+    }
+    truncatedContent += closeTags(tagsStack);
+
+    if (opts.removeImageTag) {
+        truncatedContent = removeImageTag(truncatedContent);
+    }
+
+    return truncatedContent;
+}
+
 export default class ExpensiMark {
-    extractVictoryChartTags = (text: string): {text: string; tags: string[]} => {
-        const tags: string[] = [];
-        const out = text.replace(VICTORY_CHART_REGEX, (match) => {
-            const placeholder = createVictoryChartPlaceholder(tags.length);
-            tags.push(match);
-            return placeholder;
-        });
-        return {text: out, tags};
-    };
-
-    restoreVictoryChartTags = (text: string, tags: string[]): string => {
-        if (tags.length === 0) {
-            return text;
-        }
-        return text.replace(VICTORY_CHART_PLACEHOLDER_PATTERN, (match, idx) => tags[Number(idx)] ?? match);
-    };
-
-    getAttributeCache = (extras?: Extras) => {
-        if (!extras) {
-            return {attrCachingFn: undefined, attrCache: undefined};
-        }
-
-        return {
-            attrCachingFn: extras.mediaAttributeCachingFn ?? extras.cacheVideoAttributes,
-            attrCache: extras.mediaAttributeCache ?? extras.videoAttributeCache,
-        };
-    };
-
     static Log = new Logger({
         serverLoggingCallback: () => undefined,
         // eslint-disable-next-line no-console
@@ -206,11 +457,11 @@ export default class ExpensiMark {
                 // want to do this anywhere else since that would break HTML.
                 // &nbsp; will create styling issues so use &#32;
                 replacement: (_extras, _match, _g1, _g2, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;');
                     return `<pre>${group}</pre>`;
                 },
                 rawInputReplacement: (_extras, _match, _g1, newLineCharacter, textWithinFences) => {
-                    const group = textWithinFences.replace(/(?:(?![\n\r])\s)/g, '&#32;').replace(/<emoji>|<\/emoji>/g, '');
+                    const group = textWithinFences.replaceAll(/(?:(?![\n\r])\s)/g, '&#32;').replaceAll(/<emoji>|<\/emoji>/g, '');
                     return `<pre>${newLineCharacter}${group}</pre>`;
                 },
             },
@@ -230,12 +481,12 @@ export default class ExpensiMark {
                  * @return Returns the HTML video tag
                  */
                 replacement: (extras, _match, videoName, videoSource) => {
-                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const attrCache = resolveAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
                 rawInputReplacement: (extras, _match, videoName, videoSource) => {
-                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const attrCache = resolveAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[videoSource];
                     return `<video data-expensify-source="${Str.sanitizeURL(videoSource)}" data-raw-href="${videoSource}" data-link-variant="${typeof videoName === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}>${videoName ? `${videoName}` : ''}</video>`;
                 },
@@ -304,7 +555,7 @@ export default class ExpensiMark {
                 name: 'heading1',
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regexp = shouldKeepRawInput ? /^# ( *(?! )(?:(?!<pre>|<video>|\n|\r\n).)+)/gm : /^# +(?! )((?:(?!<pre>|<video>|\n|\r\n).)+)/gm;
-                    return this.replaceTextWithExtras(textToProcess, regexp, EXTRAS_DEFAULT, replacement);
+                    return replaceTextWithExtras(textToProcess, regexp, EXTRAS_DEFAULT, replacement);
                 },
                 replacement: '<h1>$1</h1>',
             },
@@ -321,18 +572,16 @@ export default class ExpensiMark {
                 name: 'image',
                 regex: MARKDOWN_IMAGE_REGEX,
                 replacement: (extras, _match, imgAlt, imgSource) => {
-                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const attrCache = resolveAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[imgSource];
                     return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} ${extraAttrs || ''}/>`;
                 },
                 rawInputReplacement: (extras, _match, imgAlt, imgSource) => {
-                    const attrCache = this.getAttributeCache(extras).attrCache;
+                    const attrCache = resolveAttributeCache(extras).attrCache;
                     const extraAttrs = attrCache && attrCache[imgSource];
                     return `<img src="${Str.sanitizeURL(imgSource)}"${imgAlt ? ` alt="${this.escapeAttributeContent(imgAlt)}"` : ''} data-raw-href="${imgSource}" data-link-variant="${typeof imgAlt === 'string' ? 'labeled' : 'auto'}" ${extraAttrs || ''}/>`;
                 },
-                shouldSkipProcessing: (textToCheck) => {
-                    return !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')');
-                },
+                shouldSkipProcessing: (textToCheck) => !textToCheck.includes('!') || !textToCheck.includes('(') || !textToCheck.includes(')'),
             },
 
             /**
@@ -355,9 +604,7 @@ export default class ExpensiMark {
                     }
                     return `<a href="${Str.sanitizeURL(g2)}" data-raw-href="${g2}" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">${g1}</a>`;
                 },
-                shouldSkipProcessing: (textToCheck) => {
-                    return !textToCheck.includes('.');
-                },
+                shouldSkipProcessing: (textToCheck) => !textToCheck.includes('.'),
             },
 
             /**
@@ -452,9 +699,7 @@ export default class ExpensiMark {
                     const href = Str.sanitizeURL(g2);
                     return `${g1}<a href="${href}" data-raw-href="${g2}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${g2}</a>${g1}`;
                 },
-                shouldSkipProcessing: (textToCheck) => {
-                    return !textToCheck.includes('.');
-                },
+                shouldSkipProcessing: (textToCheck) => !textToCheck.includes('.'),
             },
 
             {
@@ -466,7 +711,7 @@ export default class ExpensiMark {
                 process: (textToProcess, replacement, shouldKeepRawInput = false) => {
                     const regex = /^(?:&gt;|>)+ +(?! )(?![^<]*(?:<\/pre>|<\/code>|<\/video>))([^\v\n\r]*)/gm;
 
-                    let replacedText = this.replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
+                    let replacedText = replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
                     if (shouldKeepRawInput) {
                         return replacedText;
                     }
@@ -501,7 +746,7 @@ export default class ExpensiMark {
                     }
 
                     // If any tags are included inside underscores, ignore it. ie. _abc <pre>pre tag</pre> abc_
-                    if (textWithinUnderscores.includes('</pre>') || this.containsNonPairTag(textWithinUnderscores)) {
+                    if (textWithinUnderscores.includes('</pre>') || containsNonPairTag(textWithinUnderscores)) {
                         return match;
                     }
 
@@ -570,13 +815,13 @@ export default class ExpensiMark {
                         return `${g1}<strong>${g2}</strong>`;
                     }
 
-                    return g2.includes('</pre>') || this.containsNonPairTag(g2) ? match : `<strong>${g2}</strong>`;
+                    return g2.includes('</pre>') || containsNonPairTag(g2) ? match : `<strong>${g2}</strong>`;
                 },
             },
             {
                 name: 'strikethrough',
                 regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
-                replacement: (_extras, match, g1) => (g1.includes('</pre>') || this.containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
+                replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
                 name: 'newline',
@@ -627,7 +872,7 @@ export default class ExpensiMark {
                     inputString
                         .replace('<br></br>', '<br/>')
                         .replace('<br><br/>', '<br/>')
-                        .replace(/(<tr.*?<\/tr>)/g, '$1<br/>')
+                        .replaceAll(/(<tr.*?<\/tr>)/g, '$1<br/>')
                         .replace('<br/></tbody>', '')
                         .replace(SLACK_SPAN_NEW_LINE_TAG + SLACK_SPAN_NEW_LINE_TAG, '<br/><br/><br/>')
                         .replace(SLACK_SPAN_NEW_LINE_TAG, '<br/><br/>'),
@@ -659,7 +904,11 @@ export default class ExpensiMark {
                 replacement: (extras, match, tagName, innerContent) => {
                     // To check if style attribute contains bold font-weight
                     const isBoldFromStyle = (style: string | null) => {
-                        return style ? style.replace(/\s/g, '').includes('font-weight:bold;') || style.replace(/\s/g, '').includes('font-weight:700;') : false;
+                        if (!style) {
+                            return false;
+                        }
+                        const normalizedStyle = style.replaceAll(/\s/g, '');
+                        return normalizedStyle.includes('font-weight:bold;') || normalizedStyle.includes('font-weight:700;');
                     };
 
                     const updateSpacesAndWrapWithAsterisksIfBold = (content: string, isBold: boolean) => {
@@ -676,7 +925,7 @@ export default class ExpensiMark {
                     const isBold = styleAttributeMatch ? isFontWeightBold : tagName === 'b' || tagName === 'strong';
 
                     // Process nested spans with potential bold style
-                    const processedInnerContent = innerContent.replace(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
+                    const processedInnerContent = innerContent.replaceAll(/<span(?:"[^"]*"|'[^']*'|[^'">])*>([\s\S]*?)<\/span>/gi, (nestedMatch, nestedContent) => {
                         const nestedStyleMatch = nestedMatch.match(fontWeightRegex);
                         const isNestedBold = isBoldFromStyle(nestedStyleMatch ? nestedStyleMatch[1] : null);
                         return updateSpacesAndWrapWithAsterisksIfBold(nestedContent, isNestedBold);
@@ -696,16 +945,14 @@ export default class ExpensiMark {
                 replacement: (_extras, _match, _g1, g2) => {
                     // We remove the line break before heading inside quote to avoid adding extra line
                     let resultString: string[] | string = g2
-                        .replace(/\n?(<h1># )/g, '$1')
-                        .replace(/(<h1>|<\/h1>)+/g, '\n')
+                        .replaceAll(/\n?(<h1># )/g, '$1')
+                        .replaceAll(/(<h1>|<\/h1>)+/g, '\n')
                         // Replace trim() with manually removing line breaks at the beginning and end of the string to avoid adding extra lines
-                        .replace(/^(\n)+|(\n)+$/g, '')
+                        .replaceAll(/^(\n)+|(\n)+$/g, '')
                         .split('\n');
 
                     // Wrap each string in the array with <blockquote> and </blockquote>
-                    resultString = resultString.map((line) => {
-                        return `<blockquote>${line}</blockquote>`;
-                    });
+                    resultString = resultString.map((line) => `<blockquote>${line}</blockquote>`);
 
                     resultString = resultString
                         .map((text) => {
@@ -715,8 +962,8 @@ export default class ExpensiMark {
                                 depth = (modifiedText.match(/<blockquote>/gi) || []).length;
                                 // Need (\s)? because the server usually sends a space character after <blockquote> so we need to consume it,
                                 // avoid being redundant because it is added in the return part
-                                modifiedText = modifiedText.replace(/<blockquote>(\s)?/gi, '');
-                                modifiedText = modifiedText.replace(/<\/blockquote>/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<blockquote>(\s)?/gi, '');
+                                modifiedText = modifiedText.replaceAll(/<\/blockquote>/gi, '');
                             } while (/<blockquote>/i.test(modifiedText));
                             return `${'>'.repeat(depth)} ${modifiedText}`;
                         })
@@ -764,7 +1011,7 @@ export default class ExpensiMark {
                     let altText = '';
                     const altRegex = /alt\s*=\s*(['"])(.*?)\1/i;
                     const altMatch = imgAttrs.match(altRegex);
-                    const attrCachingFn = this.getAttributeCache(extras).attrCachingFn;
+                    const attrCachingFn = resolveAttributeCache(extras).attrCachingFn;
                     let attributes = imgAttrs;
                     if (altMatch) {
                         altText = altMatch[2];
@@ -798,7 +1045,7 @@ export default class ExpensiMark {
                  * @returns The markdown video tag
                  */
                 replacement: (extras, _match, _g1, videoSource, videoAttrs, videoName) => {
-                    const attrCachingFn = this.getAttributeCache(extras).attrCachingFn;
+                    const attrCachingFn = resolveAttributeCache(extras).attrCachingFn;
 
                     if (videoAttrs && attrCachingFn && typeof attrCachingFn === 'function') {
                         attrCachingFn(videoSource, videoAttrs);
@@ -814,10 +1061,12 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="?(\d+)"?(?: *\/>|><\/mention-report>)/gi,
-                replacement: (extras, _match, g1, _offset, _string) => {
+                replacement: (extras, _match, g1) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
-                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
+                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {
+                            reportID: g1,
+                        });
                         return '#Hidden';
                     }
 
@@ -827,11 +1076,13 @@ export default class ExpensiMark {
             {
                 name: 'userMention',
                 regex: /(?:<mention-user accountID="?(\d+)"?(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
-                replacement: (extras, _match, g1, g2, _offset, _string) => {
+                replacement: (extras, _match, g1, g2) => {
                     if (g1) {
                         const accountToNameMap = extras.accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
-                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
+                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {
+                                accountID: g1,
+                            });
                             return '@Hidden';
                         }
 
@@ -900,10 +1151,12 @@ export default class ExpensiMark {
             {
                 name: 'reportMentions',
                 regex: /<mention-report reportID="?(\d+)"?(?: *\/>|><\/mention-report>)/gi,
-                replacement: (extras, _match, g1, _offset, _string) => {
+                replacement: (extras, _match, g1) => {
                     const reportToNameMap = extras.reportIDToName;
                     if (!reportToNameMap || !reportToNameMap[g1]) {
-                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {reportID: g1});
+                        ExpensiMark.Log.alert('[ExpensiMark] Missing report name', {
+                            reportID: g1,
+                        });
                         return '#Hidden';
                     }
 
@@ -913,11 +1166,13 @@ export default class ExpensiMark {
             {
                 name: 'userMention',
                 regex: /(?:<mention-user accountID="?(\d+)"?(?: *\/>|><\/mention-user>))|(?:<mention-user>(.*?)<\/mention-user>)/gi,
-                replacement: (extras, _match, g1, g2, _offset, _string) => {
+                replacement: (extras, _match, g1, g2) => {
                     if (g1) {
                         const accountToNameMap = extras.accountIDToName;
                         if (!accountToNameMap || !accountToNameMap[g1]) {
-                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {accountID: g1});
+                            ExpensiMark.Log.alert('[ExpensiMark] Missing account name', {
+                                accountID: g1,
+                            });
                             return '@Hidden';
                         }
                         return `@${Str.removeSMSDomain(extras.accountIDToName?.[g1] ?? '')}`;
@@ -1001,7 +1256,7 @@ export default class ExpensiMark {
 
         // Extract VictoryChart blocks to preserve their markup during processing.
         // Only safe for trusted server input - user input must be escaped to prevent XSS.
-        const {text: textWithPlaceholders, tags: victoryChartTags} = shouldEscapeText ? {text, tags: [] as string[]} : this.extractVictoryChartTags(text);
+        const {text: textWithPlaceholders, tags: victoryChartTags} = shouldEscapeText ? {text, tags: [] as string[]} : extractVictoryChartTags(text);
 
         // This ensures that any html the user puts into the comment field shows as raw html
         let replacedText = shouldEscapeText ? Utils.escapeText(textWithPlaceholders) : textWithPlaceholders;
@@ -1021,7 +1276,7 @@ export default class ExpensiMark {
             if ('process' in rule) {
                 replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
             } else {
-                replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
+                replacedText = replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
             }
 
             // Post-process text after applying regex
@@ -1030,7 +1285,9 @@ export default class ExpensiMark {
             }
         };
         try {
-            rules.forEach(processRule);
+            for (const rule of rules) {
+                processRule(rule);
+            }
         } catch (e) {
             ExpensiMark.Log.alert('Error replacing text with html in ExpensiMark.replace', {error: e});
 
@@ -1038,7 +1295,7 @@ export default class ExpensiMark {
             return shouldEscapeText ? Utils.escapeText(text) : text;
         }
 
-        return this.restoreVictoryChartTags(replacedText, victoryChartTags);
+        return restoreVictoryChartTags(replacedText, victoryChartTags);
     }
 
     /**
@@ -1168,7 +1425,10 @@ export default class ExpensiMark {
 
             // Line breaks (`\n`) followed by empty contents are already removed
             // but line breaks inside contents should be parsed to <br/> to skip `autoEmail` rule
-            replacedText = this.replace(replacedText, {filterRules: ['newline'], shouldEscapeText: false});
+            replacedText = this.replace(replacedText, {
+                filterRules: ['newline'],
+                shouldEscapeText: false,
+            });
 
             // Now we move to the next match that the js regex found in the text
             match = regex.exec(textToCheck);
@@ -1177,53 +1437,6 @@ export default class ExpensiMark {
             replacedText = replacedText.concat(textToCheck.substr(startIndex));
         }
         return replacedText;
-    }
-
-    /**
-     * replace block element with '\n' if :
-     * 1. We have text within the element.
-     * 2. The text does not end with a new line.
-     * 3. It's not the last element in the string.
-     */
-    replaceBlockElementWithNewLine(htmlString: string): string {
-        // eslint-disable-next-line max-len
-        let splitText = htmlString
-            // Lines starting with quote mark '>' will have '\n' added to them so to avoid adding extra '\n', remove the block element right next to it
-            .replaceAll(
-                /<blockquote>> (<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>)/gi,
-                '<blockquote>> ',
-            )
-            .split(
-                /<div.*?>|<\/div>|<comment.*?>|\n<\/comment>|<\/comment>|<h1>|<\/h1>|<h2>|<\/h2>|<h3>|<\/h3>|<h4>|<\/h4>|<h5>|<\/h5>|<h6>|<\/h6>|<p>|<\/p>|<li>|<\/li>|<blockquote>|<\/blockquote>/,
-            );
-        const stripHTML = (text: string) => Str.stripHTML(text);
-        splitText = splitText.map(stripHTML);
-        let joinedText = '';
-
-        // Delete whitespace at the end
-        while (splitText.length) {
-            if (splitText[splitText.length - 1].trim().length > 0 || splitText[splitText.length - 1].match(/\n/)) {
-                break;
-            }
-            splitText.pop();
-        }
-
-        const processText = (text: string, index: number) => {
-            if (text.trim().length === 0 && !text.match(/\n/)) {
-                return;
-            }
-
-            // Insert '\n' unless it ends with '\n' or it's the last element, or if it's a header ('# ') with a space.
-            if (text.match(/\n[\s]?$/) || index === splitText.length - 1 || text === '# ') {
-                joinedText += text;
-            } else {
-                joinedText += `${text}\n`;
-            }
-        };
-
-        splitText.forEach(processText);
-
-        return joinedText;
     }
 
     /**
@@ -1246,10 +1459,8 @@ export default class ExpensiMark {
      * Note that there will always be only a single closing tag, even if multiple opening tags exist.
      * Only one closing tag is needed to detect if a nested quote has ended.
      */
-    unpackNestedQuotes(text: string): string {
-        let parsedText = text.replace(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => {
-            return `${match}</split>`;
-        });
+    static unpackNestedQuotes(text: string): string {
+        let parsedText = text.replaceAll(/((<\/blockquote>)+(<br \/>)?)|(<br \/>)/g, (match) => `${match}</split>`);
         const splittedText = parsedText.split('</split>');
         if (splittedText.length > 0 && splittedText[splittedText.length - 1] === '') {
             splittedText.pop();
@@ -1263,7 +1474,7 @@ export default class ExpensiMark {
                     return '';
                 }
 
-                const textLine = line.replace(/(<br \/>)$/g, '');
+                const textLine = line.replaceAll(/(<br \/>)$/g, '');
                 if (textLine.startsWith('<blockquote>')) {
                     count += (textLine.match(/<blockquote>/g) || []).length;
                 }
@@ -1301,10 +1512,10 @@ export default class ExpensiMark {
         if (parseBodyTag) {
             generatedMarkdown = parseBodyTag[2];
         }
-        generatedMarkdown = this.unpackNestedQuotes(generatedMarkdown);
+        generatedMarkdown = ExpensiMark.unpackNestedQuotes(generatedMarkdown);
 
         // Extract VictoryChart blocks before HTML stripping, then restore them.
-        const {text: textWithPlaceholders, tags: victoryChartTags} = this.extractVictoryChartTags(generatedMarkdown);
+        const {text: textWithPlaceholders, tags: victoryChartTags} = extractVictoryChartTags(generatedMarkdown);
         generatedMarkdown = textWithPlaceholders;
 
         const processRule = (rule: RuleWithRegex) => {
@@ -1313,12 +1524,14 @@ export default class ExpensiMark {
                 generatedMarkdown = rule.pre(generatedMarkdown);
             }
 
-            generatedMarkdown = this.replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
+            generatedMarkdown = replaceTextWithExtras(generatedMarkdown, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToMarkdownRules.forEach(processRule);
-        const decoded = Str.htmlDecode(this.replaceBlockElementWithNewLine(generatedMarkdown));
-        return this.restoreVictoryChartTags(decoded, victoryChartTags);
+        for (const rule of this.htmlToMarkdownRules) {
+            processRule(rule);
+        }
+        const decoded = Str.htmlDecode(replaceBlockElementWithNewLine(generatedMarkdown));
+        return restoreVictoryChartTags(decoded, victoryChartTags);
     }
 
     /**
@@ -1327,10 +1540,12 @@ export default class ExpensiMark {
     htmlToText(htmlString: string, extras: Extras = EXTRAS_DEFAULT): string {
         let replacedText = htmlString;
         const processRule = (rule: RuleWithRegex) => {
-            replacedText = this.replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
+            replacedText = replaceTextWithExtras(replacedText, rule.regex, extras, rule.replacement);
         };
 
-        this.htmlToTextRules.forEach(processRule);
+        for (const rule of this.htmlToTextRules) {
+            processRule(rule);
+        }
 
         // Unescaping because the text is escaped in 'replace' function
         // We use 'htmlDecode' instead of 'unescape' to replace entities like '&#32;'
@@ -1349,7 +1564,7 @@ export default class ExpensiMark {
             isStartingWithSpace = !!g2;
             return '';
         };
-        const textToReplace = text.replace(/^(?:&gt;|>)( )?/gm, handleMatch);
+        const textToReplace = text.replaceAll(/^(?:&gt;|>)( )?/gm, handleMatch);
         const filterRules = ['heading1'];
         // If we don't reach the max quote depth, we allow the recursive call to process other possible quotes
         if (this.currentQuoteDepth < this.maxQuoteDepth - 1 && !isStartingWithSpace) {
@@ -1366,40 +1581,13 @@ export default class ExpensiMark {
         return {replacedText, shouldAddSpace: isStartingWithSpace};
     }
 
-    /**
-     * Check if the input text includes only the open or the close tag of an element.
-     */
-    containsNonPairTag(textToCheck: string): boolean {
-        // Create a regular expression to match HTML tags
-        const tagRegExp = /<([a-z][a-z0-9-]*)\b[^>]*>|<\/([a-z][a-z0-9-]*)\s*>/gi;
+    getAttributeCache = resolveAttributeCache;
 
-        // Use a stack to keep track of opening tags
-        const tagStack = [];
+    replaceBlockElementWithNewLine = replaceBlockElementWithNewLine;
 
-        // Match all HTML tags in the string
-        let match = tagRegExp.exec(textToCheck);
-        while (match) {
-            const openingTag = match[1];
-            const closingTag = match[2];
+    containsNonPairTag = containsNonPairTag;
 
-            if (openingTag && openingTag !== 'br') {
-                // If it's an opening tag, push it onto the stack
-                tagStack.push(openingTag);
-            } else if (closingTag) {
-                // If it's a closing tag, pop the top of the stack
-                const expectedTag = tagStack.pop();
-
-                // If the closing tag doesn't match the expected opening tag, return false
-                if (closingTag !== expectedTag) {
-                    return true;
-                }
-            }
-            match = tagRegExp.exec(textToCheck);
-        }
-
-        // If there are any tags left in the stack, they're unclosed
-        return tagStack.length !== 0;
-    }
+    truncateHTML = truncateHTML;
 
     /**
      * @returns array or undefined if exception occurs when executing regex matching
@@ -1445,213 +1633,5 @@ export default class ExpensiMark {
         // illegal attribute value characters like `," or ' which might break the HTML
         originalContent = Str.replaceAll(originalContent, '\n', '');
         return Utils.escapeText(originalContent);
-    }
-
-    /**
-     * Determines the end position to truncate the HTML content while considering word boundaries.
-     *
-     * @param {string} content - The HTML content to be truncated.
-     * @param {number} tailPosition - The position up to which the content should be considered.
-     * @param {number} maxLength - The maximum length of the truncated content.
-     * @param {number} totalLength - The length of the content processed so far.
-     * @param {Object} opts - Options to customize the truncation.
-     * @returns {number} The calculated position to truncate the content.
-     */
-    getEndPosition(content: string, tailPosition: number | undefined, maxLength: number, totalLength: number, opts: TruncateOptions) {
-        const WORD_BREAK_REGEX = /\W+/g;
-
-        // Calculate the default position to truncate based on the maximum length and the length of the content processed so far
-        const defaultPosition = maxLength - totalLength;
-
-        // Define the slop value, which determines the tolerance for cutting off content near the maximum length
-        const slop = opts.slop;
-        if (!slop) return defaultPosition;
-
-        // Initialize the position to the default position
-        let position = defaultPosition;
-
-        // Determine if the default position is considered "short" based on the slop value
-        const isShort = defaultPosition < slop;
-
-        // Calculate the position within the slop range
-        const slopPos = isShort ? defaultPosition : slop - 1;
-
-        // Extract the substring to analyze for word boundaries, considering the slop and tail position
-        const substr = content.slice(isShort ? 0 : defaultPosition - slop, tailPosition !== undefined ? tailPosition : defaultPosition + slop);
-
-        // Find the first word boundary within the substring
-        const wordBreakMatch = WORD_BREAK_REGEX.exec(substr);
-
-        // Adjust the position to avoid truncating in the middle of a word if the option is enabled
-        if (!opts.truncateLastWord) {
-            if (tailPosition && substr.length <= tailPosition) {
-                // If tail position is defined and the substring length is within the tail position, set position to the substring length
-                position = substr.length;
-            } else {
-                // Iterate through word boundary matches to adjust the position
-                while (wordBreakMatch !== null) {
-                    if (wordBreakMatch.index < slopPos) {
-                        // If the word boundary is before the slop position, adjust position backward
-                        position = defaultPosition - (slopPos - wordBreakMatch.index);
-                        if (wordBreakMatch.index === 0 && defaultPosition <= 1) {
-                            break;
-                        }
-                    } else if (wordBreakMatch.index === slopPos) {
-                        // If the word boundary is at the slop position, set position to the default position
-                        position = defaultPosition;
-                        break;
-                    } else {
-                        // If the word boundary is after the slop position, adjust position forward
-                        position = defaultPosition + (wordBreakMatch.index - slopPos);
-                        break;
-                    }
-                }
-            }
-            // If the character at the determined position is a whitespace, adjust position backward
-            if (content.charAt(position - 1).match(/\s$/)) {
-                position--;
-            }
-        }
-
-        // Return the calculated position to truncate the content
-        return position;
-    }
-
-    /**
-     * Truncate HTML string and keep tag safe.
-     * pulled from https://github.com/huang47/nodejs-html-truncate/blob/master/lib/truncate.js
-     *
-     * @param {string} html - The string that needs to be truncated
-     * @param {number} maxLength - Length of truncated string
-     * @param {Object} [options] - Optional configuration options
-     * @returns {string} The truncated string
-     */
-    truncateHTML(html: string, maxLength: number, options?: TruncateOptions) {
-        const EMPTY_STRING = '';
-        const DEFAULT_TRUNCATE_SYMBOL = '...';
-        const DEFAULT_SLOP = Math.min(10, maxLength);
-        const tagsStack = [];
-        const KEY_VALUE_REGEX = '((?:\\s+(?:\\w+|-)+(?:\\s*=\\s*(?:"(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|[^\'">\\s]+))?)*)';
-        const IS_CLOSE_REGEX = '\\s*\\/?\\s*';
-        const CLOSE_REGEX = '\\s*\\/\\s*';
-        const SELF_CLOSE_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
-        const HTML_TAG_REGEX = new RegExp(`<\\/?(\\w+)${KEY_VALUE_REGEX}${IS_CLOSE_REGEX}>`);
-        const URL_REGEX = /(((ftp|https?):\/\/)[\\-\w@:%_\\+.~#?,&\\/\\/=]+)|((mailto:)?[_.\w\\-]+@([\w][\w\\-]+\.)+[a-zA-Z]{2,3})/g;
-        const IMAGE_TAG_REGEX = new RegExp(`<img\\s*${KEY_VALUE_REGEX}${CLOSE_REGEX}>`);
-        let truncatedContent = EMPTY_STRING;
-        let totalLength = 0;
-        let matches = HTML_TAG_REGEX.exec(html);
-        let endResult;
-        let index;
-        let tag;
-        let selfClose = null;
-        let htmlString = html;
-
-        const opts = {
-            ellipsis: DEFAULT_TRUNCATE_SYMBOL,
-            truncateLastWord: true,
-            slop: DEFAULT_SLOP,
-            ...options,
-        };
-
-        function removeImageTag(content: string): string {
-            const match = IMAGE_TAG_REGEX.exec(content);
-            if (!match) {
-                return content;
-            }
-
-            const matchIndex = match.index;
-            const matchLength = match[0].length;
-
-            return content.substring(0, matchIndex) + content.substring(matchIndex + matchLength);
-        }
-
-        function closeTags(tags: string[]): string {
-            return tags
-                .reverse()
-                .map((mappedTag) => {
-                    return `</${mappedTag}>`;
-                })
-                .join('');
-        }
-
-        while (matches) {
-            matches = HTML_TAG_REGEX.exec(htmlString);
-
-            if (!matches) {
-                if (totalLength >= maxLength) {
-                    break;
-                }
-
-                matches = URL_REGEX.exec(htmlString);
-                if (!matches || matches.index >= maxLength) {
-                    truncatedContent += htmlString.substring(0, this.getEndPosition(htmlString, undefined, maxLength, totalLength, opts));
-                    break;
-                }
-
-                while (matches) {
-                    endResult = matches[0];
-                    if (endResult !== null) {
-                        index = matches.index;
-                        truncatedContent += htmlString.substring(0, index + endResult.length - totalLength);
-                        htmlString = htmlString.substring(index + endResult.length);
-                        matches = URL_REGEX.exec(htmlString);
-                    }
-                }
-                break;
-            }
-
-            endResult = matches[0];
-            index = matches.index;
-
-            if (totalLength + index > maxLength) {
-                truncatedContent += htmlString.substring(0, this.getEndPosition(htmlString, index, maxLength, totalLength, opts));
-                break;
-            } else {
-                totalLength += index;
-                truncatedContent += htmlString.substring(0, index);
-            }
-
-            if (endResult[1] === '/') {
-                tagsStack.pop();
-                selfClose = null;
-            } else {
-                selfClose = SELF_CLOSE_REGEX.exec(endResult);
-                if (!selfClose) {
-                    tag = matches[1];
-                    tagsStack.push(tag);
-                }
-            }
-
-            truncatedContent += selfClose ? selfClose[0] : endResult;
-            htmlString = htmlString.substring(index + endResult.length); // Update htmlString
-        }
-
-        if (htmlString.length > maxLength - totalLength && opts.ellipsis) {
-            truncatedContent += opts.ellipsis ? '...' : '';
-        }
-        truncatedContent += closeTags(tagsStack);
-
-        if (opts.removeImageTag) {
-            truncatedContent = removeImageTag(truncatedContent);
-        }
-
-        return truncatedContent;
-    }
-
-    /**
-     * Replaces text with a replacement based on a regex
-     * @param text - The text to replace
-     * @param regexp - The regex to match
-     * @param extras - The extras object
-     * @param replacement - The replacement string or function
-     * @returns The replaced text
-     */
-    replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, replacement: Replacement): string {
-        if (typeof replacement === 'function') {
-            // if the replacement is a function, we pass the extras object to it
-            return text.replace(regexp, (...args) => replacement(extras, ...args));
-        }
-        return text.replace(regexp, replacement);
     }
 }

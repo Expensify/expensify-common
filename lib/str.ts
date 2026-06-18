@@ -51,9 +51,9 @@ const Str = {
      * @returns The cent value of the @p amountStr.
      */
     fromUSDToNumber(amountStr: string, allowFraction: boolean): number {
-        let amount: string | number = String(amountStr).replace(/[^\d.\-()]+/g, '');
+        let amount: string | number = String(amountStr).replaceAll(/[^\d.\-()]+/g, '');
         if (amount.match(/\(.*\)/)) {
-            const modifiedAmount = amount.replace(/[()]/g, '');
+            const modifiedAmount = amount.replaceAll(/[()]/g, '');
             amount = `-${modifiedAmount}`;
         }
         amount = Number(amount) * 100;
@@ -82,7 +82,7 @@ const Str = {
      * Convert new line to <br />
      */
     nl2br(str: string): string {
-        return str.replace(/\n/g, '<br />');
+        return str.replaceAll('\n', '<br />');
     },
 
     /**
@@ -164,7 +164,7 @@ const Str = {
      */
     makeID(str: string): string {
         const modifiedString = String(str)
-            .replace(/[^A-Za-z0-9]/g, '_')
+            .replaceAll(/[^A-Za-z0-9]/g, '_')
             .toUpperCase();
         return `id_${modifiedString}`;
     },
@@ -198,7 +198,7 @@ const Str = {
         function recap_callback(t: unknown, a: string, b: string) {
             return a + b.toUpperCase();
         }
-        return str.replace(
+        return str.replaceAll(
             // **NOTE: Match to _libfop.php
             /([^A-Za-z'.0-9])([a-z])/g,
             recap_callback,
@@ -209,14 +209,14 @@ const Str = {
      * Replace all the non alphanumerical character by _
      */
     sanitizeToAlphaNumeric(input: string): string {
-        return String(input).replace(/[^\d\w]/g, '_');
+        return String(input).replaceAll(/[^\d\w]/g, '_');
     },
 
     /**
      * Strip out all the non numerical characters
      */
     stripNonNumeric(input: string): string {
-        return String(input).replace(/[^\d]/g, '');
+        return String(input).replaceAll(/[^\d]/g, '');
     },
 
     /**
@@ -224,7 +224,7 @@ const Str = {
      * @returns The ascii version of the string.
      */
     stripNonASCIICharacters(input: string): string {
-        return String(input).replace(/[\u0000-\u0019\u0080-\uffff]/g, '');
+        return String(input).replaceAll(/[\u0000-\u0019\u0080-\uffff]/g, '');
     },
 
     /**
@@ -239,7 +239,7 @@ const Str = {
      */
     shortenText(val: string, length: number): string {
         // Remove extra spaces because they don't show up in html anyway.
-        const text = String(val).replace(/\s+/g, ' ');
+        const text = String(val).replaceAll(/\s+/g, ' ');
         const truncatedText = text.substr(0, length - 3);
         return text.length > length ? `${truncatedText}...` : text;
     },
@@ -330,7 +330,7 @@ const Str = {
             return '';
         }
 
-        return str.replace(/<[^>]*>?/gm, '');
+        return str.replaceAll(/<[^>]*>?/gm, '');
     },
 
     /**
@@ -435,7 +435,7 @@ const Str = {
      * @returns string with the trailing comma removed
      */
     removeTrailingComma(str: string): string {
-        return str.trim().replace(/(,$)/g, '');
+        return str.trim().replaceAll(/(,$)/g, '');
     },
 
     /**
@@ -513,7 +513,7 @@ const Str = {
      * Sanitize phone number to return only numbers. Return null if non valid phone number.
      */
     sanitizePhoneNumber(str: string): string | null {
-        const string = str.replace(/(?!^\+)\D/g, '');
+        const string = str.replaceAll(/(?!^\+)\D/g, '');
         return string.length <= 15 && string.length >= 10 ? string : null;
     },
 
@@ -533,7 +533,7 @@ const Str = {
      * @returns The escaped string
      */
     escapeForRegExp(str: string): string {
-        return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+        return str.replaceAll(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
     },
 
     /**
@@ -543,7 +543,7 @@ const Str = {
      * @returns The escaped string
      */
     escapeForExpenseRule(str: string): string {
-        return str.replace(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
+        return str.replaceAll(/[-[\]/{}()*+?\\^$|]/g, '\\$&');
     },
 
     /**
@@ -554,7 +554,7 @@ const Str = {
      * @returns The escaped string
      */
     addBackslashBeforeColonsForTagNamesComingFromQBD(str: string): string {
-        return str.replace(/([^\\]):/g, '$1\\:');
+        return str.replaceAll(/([^\\]):/g, '$1\\:');
     },
 
     /**
@@ -562,7 +562,7 @@ const Str = {
      * eg: myString\[\]\* -> myString[]*
      */
     stripBackslashes(str: string): string {
-        return str.replace(/\\/g, '');
+        return str.replaceAll('\\', '');
     },
 
     /**
@@ -627,7 +627,7 @@ const Str = {
      */
     ucwords(str: string): string {
         const capitalize = ($1: string) => $1.toUpperCase();
-        return String(str).replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
+        return String(str).replaceAll(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, capitalize);
     },
 
     /**
@@ -790,7 +790,7 @@ const Str = {
             return str;
         }
 
-        return str.substring(0, num).replace(/./g, mask) + str.substring(num);
+        return str.substring(0, num).replaceAll(/./g, mask) + str.substring(num);
     },
 
     /**
@@ -950,7 +950,7 @@ const Str = {
      * Returns text without our SMS domain
      */
     removeSMSDomain(text: string): string {
-        return text.replace(REMOVE_SMS_DOMAIN_PATTERN, '');
+        return text.replaceAll(REMOVE_SMS_DOMAIN_PATTERN, '');
     },
 
     /**

@@ -1,4 +1,3 @@
-// eslint-disable-next-line rulesdir/no-api-in-views
 export {default as API} from './API';
 export {default as APIDeferred} from './APIDeferred';
 export {default as BrowserDetect} from './BrowserDetect';
