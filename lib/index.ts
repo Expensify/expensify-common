@@ -19,3 +19,5 @@ export {default as fastMerge} from './fastMerge';
 export {default as Str} from './str';
 export {default as TLD_REGEX} from './tlds';
 export {default as md5} from './md5';
+export {default as CLI} from './CLI';
+export {default as SafeString} from './SafeString';

@@ -255,3 +255,47 @@ describe('Str.getExtension', () => {
         expect(Str.getExtension([])).toBeUndefined();
     });
 });
+
+describe('Str.dedent', () => {
+    it('removes common indentation from multiline strings', () => {
+        const result = Str.dedent(`
+            line one
+            line two
+        `);
+
+        expect(result).toBe('line one\nline two\n');
+    });
+
+    it('removes at most one leading newline', () => {
+        expect(
+            Str.dedent(`
+            hello
+        `),
+        ).toBe('hello\n');
+
+        expect(
+            Str.dedent(`
+
+            hello
+        `),
+        ).toBe('\nhello\n');
+    });
+
+    it('normalizes CRLF line endings', () => {
+        expect(Str.dedent('    hello\r\n    world')).toBe('hello\nworld');
+    });
+
+    it('ignores empty lines when calculating indentation', () => {
+        const result = Str.dedent(`
+            first line
+
+            second line
+        `);
+
+        expect(result).toBe('first line\n\nsecond line\n');
+    });
+
+    it('returns an empty string for empty input', () => {
+        expect(Str.dedent('')).toBe('');
+    });
+});
