@@ -1,14 +1,41 @@
 {
   "name": "expensify-common",
-  "version": "2.0.184",
+  "version": "2.0.185",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./esm/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./str": {
+      "types": "./dist/str.d.ts",
+      "import": "./esm/str.mjs",
+      "require": "./dist/str.js",
+      "default": "./dist/str.js"
+    },
+    "./CLI": {
+      "types": "./dist/CLI.d.ts",
+      "import": "./esm/CLI.mjs",
+      "require": "./dist/CLI.js",
+      "default": "./dist/CLI.js"
+    },
+    "./SafeString": {
+      "types": "./dist/SafeString.d.ts",
+      "import": "./esm/SafeString.mjs",
+      "require": "./dist/SafeString.js",
+      "default": "./dist/SafeString.js"
+    }
+  },
   "files": [
     "dist/**/*",
+    "esm/**/*",
     "API.md",
     "README.md",
     "LICENSE.md"
