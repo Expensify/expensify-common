@@ -1,211 +1,203 @@
 /**
  * @jest-environment node
  */
-import CLI from "../lib/CLI";
-import Str from "../lib/str";
+import CLI from '../lib/CLI';
+import Str from '../lib/str';
 
 function setArgv(...args) {
-  process.argv = ["node", "script.ts", ...args];
+    process.argv = ['node', 'script.ts', ...args];
 }
 
-describe("CLI", () => {
-  const ORIGINAL_ARGV = process.argv;
-  let mockExit;
-  let mockLog;
-  let mockError;
-  let mockWarn;
+describe('CLI', () => {
+    const ORIGINAL_ARGV = process.argv;
+    let mockExit;
+    let mockLog;
+    let mockError;
+    let mockWarn;
 
-  beforeEach(() => {
-    process.argv = ["ts-node", "script.ts"];
-    mockExit = jest.spyOn(process, "exit").mockImplementation(() => {
-      throw new Error("exit");
-    });
-    mockLog = jest.spyOn(console, "log").mockImplementation(() => {});
-    mockError = jest.spyOn(console, "error").mockImplementation(() => {});
-    mockWarn = jest.spyOn(console, "warn").mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  afterAll(() => {
-    process.argv = ORIGINAL_ARGV;
-  });
-
-  it("parses boolean flags with default false", () => {
-    const cli = new CLI({
-      flags: {
-        verbose: { description: "Enable verbose mode" },
-      },
+    beforeEach(() => {
+        process.argv = ['ts-node', 'script.ts'];
+        mockExit = jest.spyOn(process, 'exit').mockImplementation(() => {
+            throw new Error('exit');
+        });
+        mockLog = jest.spyOn(console, 'log').mockImplementation(() => {});
+        mockError = jest.spyOn(console, 'error').mockImplementation(() => {});
+        mockWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
-    expect(cli.flags.verbose).toBe(false);
-  });
-
-  it("sets boolean flag when present", () => {
-    process.argv.push("--verbose");
-    const cli = new CLI({
-      flags: {
-        verbose: { description: "Enable verbose mode" },
-      },
+    afterEach(() => {
+        jest.resetAllMocks();
     });
 
-    expect(cli.flags.verbose).toBe(true);
-  });
-
-  it("parses named arg with default", () => {
-    const cli = new CLI({
-      namedArgs: {
-        name: { description: "Your name", default: "Guest" },
-      },
+    afterAll(() => {
+        process.argv = ORIGINAL_ARGV;
     });
 
-    expect(cli.namedArgs.name).toBe("Guest");
-  });
-
-  it("uses named arg value from command line", () => {
-    process.argv.push("--name=Alice");
-    const cli = new CLI({
-      namedArgs: {
-        name: { description: "Your name", default: "Guest" },
-      },
-    });
-
-    expect(cli.namedArgs.name).toBe("Alice");
-  });
-
-  it('supports "--arg value" syntax', () => {
-    process.argv.push("--name", "Bob");
-    const cli = new CLI({
-      namedArgs: {
-        name: { description: "Your name" },
-      },
-    });
-
-    expect(cli.namedArgs.name).toBe("Bob");
-  });
-
-  it("throws if required named arg is missing", () => {
-    expect(
-      () =>
-        new CLI({
-          namedArgs: {
-            name: { description: "Required arg" },
-          },
-        }),
-    ).toThrow();
-    expect(mockError).toHaveBeenCalledWith(
-      "Missing required named argument --name",
-    );
-  });
-
-  it("throws on invalid named arg value from parse function", () => {
-    process.argv.push("--count", "abc");
-    expect(
-      () =>
-        new CLI({
-          namedArgs: {
-            count: {
-              description: "Numeric value",
-              parse: (val) => {
-                const num = Number(val);
-                if (Number.isNaN(num)) {
-                  throw new Error("Must be a number");
-                }
-                return num;
-              },
+    it('parses boolean flags with default false', () => {
+        const cli = new CLI({
+            flags: {
+                verbose: {description: 'Enable verbose mode'},
             },
-          },
-        }),
-    ).toThrow();
-    expect(mockError).toHaveBeenCalledWith(
-      "Invalid value for --count: Must be a number",
-    );
-  });
+        });
 
-  it("parses required positional arg", () => {
-    process.argv.push("Hello");
-    const cli = new CLI({
-      positionalArgs: [{ name: "greeting", description: "Greeting" }],
+        expect(cli.flags.verbose).toBe(false);
     });
 
-    expect(cli.positionalArgs.greeting).toBe("Hello");
-  });
+    it('sets boolean flag when present', () => {
+        process.argv.push('--verbose');
+        const cli = new CLI({
+            flags: {
+                verbose: {description: 'Enable verbose mode'},
+            },
+        });
 
-  it("uses default for optional positional arg", () => {
-    const cli = new CLI({
-      positionalArgs: [
-        { name: "greeting", description: "Greeting", default: "Hi" },
-      ],
+        expect(cli.flags.verbose).toBe(true);
     });
 
-    expect(cli.positionalArgs.greeting).toBe("Hi");
-  });
+    it('parses named arg with default', () => {
+        const cli = new CLI({
+            namedArgs: {
+                name: {description: 'Your name', default: 'Guest'},
+            },
+        });
 
-  it("throws for missing required positional arg", () => {
-    expect(
-      () =>
-        new CLI({
-          positionalArgs: [{ name: "greeting", description: "Greeting" }],
-        }),
-    ).toThrow();
-    expect(mockError).toHaveBeenCalledWith(
-      "Missing required positional argument --greeting",
-    );
-  });
-
-  it("parses custom type with parse function", () => {
-    process.argv.push("--locales", "en,fr,es");
-    const cli = new CLI({
-      namedArgs: {
-        locales: {
-          description: "Languages",
-          parse: (val) => val.split(","),
-        },
-      },
+        expect(cli.namedArgs.name).toBe('Guest');
     });
 
-    expect(cli.namedArgs.locales).toEqual(["en", "fr", "es"]);
-  });
+    it('uses named arg value from command line', () => {
+        process.argv.push('--name=Alice');
+        const cli = new CLI({
+            namedArgs: {
+                name: {description: 'Your name', default: 'Guest'},
+            },
+        });
 
-  it("prints help message and exits with --help flag", () => {
-    process.argv.push("--help");
-    expect(
-      () =>
-        new CLI({
-          flags: {
-            verbose: { description: "Enable verbose logging" },
-          },
-          namedArgs: {
-            time: {
-              description: "Time of day to greet (morning or evening)",
-              default: "morning",
-              parse: (val) => {
-                if (val !== "morning" && val !== "evening") {
-                  throw new Error('Must be "morning" or "evening"');
-                }
-                return val;
-              },
-            },
-          },
-          positionalArgs: [
-            {
-              name: "firstName",
-              description: "First name to greet",
-            },
-            {
-              name: "lastName",
-              description: "Last name to greet",
-              default: "",
-            },
-          ],
-        }),
-    ).toThrow("exit");
+        expect(cli.namedArgs.name).toBe('Alice');
+    });
 
-    const scriptName = "script.ts";
-    const expectedOutput = Str.dedent(
-      `
+    it('supports "--arg value" syntax', () => {
+        process.argv.push('--name', 'Bob');
+        const cli = new CLI({
+            namedArgs: {
+                name: {description: 'Your name'},
+            },
+        });
+
+        expect(cli.namedArgs.name).toBe('Bob');
+    });
+
+    it('throws if required named arg is missing', () => {
+        expect(
+            () =>
+                new CLI({
+                    namedArgs: {
+                        name: {description: 'Required arg'},
+                    },
+                }),
+        ).toThrow();
+        expect(mockError).toHaveBeenCalledWith('Missing required named argument --name');
+    });
+
+    it('throws on invalid named arg value from parse function', () => {
+        process.argv.push('--count', 'abc');
+        expect(
+            () =>
+                new CLI({
+                    namedArgs: {
+                        count: {
+                            description: 'Numeric value',
+                            parse: (val) => {
+                                const num = Number(val);
+                                if (Number.isNaN(num)) {
+                                    throw new Error('Must be a number');
+                                }
+                                return num;
+                            },
+                        },
+                    },
+                }),
+        ).toThrow();
+        expect(mockError).toHaveBeenCalledWith('Invalid value for --count: Must be a number');
+    });
+
+    it('parses required positional arg', () => {
+        process.argv.push('Hello');
+        const cli = new CLI({
+            positionalArgs: [{name: 'greeting', description: 'Greeting'}],
+        });
+
+        expect(cli.positionalArgs.greeting).toBe('Hello');
+    });
+
+    it('uses default for optional positional arg', () => {
+        const cli = new CLI({
+            positionalArgs: [{name: 'greeting', description: 'Greeting', default: 'Hi'}],
+        });
+
+        expect(cli.positionalArgs.greeting).toBe('Hi');
+    });
+
+    it('throws for missing required positional arg', () => {
+        expect(
+            () =>
+                new CLI({
+                    positionalArgs: [{name: 'greeting', description: 'Greeting'}],
+                }),
+        ).toThrow();
+        expect(mockError).toHaveBeenCalledWith('Missing required positional argument --greeting');
+    });
+
+    it('parses custom type with parse function', () => {
+        process.argv.push('--locales', 'en,fr,es');
+        const cli = new CLI({
+            namedArgs: {
+                locales: {
+                    description: 'Languages',
+                    parse: (val) => val.split(','),
+                },
+            },
+        });
+
+        expect(cli.namedArgs.locales).toEqual(['en', 'fr', 'es']);
+    });
+
+    it('prints help message and exits with --help flag', () => {
+        process.argv.push('--help');
+        expect(
+            () =>
+                new CLI({
+                    flags: {
+                        verbose: {description: 'Enable verbose logging'},
+                    },
+                    namedArgs: {
+                        time: {
+                            description: 'Time of day to greet (morning or evening)',
+                            default: 'morning',
+                            parse: (val) => {
+                                if (val !== 'morning' && val !== 'evening') {
+                                    throw new Error('Must be "morning" or "evening"');
+                                }
+                                return val;
+                            },
+                        },
+                    },
+                    positionalArgs: [
+                        {
+                            name: 'firstName',
+                            description: 'First name to greet',
+                        },
+                        {
+                            name: 'lastName',
+                            description: 'Last name to greet',
+                            default: '',
+                        },
+                    ],
+                }),
+        ).toThrow('exit');
+
+        const scriptName = 'script.ts';
+        const expectedOutput = Str.dedent(
+            `
             Usage: npx ts-node ${scriptName} [--verbose] [--yes] [--no] [--help] [--time <value>] <firstName> [lastName]
 
             Flags:
@@ -221,371 +213,352 @@ describe("CLI", () => {
               firstName              First name to greet
               lastName               Last name to greet (default: )
         `,
-    ).trim();
+        ).trim();
 
-    const actualOutput = mockLog.mock.calls.flat().join("\n").trim();
+        const actualOutput = mockLog.mock.calls.flat().join('\n').trim();
 
-    expect(actualOutput).toBe(expectedOutput);
-    expect(mockExit).toHaveBeenCalledWith(0);
-  });
-
-  it("handles supersession when superseding arg is provided", () => {
-    process.argv.push("--paths", "common.save,errors.generic");
-    const cli = new CLI({
-      namedArgs: {
-        compareRef: {
-          description: "Compare reference",
-          default: "main",
-        },
-        paths: {
-          description: "Specific paths to process",
-          parse: (val) => val.split(","),
-          supersedes: ["compareRef"],
-          required: false,
-        },
-      },
+        expect(actualOutput).toBe(expectedOutput);
+        expect(mockExit).toHaveBeenCalledWith(0);
     });
 
-    expect(cli.namedArgs.paths).toEqual(["common.save", "errors.generic"]);
-    expect(cli.namedArgs.compareRef).toBeUndefined();
-  });
-
-  it("uses default value when superseding arg is not provided", () => {
-    const cli = new CLI({
-      namedArgs: {
-        compareRef: {
-          description: "Compare reference",
-          default: "main",
-        },
-        paths: {
-          description: "Specific paths to process",
-          parse: (val) => val.split(","),
-          supersedes: ["compareRef"],
-          required: false,
-        },
-      },
-    });
-
-    expect(cli.namedArgs.paths).toBeUndefined();
-    expect(cli.namedArgs.compareRef).toBe("main");
-  });
-
-  it("shows supersession information in help message", () => {
-    process.argv.push("--help");
-    expect(
-      () =>
-        new CLI({
-          namedArgs: {
-            compareRef: {
-              description: "Compare reference",
-              default: "main",
+    it('handles supersession when superseding arg is provided', () => {
+        process.argv.push('--paths', 'common.save,errors.generic');
+        const cli = new CLI({
+            namedArgs: {
+                compareRef: {
+                    description: 'Compare reference',
+                    default: 'main',
+                },
+                paths: {
+                    description: 'Specific paths to process',
+                    parse: (val) => val.split(','),
+                    supersedes: ['compareRef'],
+                    required: false,
+                },
             },
-            paths: {
-              description: "Specific paths to process",
-              supersedes: ["compareRef"],
-              required: false,
+        });
+
+        expect(cli.namedArgs.paths).toEqual(['common.save', 'errors.generic']);
+        expect(cli.namedArgs.compareRef).toBeUndefined();
+    });
+
+    it('uses default value when superseding arg is not provided', () => {
+        const cli = new CLI({
+            namedArgs: {
+                compareRef: {
+                    description: 'Compare reference',
+                    default: 'main',
+                },
+                paths: {
+                    description: 'Specific paths to process',
+                    parse: (val) => val.split(','),
+                    supersedes: ['compareRef'],
+                    required: false,
+                },
             },
-          },
-        }),
-    ).toThrow("exit");
+        });
 
-    const actualOutput = mockLog.mock.calls.flat().join("\n");
-    expect(actualOutput).toContain("(supersedes: compareRef)");
-    expect(mockExit).toHaveBeenCalledWith(0);
-  });
-
-  it("handles multiple superseded args", () => {
-    process.argv.push("--priority", "high");
-    const cli = new CLI({
-      namedArgs: {
-        lowPriority: {
-          description: "Low priority mode",
-          default: "enabled",
-        },
-        mediumPriority: {
-          description: "Medium priority mode",
-          default: "enabled",
-        },
-        priority: {
-          description: "Priority level",
-          supersedes: ["lowPriority", "mediumPriority"],
-          required: false,
-        },
-      },
+        expect(cli.namedArgs.paths).toBeUndefined();
+        expect(cli.namedArgs.compareRef).toBe('main');
     });
 
-    expect(cli.namedArgs.priority).toBe("high");
-    expect(cli.namedArgs.lowPriority).toBeUndefined();
-    expect(cli.namedArgs.mediumPriority).toBeUndefined();
-  });
+    it('shows supersession information in help message', () => {
+        process.argv.push('--help');
+        expect(
+            () =>
+                new CLI({
+                    namedArgs: {
+                        compareRef: {
+                            description: 'Compare reference',
+                            default: 'main',
+                        },
+                        paths: {
+                            description: 'Specific paths to process',
+                            supersedes: ['compareRef'],
+                            required: false,
+                        },
+                    },
+                }),
+        ).toThrow('exit');
 
-  it("requires superseded args when superseding arg is not provided", () => {
-    expect(
-      () =>
-        new CLI({
-          namedArgs: {
-            compareRef: {
-              description: "Compare reference",
+        const actualOutput = mockLog.mock.calls.flat().join('\n');
+        expect(actualOutput).toContain('(supersedes: compareRef)');
+        expect(mockExit).toHaveBeenCalledWith(0);
+    });
+
+    it('handles multiple superseded args', () => {
+        process.argv.push('--priority', 'high');
+        const cli = new CLI({
+            namedArgs: {
+                lowPriority: {
+                    description: 'Low priority mode',
+                    default: 'enabled',
+                },
+                mediumPriority: {
+                    description: 'Medium priority mode',
+                    default: 'enabled',
+                },
+                priority: {
+                    description: 'Priority level',
+                    supersedes: ['lowPriority', 'mediumPriority'],
+                    required: false,
+                },
             },
-            paths: {
-              description: "Specific paths to process",
-              supersedes: ["compareRef"],
-              required: false,
+        });
+
+        expect(cli.namedArgs.priority).toBe('high');
+        expect(cli.namedArgs.lowPriority).toBeUndefined();
+        expect(cli.namedArgs.mediumPriority).toBeUndefined();
+    });
+
+    it('requires superseded args when superseding arg is not provided', () => {
+        expect(
+            () =>
+                new CLI({
+                    namedArgs: {
+                        compareRef: {
+                            description: 'Compare reference',
+                        },
+                        paths: {
+                            description: 'Specific paths to process',
+                            supersedes: ['compareRef'],
+                            required: false,
+                        },
+                    },
+                }),
+        ).toThrow();
+        expect(mockError).toHaveBeenCalledWith('Missing required named argument --compareRef');
+    });
+
+    it('warns when superseded arg is provided alongside superseding arg', () => {
+        process.argv.push('--paths', 'common.save', '--compare-ref', 'main');
+        const cli = new CLI({
+            namedArgs: {
+                'compare-ref': {
+                    description: 'Compare reference',
+                    default: 'main',
+                },
+                paths: {
+                    description: 'Specific paths to process',
+                    parse: (val) => val.split(','),
+                    supersedes: ['compare-ref'],
+                    required: false,
+                },
             },
-          },
-        }),
-    ).toThrow();
-    expect(mockError).toHaveBeenCalledWith(
-      "Missing required named argument --compareRef",
-    );
-  });
+        });
 
-  it("warns when superseded arg is provided alongside superseding arg", () => {
-    process.argv.push("--paths", "common.save", "--compare-ref", "main");
-    const cli = new CLI({
-      namedArgs: {
-        "compare-ref": {
-          description: "Compare reference",
-          default: "main",
-        },
-        paths: {
-          description: "Specific paths to process",
-          parse: (val) => val.split(","),
-          supersedes: ["compare-ref"],
-          required: false,
-        },
-      },
+        expect(mockWarn).toHaveBeenCalledWith('⚠️  Warning: --compare-ref is superseded by --paths and will be ignored.');
+        expect(cli.namedArgs.paths).toEqual(['common.save']);
+        expect(cli.namedArgs['compare-ref']).toBeUndefined();
     });
 
-    expect(mockWarn).toHaveBeenCalledWith(
-      "⚠️  Warning: --compare-ref is superseded by --paths and will be ignored.",
-    );
-    expect(cli.namedArgs.paths).toEqual(["common.save"]);
-    expect(cli.namedArgs["compare-ref"]).toBeUndefined();
-  });
+    it('warns for multiple superseded args when provided', () => {
+        process.argv.push('--priority', 'high', '--low-priority', 'disabled', '--medium-priority', 'enabled');
+        const cli = new CLI({
+            namedArgs: {
+                'low-priority': {
+                    description: 'Low priority mode',
+                    default: 'enabled',
+                },
+                'medium-priority': {
+                    description: 'Medium priority mode',
+                    default: 'enabled',
+                },
+                priority: {
+                    description: 'Priority level',
+                    supersedes: ['low-priority', 'medium-priority'],
+                    required: false,
+                },
+            },
+        });
 
-  it("warns for multiple superseded args when provided", () => {
-    process.argv.push(
-      "--priority",
-      "high",
-      "--low-priority",
-      "disabled",
-      "--medium-priority",
-      "enabled",
-    );
-    const cli = new CLI({
-      namedArgs: {
-        "low-priority": {
-          description: "Low priority mode",
-          default: "enabled",
-        },
-        "medium-priority": {
-          description: "Medium priority mode",
-          default: "enabled",
-        },
-        priority: {
-          description: "Priority level",
-          supersedes: ["low-priority", "medium-priority"],
-          required: false,
-        },
-      },
+        expect(mockWarn).toHaveBeenCalledWith('⚠️  Warning: --low-priority is superseded by --priority and will be ignored.');
+        expect(mockWarn).toHaveBeenCalledWith('⚠️  Warning: --medium-priority is superseded by --priority and will be ignored.');
+        expect(cli.namedArgs.priority).toBe('high');
+        expect(cli.namedArgs['low-priority']).toBeUndefined();
+        expect(cli.namedArgs['medium-priority']).toBeUndefined();
     });
 
-    expect(mockWarn).toHaveBeenCalledWith(
-      "⚠️  Warning: --low-priority is superseded by --priority and will be ignored.",
-    );
-    expect(mockWarn).toHaveBeenCalledWith(
-      "⚠️  Warning: --medium-priority is superseded by --priority and will be ignored.",
-    );
-    expect(cli.namedArgs.priority).toBe("high");
-    expect(cli.namedArgs["low-priority"]).toBeUndefined();
-    expect(cli.namedArgs["medium-priority"]).toBeUndefined();
-  });
+    it('does not warn when only superseding arg is provided', () => {
+        process.argv.push('--paths', 'common.save');
+        const cli = new CLI({
+            namedArgs: {
+                'compare-ref': {
+                    description: 'Compare reference',
+                    default: 'main',
+                },
+                paths: {
+                    description: 'Specific paths to process',
+                    parse: (val) => val.split(','),
+                    supersedes: ['compare-ref'],
+                    required: false,
+                },
+            },
+        });
 
-  it("does not warn when only superseding arg is provided", () => {
-    process.argv.push("--paths", "common.save");
-    const cli = new CLI({
-      namedArgs: {
-        "compare-ref": {
-          description: "Compare reference",
-          default: "main",
-        },
-        paths: {
-          description: "Specific paths to process",
-          parse: (val) => val.split(","),
-          supersedes: ["compare-ref"],
-          required: false,
-        },
-      },
+        expect(mockWarn).not.toHaveBeenCalled();
+        expect(cli.namedArgs.paths).toEqual(['common.save']);
+        expect(cli.namedArgs['compare-ref']).toBeUndefined();
     });
 
-    expect(mockWarn).not.toHaveBeenCalled();
-    expect(cli.namedArgs.paths).toEqual(["common.save"]);
-    expect(cli.namedArgs["compare-ref"]).toBeUndefined();
-  });
+    describe('variadic positional args', () => {
+        it('collects multiple positional args into a string[]', () => {
+            setArgv('check', 'file1.ts', 'file2.tsx', 'file3.jsx');
 
-  describe("variadic positional args", () => {
-    it("collects multiple positional args into a string[]", () => {
-      setArgv("check", "file1.ts", "file2.tsx", "file3.jsx");
+            const cli = new CLI({
+                positionalArgs: [
+                    {
+                        name: 'command',
+                        description: 'Command to run',
+                    },
+                    {
+                        name: 'files',
+                        description: 'Files to check',
+                        variadic: true,
+                        default: [],
+                    },
+                ],
+            });
 
-      const cli = new CLI({
-        positionalArgs: [
-          {
-            name: "command",
-            description: "Command to run",
-          },
-          {
-            name: "files",
-            description: "Files to check",
-            variadic: true,
-            default: [],
-          },
-        ],
-      });
+            expect(cli.positionalArgs.command).toBe('check');
+            expect(cli.positionalArgs.files).toEqual(['file1.ts', 'file2.tsx', 'file3.jsx']);
+        });
 
-      expect(cli.positionalArgs.command).toBe("check");
-      expect(cli.positionalArgs.files).toEqual([
-        "file1.ts",
-        "file2.tsx",
-        "file3.jsx",
-      ]);
+        it('returns an empty array when no variadic args are provided', () => {
+            setArgv('check');
+
+            const cli = new CLI({
+                positionalArgs: [
+                    {
+                        name: 'command',
+                        description: 'Command to run',
+                    },
+                    {
+                        name: 'files',
+                        description: 'Files to check',
+                        variadic: true,
+                        default: [],
+                    },
+                ],
+            });
+
+            expect(cli.positionalArgs.command).toBe('check');
+            expect(cli.positionalArgs.files).toEqual([]);
+        });
+
+        it('works with flags alongside variadic args', () => {
+            setArgv('--verbose', 'check', 'file1.ts', 'file2.ts');
+
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose output'},
+                },
+                positionalArgs: [
+                    {
+                        name: 'command',
+                        description: 'Command to run',
+                    },
+                    {
+                        name: 'files',
+                        description: 'Files to check',
+                        variadic: true,
+                        default: [],
+                    },
+                ],
+            });
+
+            expect(cli.flags.verbose).toBe(true);
+            expect(cli.positionalArgs.command).toBe('check');
+            expect(cli.positionalArgs.files).toEqual(['file1.ts', 'file2.ts']);
+        });
+
+        it('works with named args alongside variadic args', () => {
+            setArgv('check', '--remote', 'upstream', 'file1.ts');
+
+            const cli = new CLI({
+                namedArgs: {
+                    remote: {description: 'Git remote', default: 'origin'},
+                },
+                positionalArgs: [
+                    {
+                        name: 'command',
+                        description: 'Command to run',
+                    },
+                    {
+                        name: 'files',
+                        description: 'Files to check',
+                        variadic: true,
+                        default: [],
+                    },
+                ],
+            });
+
+            expect(cli.namedArgs.remote).toBe('upstream');
+            expect(cli.positionalArgs.command).toBe('check');
+            expect(cli.positionalArgs.files).toEqual(['file1.ts']);
+        });
     });
 
-    it("returns an empty array when no variadic args are provided", () => {
-      setArgv("check");
+    describe('built-in flags', () => {
+        it('sets --yes flag when present', () => {
+            process.argv.push('--yes');
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose mode'},
+                },
+            });
 
-      const cli = new CLI({
-        positionalArgs: [
-          {
-            name: "command",
-            description: "Command to run",
-          },
-          {
-            name: "files",
-            description: "Files to check",
-            variadic: true,
-            default: [],
-          },
-        ],
-      });
+            expect(cli.flags.yes).toBe(true);
+            expect(cli.flags.no).toBe(false);
+        });
 
-      expect(cli.positionalArgs.command).toBe("check");
-      expect(cli.positionalArgs.files).toEqual([]);
+        it('sets --no flag when present', () => {
+            process.argv.push('--no');
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose mode'},
+                },
+            });
+
+            expect(cli.flags.no).toBe(true);
+            expect(cli.flags.yes).toBe(false);
+        });
+
+        it('--yes and --no default to false', () => {
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose mode'},
+                },
+            });
+
+            expect(cli.flags.yes).toBe(false);
+            expect(cli.flags.no).toBe(false);
+        });
     });
 
-    it("works with flags alongside variadic args", () => {
-      setArgv("--verbose", "check", "file1.ts", "file2.ts");
+    describe('promptUserConfirmation', () => {
+        it('returns true immediately when --yes flag is set', async () => {
+            process.argv.push('--yes');
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose mode'},
+                },
+            });
 
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose output" },
-        },
-        positionalArgs: [
-          {
-            name: "command",
-            description: "Command to run",
-          },
-          {
-            name: "files",
-            description: "Files to check",
-            variadic: true,
-            default: [],
-          },
-        ],
-      });
+            const result = await cli.promptUserConfirmation('Continue?');
+            expect(result).toBe(true);
+        });
 
-      expect(cli.flags.verbose).toBe(true);
-      expect(cli.positionalArgs.command).toBe("check");
-      expect(cli.positionalArgs.files).toEqual(["file1.ts", "file2.ts"]);
+        it('returns false immediately when --no flag is set', async () => {
+            process.argv.push('--no');
+            const cli = new CLI({
+                flags: {
+                    verbose: {description: 'Enable verbose mode'},
+                },
+            });
+
+            const result = await cli.promptUserConfirmation('Continue?');
+            expect(result).toBe(false);
+        });
     });
-
-    it("works with named args alongside variadic args", () => {
-      setArgv("check", "--remote", "upstream", "file1.ts");
-
-      const cli = new CLI({
-        namedArgs: {
-          remote: { description: "Git remote", default: "origin" },
-        },
-        positionalArgs: [
-          {
-            name: "command",
-            description: "Command to run",
-          },
-          {
-            name: "files",
-            description: "Files to check",
-            variadic: true,
-            default: [],
-          },
-        ],
-      });
-
-      expect(cli.namedArgs.remote).toBe("upstream");
-      expect(cli.positionalArgs.command).toBe("check");
-      expect(cli.positionalArgs.files).toEqual(["file1.ts"]);
-    });
-  });
-
-  describe("built-in flags", () => {
-    it("sets --yes flag when present", () => {
-      process.argv.push("--yes");
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose mode" },
-        },
-      });
-
-      expect(cli.flags.yes).toBe(true);
-      expect(cli.flags.no).toBe(false);
-    });
-
-    it("sets --no flag when present", () => {
-      process.argv.push("--no");
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose mode" },
-        },
-      });
-
-      expect(cli.flags.no).toBe(true);
-      expect(cli.flags.yes).toBe(false);
-    });
-
-    it("--yes and --no default to false", () => {
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose mode" },
-        },
-      });
-
-      expect(cli.flags.yes).toBe(false);
-      expect(cli.flags.no).toBe(false);
-    });
-  });
-
-  describe("promptUserConfirmation", () => {
-    it("returns true immediately when --yes flag is set", async () => {
-      process.argv.push("--yes");
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose mode" },
-        },
-      });
-
-      const result = await cli.promptUserConfirmation("Continue?");
-      expect(result).toBe(true);
-    });
-
-    it("returns false immediately when --no flag is set", async () => {
-      process.argv.push("--no");
-      const cli = new CLI({
-        flags: {
-          verbose: { description: "Enable verbose mode" },
-        },
-      });
-
-      const result = await cli.promptUserConfirmation("Continue?");
-      expect(result).toBe(false);
-    });
-  });
 });
