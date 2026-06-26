@@ -29,7 +29,7 @@
   "scripts": {
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && rm -f dist/CLI.js dist/CLI.d.ts && cp ./lib/*.d.ts ./dist",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist",
     "test": "jest",
     "lint": "eslint lib/ __tests__/",
     "prettier": "prettier --write lib/",
