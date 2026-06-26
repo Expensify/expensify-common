@@ -20,9 +20,6 @@ test("the CJS barrel resolves through package exports", () => {
 
 test("CLI subpath resolves to compiled dist output", () => {
   expect(require.resolve("expensify-common/CLI")).toMatch(/dist\/CLI\.js$/);
-  expect(require.resolve("expensify-common/dist/CLI")).toMatch(
-    /dist\/CLI\.js$/,
-  );
 });
 
 test("CLI subpath ESM entry is published alongside the CJS build", () => {
@@ -44,28 +41,16 @@ test("CLI subpath default export is the constructor via ESM import", async () =>
   expect(CLI.name).toBe("CLI");
 });
 
-test("Device subpath resolves via canonical and dist-prefixed imports", () => {
-  const {
-    getOSAndName: getOSAndNameFromCanonicalPath,
-  } = require("expensify-common/Device");
-  const {
-    getOSAndName: getOSAndNameFromDistPath,
-  } = require("expensify-common/dist/Device");
+test("Device subpath resolves through package exports", () => {
+  const { getOSAndName } = require("expensify-common/Device");
 
-  expect(typeof getOSAndNameFromCanonicalPath).toBe("function");
-  expect(getOSAndNameFromDistPath).toBe(getOSAndNameFromCanonicalPath);
+  expect(typeof getOSAndName).toBe("function");
 });
 
-test("utils subpath resolves via canonical and dist-prefixed imports", () => {
-  const {
-    unescapeText: unescapeTextFromCanonicalPath,
-  } = require("expensify-common/utils");
-  const {
-    unescapeText: unescapeTextFromDistPath,
-  } = require("expensify-common/dist/utils");
+test("utils subpath resolves through package exports", () => {
+  const { unescapeText } = require("expensify-common/utils");
 
-  expect(unescapeTextFromCanonicalPath("&amp;")).toBe("&");
-  expect(unescapeTextFromDistPath).toBe(unescapeTextFromCanonicalPath);
+  expect(unescapeText("&amp;")).toBe("&");
 });
 
 test("Device and utils subpaths support ESM import", async () => {
@@ -86,13 +71,11 @@ test("barrel supports ESM import through package exports", async () => {
 
 test("nested component subpaths resolve through package exports", () => {
   const CopyText = require("expensify-common/components/CopyText");
-  const CopyTextFromDistPath = require("expensify-common/dist/components/CopyText");
 
   expect(CopyText.default).toBeDefined();
-  expect(CopyTextFromDistPath.default).toBe(CopyText.default);
 });
 
-test("every compiled CJS entry is exported with canonical and dist-prefixed subpaths", () => {
+test("every compiled CJS entry is exported as a canonical subpath", () => {
   const fs = require("fs");
   const path = require("path");
   const packageJson = require("../package.json");
@@ -138,6 +121,6 @@ test("every compiled CJS entry is exported with canonical and dist-prefixed subp
     }
 
     expect(packageJson.exports[`./${entryPath}`]).toBeDefined();
-    expect(packageJson.exports[`./dist/${entryPath}`]).toBeDefined();
+    expect(packageJson.exports[`./dist/${entryPath}`]).toBeUndefined();
   }
 });

@@ -84,11 +84,7 @@ function buildExportsMap() {
 
     const subpathExport = createSubpathExport(entryPath);
 
-    // Canonical subpath without `dist/` prefix (e.g. expensify-common/Device).
     exportsMap[`./${entryPath}`] = subpathExport;
-
-    // Backward-compatible `dist/` prefix (e.g. expensify-common/dist/Device).
-    exportsMap[`./dist/${entryPath}`] = subpathExport;
   }
 
   return exportsMap;
