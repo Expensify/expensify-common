@@ -14,14 +14,14 @@
       "default": "./dist/index.js"
     },
     "./CLI": {
-      "types": "./lib/CLI.ts",
-      "default": "./lib/CLI.ts"
+      "types": "./dist/CLI.d.ts",
+      "import": "./dist/esm/CLI.js",
+      "require": "./dist/CLI.js",
+      "default": "./dist/esm/CLI.js"
     }
   },
   "files": [
     "dist/**/*",
-    "lib/CLI.ts",
-    "lib/SafeString.ts",
     "API.md",
     "README.md",
     "LICENSE.md"
@@ -29,7 +29,7 @@
   "scripts": {
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist",
+    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.cli.cjs.json && mkdir -p dist/esm && cp ./lib/cli.esm.js ./dist/esm/CLI.js && cp ./lib/esm-package.json ./dist/esm/package.json",
     "test": "jest",
     "lint": "eslint lib/ __tests__/",
     "prettier": "prettier --write lib/ __tests__/",
