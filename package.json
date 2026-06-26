@@ -29,7 +29,7 @@
   "scripts": {
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.cli.cjs.json && mkdir -p dist/esm && cp ./lib/cli.esm.js ./dist/esm/CLI.js && cp ./lib/esm-package.json ./dist/esm/package.json",
+    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.cli.cjs.json && tsc -p tsconfig.cli.esm.json && cp ./lib/esm-package.json ./dist/esm/package.json",
     "test": "jest",
     "lint": "eslint lib/ __tests__/",
     "prettier": "prettier --write lib/ __tests__/",
@@ -101,6 +101,9 @@
     ]
   },
   "jest": {
-    "testEnvironment": "jsdom"
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

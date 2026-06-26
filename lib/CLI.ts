@@ -4,7 +4,7 @@
  */
 import * as readline from 'readline';
 import type {NonEmptyObject, NonEmptyTuple, ValueOf, Writable} from 'type-fest';
-import SafeString from './SafeString';
+import SafeString from './SafeString.js';
 
 /**
  * A base CLI arg has only a description, which we will use in the help/usage message (built-in to any CLI).
