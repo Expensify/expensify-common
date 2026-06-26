@@ -1,3 +1,14 @@
+/**
+ * Generates the package.json `exports` map after the CJS and ESM builds complete.
+ *
+ * Scans dist/ for every compiled entry point (top-level modules, components, mixins, etc.) and
+ * writes canonical subpath exports such as `expensify-common/Device` and `expensify-common/utils`.
+ * Each subpath points at the matching CJS file for `require`, the ESM file in dist/esm for
+ * `import` when available, and the shared .d.ts for types. The barrel entry (`.`) is configured
+ * separately to use the CJS index for both import and require.
+ *
+ * Run as the final step of `npm run build`; it overwrites `package.json` exports in place.
+ */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";

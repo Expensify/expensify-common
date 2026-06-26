@@ -246,7 +246,7 @@
   "scripts": {
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.esm.json && node ./scripts/fix-esm-import-extensions.mjs && cp ./lib/esm-package.json ./dist/esm/package.json && node ./scripts/generate-package-exports.mjs",
+    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.esm.json && cp ./lib/esm-package.json ./dist/esm/package.json && node ./scripts/generate-package-exports.mjs",
     "test": "jest",
     "lint": "eslint lib/ __tests__/",
     "prettier": "prettier --write lib/ __tests__/",
