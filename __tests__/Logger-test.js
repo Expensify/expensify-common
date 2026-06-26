@@ -24,14 +24,14 @@ test('Test Log.info()', () => {
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
-        })
+        }),
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
-        {message: "[info] Test1", parameters: "", email: null},
-        {message: "[info] Test2", parameters: "", email: null},
+        {message: '[info] Test1', parameters: '', email: null},
+        {message: '[info] Test2', parameters: '', email: null},
     ]);
 
     // Test the case where `isDebug` is `true` in `Log` instance and we pass `extraData` parameter
@@ -49,11 +49,11 @@ test('Test Log.alert()', () => {
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
-        })
+        }),
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[alrt] Test2", parameters: {}, email: null}]);
+    expect(packet).toEqual([{message: '[alrt] Test2', parameters: {}, email: null}]);
 });
 
 test('Test Log.warn()', () => {
@@ -65,11 +65,11 @@ test('Test Log.warn()', () => {
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
-        })
+        }),
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[warn] Test2", parameters: '', email: null}]);
+    expect(packet).toEqual([{message: '[warn] Test2', parameters: '', email: null}]);
 });
 
 test('Test Log.hmmm()', () => {
@@ -82,14 +82,14 @@ test('Test Log.hmmm()', () => {
         expect.objectContaining({
             api_setCookie: false,
             logPacket: expect.any(String),
-        })
+        }),
     );
     const packet = JSON.parse(mockServerLoggingCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
     delete packet[1].timestamp;
     expect(packet).toEqual([
-        {message: "[hmmm] Test", parameters: '', email: null},
-        {message: "[info] Test", parameters: '', email: null}
+        {message: '[hmmm] Test', parameters: '', email: null},
+        {message: '[info] Test', parameters: '', email: null},
     ]);
 });
 
@@ -112,7 +112,7 @@ test('Test getContextEmail captures email per log line', () => {
 
     const packet = JSON.parse(mockCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[info] Test message", parameters: '', email: 'test@example.com'}]);
+    expect(packet).toEqual([{message: '[info] Test message', parameters: '', email: 'test@example.com'}]);
 });
 
 test('Test getContextEmail throwing does not break logging', () => {
@@ -131,5 +131,5 @@ test('Test getContextEmail throwing does not break logging', () => {
 
     const packet = JSON.parse(mockCallback.mock.calls[0][1].logPacket);
     delete packet[0].timestamp;
-    expect(packet).toEqual([{message: "[info] Test message", parameters: '', email: null}]);
+    expect(packet).toEqual([{message: '[info] Test message', parameters: '', email: null}]);
 });
