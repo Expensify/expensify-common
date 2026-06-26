@@ -1,4 +1,4 @@
-/* eslint-disable jsdoc/check-tag-names -- @jest-environment is a valid Jest directive */
+
 /**
  * @jest-environment node
  */
