@@ -10,14 +10,231 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./API": {
+      "types": "./dist/API.d.ts",
+      "require": "./dist/API.js",
+      "import": "./dist/esm/API.js",
+      "default": "./dist/esm/API.js"
+    },
+    "./APIDeferred": {
+      "types": "./dist/APIDeferred.d.ts",
+      "require": "./dist/APIDeferred.js",
+      "import": "./dist/esm/APIDeferred.js",
+      "default": "./dist/esm/APIDeferred.js"
+    },
+    "./BrowserDetect": {
+      "types": "./dist/BrowserDetect.d.ts",
+      "require": "./dist/BrowserDetect.js",
+      "import": "./dist/esm/BrowserDetect.js",
+      "default": "./dist/esm/BrowserDetect.js"
+    },
     "./CLI": {
       "types": "./dist/CLI.d.ts",
-      "import": "./dist/esm/CLI.js",
       "require": "./dist/CLI.js",
+      "import": "./dist/esm/CLI.js",
       "default": "./dist/esm/CLI.js"
+    },
+    "./CONST": {
+      "types": "./dist/CONST.d.ts",
+      "require": "./dist/CONST.js",
+      "import": "./dist/esm/CONST.js",
+      "default": "./dist/esm/CONST.js"
+    },
+    "./Cookie": {
+      "types": "./dist/Cookie.d.ts",
+      "require": "./dist/Cookie.js",
+      "import": "./dist/esm/Cookie.js",
+      "default": "./dist/esm/Cookie.js"
+    },
+    "./CredentialsWrapper": {
+      "types": "./dist/CredentialsWrapper.d.ts",
+      "require": "./dist/CredentialsWrapper.js",
+      "import": "./dist/esm/CredentialsWrapper.js",
+      "default": "./dist/esm/CredentialsWrapper.js"
+    },
+    "./Device": {
+      "types": "./dist/Device.d.ts",
+      "require": "./dist/Device.js",
+      "import": "./dist/esm/Device.js",
+      "default": "./dist/esm/Device.js"
+    },
+    "./ExpenseRule": {
+      "types": "./dist/ExpenseRule.d.ts",
+      "require": "./dist/ExpenseRule.js",
+      "import": "./dist/esm/ExpenseRule.js",
+      "default": "./dist/esm/ExpenseRule.js"
+    },
+    "./ExpensiMark": {
+      "types": "./dist/ExpensiMark.d.ts",
+      "require": "./dist/ExpensiMark.js",
+      "import": "./dist/esm/ExpensiMark.js",
+      "default": "./dist/esm/ExpensiMark.js"
+    },
+    "./Func": {
+      "types": "./dist/Func.d.ts",
+      "require": "./dist/Func.js",
+      "import": "./dist/esm/Func.js",
+      "default": "./dist/esm/Func.js"
+    },
+    "./Log": {
+      "types": "./dist/Log.d.ts",
+      "require": "./dist/Log.js",
+      "import": "./dist/esm/Log.js",
+      "default": "./dist/esm/Log.js"
+    },
+    "./Logger": {
+      "types": "./dist/Logger.d.ts",
+      "require": "./dist/Logger.js",
+      "import": "./dist/esm/Logger.js",
+      "default": "./dist/esm/Logger.js"
+    },
+    "./Network": {
+      "types": "./dist/Network.d.ts",
+      "require": "./dist/Network.js",
+      "import": "./dist/esm/Network.js",
+      "default": "./dist/esm/Network.js"
+    },
+    "./Num": {
+      "types": "./dist/Num.d.ts",
+      "require": "./dist/Num.js",
+      "import": "./dist/esm/Num.js",
+      "default": "./dist/esm/Num.js"
+    },
+    "./PageEvent": {
+      "types": "./dist/PageEvent.d.ts",
+      "require": "./dist/PageEvent.js",
+      "import": "./dist/esm/PageEvent.js",
+      "default": "./dist/esm/PageEvent.js"
+    },
+    "./PubSub": {
+      "types": "./dist/PubSub.d.ts",
+      "require": "./dist/PubSub.js",
+      "import": "./dist/esm/PubSub.js",
+      "default": "./dist/esm/PubSub.js"
+    },
+    "./ReportHistoryStore": {
+      "types": "./dist/ReportHistoryStore.d.ts",
+      "require": "./dist/ReportHistoryStore.js",
+      "import": "./dist/esm/ReportHistoryStore.js",
+      "default": "./dist/esm/ReportHistoryStore.js"
+    },
+    "./SafeString": {
+      "types": "./dist/SafeString.d.ts",
+      "require": "./dist/SafeString.js",
+      "import": "./dist/esm/SafeString.js",
+      "default": "./dist/esm/SafeString.js"
+    },
+    "./Templates": {
+      "types": "./dist/Templates.d.ts",
+      "require": "./dist/Templates.js",
+      "import": "./dist/esm/Templates.js",
+      "default": "./dist/esm/Templates.js"
+    },
+    "./Url": {
+      "types": "./dist/Url.d.ts",
+      "require": "./dist/Url.js",
+      "import": "./dist/esm/Url.js",
+      "default": "./dist/esm/Url.js"
+    },
+    "./components/CopyText": {
+      "types": "./dist/components/CopyText.d.ts",
+      "require": "./dist/components/CopyText.js",
+      "import": "./dist/esm/components/CopyText.js",
+      "default": "./dist/esm/components/CopyText.js"
+    },
+    "./components/StepProgressBar": {
+      "types": "./dist/components/StepProgressBar.d.ts",
+      "require": "./dist/components/StepProgressBar.js",
+      "import": "./dist/esm/components/StepProgressBar.js",
+      "default": "./dist/esm/components/StepProgressBar.js"
+    },
+    "./components/form/element/combobox": {
+      "types": "./dist/components/form/element/combobox.d.ts",
+      "require": "./dist/components/form/element/combobox.js",
+      "import": "./dist/esm/components/form/element/combobox.js",
+      "default": "./dist/esm/components/form/element/combobox.js"
+    },
+    "./components/form/element/dropdown": {
+      "types": "./dist/components/form/element/dropdown.d.ts",
+      "require": "./dist/components/form/element/dropdown.js",
+      "import": "./dist/esm/components/form/element/dropdown.js",
+      "default": "./dist/esm/components/form/element/dropdown.js"
+    },
+    "./components/form/element/dropdownItem": {
+      "types": "./dist/components/form/element/dropdownItem.d.ts",
+      "require": "./dist/components/form/element/dropdownItem.js",
+      "import": "./dist/esm/components/form/element/dropdownItem.js",
+      "default": "./dist/esm/components/form/element/dropdownItem.js"
+    },
+    "./components/form/element/onOffSwitch": {
+      "types": "./dist/components/form/element/onOffSwitch.d.ts",
+      "require": "./dist/components/form/element/onOffSwitch.js",
+      "import": "./dist/esm/components/form/element/onOffSwitch.js",
+      "default": "./dist/esm/components/form/element/onOffSwitch.js"
+    },
+    "./components/form/element/switch": {
+      "types": "./dist/components/form/element/switch.d.ts",
+      "require": "./dist/components/form/element/switch.js",
+      "import": "./dist/esm/components/form/element/switch.js",
+      "default": "./dist/esm/components/form/element/switch.js"
+    },
+    "./fastMerge": {
+      "types": "./dist/fastMerge.d.ts",
+      "require": "./dist/fastMerge.js",
+      "import": "./dist/esm/fastMerge.js",
+      "default": "./dist/esm/fastMerge.js"
+    },
+    "./jquery.expensifyIframify": {
+      "types": "./dist/jquery.expensifyIframify.d.ts",
+      "require": "./dist/jquery.expensifyIframify.js",
+      "import": "./dist/esm/jquery.expensifyIframify.js",
+      "default": "./dist/esm/jquery.expensifyIframify.js"
+    },
+    "./md5": {
+      "types": "./dist/md5.d.ts",
+      "require": "./dist/md5.js",
+      "import": "./dist/esm/md5.js",
+      "default": "./dist/esm/md5.js"
+    },
+    "./mixins/PubSub": {
+      "types": "./dist/mixins/PubSub.d.ts",
+      "require": "./dist/mixins/PubSub.js",
+      "import": "./dist/esm/mixins/PubSub.js",
+      "default": "./dist/esm/mixins/PubSub.js"
+    },
+    "./mixins/extraClasses": {
+      "types": "./dist/mixins/extraClasses.d.ts",
+      "require": "./dist/mixins/extraClasses.js",
+      "import": "./dist/esm/mixins/extraClasses.js",
+      "default": "./dist/esm/mixins/extraClasses.js"
+    },
+    "./mixins/validationClasses": {
+      "types": "./dist/mixins/validationClasses.d.ts",
+      "require": "./dist/mixins/validationClasses.js",
+      "import": "./dist/esm/mixins/validationClasses.js",
+      "default": "./dist/esm/mixins/validationClasses.js"
+    },
+    "./str": {
+      "types": "./dist/str.d.ts",
+      "require": "./dist/str.js",
+      "import": "./dist/esm/str.js",
+      "default": "./dist/esm/str.js"
+    },
+    "./tlds": {
+      "types": "./dist/tlds.d.ts",
+      "require": "./dist/tlds.js",
+      "import": "./dist/esm/tlds.js",
+      "default": "./dist/esm/tlds.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "require": "./dist/utils.js",
+      "import": "./dist/esm/utils.js",
+      "default": "./dist/esm/utils.js"
     }
   },
   "files": [
@@ -29,9 +246,9 @@
   "scripts": {
     "grunt": "grunt",
     "typecheck": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.cli.cjs.json && tsc -p tsconfig.cli.esm.json && cp ./lib/esm-package.json ./dist/esm/package.json",
+    "build": "tsc -p tsconfig.build.json && cp ./lib/*.d.ts ./dist && tsc -p tsconfig.esm.json && cp ./lib/esm-package.json ./dist/esm/package.json && node ./scripts/generate-package-exports.mjs",
     "test": "jest",
-    "lint": "eslint lib/ __tests__/",
+    "lint": "eslint lib/ __tests__/ scripts/",
     "prettier": "prettier --write lib/ __tests__/",
     "patch": "npm --no-git-tag-version version patch",
     "update-tlds": "echo \"$(curl -s https://data.iana.org/TLD/tlds-alpha-by-domain.txt | sed '1d' | awk '{print length, $0}' - | sort -n -r | cut -d \" \" -f2- )|SJC|RNO|LAX\" | tr '\\n' '|' | sed s'/.$//' | printf \"const TLD_REGEX='$(cat -)';\\n\\nexport default TLD_REGEX;\\n\" > lib/tlds.jsx"
