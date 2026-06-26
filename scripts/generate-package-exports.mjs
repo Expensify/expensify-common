@@ -20,6 +20,10 @@ const esmDir = path.join(distDir, "esm");
 
 /**
  * Collects every compiled JS entry under dist/, excluding the ESM output tree.
+ *
+ * @param {string} directory
+ * @param {string} [relativePath]
+ * @returns {string[]}
  */
 function collectCjsEntryPaths(directory, relativePath = "") {
   const entries = [];
