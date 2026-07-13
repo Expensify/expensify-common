@@ -146,6 +146,9 @@ export default function ReportHistoryStore(API, PubSub) {
     }
 
     return {
+        /**
+         * @deprecated use getFlatHistory instead.
+         */
         get: (reportID, ignoreCache = false) => {
             const promise = new Deferred();
             get(reportID, ignoreCache)
