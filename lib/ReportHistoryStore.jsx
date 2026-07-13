@@ -169,26 +169,6 @@ export default function ReportHistoryStore(API, PubSub) {
             return promise;
         },
 
-        insertIntoCache: (reportID, reportAction) => {
-            const promise = new Deferred();
-            getFromCache(reportID)
-                .done((cachedHistory) => {
-                    const sequenceNumber = reportAction.sequenceNumber;
-
-                    if (cachedHistory.length >= sequenceNumber) {
-                        mergeItems(reportID, [reportAction]);
-                        return promise.resolve(filterHiddenActions(store.cache[reportID]));
-                    }
-
-                    get(reportID)
-                        .done((reportHistory) => promise.resolve(filterHiddenActions(reportHistory)))
-                        .fail(promise.reject);
-                })
-                .fail(promise.reject);
-
-            return promise;
-        },
-
         insertIntoCacheByActionID: (reportID, reportAction) => {
             const promise = new Deferred();
             getFromCache(reportID)
