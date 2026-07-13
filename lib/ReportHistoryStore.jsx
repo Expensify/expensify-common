@@ -191,7 +191,7 @@ export default function ReportHistoryStore(API, PubSub) {
             getFromCache(reportID)
                 .done((cachedHistory) => {
                     if (cachedHistory.some(({reportActionID}) => reportActionID === reportAction.reportActionID)) {
-                        mergeHistoryByTimestamp(reportID, [reportAction]);
+                        mergeHistoryByReportActionID(reportID, [reportAction]);
                         return promise.resolve(filterHiddenActions(store.cache[reportID]));
                     }
 
