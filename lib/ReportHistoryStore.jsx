@@ -91,32 +91,15 @@ export default function ReportHistoryStore(API, PubSub) {
 
     /**
      * Gets the history.
+     * 
+     * @deprecated use getFlatHistory instead.
      *
      * @param {Number} reportID
      * @param {Boolean} ignoreCache
      * @returns {Deferred}
      */
     function get(reportID, ignoreCache) {
-        const promise = new Deferred();
-
-        if (ignoreCache) {
-            delete store.cache[reportID];
-        }
-
-        const cachedHistory = store.cache[reportID] || [];
-        const firstHistoryItem = cachedHistory[0] || {};
-
-        store.API.Report_GetHistory({
-            reportID,
-            offset: firstHistoryItem.sequenceNumber || 0,
-        })
-            .done((recentHistory) => {
-                mergeItems(reportID, recentHistory);
-                promise.resolve(store.cache[reportID]);
-            })
-            .fail(promise.reject);
-
-        return promise;
+        return getFlatHistory(reportID, ignoreCache);
     }
 
     /**
