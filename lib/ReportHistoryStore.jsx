@@ -32,27 +32,6 @@ export default function ReportHistoryStore(API, PubSub) {
      * @param {Number} reportID
      * @param {Object[]} newHistory
      */
-    function mergeItems(reportID, newHistory) {
-        if (newHistory.length === 0) {
-            return;
-        }
-
-        const newCache = newHistory.reverse().reduce((prev, curr) => {
-            if (!prev.some((item) => item.sequenceNumber === curr.sequenceNumber)) {
-                prev.unshift(curr);
-            }
-            return prev;
-        }, store.cache[reportID] || []);
-
-        store.cache[reportID] = newCache.sort((a, b) => b.sequenceNumber - a.sequenceNumber);
-    }
-
-    /**
-     * Merges history items into the cache and creates it if it doesn't yet exist.
-     *
-     * @param {Number} reportID
-     * @param {Object[]} newHistory
-     */
     function mergeHistoryByTimestamp(reportID, newHistory) {
         if (newHistory.length === 0) {
             return;
