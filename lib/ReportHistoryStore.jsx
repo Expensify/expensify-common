@@ -233,32 +233,7 @@ export default class ReportHistoryStore {
      * @returns {Deferred}
      */
     get(reportID, ignoreCache) {
-        const promise = new Deferred();
-
-        // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
-        if (ignoreCache) {
-            delete this.cache[reportID];
-        }
-
-        // We'll poll the API for the un-cached history
-        const cachedHistory = this.cache[reportID] || [];
-        const firstHistoryItem = _.first(cachedHistory) || {};
-
-        // Grab the most recent sequenceNumber we have and poll the API for fresh data
-        this.API.Report_GetHistory({
-            reportID,
-            offset: firstHistoryItem.sequenceNumber || 0
-        })
-            .done((recentHistory) => {
-                // Update history with new items fetched
-                this.mergeItems(reportID, recentHistory);
-
-                // Return history for this report
-                promise.resolve(this.cache[reportID]);
-            })
-            .fail(promise.reject);
-
-        return promise;
+        return this.getFlatHistory(reportID, ignoreCache);
     }
 
     /**
