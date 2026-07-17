@@ -147,7 +147,7 @@ export default class ReportHistoryStore {
      * @param {Number} reportID
      * @param {Object[]} newHistory
      */
-    mergeHistoryByTimestamp(reportID, newHistory) {
+    mergeHistoryByReportActionID(reportID, newHistory) {
         if (newHistory.length === 0) {
             return;
         }
