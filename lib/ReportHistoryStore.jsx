@@ -125,7 +125,7 @@ export default class ReportHistoryStore {
                 const promise = new Deferred();
                 this.getFromCache(reportID)
                     .done((cachedHistory) => {
-                        if (cachedHistory.some(({reportActionID}) => reportActionID === reportAction.reportActionID)) {
+                        if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
                             this.mergeHistoryByTimestamp(reportID, [reportAction]);
                             return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
                         }
