@@ -227,6 +227,8 @@ export default class ReportHistoryStore {
     /**
      * Gets the history.
      *
+     * @deprecated use getFlatHistory instead.
+     *
      * @param {Number} reportID
      * @param {Boolean} ignoreCache
      *
