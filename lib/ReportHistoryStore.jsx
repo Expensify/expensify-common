@@ -114,6 +114,32 @@ export default class ReportHistoryStore {
             },
 
             /**
+             * Set a history item directly into the cache. Checks to see if we have the previous item first.
+             *
+             * @param {Number} reportID
+             * @param {Object} reportAction
+             *
+             * @returns {Deferred}
+             */
+            insertIntoCacheByActionID: (reportID, reportAction) => {
+                const promise = new Deferred();
+                this.getFromCache(reportID)
+                    .done((cachedHistory) => {
+                        if (cachedHistory.some(({reportActionID}) => reportActionID === reportAction.reportActionID)) {
+                            this.mergeHistoryByTimestamp(reportID, [reportAction]);
+                            return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
+                        }
+
+                        this.getFlatHistory(reportID)
+                            .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
+                            .fail(promise.reject);
+                    })
+                    .fail(promise.reject);
+
+                return promise;
+            },
+
+            /**
              * Certain events need to completely clear the cache. This method allows other code modules using this
              * (like Web, Mobile) to assign which events would do so.
              *
