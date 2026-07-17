@@ -85,42 +85,6 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            insertIntoCache: (reportID, reportAction) => {
-                const promise = new Deferred();
-                this.getFromCache(reportID)
-                    .done((cachedHistory) => {
-                        const sequenceNumber = reportAction.sequenceNumber;
-
-                        // Do we have the reportAction immediately before this one?
-                        // Note: History is zero indexed. So if we want to check if we have the previous message before an
-                        // incoming message with a sequenceNumber of 18 then we'd be looking for a cache length of 18
-                        // which would indicate that we have sequenceNumber 17)
-                        if (cachedHistory.length >= sequenceNumber) {
-                            // If we have the previous one then we can assume we have an up to date history minus the most recent
-                            // and must merge it into the cache
-                            this.mergeItems(reportID, [reportAction]);
-                            return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
-                        }
-
-                        // If we get here we have an incomplete history and should get
-                        // the report history again, but this time do not check the cache first.
-                        this.get(reportID)
-                            .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
-                            .fail(promise.reject);
-                    })
-                    .fail(promise.reject);
-
-                return promise;
-            },
-
-            /**
-             * Set a history item directly into the cache. Checks to see if we have the previous item first.
-             *
-             * @param {Number} reportID
-             * @param {Object} reportAction
-             *
-             * @returns {Deferred}
-             */
             insertIntoCacheByActionID: (reportID, reportAction) => {
                 const promise = new Deferred();
                 this.getFromCache(reportID)
@@ -153,28 +117,6 @@ export default class ReportHistoryStore {
             // via PHP or html pages within the app e.g. printablereport.html
             filterHiddenActions: this.filterHiddenActions,
         };
-    }
-
-    /**
-     * Merges history items into the cache and creates it if it doesn't yet exist.
-     *
-     * @param {Number} reportID
-     * @param {Object[]} newHistory
-     */
-    mergeItems(reportID, newHistory) {
-        if (newHistory.length === 0) {
-            return;
-        }
-
-        const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
-            if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
-                prev.unshift(curr);
-            }
-            return prev;
-        }, this.cache[reportID] || []);
-
-        // Sort items in case they have become out of sync
-        this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
     }
 
     /**
