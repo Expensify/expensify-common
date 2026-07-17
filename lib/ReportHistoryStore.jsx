@@ -279,13 +279,7 @@ export default class ReportHistoryStore {
 
         // First check to see if we even have this history in cache
         if (_.isEmpty(cachedHistory)) {
-            this.API.Report_GetHistory({reportID})
-                .done((reportHistory) => {
-                    this.mergeItems(reportID, reportHistory);
-                    promise.resolve(this.cache[reportID]);
-                })
-                .fail(promise.reject);
-            return promise;
+            return this.getFlatHistory(reportID);
         }
 
         return promise.resolve(cachedHistory);
