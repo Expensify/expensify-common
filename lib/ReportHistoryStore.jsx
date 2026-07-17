@@ -38,6 +38,25 @@ export default class ReportHistoryStore {
          */
         return {
             /**
+             * Returns the history for a given report. This flow does not depend on the deprecated sequence number in report actions.
+             * Note that we are unable to ask for the cached history.
+             *
+             * @param {Number} reportID
+             * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
+             *
+             * @returns {Deferred}
+             */
+            getFlatHistory: (reportID, ignoreCache = false) => {
+                const promise = new Deferred();
+                this.getFlatHistory(reportID, ignoreCache)
+                    .done((reportHistory) => {
+                        promise.resolve(this.filterHiddenActions(reportHistory));
+                    })
+                    .fail(promise.reject);
+                return promise;
+            },
+
+            /**
              * Returns the history for a given report.
              * Note that we are unable to ask for the cached history.
              *
@@ -128,6 +147,37 @@ export default class ReportHistoryStore {
 
         // Sort items in case they have become out of sync
         this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
+    }
+
+    /**
+     * Gets the history. This flow does not depend on the deprecated sequence number in report actions.
+     *
+     * @param {Number} reportID
+     * @param {Boolean} ignoreCache
+     *
+     * @returns {Deferred}
+     */
+    getFlatHistory(reportID, ignoreCache) {
+        const promise = new Deferred();
+
+        // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
+        if (ignoreCache) {
+            delete this.cache[reportID];
+        }
+
+        this.API.Report_GetHistory({
+            reportID,
+        })
+            .done((recentHistory) => {
+                // Update history with new items fetched
+                this.mergeHistoryByTimestamp(reportID, recentHistory);
+
+                // Return history for this report
+                promise.resolve(this.cache[reportID]);
+            })
+            .fail(promise.reject);
+
+        return promise;
     }
 
     /**
