@@ -60,6 +60,8 @@ export default class ReportHistoryStore {
              * Returns the history for a given report.
              * Note that we are unable to ask for the cached history.
              *
+             * @deprecated use getFlatHistory instead.
+             * 
              * @param {Number} reportID
              * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
              *
