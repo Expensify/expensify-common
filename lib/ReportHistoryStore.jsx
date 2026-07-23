@@ -38,9 +38,30 @@ export default class ReportHistoryStore {
          */
         return {
             /**
+             * Returns the history for a given report. This flow does not depend on the deprecated sequence number in report actions.
+             * Note that we are unable to ask for the cached history.
+             *
+             * @param {Number} reportID
+             * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
+             *
+             * @returns {Deferred}
+             */
+            getFlatHistory: (reportID, ignoreCache = false) => {
+                const promise = new Deferred();
+                this.getFlatHistory(reportID, ignoreCache)
+                    .done((reportHistory) => {
+                        promise.resolve(this.filterHiddenActions(reportHistory));
+                    })
+                    .fail(promise.reject);
+                return promise;
+            },
+
+            /**
              * Returns the history for a given report.
              * Note that we are unable to ask for the cached history.
              *
+             * @deprecated use getFlatHistory instead.
+             * 
              * @param {Number} reportID
              * @param {Boolean} ignoreCache - useful if you need to force the report history to reload completely.
              *
@@ -64,26 +85,16 @@ export default class ReportHistoryStore {
              *
              * @returns {Deferred}
              */
-            insertIntoCache: (reportID, reportAction) => {
+            insertIntoCacheByActionID: (reportID, reportAction) => {
                 const promise = new Deferred();
                 this.getFromCache(reportID)
                     .done((cachedHistory) => {
-                        const sequenceNumber = reportAction.sequenceNumber;
-
-                        // Do we have the reportAction immediately before this one?
-                        // Note: History is zero indexed. So if we want to check if we have the previous message before an
-                        // incoming message with a sequenceNumber of 18 then we'd be looking for a cache length of 18
-                        // which would indicate that we have sequenceNumber 17)
-                        if (cachedHistory.length >= sequenceNumber) {
-                            // If we have the previous one then we can assume we have an up to date history minus the most recent
-                            // and must merge it into the cache
-                            this.mergeItems(reportID, [reportAction]);
+                        if (_.some(cachedHistory, ({reportActionID}) => reportActionID === reportAction.reportActionID)) {
+                            this.mergeHistoryByTimestamp(reportID, [reportAction]);
                             return promise.resolve(this.filterHiddenActions(this.cache[reportID]));
                         }
 
-                        // If we get here we have an incomplete history and should get
-                        // the report history again, but this time do not check the cache first.
-                        this.get(reportID)
+                        this.getFlatHistory(reportID)
                             .done(reportHistory => promise.resolve(this.filterHiddenActions(reportHistory)))
                             .fail(promise.reject);
                     })
@@ -114,31 +125,53 @@ export default class ReportHistoryStore {
      * @param {Number} reportID
      * @param {Object[]} newHistory
      */
-    mergeItems(reportID, newHistory) {
+    mergeHistoryByTimestamp(reportID, newHistory) {
         if (newHistory.length === 0) {
             return;
         }
 
         const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
-            if (!_.findWhere(prev, {sequenceNumber: curr.sequenceNumber})) {
+            if (!_.findWhere(prev, {reportActionTimestamp: curr.reportActionTimestamp})) {
                 prev.unshift(curr);
             }
             return prev;
         }, this.cache[reportID] || []);
 
         // Sort items in case they have become out of sync
-        this.cache[reportID] = _.sortBy(newCache, 'sequenceNumber').reverse();
+        this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp').reverse();
     }
 
     /**
-     * Gets the history.
+     * Merges history items by reportActionID into the cache and creates it if it doesn't yet exist.
+     *
+     * @param {Number} reportID
+     * @param {Object[]} newHistory
+     */
+    mergeHistoryByReportActionID(reportID, newHistory) {
+        if (newHistory.length === 0) {
+            return;
+        }
+
+        const newCache = _.reduce(newHistory.reverse(), (prev, curr) => {
+            if (!_.findWhere(prev, {reportActionID: curr.reportActionID})) {
+                prev.unshift(curr);
+            }
+            return prev;
+        }, this.cache[reportID] || []);
+
+        // Sort items in case they have become out of sync
+        this.cache[reportID] = _.sortBy(newCache, 'reportActionTimestamp').reverse();
+    }
+
+    /**
+     * Gets the history. This flow does not depend on the deprecated sequence number in report actions.
      *
      * @param {Number} reportID
      * @param {Boolean} ignoreCache
      *
      * @returns {Deferred}
      */
-    get(reportID, ignoreCache) {
+    getFlatHistory(reportID, ignoreCache) {
         const promise = new Deferred();
 
         // Remove the cache entry if we're ignoring the cache, since we'll be replacing it later.
@@ -146,18 +179,12 @@ export default class ReportHistoryStore {
             delete this.cache[reportID];
         }
 
-        // We'll poll the API for the un-cached history
-        const cachedHistory = this.cache[reportID] || [];
-        const firstHistoryItem = _.first(cachedHistory) || {};
-
-        // Grab the most recent sequenceNumber we have and poll the API for fresh data
         this.API.Report_GetHistory({
             reportID,
-            offset: firstHistoryItem.sequenceNumber || 0
         })
             .done((recentHistory) => {
                 // Update history with new items fetched
-                this.mergeItems(reportID, recentHistory);
+                this.mergeHistoryByTimestamp(reportID, recentHistory);
 
                 // Return history for this report
                 promise.resolve(this.cache[reportID]);
@@ -165,6 +192,20 @@ export default class ReportHistoryStore {
             .fail(promise.reject);
 
         return promise;
+    }
+
+    /**
+     * Gets the history.
+     *
+     * @deprecated use getFlatHistory instead.
+     *
+     * @param {Number} reportID
+     * @param {Boolean} ignoreCache
+     *
+     * @returns {Deferred}
+     */
+    get(reportID, ignoreCache) {
+        return this.getFlatHistory(reportID, ignoreCache);
     }
 
     /**
@@ -180,13 +221,7 @@ export default class ReportHistoryStore {
 
         // First check to see if we even have this history in cache
         if (_.isEmpty(cachedHistory)) {
-            this.API.Report_GetHistory({reportID})
-                .done((reportHistory) => {
-                    this.mergeItems(reportID, reportHistory);
-                    promise.resolve(this.cache[reportID]);
-                })
-                .fail(promise.reject);
-            return promise;
+            return this.getFlatHistory(reportID);
         }
 
         return promise.resolve(cachedHistory);
