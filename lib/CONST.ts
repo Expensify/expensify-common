@@ -905,6 +905,7 @@ const CONST = {
         ADD_CONTACT_METHOD: 'add_contact_method',
         VALIDATE_ACCOUNT: 'validate_account',
         REVEAL_CARD_DETAILS: 'reveal_card_details',
+        REGISTER_AUTHENTICATION_KEY: 'register_authentication_key',
     },
 
     EXPENSIFY_CARD: {

@@ -1,6 +1,6 @@
 {
   "name": "expensify-common",
-  "version": "2.0.191",
+  "version": "2.0.195",
   "author": "Expensify, Inc.",
   "description": "Expensify libraries and components shared across different repos",
   "homepage": "https://expensify.com",
@@ -303,6 +303,11 @@
     "type-fest": "5.7.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.61.0"
+  },
+  "overrides": {
+    "minimatch@3": {
+      "brace-expansion": "1.1.12"
+    }
   },
   "browserify": {
     "transform": [

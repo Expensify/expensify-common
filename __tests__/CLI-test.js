@@ -198,7 +198,7 @@ describe('CLI', () => {
         const scriptName = 'script.ts';
         const expectedOutput = Str.dedent(
             `
-            Usage: npx ts-node ${scriptName} [--verbose] [--yes] [--no] [--help] [--time <value>] <firstName> [lastName]
+            Usage: node ${scriptName} [--verbose] [--yes] [--no] [--help] [--time <value>] <firstName> [lastName]
 
             Flags:
               --verbose              Enable verbose logging
@@ -533,6 +533,42 @@ describe('CLI', () => {
 
             expect(cli.flags.yes).toBe(false);
             expect(cli.flags.no).toBe(false);
+        });
+    });
+
+    describe('runtime detection in usage line', () => {
+        const TS_NODE_SYMBOL = Symbol.for('ts-node.register.instance');
+        const ORIGINAL_EXEC_ARGV = process.execArgv;
+
+        afterEach(() => {
+            delete process.versions.bun;
+            Reflect.deleteProperty(process, TS_NODE_SYMBOL);
+            process.execArgv = ORIGINAL_EXEC_ARGV;
+        });
+
+        function getHelpOutput() {
+            process.argv.push('--help');
+            expect(() => new CLI({positionalArgs: [{name: 'greeting', description: 'Greeting'}]})).toThrow('exit');
+            return mockLog.mock.calls.flat().join('\n');
+        }
+
+        it('auto-detects bun via process.versions.bun', () => {
+            process.versions.bun = '1.1.0';
+            expect(getHelpOutput()).toContain('Usage: bun script.ts');
+        });
+
+        it('auto-detects ts-node via the internal ts-node.register.instance symbol', () => {
+            Reflect.set(process, TS_NODE_SYMBOL, {});
+            expect(getHelpOutput()).toContain('Usage: npx ts-node script.ts');
+        });
+
+        it('auto-detects tsx via its loader hook in process.execArgv', () => {
+            process.execArgv = [...ORIGINAL_EXEC_ARGV, '--import', '/path/to/node_modules/tsx/dist/loader.mjs'];
+            expect(getHelpOutput()).toContain('Usage: npx tsx script.ts');
+        });
+
+        it('falls back to plain node when no runtime markers are present', () => {
+            expect(getHelpOutput()).toContain('Usage: node script.ts');
         });
     });
 
