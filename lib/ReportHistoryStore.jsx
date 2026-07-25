@@ -69,19 +69,6 @@ export default function ReportHistoryStore(API, PubSub) {
     }
 
     /**
-     * Gets the history.
-     * 
-     * @deprecated use getFlatHistory instead.
-     *
-     * @param {Number} reportID
-     * @param {Boolean} ignoreCache
-     * @returns {Deferred}
-     */
-    function get(reportID, ignoreCache) {
-        return getFlatHistory(reportID, ignoreCache);
-    }
-
-    /**
      * Gets the history. This flow does not depend on the deprecated sequence number in report actions.
      *
      * @param {Number} reportID
@@ -108,6 +95,19 @@ export default function ReportHistoryStore(API, PubSub) {
     }
 
     /**
+     * Gets the history.
+     *
+     * @deprecated use getFlatHistory instead.
+     *
+     * @param {Number} reportID
+     * @param {Boolean} ignoreCache
+     * @returns {Deferred}
+     */
+    function get(reportID, ignoreCache) {
+        return getFlatHistory(reportID, ignoreCache);
+    }
+
+    /**
      * Gets the history from the cache if it exists. Otherwise fully loads the history.
      *
      * @param {Number} reportID
@@ -126,7 +126,13 @@ export default function ReportHistoryStore(API, PubSub) {
 
     return {
         /**
+         * Gets the history.
+         *
          * @deprecated use getFlatHistory instead.
+         *
+         * @param {Number} reportID
+         * @param {Boolean} ignoreCache
+         * @returns {Deferred}
          */
         get: (reportID, ignoreCache = false) => {
             const promise = new Deferred();
