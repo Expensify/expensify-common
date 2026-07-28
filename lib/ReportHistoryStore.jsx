@@ -12,6 +12,7 @@ export default function ReportHistoryStore(API, PubSub) {
         throw new Error('Cannot instantiate ReportHistoryStore without API');
     }
 
+
     const store = {
         API,
         cache: {},
