@@ -80,6 +80,9 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
     `\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(((${UrlPatterns.MARKDOWN_URL_REGEX})\\.(?:${Constants.CONST.VIDEO_EXTENSIONS.join('|')}))\\)(?![^<]*(<\\/pre>|<\\/code>))`,
     'gi',
 );
+const BOLD_MARKDOWN_REGEX =
+    /(?<!<[^>]*)(\b_|\B)\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g;
+const STRIKETHROUGH_MARKDOWN_REGEX = /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g;
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
@@ -128,6 +131,228 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
         return text.replace(regexp, (...args) => replacement(extras, ...args));
     }
     return text.replace(regexp, replacement);
+}
+
+function replaceBoldMarkdown(text: string, regexp: RegExp, replacement: Replacement): string {
+    if (!text.includes('*')) {
+        return text;
+    }
+
+    const starPositions = [];
+    const protectedTags = [];
+    const blockedTagNames = new Set(['a', 'code', 'pre', 'video']);
+    let index = 0;
+
+    while (index < text.length) {
+        if (text[index] === '<') {
+            const tagEnd = text.indexOf('>', index + 1);
+            if (tagEnd === -1) {
+                break;
+            }
+
+            const tag = text.slice(index + 1, tagEnd).trim();
+            const isClosingTag = tag.startsWith('/');
+            const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
+            if (tagName && blockedTagNames.has(tagName)) {
+                if (isClosingTag) {
+                    const matchingTagIndex = protectedTags.lastIndexOf(tagName);
+                    if (matchingTagIndex !== -1) {
+                        protectedTags.splice(matchingTagIndex, 1);
+                    }
+                } else if (!tag.endsWith('/')) {
+                    protectedTags.push(tagName);
+                }
+            }
+
+            index = tagEnd + 1;
+            continue;
+        }
+
+        if (text[index] === '*' && protectedTags.length === 0) {
+            starPositions.push(index);
+        }
+        index++;
+    }
+
+    if (starPositions.length < 2) {
+        return text;
+    }
+
+    const isWordCharacter = (character?: string) => {
+        if (!character) {
+            return false;
+        }
+        const code = character.charCodeAt(0);
+        return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    };
+    const canOpen = (position: number) => {
+        const nextCharacter = text[position + 1];
+        if (!nextCharacter || /\s|\*/.test(nextCharacter) || text.startsWith('</em', position + 1)) {
+            return false;
+        }
+
+        const previousCharacter = text[position - 1];
+        if (!isWordCharacter(previousCharacter)) {
+            return true;
+        }
+        return previousCharacter === '_' && !isWordCharacter(text[position - 2]);
+    };
+    const canClose = (position: number) => {
+        const previousCharacter = text[position - 1];
+        return Boolean(previousCharacter && !/\s|\*/.test(previousCharacter) && !isWordCharacter(text[position + 1]));
+    };
+
+    const output = [];
+    const candidateRegex = regexp;
+    let outputStart = 0;
+    let openingPosition;
+
+    for (const starPosition of starPositions) {
+        if (openingPosition === undefined) {
+            openingPosition = canOpen(starPosition) ? starPosition : undefined;
+            continue;
+        }
+        if (!canClose(starPosition)) {
+            continue;
+        }
+
+        const prefixLength = openingPosition > 0 ? 1 : 0;
+        const suffixLength = starPosition + 1 < text.length ? 1 : 0;
+        const candidateStart = openingPosition - prefixLength;
+        const candidateEnd = starPosition + 1 + suffixLength;
+        const candidate = text.slice(candidateStart, candidateEnd);
+        candidateRegex.lastIndex = 0;
+        const candidateMatch = candidateRegex.exec(candidate);
+        if (!candidateMatch) {
+            openingPosition = canOpen(starPosition) ? starPosition : undefined;
+            continue;
+        }
+        candidateRegex.lastIndex = 0;
+        const replacedCandidate = replaceTextWithExtras(candidate, candidateRegex, EXTRAS_DEFAULT, replacement);
+        if (replacedCandidate !== candidate) {
+            const replacedCoreEnd = suffixLength ? replacedCandidate.length - suffixLength : replacedCandidate.length;
+            output.push(text.slice(outputStart, openingPosition));
+            output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
+            outputStart = starPosition + 1;
+            openingPosition = undefined;
+            continue;
+        }
+        openingPosition = undefined;
+    }
+
+    if (output.length === 0) {
+        return text;
+    }
+
+    output.push(text.slice(outputStart));
+    return output.join('');
+}
+
+function replaceStrikethroughMarkdown(text: string, regexp: RegExp, replacement: Replacement): string {
+    if (!text.includes('~')) {
+        return text;
+    }
+
+    const tildePositions = [];
+    const protectedTags = [];
+    const blockedTagNames = new Set(['a', 'code', 'pre', 'video']);
+    let index = 0;
+
+    while (index < text.length) {
+        if (text[index] === '<') {
+            const tagEnd = text.indexOf('>', index + 1);
+            if (tagEnd === -1) {
+                break;
+            }
+
+            const tag = text.slice(index + 1, tagEnd).trim();
+            const isClosingTag = tag.startsWith('/');
+            const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
+            if (tagName && blockedTagNames.has(tagName)) {
+                if (isClosingTag) {
+                    const matchingTagIndex = protectedTags.lastIndexOf(tagName);
+                    if (matchingTagIndex !== -1) {
+                        protectedTags.splice(matchingTagIndex, 1);
+                    }
+                } else if (!tag.endsWith('/')) {
+                    protectedTags.push(tagName);
+                }
+            }
+
+            index = tagEnd + 1;
+            continue;
+        }
+
+        if (text[index] === '~' && protectedTags.length === 0) {
+            tildePositions.push(index);
+        }
+        index++;
+    }
+
+    if (tildePositions.length < 2) {
+        return text;
+    }
+
+    const isWordCharacter = (character?: string) => {
+        if (!character) {
+            return false;
+        }
+        const code = character.charCodeAt(0);
+        return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    };
+    const canOpen = (position: number) => {
+        const nextCharacter = text[position + 1];
+        return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
+    };
+    const canClose = (position: number) => {
+        const previousCharacter = text[position - 1];
+        return Boolean(previousCharacter && !/\s|~/.test(previousCharacter) && !isWordCharacter(text[position + 1]));
+    };
+
+    const output = [];
+    const candidateRegex = regexp;
+    let outputStart = 0;
+    let openingPosition;
+
+    for (const tildePosition of tildePositions) {
+        if (openingPosition === undefined) {
+            openingPosition = canOpen(tildePosition) ? tildePosition : undefined;
+            continue;
+        }
+        if (!canClose(tildePosition)) {
+            continue;
+        }
+
+        const prefixLength = openingPosition > 0 ? 1 : 0;
+        const suffixLength = tildePosition + 1 < text.length ? 1 : 0;
+        const candidateStart = openingPosition - prefixLength;
+        const candidateEnd = tildePosition + 1 + suffixLength;
+        const candidate = text.slice(candidateStart, candidateEnd);
+        candidateRegex.lastIndex = 0;
+        const candidateMatch = candidateRegex.exec(candidate);
+        if (!candidateMatch) {
+            openingPosition = canOpen(tildePosition) ? tildePosition : undefined;
+            continue;
+        }
+        candidateRegex.lastIndex = 0;
+        const replacedCandidate = replaceTextWithExtras(candidate, candidateRegex, EXTRAS_DEFAULT, replacement);
+        if (replacedCandidate !== candidate) {
+            const replacedCoreEnd = suffixLength ? replacedCandidate.length - suffixLength : replacedCandidate.length;
+            output.push(text.slice(outputStart, openingPosition));
+            output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
+            outputStart = tildePosition + 1;
+            openingPosition = undefined;
+            continue;
+        }
+        openingPosition = undefined;
+    }
+
+    if (output.length === 0) {
+        return text;
+    }
+
+    output.push(text.slice(outputStart));
+    return output.join('');
 }
 
 /**
@@ -688,7 +913,7 @@ export default class ExpensiMark {
 
                 process: (textToProcess, replacement) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
-                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn);
+                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, true);
                 },
 
                 replacement: (_extras, _match, g1, g2) => {
@@ -809,7 +1034,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                regex: /(?<!<[^>]*)(\b_|\B)\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
+                process: (textToProcess, replacement) => replaceBoldMarkdown(textToProcess, BOLD_MARKDOWN_REGEX, replacement),
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -820,7 +1045,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
+                process: (textToProcess, replacement) => replaceStrikethroughMarkdown(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement),
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
@@ -1301,7 +1526,108 @@ export default class ExpensiMark {
     /**
      * Checks matched URLs for validity and replace valid links with html elements
      */
-    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false): string {
+        if (shouldScanForUrls) {
+            const output = [];
+            const candidateRegex = regex;
+            let outputStart = 0;
+            let index = 0;
+            let hostnameRunStart = 0;
+            const isAlphaNumeric = (character: string) => {
+                const code = character.charCodeAt(0);
+                return (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+            };
+            const isHostnameCharacter = (character: string) => isAlphaNumeric(character) || character === '-' || character === '.';
+            const isSpace = (character: string) => {
+                const code = character.charCodeAt(0);
+                return code <= 32 || code === 160;
+            };
+
+            while (index < textToCheck.length) {
+                if (textToCheck[index] === '<') {
+                    const tagEnd = textToCheck.indexOf('>', index + 1);
+                    if (tagEnd === -1) {
+                        break;
+                    }
+
+                    let closingTag = '';
+                    if (textToCheck.startsWith('<a ', index) || textToCheck.startsWith('<a>', index)) {
+                        closingTag = '</a>';
+                    } else if (textToCheck.startsWith('<pre', index)) {
+                        closingTag = '</pre>';
+                    } else if (textToCheck.startsWith('<code', index)) {
+                        closingTag = '</code>';
+                    }
+
+                    if (closingTag) {
+                        const closingTagStart = textToCheck.indexOf(closingTag, tagEnd + 1);
+                        index = closingTagStart === -1 ? textToCheck.length : closingTagStart + closingTag.length;
+                    } else {
+                        index = tagEnd + 1;
+                    }
+                    hostnameRunStart = index;
+                    continue;
+                }
+
+                if (!isHostnameCharacter(textToCheck[index])) {
+                    hostnameRunStart = index + 1;
+                    index++;
+                    continue;
+                }
+                if (textToCheck[index] !== '.') {
+                    index++;
+                    continue;
+                }
+
+                const hostnameStart = hostnameRunStart;
+                let tldEnd = index + 1;
+                while (tldEnd < textToCheck.length && (isAlphaNumeric(textToCheck[tldEnd]) || textToCheck[tldEnd] === '-')) {
+                    tldEnd++;
+                }
+                if (hostnameStart === index || tldEnd === index + 1) {
+                    index++;
+                    continue;
+                }
+
+                let candidateStart = hostnameStart;
+                const protocol = textToCheck.slice(Math.max(0, hostnameStart - 8), hostnameStart).toLowerCase();
+                if (protocol.endsWith('https://')) {
+                    candidateStart = hostnameStart - 8;
+                } else if (protocol.endsWith('http://')) {
+                    candidateStart = hostnameStart - 7;
+                } else if (protocol.endsWith('ftps://')) {
+                    candidateStart = hostnameStart - 7;
+                } else if (protocol.endsWith('ftp://')) {
+                    candidateStart = hostnameStart - 6;
+                }
+                if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
+                    candidateStart--;
+                }
+                while (candidateStart > 0 && '_*~'.includes(textToCheck[candidateStart - 1])) {
+                    candidateStart--;
+                }
+
+                let candidateEnd = tldEnd;
+                while (candidateEnd < textToCheck.length && !isSpace(textToCheck[candidateEnd]) && textToCheck[candidateEnd] !== '<') {
+                    candidateEnd++;
+                }
+
+                const candidate = textToCheck.slice(candidateStart, candidateEnd);
+                candidateRegex.lastIndex = 0;
+                output.push(textToCheck.slice(outputStart, candidateStart));
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
+                outputStart = candidateEnd;
+                index = candidateEnd;
+                hostnameRunStart = candidateEnd;
+            }
+
+            if (output.length === 0) {
+                return textToCheck;
+            }
+            output.push(textToCheck.slice(outputStart));
+            return output.join('');
+        }
+
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
