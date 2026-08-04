@@ -133,127 +133,38 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
     return text.replace(regexp, replacement);
 }
 
-function replaceBoldMarkdown(text: string, regexp: RegExp, replacement: Replacement): string {
-    if (!text.includes('*')) {
-        return text;
+function isWordCharacter(character?: string): boolean {
+    if (!character) {
+        return false;
     }
-
-    const starPositions = [];
-    const protectedTags = [];
-    const blockedTagNames = new Set(['a', 'code', 'pre', 'video']);
-    let index = 0;
-
-    while (index < text.length) {
-        if (text[index] === '<') {
-            const tagEnd = text.indexOf('>', index + 1);
-            if (tagEnd === -1) {
-                break;
-            }
-
-            const tag = text.slice(index + 1, tagEnd).trim();
-            const isClosingTag = tag.startsWith('/');
-            const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
-            if (tagName && blockedTagNames.has(tagName)) {
-                if (isClosingTag) {
-                    const matchingTagIndex = protectedTags.lastIndexOf(tagName);
-                    if (matchingTagIndex !== -1) {
-                        protectedTags.splice(matchingTagIndex, 1);
-                    }
-                } else if (!tag.endsWith('/')) {
-                    protectedTags.push(tagName);
-                }
-            }
-
-            index = tagEnd + 1;
-            continue;
-        }
-
-        if (text[index] === '*' && protectedTags.length === 0) {
-            starPositions.push(index);
-        }
-        index++;
-    }
-
-    if (starPositions.length < 2) {
-        return text;
-    }
-
-    const isWordCharacter = (character?: string) => {
-        if (!character) {
-            return false;
-        }
-        const code = character.charCodeAt(0);
-        return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-    };
-    const canOpen = (position: number) => {
-        const nextCharacter = text[position + 1];
-        if (!nextCharacter || /\s|\*/.test(nextCharacter) || text.startsWith('</em', position + 1)) {
-            return false;
-        }
-
-        const previousCharacter = text[position - 1];
-        if (!isWordCharacter(previousCharacter)) {
-            return true;
-        }
-        return previousCharacter === '_' && !isWordCharacter(text[position - 2]);
-    };
-    const canClose = (position: number) => {
-        const previousCharacter = text[position - 1];
-        return Boolean(previousCharacter && !/\s|\*/.test(previousCharacter) && !isWordCharacter(text[position + 1]));
-    };
-
-    const output = [];
-    const candidateRegex = regexp;
-    let outputStart = 0;
-    let openingPosition;
-
-    for (const starPosition of starPositions) {
-        if (openingPosition === undefined) {
-            openingPosition = canOpen(starPosition) ? starPosition : undefined;
-            continue;
-        }
-        if (!canClose(starPosition)) {
-            continue;
-        }
-
-        const prefixLength = openingPosition > 0 ? 1 : 0;
-        const suffixLength = starPosition + 1 < text.length ? 1 : 0;
-        const candidateStart = openingPosition - prefixLength;
-        const candidateEnd = starPosition + 1 + suffixLength;
-        const candidate = text.slice(candidateStart, candidateEnd);
-        candidateRegex.lastIndex = 0;
-        const candidateMatch = candidateRegex.exec(candidate);
-        if (!candidateMatch) {
-            openingPosition = canOpen(starPosition) ? starPosition : undefined;
-            continue;
-        }
-        candidateRegex.lastIndex = 0;
-        const replacedCandidate = replaceTextWithExtras(candidate, candidateRegex, EXTRAS_DEFAULT, replacement);
-        if (replacedCandidate !== candidate) {
-            const replacedCoreEnd = suffixLength ? replacedCandidate.length - suffixLength : replacedCandidate.length;
-            output.push(text.slice(outputStart, openingPosition));
-            output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
-            outputStart = starPosition + 1;
-            openingPosition = undefined;
-            continue;
-        }
-        openingPosition = undefined;
-    }
-
-    if (output.length === 0) {
-        return text;
-    }
-
-    output.push(text.slice(outputStart));
-    return output.join('');
+    const code = character.charCodeAt(0);
+    return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
 }
 
-function replaceStrikethroughMarkdown(text: string, regexp: RegExp, replacement: Replacement): string {
-    if (!text.includes('~')) {
+function canOpenBoldMarkdown(text: string, position: number): boolean {
+    const nextCharacter = text[position + 1];
+    if (!nextCharacter || /\s|\*/.test(nextCharacter) || text.startsWith('</em', position + 1)) {
+        return false;
+    }
+
+    const previousCharacter = text[position - 1];
+    if (!isWordCharacter(previousCharacter)) {
+        return true;
+    }
+    return previousCharacter === '_' && !isWordCharacter(text[position - 2]);
+}
+
+function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
+    const nextCharacter = text[position + 1];
+    return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
+}
+
+function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: (text: string, position: number) => boolean): string {
+    if (!text.includes(marker)) {
         return text;
     }
 
-    const tildePositions = [];
+    const markerPositions = [];
     const protectedTags = [];
     const blockedTagNames = new Set(['a', 'code', 'pre', 'video']);
     let index = 0;
@@ -283,30 +194,19 @@ function replaceStrikethroughMarkdown(text: string, regexp: RegExp, replacement:
             continue;
         }
 
-        if (text[index] === '~' && protectedTags.length === 0) {
-            tildePositions.push(index);
+        if (text[index] === marker && protectedTags.length === 0) {
+            markerPositions.push(index);
         }
         index++;
     }
 
-    if (tildePositions.length < 2) {
+    if (markerPositions.length < 2) {
         return text;
     }
 
-    const isWordCharacter = (character?: string) => {
-        if (!character) {
-            return false;
-        }
-        const code = character.charCodeAt(0);
-        return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-    };
-    const canOpen = (position: number) => {
-        const nextCharacter = text[position + 1];
-        return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
-    };
     const canClose = (position: number) => {
         const previousCharacter = text[position - 1];
-        return Boolean(previousCharacter && !/\s|~/.test(previousCharacter) && !isWordCharacter(text[position + 1]));
+        return Boolean(previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]));
     };
 
     const output = [];
@@ -314,24 +214,24 @@ function replaceStrikethroughMarkdown(text: string, regexp: RegExp, replacement:
     let outputStart = 0;
     let openingPosition;
 
-    for (const tildePosition of tildePositions) {
+    for (const markerPosition of markerPositions) {
         if (openingPosition === undefined) {
-            openingPosition = canOpen(tildePosition) ? tildePosition : undefined;
+            openingPosition = canOpen(text, markerPosition) ? markerPosition : undefined;
             continue;
         }
-        if (!canClose(tildePosition)) {
+        if (!canClose(markerPosition)) {
             continue;
         }
 
         const prefixLength = openingPosition > 0 ? 1 : 0;
-        const suffixLength = tildePosition + 1 < text.length ? 1 : 0;
+        const suffixLength = markerPosition + 1 < text.length ? 1 : 0;
         const candidateStart = openingPosition - prefixLength;
-        const candidateEnd = tildePosition + 1 + suffixLength;
+        const candidateEnd = markerPosition + 1 + suffixLength;
         const candidate = text.slice(candidateStart, candidateEnd);
         candidateRegex.lastIndex = 0;
         const candidateMatch = candidateRegex.exec(candidate);
         if (!candidateMatch) {
-            openingPosition = canOpen(tildePosition) ? tildePosition : undefined;
+            openingPosition = canOpen(text, markerPosition) ? markerPosition : undefined;
             continue;
         }
         candidateRegex.lastIndex = 0;
@@ -340,7 +240,7 @@ function replaceStrikethroughMarkdown(text: string, regexp: RegExp, replacement:
             const replacedCoreEnd = suffixLength ? replacedCandidate.length - suffixLength : replacedCandidate.length;
             output.push(text.slice(outputStart, openingPosition));
             output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
-            outputStart = tildePosition + 1;
+            outputStart = markerPosition + 1;
             openingPosition = undefined;
             continue;
         }
@@ -1034,7 +934,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                process: (textToProcess, replacement) => replaceBoldMarkdown(textToProcess, BOLD_MARKDOWN_REGEX, replacement),
+                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, BOLD_MARKDOWN_REGEX, replacement, '*', canOpenBoldMarkdown),
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -1045,7 +945,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                process: (textToProcess, replacement) => replaceStrikethroughMarkdown(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement),
+                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement, '~', canOpenStrikethroughMarkdown),
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
