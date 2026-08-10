@@ -35,6 +35,14 @@ type Extras = {
 export type {Extras};
 
 const EXTRAS_DEFAULT = {};
+// These constants represent the ASCII ranges for digits (0-9) and letters (A-Z, a-z).
+const ASCII_DIGIT_START = '0'.charCodeAt(0);
+const ASCII_DIGIT_END = '9'.charCodeAt(0);
+const ASCII_UPPERCASE_START = 'A'.charCodeAt(0);
+const ASCII_UPPERCASE_END = 'Z'.charCodeAt(0);
+const ASCII_LOWERCASE_START = 'a'.charCodeAt(0);
+const ASCII_LOWERCASE_END = 'z'.charCodeAt(0);
+const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
@@ -133,12 +141,21 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
     return text.replace(regexp, replacement);
 }
 
-function isWordCharacter(character?: string): boolean {
+function isAsciiAlphaNumeric(character?: string): boolean {
     if (!character) {
         return false;
     }
+
     const code = character.charCodeAt(0);
-    return character === '_' || (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    return (
+        (code >= ASCII_DIGIT_START && code <= ASCII_DIGIT_END) ||
+        (code >= ASCII_UPPERCASE_START && code <= ASCII_UPPERCASE_END) ||
+        (code >= ASCII_LOWERCASE_START && code <= ASCII_LOWERCASE_END)
+    );
+}
+
+function isWordCharacter(character?: string): boolean {
+    return character === '_' || isAsciiAlphaNumeric(character);
 }
 
 function canOpenBoldMarkdown(text: string, position: number): boolean {
@@ -1433,11 +1450,7 @@ export default class ExpensiMark {
             let outputStart = 0;
             let index = 0;
             let hostnameRunStart = 0;
-            const isAlphaNumeric = (character: string) => {
-                const code = character.charCodeAt(0);
-                return (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
-            };
-            const isHostnameCharacter = (character: string) => isAlphaNumeric(character) || character === '-' || character === '.';
+            const isHostnameCharacter = (character: string) => isAsciiAlphaNumeric(character) || character === '-' || character === '.';
             const isSpace = (character: string) => {
                 const code = character.charCodeAt(0);
                 return code <= 32 || code === 160;
@@ -1481,7 +1494,7 @@ export default class ExpensiMark {
 
                 const hostnameStart = hostnameRunStart;
                 let tldEnd = index + 1;
-                while (tldEnd < textToCheck.length && (isAlphaNumeric(textToCheck[tldEnd]) || textToCheck[tldEnd] === '-')) {
+                while (tldEnd < textToCheck.length && (isAsciiAlphaNumeric(textToCheck[tldEnd]) || textToCheck[tldEnd] === '-')) {
                     tldEnd++;
                 }
                 if (hostnameStart === index || tldEnd === index + 1) {
@@ -1490,15 +1503,13 @@ export default class ExpensiMark {
                 }
 
                 let candidateStart = hostnameStart;
-                const protocol = textToCheck.slice(Math.max(0, hostnameStart - 8), hostnameStart).toLowerCase();
-                if (protocol.endsWith('https://')) {
-                    candidateStart = hostnameStart - 8;
-                } else if (protocol.endsWith('http://')) {
-                    candidateStart = hostnameStart - 7;
-                } else if (protocol.endsWith('ftps://')) {
-                    candidateStart = hostnameStart - 7;
-                } else if (protocol.endsWith('ftp://')) {
-                    candidateStart = hostnameStart - 6;
+                // // Include a protocol such as "https://" so the existing URL regex sees the full URL.
+                const matchedProtocol = URL_PROTOCOLS.find((protocol) => {
+                    const protocolStart = hostnameStart - protocol.length;
+                    return protocolStart >= 0 && textToCheck.slice(protocolStart, hostnameStart).toLowerCase() === protocol;
+                });
+                if (matchedProtocol) {
+                    candidateStart = hostnameStart - matchedProtocol.length;
                 }
                 if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
                     candidateStart--;
