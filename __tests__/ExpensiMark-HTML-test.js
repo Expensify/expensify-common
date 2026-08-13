@@ -631,6 +631,14 @@ describe('Test long input candidate parsing', () => {
         );
     });
 
+    test('autolinks a protocol URL with a dotless host and dotted path', () => {
+        const input = 'http://localhost:3000/foo.app';
+        expect(parser.replace(input)).toBe('<a href="http://localhost:3000/foo.app" target="_blank" rel="noreferrer noopener">http://localhost:3000/foo.app</a>');
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(
+            '<a href="http://localhost:3000/foo.app" data-raw-href="http://localhost:3000/foo.app" data-link-variant="auto" target="_blank" rel="noreferrer noopener">http://localhost:3000/foo.app</a>',
+        );
+    });
+
     test.each([
         ['*example.com*', `<strong>${anchor('example.com')}</strong>`],
         ['~example.com~', `<del>${anchor('example.com')}</del>`],

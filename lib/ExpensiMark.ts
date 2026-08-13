@@ -1455,6 +1455,26 @@ export default class ExpensiMark {
                 const code = character.charCodeAt(0);
                 return code <= 32 || code === 160;
             };
+            const getCandidateStart = (start: number) => {
+                let candidateStart = start;
+                if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
+                    candidateStart--;
+                }
+                while (candidateStart > 0 && '_*~'.includes(textToCheck[candidateStart - 1])) {
+                    candidateStart--;
+                }
+                return candidateStart;
+            };
+            const getProtocolAt = (position: number) => URL_PROTOCOLS.find((protocol) => textToCheck.slice(position, position + protocol.length).toLowerCase() === protocol);
+            const processUrlCandidate = (candidateStart: number, candidateEnd: number) => {
+                const candidate = textToCheck.slice(candidateStart, candidateEnd);
+                candidateRegex.lastIndex = 0;
+                output.push(textToCheck.slice(outputStart, candidateStart));
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
+                outputStart = candidateEnd;
+                index = candidateEnd;
+                hostnameRunStart = candidateEnd;
+            };
 
             while (index < textToCheck.length) {
                 if (textToCheck[index] === '<') {
@@ -1482,6 +1502,22 @@ export default class ExpensiMark {
                     continue;
                 }
 
+                const currentCharacter = textToCheck[index];
+                if (currentCharacter === 'h' || currentCharacter === 'H' || currentCharacter === 'f' || currentCharacter === 'F') {
+                    const matchedProtocol = getProtocolAt(index);
+                    if (matchedProtocol) {
+                        const candidateStart = getCandidateStart(index);
+
+                        let candidateEnd = index + matchedProtocol.length;
+                        while (candidateEnd < textToCheck.length && !isSpace(textToCheck[candidateEnd]) && textToCheck[candidateEnd] !== '<') {
+                            candidateEnd++;
+                        }
+
+                        processUrlCandidate(candidateStart, candidateEnd);
+                        continue;
+                    }
+                }
+
                 if (!isHostnameCharacter(textToCheck[index])) {
                     hostnameRunStart = index + 1;
                     index++;
@@ -1502,34 +1538,14 @@ export default class ExpensiMark {
                     continue;
                 }
 
-                let candidateStart = hostnameStart;
-                // // Include a protocol such as "https://" so the existing URL regex sees the full URL.
-                const matchedProtocol = URL_PROTOCOLS.find((protocol) => {
-                    const protocolStart = hostnameStart - protocol.length;
-                    return protocolStart >= 0 && textToCheck.slice(protocolStart, hostnameStart).toLowerCase() === protocol;
-                });
-                if (matchedProtocol) {
-                    candidateStart = hostnameStart - matchedProtocol.length;
-                }
-                if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
-                    candidateStart--;
-                }
-                while (candidateStart > 0 && '_*~'.includes(textToCheck[candidateStart - 1])) {
-                    candidateStart--;
-                }
+                const candidateStart = getCandidateStart(hostnameStart);
 
                 let candidateEnd = tldEnd;
                 while (candidateEnd < textToCheck.length && !isSpace(textToCheck[candidateEnd]) && textToCheck[candidateEnd] !== '<') {
                     candidateEnd++;
                 }
 
-                const candidate = textToCheck.slice(candidateStart, candidateEnd);
-                candidateRegex.lastIndex = 0;
-                output.push(textToCheck.slice(outputStart, candidateStart));
-                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
-                outputStart = candidateEnd;
-                index = candidateEnd;
-                hostnameRunStart = candidateEnd;
+                processUrlCandidate(candidateStart, candidateEnd);
             }
 
             if (output.length === 0) {
