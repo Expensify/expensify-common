@@ -1455,6 +1455,8 @@ export default class ExpensiMark {
                 const code = character.charCodeAt(0);
                 return code <= 32 || code === 160;
             };
+            // Move left over @, *, _, and ~ so the existing URL regex receives the full
+            // surrounding text, such as *example.com* or @example.com.
             const getCandidateStart = (start: number) => {
                 let candidateStart = start;
                 if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
@@ -1465,7 +1467,11 @@ export default class ExpensiMark {
                 }
                 return candidateStart;
             };
+            // Check for a supported protocol before looking for a dot. This keeps URLs
+            // such as http://localhost:3000/foo.app as one candidate.
             const getProtocolAt = (position: number) => URL_PROTOCOLS.find((protocol) => textToCheck.slice(position, position + protocol.length).toLowerCase() === protocol);
+            // Extract one candidate, pass it to the existing URL replacement code, and move
+            // every scanner position past it so it is not scanned again.
             const processUrlCandidate = (candidateStart: number, candidateEnd: number) => {
                 const candidate = textToCheck.slice(candidateStart, candidateEnd);
                 candidateRegex.lastIndex = 0;
