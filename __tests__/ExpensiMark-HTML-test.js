@@ -639,6 +639,21 @@ describe('Test long input candidate parsing', () => {
         );
     });
 
+    test('does not autolink a URL-looking video label', () => {
+        const input = '![example.com](https://example.com/video.mp4)';
+        expect(parser.replace(input)).toBe('<video data-expensify-source="https://example.com/video.mp4" >example.com</video>');
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(
+            '<video data-expensify-source="https://example.com/video.mp4" data-raw-href="https://example.com/video.mp4" data-link-variant="labeled" >example.com</video>',
+        );
+    });
+
+    test('does not autolink inside nested protected tags', () => {
+        const input = '<code><code>example.com</code>after.com</code> outside.com';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(
+            '<code><code>example.com</code>after.com</code> <a href="https://outside.com" target="_blank" rel="noreferrer noopener">outside.com</a>',
+        );
+    });
+
     test.each([
         ['*example.com*', `<strong>${anchor('example.com')}</strong>`],
         ['~example.com~', `<del>${anchor('example.com')}</del>`],

@@ -43,6 +43,7 @@ const ASCII_UPPERCASE_END = 'Z'.charCodeAt(0);
 const ASCII_LOWERCASE_START = 'a'.charCodeAt(0);
 const ASCII_LOWERCASE_END = 'z'.charCodeAt(0);
 const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
+const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
@@ -176,38 +177,45 @@ function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
     return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
 }
 
+function updateProtectedTagStack(text: string, tagStart: number, protectedTags: string[]): number | undefined {
+    const tagEnd = text.indexOf('>', tagStart + 1);
+    if (tagEnd === -1) {
+        return undefined;
+    }
+
+    const tag = text.slice(tagStart + 1, tagEnd).trim();
+    const isClosingTag = tag.startsWith('/');
+    const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
+    if (tagName && PROTECTED_TAG_NAMES.has(tagName)) {
+        if (isClosingTag) {
+            const matchingTagIndex = protectedTags.lastIndexOf(tagName);
+            if (matchingTagIndex !== -1) {
+                protectedTags.splice(matchingTagIndex, 1);
+            }
+        } else if (!tag.endsWith('/')) {
+            protectedTags.push(tagName);
+        }
+    }
+
+    return tagEnd + 1;
+}
+
 function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: (text: string, position: number) => boolean): string {
     if (!text.includes(marker)) {
         return text;
     }
 
     const markerPositions = [];
-    const protectedTags = [];
-    const blockedTagNames = new Set(['a', 'code', 'pre', 'video']);
+    const protectedTags: string[] = [];
     let index = 0;
 
     while (index < text.length) {
         if (text[index] === '<') {
-            const tagEnd = text.indexOf('>', index + 1);
-            if (tagEnd === -1) {
+            const nextIndex = updateProtectedTagStack(text, index, protectedTags);
+            if (nextIndex === undefined) {
                 break;
             }
-
-            const tag = text.slice(index + 1, tagEnd).trim();
-            const isClosingTag = tag.startsWith('/');
-            const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
-            if (tagName && blockedTagNames.has(tagName)) {
-                if (isClosingTag) {
-                    const matchingTagIndex = protectedTags.lastIndexOf(tagName);
-                    if (matchingTagIndex !== -1) {
-                        protectedTags.splice(matchingTagIndex, 1);
-                    }
-                } else if (!tag.endsWith('/')) {
-                    protectedTags.push(tagName);
-                }
-            }
-
-            index = tagEnd + 1;
+            index = nextIndex;
             continue;
         }
 
@@ -1450,6 +1458,7 @@ export default class ExpensiMark {
             let outputStart = 0;
             let index = 0;
             let hostnameRunStart = 0;
+            const protectedTags: string[] = [];
             const isHostnameCharacter = (character: string) => isAsciiAlphaNumeric(character) || character === '-' || character === '.';
             const isSpace = (character: string) => {
                 const code = character.charCodeAt(0);
@@ -1484,26 +1493,16 @@ export default class ExpensiMark {
 
             while (index < textToCheck.length) {
                 if (textToCheck[index] === '<') {
-                    const tagEnd = textToCheck.indexOf('>', index + 1);
-                    if (tagEnd === -1) {
+                    const nextIndex = updateProtectedTagStack(textToCheck, index, protectedTags);
+                    if (nextIndex === undefined) {
                         break;
                     }
-
-                    let closingTag = '';
-                    if (textToCheck.startsWith('<a ', index) || textToCheck.startsWith('<a>', index)) {
-                        closingTag = '</a>';
-                    } else if (textToCheck.startsWith('<pre', index)) {
-                        closingTag = '</pre>';
-                    } else if (textToCheck.startsWith('<code', index)) {
-                        closingTag = '</code>';
-                    }
-
-                    if (closingTag) {
-                        const closingTagStart = textToCheck.indexOf(closingTag, tagEnd + 1);
-                        index = closingTagStart === -1 ? textToCheck.length : closingTagStart + closingTag.length;
-                    } else {
-                        index = tagEnd + 1;
-                    }
+                    index = nextIndex;
+                    hostnameRunStart = index;
+                    continue;
+                }
+                if (protectedTags.length > 0) {
+                    index++;
                     hostnameRunStart = index;
                     continue;
                 }
