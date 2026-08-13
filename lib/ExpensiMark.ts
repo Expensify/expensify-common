@@ -48,6 +48,7 @@ const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
+type UrlCandidate = {start: number; end: number};
 
 type CommonRule = {
     name: string;
@@ -177,6 +178,7 @@ function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
     return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
 }
 
+// Records when scanning enters or leaves <a>, <code>, <pre>, or <video>, then returns the character after the tag.
 function updateProtectedTagStack(text: string, tagStart: number, protectedTags: string[]): number | undefined {
     const tagEnd = text.indexOf('>', tagStart + 1);
     if (tagEnd === -1) {
@@ -198,6 +200,112 @@ function updateProtectedTagStack(text: string, tagStart: number, protectedTags: 
     }
 
     return tagEnd + 1;
+}
+
+// Allows letters, numbers, '-', and '.' because they can appear in a domain such as example.com.
+function isHostnameCharacter(character?: string): boolean {
+    return Boolean(character && (isAsciiAlphaNumeric(character) || character === '-' || character === '.'));
+}
+
+// Returns true when whitespace marks the end of the possible URL.
+function isUrlBoundarySpace(character: string): boolean {
+    const code = character.charCodeAt(0);
+    return code <= 32 || code === 160;
+}
+
+// Checks for http://, https://, ftp://, or ftps:// starting at this position.
+function getProtocolAt(text: string, position: number) {
+    const firstCharacter = text[position]?.toLowerCase();
+    if (firstCharacter !== 'h' && firstCharacter !== 'f') {
+        return undefined;
+    }
+    return URL_PROTOCOLS.find((protocol) => text.slice(position, position + protocol.length).toLowerCase() === protocol);
+}
+
+// Reads the text after the dot in example.com and returns where the hostname ends.
+function findHostnameEnd(text: string, hostnameStart: number, dotPosition: number): number | undefined {
+    let hostnameEnd = dotPosition + 1;
+    while (hostnameEnd < text.length && (isAsciiAlphaNumeric(text[hostnameEnd]) || text[hostnameEnd] === '-')) {
+        hostnameEnd++;
+    }
+    if (hostnameStart === dotPosition || hostnameEnd === dotPosition + 1) {
+        return undefined;
+    }
+    return hostnameEnd;
+}
+
+// Expands example.com to include nearby @, *, _, or ~, plus its path, until whitespace or HTML.
+function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
+    let candidateStart = start;
+    if (candidateStart > 0 && text[candidateStart - 1] === '@') {
+        candidateStart--;
+    }
+    while (candidateStart > 0 && '_*~'.includes(text[candidateStart - 1])) {
+        candidateStart--;
+    }
+
+    let candidateEnd = end;
+    while (candidateEnd < text.length && !isUrlBoundarySpace(text[candidateEnd]) && text[candidateEnd] !== '<') {
+        candidateEnd++;
+    }
+    return {start: candidateStart, end: candidateEnd};
+}
+
+// Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex.
+function findUrlCandidates(text: string): UrlCandidate[] {
+    const candidates: UrlCandidate[] = [];
+    const protectedTags: string[] = [];
+    let index = 0;
+    let hostnameRunStart = 0;
+
+    while (index < text.length) {
+        if (text[index] === '<') {
+            const nextIndex = updateProtectedTagStack(text, index, protectedTags);
+            if (nextIndex === undefined) {
+                break;
+            }
+            index = nextIndex;
+            hostnameRunStart = index;
+            continue;
+        }
+        if (protectedTags.length > 0) {
+            index++;
+            hostnameRunStart = index;
+            continue;
+        }
+
+        const matchedProtocol = getProtocolAt(text, index);
+        if (matchedProtocol) {
+            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
+            candidates.push(candidate);
+            index = candidate.end;
+            hostnameRunStart = candidate.end;
+            continue;
+        }
+
+        if (!isHostnameCharacter(text[index])) {
+            hostnameRunStart = index + 1;
+            index++;
+            continue;
+        }
+        if (text[index] !== '.') {
+            index++;
+            continue;
+        }
+
+        const hostnameEnd = findHostnameEnd(text, hostnameRunStart, index);
+        if (hostnameEnd === undefined) {
+            index++;
+            continue;
+        }
+
+        const candidate = extendUrlCandidateBoundaries(text, hostnameRunStart, hostnameEnd);
+        candidates.push(candidate);
+        index = candidate.end;
+        hostnameRunStart = candidate.end;
+    }
+
+    return candidates;
 }
 
 function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: (text: string, position: number) => boolean): string {
@@ -1453,109 +1561,23 @@ export default class ExpensiMark {
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false): string {
         if (shouldScanForUrls) {
+            const candidates = findUrlCandidates(textToCheck);
+            if (candidates.length === 0) {
+                return textToCheck;
+            }
+
             const output = [];
             const candidateRegex = regex;
             let outputStart = 0;
-            let index = 0;
-            let hostnameRunStart = 0;
-            const protectedTags: string[] = [];
-            const isHostnameCharacter = (character: string) => isAsciiAlphaNumeric(character) || character === '-' || character === '.';
-            const isSpace = (character: string) => {
-                const code = character.charCodeAt(0);
-                return code <= 32 || code === 160;
-            };
-            // Move left over @, *, _, and ~ so the existing URL regex receives the full
-            // surrounding text, such as *example.com* or @example.com.
-            const getCandidateStart = (start: number) => {
-                let candidateStart = start;
-                if (candidateStart > 0 && textToCheck[candidateStart - 1] === '@') {
-                    candidateStart--;
-                }
-                while (candidateStart > 0 && '_*~'.includes(textToCheck[candidateStart - 1])) {
-                    candidateStart--;
-                }
-                return candidateStart;
-            };
-            // Check for a supported protocol before looking for a dot. This keeps URLs
-            // such as http://localhost:3000/foo.app as one candidate.
-            const getProtocolAt = (position: number) => URL_PROTOCOLS.find((protocol) => textToCheck.slice(position, position + protocol.length).toLowerCase() === protocol);
-            // Extract one candidate, pass it to the existing URL replacement code, and move
-            // every scanner position past it so it is not scanned again.
-            const processUrlCandidate = (candidateStart: number, candidateEnd: number) => {
-                const candidate = textToCheck.slice(candidateStart, candidateEnd);
+
+            for (const {start, end} of candidates) {
+                const candidate = textToCheck.slice(start, end);
                 candidateRegex.lastIndex = 0;
-                output.push(textToCheck.slice(outputStart, candidateStart));
+                output.push(textToCheck.slice(outputStart, start));
                 output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
-                outputStart = candidateEnd;
-                index = candidateEnd;
-                hostnameRunStart = candidateEnd;
-            };
-
-            while (index < textToCheck.length) {
-                if (textToCheck[index] === '<') {
-                    const nextIndex = updateProtectedTagStack(textToCheck, index, protectedTags);
-                    if (nextIndex === undefined) {
-                        break;
-                    }
-                    index = nextIndex;
-                    hostnameRunStart = index;
-                    continue;
-                }
-                if (protectedTags.length > 0) {
-                    index++;
-                    hostnameRunStart = index;
-                    continue;
-                }
-
-                const currentCharacter = textToCheck[index];
-                if (currentCharacter === 'h' || currentCharacter === 'H' || currentCharacter === 'f' || currentCharacter === 'F') {
-                    const matchedProtocol = getProtocolAt(index);
-                    if (matchedProtocol) {
-                        const candidateStart = getCandidateStart(index);
-
-                        let candidateEnd = index + matchedProtocol.length;
-                        while (candidateEnd < textToCheck.length && !isSpace(textToCheck[candidateEnd]) && textToCheck[candidateEnd] !== '<') {
-                            candidateEnd++;
-                        }
-
-                        processUrlCandidate(candidateStart, candidateEnd);
-                        continue;
-                    }
-                }
-
-                if (!isHostnameCharacter(textToCheck[index])) {
-                    hostnameRunStart = index + 1;
-                    index++;
-                    continue;
-                }
-                if (textToCheck[index] !== '.') {
-                    index++;
-                    continue;
-                }
-
-                const hostnameStart = hostnameRunStart;
-                let tldEnd = index + 1;
-                while (tldEnd < textToCheck.length && (isAsciiAlphaNumeric(textToCheck[tldEnd]) || textToCheck[tldEnd] === '-')) {
-                    tldEnd++;
-                }
-                if (hostnameStart === index || tldEnd === index + 1) {
-                    index++;
-                    continue;
-                }
-
-                const candidateStart = getCandidateStart(hostnameStart);
-
-                let candidateEnd = tldEnd;
-                while (candidateEnd < textToCheck.length && !isSpace(textToCheck[candidateEnd]) && textToCheck[candidateEnd] !== '<') {
-                    candidateEnd++;
-                }
-
-                processUrlCandidate(candidateStart, candidateEnd);
+                outputStart = end;
             }
 
-            if (output.length === 0) {
-                return textToCheck;
-            }
             output.push(textToCheck.slice(outputStart));
             return output.join('');
         }
