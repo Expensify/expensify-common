@@ -42,6 +42,8 @@ const ASCII_UPPERCASE_START = 'A'.charCodeAt(0);
 const ASCII_UPPERCASE_END = 'Z'.charCodeAt(0);
 const ASCII_LOWERCASE_START = 'a'.charCodeAt(0);
 const ASCII_LOWERCASE_END = 'z'.charCodeAt(0);
+const ASCII_WHITESPACE_END = ' '.charCodeAt(0);
+const NON_BREAKING_SPACE_CODE = 160;
 const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
@@ -210,7 +212,7 @@ function isHostnameCharacter(character?: string): boolean {
 // Returns true when whitespace marks the end of the possible URL.
 function isUrlBoundarySpace(character: string): boolean {
     const code = character.charCodeAt(0);
-    return code <= 32 || code === 160;
+    return code <= ASCII_WHITESPACE_END || code === NON_BREAKING_SPACE_CODE;
 }
 
 // Checks for http://, https://, ftp://, or ftps:// starting at this position.
