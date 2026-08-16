@@ -655,6 +655,26 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['@*example.com*', '@<strong>example.com</strong>'],
+        ['@_example.com_', '@<em>example.com</em>'],
+        ['@~example.com~', '@<del>example.com</del>'],
+        ['test@*example.com*', 'test@<strong>example.com</strong>'],
+    ])('keeps the @ context when checking a formatted URL candidate in %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(expected);
+    });
+
+    test.each([
+        ['`~` ~strike~', '<code>~</code> ~strike~'],
+        ['`x~` ~strike~', '<code>x~</code> <del>strike</del>'],
+        ['[~](https://example.com) ~strike~', `${anchor('https://example.com', '~')} ~strike~`],
+        ['`*` *bold*', '<code>*</code> <strong>bold</strong>'],
+        ['[*](https://example.com) *bold*', `${anchor('https://example.com', '*')} <strong>bold</strong>`],
+    ])('keeps protected markers when selecting Markdown pairs in %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+    });
+
+    test.each([
         ['*example.com*', `<strong>${anchor('example.com')}</strong>`],
         ['~example.com~', `<del>${anchor('example.com')}</del>`],
         ['*[link](https://example.com)*', `<strong>${anchor('https://example.com', 'link')}</strong>`],

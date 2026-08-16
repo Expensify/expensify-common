@@ -45,12 +45,15 @@ const ASCII_LOWERCASE_END = 'z'.charCodeAt(0);
 const ASCII_WHITESPACE_END = ' '.charCodeAt(0);
 const NON_BREAKING_SPACE_CODE = 160;
 const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
+const URL_CANDIDATE_PREFIX_CHARACTERS = '@_*~';
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
 type UrlCandidate = {start: number; end: number};
+type MarkdownMarker = {position: number; isProtected: boolean};
+type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
 type CommonRule = {
     name: string;
@@ -162,7 +165,11 @@ function isWordCharacter(character?: string): boolean {
     return character === '_' || isAsciiAlphaNumeric(character);
 }
 
-function canOpenBoldMarkdown(text: string, position: number): boolean {
+function canOpenBoldMarkdown(text: string, position: number, isProtected: boolean): boolean {
+    if (isProtected) {
+        return false;
+    }
+
     const nextCharacter = text[position + 1];
     if (!nextCharacter || /\s|\*/.test(nextCharacter) || text.startsWith('</em', position + 1)) {
         return false;
@@ -176,6 +183,10 @@ function canOpenBoldMarkdown(text: string, position: number): boolean {
 }
 
 function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
+    if (isWordCharacter(text[position - 1])) {
+        return false;
+    }
+
     const nextCharacter = text[position + 1];
     return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
 }
@@ -236,13 +247,10 @@ function findHostnameEnd(text: string, hostnameStart: number, dotPosition: numbe
     return hostnameEnd;
 }
 
-// Expands example.com to include nearby @, *, _, or ~, plus its path, until whitespace or HTML.
+// Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML.
 function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
     let candidateStart = start;
-    if (candidateStart > 0 && text[candidateStart - 1] === '@') {
-        candidateStart--;
-    }
-    while (candidateStart > 0 && '_*~'.includes(text[candidateStart - 1])) {
+    while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
         candidateStart--;
     }
 
@@ -310,12 +318,12 @@ function findUrlCandidates(text: string): UrlCandidate[] {
     return candidates;
 }
 
-function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: (text: string, position: number) => boolean): string {
+function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
     if (!text.includes(marker)) {
         return text;
     }
 
-    const markerPositions = [];
+    const markers: MarkdownMarker[] = [];
     const protectedTags: string[] = [];
     let index = 0;
 
@@ -329,13 +337,14 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
             continue;
         }
 
-        if (text[index] === marker && protectedTags.length === 0) {
-            markerPositions.push(index);
+        // Keep protected markers in order, but remember that they cannot be replaced.
+        if (text[index] === marker) {
+            markers.push({position: index, isProtected: protectedTags.length > 0});
         }
         index++;
     }
 
-    if (markerPositions.length < 2) {
+    if (markers.length < 2) {
         return text;
     }
 
@@ -347,17 +356,24 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
     const output = [];
     const candidateRegex = regexp;
     let outputStart = 0;
-    let openingPosition;
+    let openingMarker: MarkdownMarker | undefined;
 
-    for (const markerPosition of markerPositions) {
-        if (openingPosition === undefined) {
-            openingPosition = canOpen(text, markerPosition) ? markerPosition : undefined;
+    for (const currentMarker of markers) {
+        const markerPosition = currentMarker.position;
+        if (openingMarker === undefined) {
+            openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;
         }
-        if (!canClose(markerPosition)) {
+        if (currentMarker.isProtected || !canClose(markerPosition)) {
             continue;
         }
 
+        if (openingMarker.isProtected) {
+            openingMarker = undefined;
+            continue;
+        }
+
+        const openingPosition = openingMarker.position;
         const prefixLength = openingPosition > 0 ? 1 : 0;
         const suffixLength = markerPosition + 1 < text.length ? 1 : 0;
         const candidateStart = openingPosition - prefixLength;
@@ -366,7 +382,7 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         candidateRegex.lastIndex = 0;
         const candidateMatch = candidateRegex.exec(candidate);
         if (!candidateMatch) {
-            openingPosition = canOpen(text, markerPosition) ? markerPosition : undefined;
+            openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;
         }
         candidateRegex.lastIndex = 0;
@@ -376,10 +392,10 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
             output.push(text.slice(outputStart, openingPosition));
             output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
             outputStart = markerPosition + 1;
-            openingPosition = undefined;
+            openingMarker = undefined;
             continue;
         }
-        openingPosition = undefined;
+        openingMarker = undefined;
     }
 
     if (output.length === 0) {
