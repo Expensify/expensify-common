@@ -909,6 +909,8 @@ const CONST = {
         REPLACE_CARD: 'replace_card',
         SHIP_CARD: 'ship_card',
         REPORT_CARD_FRAUD: 'report_card_fraud',
+        ISSUE_CARD: 'issue_card',
+        UPDATE_CARD: 'update_card',
     },
 
     EXPENSIFY_CARD: {
