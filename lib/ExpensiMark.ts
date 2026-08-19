@@ -148,6 +148,7 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
     return text.replace(regexp, replacement);
 }
 
+/** Returns whether the character is an ASCII letter or digit. */
 function isAsciiAlphaNumeric(character?: string): boolean {
     if (!character) {
         return false;
@@ -161,10 +162,12 @@ function isAsciiAlphaNumeric(character?: string): boolean {
     );
 }
 
+/** Returns whether the character is an ASCII letter, digit, or underscore. */
 function isWordCharacter(character?: string): boolean {
     return character === '_' || isAsciiAlphaNumeric(character);
 }
 
+/** Returns whether the marker at this position can open a bold range. */
 function canOpenBoldMarkdown(text: string, position: number, isProtected: boolean): boolean {
     if (isProtected) {
         return false;
@@ -182,6 +185,7 @@ function canOpenBoldMarkdown(text: string, position: number, isProtected: boolea
     return previousCharacter === '_' && !isWordCharacter(text[position - 2]);
 }
 
+/** Returns whether the marker at this position can open a strikethrough range. */
 function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
     if (isWordCharacter(text[position - 1])) {
         return false;
@@ -191,7 +195,13 @@ function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
     return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
 }
 
-// Records when scanning enters or leaves <a>, <code>, <pre>, or <video>, then returns the character after the tag.
+/** Returns whether the marker at this position can close a bold or strikethrough range. */
+function canCloseMarkdown(text: string, position: number, marker: '*' | '~'): boolean {
+    const previousCharacter = text[position - 1];
+    return Boolean(previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]));
+}
+
+/** Records when scanning enters or leaves <a>, <code>, <pre>, or <video>, then returns the character after the tag. */
 function updateProtectedTagStack(text: string, tagStart: number, protectedTags: string[]): number | undefined {
     const tagEnd = text.indexOf('>', tagStart + 1);
     if (tagEnd === -1) {
@@ -215,18 +225,18 @@ function updateProtectedTagStack(text: string, tagStart: number, protectedTags: 
     return tagEnd + 1;
 }
 
-// Allows letters, numbers, '-', and '.' because they can appear in a domain such as example.com.
+/** Returns whether the character can be part of a hostname such as example.com. */
 function isHostnameCharacter(character?: string): boolean {
     return Boolean(character && (isAsciiAlphaNumeric(character) || character === '-' || character === '.'));
 }
 
-// Returns true when whitespace marks the end of the possible URL.
+/** Returns whether the character is whitespace that ends a possible URL. */
 function isUrlBoundarySpace(character: string): boolean {
     const code = character.charCodeAt(0);
     return code <= ASCII_WHITESPACE_END || code === NON_BREAKING_SPACE_CODE;
 }
 
-// Checks for http://, https://, ftp://, or ftps:// starting at this position.
+/** Returns the supported URL protocol that starts at this position, if one exists. */
 function getProtocolAt(text: string, position: number) {
     const firstCharacter = text[position]?.toLowerCase();
     if (firstCharacter !== 'h' && firstCharacter !== 'f') {
@@ -235,7 +245,7 @@ function getProtocolAt(text: string, position: number) {
     return URL_PROTOCOLS.find((protocol) => text.slice(position, position + protocol.length).toLowerCase() === protocol);
 }
 
-// Reads the text after the dot in example.com and returns where the hostname ends.
+/** Reads the text after the dot in example.com and returns where the hostname ends. */
 function findHostnameEnd(text: string, hostnameStart: number, dotPosition: number): number | undefined {
     let hostnameEnd = dotPosition + 1;
     while (hostnameEnd < text.length && (isAsciiAlphaNumeric(text[hostnameEnd]) || text[hostnameEnd] === '-')) {
@@ -247,7 +257,7 @@ function findHostnameEnd(text: string, hostnameStart: number, dotPosition: numbe
     return hostnameEnd;
 }
 
-// Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML.
+/** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
 function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
     let candidateStart = start;
     while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
@@ -261,7 +271,7 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
     return {start: candidateStart, end: candidateEnd};
 }
 
-// Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex.
+/** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex. */
 function findUrlCandidates(text: string): UrlCandidate[] {
     const candidates: UrlCandidate[] = [];
     const protectedTags: string[] = [];
@@ -318,6 +328,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
     return candidates;
 }
 
+/** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
 function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
     if (!text.includes(marker)) {
         return text;
@@ -344,14 +355,10 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         index++;
     }
 
+    // A Markdown range needs both an opening and closing marker, such as the two * characters in *bold*.
     if (markers.length < 2) {
         return text;
     }
-
-    const canClose = (position: number) => {
-        const previousCharacter = text[position - 1];
-        return Boolean(previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]));
-    };
 
     const output = [];
     const candidateRegex = regexp;
@@ -364,7 +371,7 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;
         }
-        if (currentMarker.isProtected || !canClose(markerPosition)) {
+        if (currentMarker.isProtected || !canCloseMarkdown(text, markerPosition, marker)) {
             continue;
         }
 
