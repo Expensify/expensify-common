@@ -192,13 +192,13 @@ function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
     }
 
     const nextCharacter = text[position + 1];
-    return Boolean(nextCharacter && !/\s|~/.test(nextCharacter));
+    return !!nextCharacter && !/\s|~/.test(nextCharacter);
 }
 
 /** Returns whether the marker at this position can close a bold or strikethrough range. */
 function canCloseMarkdown(text: string, position: number, marker: '*' | '~'): boolean {
     const previousCharacter = text[position - 1];
-    return Boolean(previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]));
+    return !!previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]);
 }
 
 /** Records when scanning enters or leaves <a>, <code>, <pre>, or <video>, then returns the character after the tag. */
@@ -227,7 +227,7 @@ function updateProtectedTagStack(text: string, tagStart: number, protectedTags: 
 
 /** Returns whether the character can be part of a hostname such as example.com. */
 function isHostnameCharacter(character?: string): boolean {
-    return Boolean(character && (isAsciiAlphaNumeric(character) || character === '-' || character === '.'));
+    return !!character && (isAsciiAlphaNumeric(character) || character === '-' || character === '.');
 }
 
 /** Returns whether the character is whitespace that ends a possible URL. */
