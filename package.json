@@ -257,6 +257,10 @@
     "type": "git",
     "url": "git+ssh://git@github.com/Expensify/expensify-common.git"
   },
+  "engines": {
+    "node": ">=26.5.0",
+    "npm": ">=11.17.0"
+  },
   "dependencies": {
     "awesome-phonenumber": "^5.4.0",
     "classnames": "2.5.0",
