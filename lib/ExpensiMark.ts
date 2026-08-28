@@ -35,10 +35,25 @@ type Extras = {
 export type {Extras};
 
 const EXTRAS_DEFAULT = {};
+// These constants represent the ASCII ranges for digits (0-9) and letters (A-Z, a-z).
+const ASCII_DIGIT_START = '0'.charCodeAt(0);
+const ASCII_DIGIT_END = '9'.charCodeAt(0);
+const ASCII_UPPERCASE_START = 'A'.charCodeAt(0);
+const ASCII_UPPERCASE_END = 'Z'.charCodeAt(0);
+const ASCII_LOWERCASE_START = 'a'.charCodeAt(0);
+const ASCII_LOWERCASE_END = 'z'.charCodeAt(0);
+const ASCII_WHITESPACE_END = ' '.charCodeAt(0);
+const NON_BREAKING_SPACE_CODE = 160;
+const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
+const URL_CANDIDATE_PREFIX_CHARACTERS = '@_*~';
+const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
+type UrlCandidate = {start: number; end: number};
+type MarkdownMarker = {position: number; isProtected: boolean};
+type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
 type CommonRule = {
     name: string;
@@ -80,6 +95,9 @@ const MARKDOWN_VIDEO_REGEX = new RegExp(
     `\\!(?:\\[([^\\][]*(?:\\[[^\\][]*][^\\][]*)*)])?\\(((${UrlPatterns.MARKDOWN_URL_REGEX})\\.(?:${Constants.CONST.VIDEO_EXTENSIONS.join('|')}))\\)(?![^<]*(<\\/pre>|<\\/code>))`,
     'gi',
 );
+const BOLD_MARKDOWN_REGEX =
+    /(?<!<[^>]*)(\b_|\B)\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g;
+const STRIKETHROUGH_MARKDOWN_REGEX = /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g;
 
 const SLACK_SPAN_NEW_LINE_TAG = '<span class="c-mrkdwn__br" data-stringify-type="paragraph-break" style="box-sizing: inherit; display: block; height: unset;"></span>';
 
@@ -128,6 +146,271 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
         return text.replace(regexp, (...args) => replacement(extras, ...args));
     }
     return text.replace(regexp, replacement);
+}
+
+/** Returns whether the character is an ASCII letter or digit. */
+function isAsciiAlphaNumeric(character?: string): boolean {
+    if (!character) {
+        return false;
+    }
+
+    const code = character.charCodeAt(0);
+    return (
+        (code >= ASCII_DIGIT_START && code <= ASCII_DIGIT_END) ||
+        (code >= ASCII_UPPERCASE_START && code <= ASCII_UPPERCASE_END) ||
+        (code >= ASCII_LOWERCASE_START && code <= ASCII_LOWERCASE_END)
+    );
+}
+
+/** Returns whether the character is an ASCII letter, digit, or underscore. */
+function isWordCharacter(character?: string): boolean {
+    return character === '_' || isAsciiAlphaNumeric(character);
+}
+
+/** Returns whether the marker at this position can open a bold range. */
+function canOpenBoldMarkdown(text: string, position: number, isProtected: boolean): boolean {
+    if (isProtected) {
+        return false;
+    }
+
+    const nextCharacter = text[position + 1];
+    if (!nextCharacter || /\s|\*/.test(nextCharacter) || text.startsWith('</em', position + 1)) {
+        return false;
+    }
+
+    const previousCharacter = text[position - 1];
+    if (!isWordCharacter(previousCharacter)) {
+        return true;
+    }
+    return previousCharacter === '_' && !isWordCharacter(text[position - 2]);
+}
+
+/** Returns whether the marker at this position can open a strikethrough range. */
+function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
+    if (isWordCharacter(text[position - 1])) {
+        return false;
+    }
+
+    const nextCharacter = text[position + 1];
+    return !!nextCharacter && !/\s|~/.test(nextCharacter);
+}
+
+/** Returns whether the marker at this position can close a bold or strikethrough range. */
+function canCloseMarkdown(text: string, position: number, marker: '*' | '~'): boolean {
+    const previousCharacter = text[position - 1];
+    return !!previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]);
+}
+
+/** Records when scanning enters or leaves <a>, <code>, <pre>, or <video>, then returns the character after the tag. */
+function updateProtectedTagStack(text: string, tagStart: number, protectedTags: string[]): number | undefined {
+    const tagEnd = text.indexOf('>', tagStart + 1);
+    if (tagEnd === -1) {
+        return undefined;
+    }
+
+    const tag = text.slice(tagStart + 1, tagEnd).trim();
+    const isClosingTag = tag.startsWith('/');
+    const tagName = tag.match(/^\/?\s*([a-z][a-z0-9-]*)/i)?.[1]?.toLowerCase();
+    if (tagName && PROTECTED_TAG_NAMES.has(tagName)) {
+        if (isClosingTag) {
+            const matchingTagIndex = protectedTags.lastIndexOf(tagName);
+            if (matchingTagIndex !== -1) {
+                protectedTags.splice(matchingTagIndex, 1);
+            }
+        } else if (!tag.endsWith('/')) {
+            protectedTags.push(tagName);
+        }
+    }
+
+    return tagEnd + 1;
+}
+
+/** Returns whether the character can be part of a hostname such as example.com. */
+function isHostnameCharacter(character?: string): boolean {
+    return !!character && (isAsciiAlphaNumeric(character) || character === '-' || character === '.');
+}
+
+/** Returns whether the character is whitespace that ends a possible URL. */
+function isUrlBoundarySpace(character: string): boolean {
+    const code = character.charCodeAt(0);
+    return code <= ASCII_WHITESPACE_END || code === NON_BREAKING_SPACE_CODE;
+}
+
+/** Returns the supported URL protocol that starts at this position, if one exists. */
+function getProtocolAt(text: string, position: number) {
+    const firstCharacter = text[position]?.toLowerCase();
+    if (firstCharacter !== 'h' && firstCharacter !== 'f') {
+        return undefined;
+    }
+    return URL_PROTOCOLS.find((protocol) => text.slice(position, position + protocol.length).toLowerCase() === protocol);
+}
+
+/** Reads the text after the dot in example.com and returns where the hostname ends. */
+function findHostnameEnd(text: string, hostnameStart: number, dotPosition: number): number | undefined {
+    let hostnameEnd = dotPosition + 1;
+    while (hostnameEnd < text.length && (isAsciiAlphaNumeric(text[hostnameEnd]) || text[hostnameEnd] === '-')) {
+        hostnameEnd++;
+    }
+    if (hostnameStart === dotPosition || hostnameEnd === dotPosition + 1) {
+        return undefined;
+    }
+    return hostnameEnd;
+}
+
+/** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
+function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
+    let candidateStart = start;
+    while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
+        candidateStart--;
+    }
+
+    let candidateEnd = end;
+    while (candidateEnd < text.length && !isUrlBoundarySpace(text[candidateEnd]) && text[candidateEnd] !== '<') {
+        candidateEnd++;
+    }
+    return {start: candidateStart, end: candidateEnd};
+}
+
+/** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex. */
+function findUrlCandidates(text: string): UrlCandidate[] {
+    const candidates: UrlCandidate[] = [];
+    const protectedTags: string[] = [];
+    let index = 0;
+    let hostnameRunStart = 0;
+
+    while (index < text.length) {
+        if (text[index] === '<') {
+            const nextIndex = updateProtectedTagStack(text, index, protectedTags);
+            if (nextIndex === undefined) {
+                break;
+            }
+            index = nextIndex;
+            hostnameRunStart = index;
+            continue;
+        }
+        if (protectedTags.length > 0) {
+            index++;
+            hostnameRunStart = index;
+            continue;
+        }
+
+        const matchedProtocol = getProtocolAt(text, index);
+        if (matchedProtocol) {
+            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
+            candidates.push(candidate);
+            index = candidate.end;
+            hostnameRunStart = candidate.end;
+            continue;
+        }
+
+        if (!isHostnameCharacter(text[index])) {
+            hostnameRunStart = index + 1;
+            index++;
+            continue;
+        }
+        if (text[index] !== '.') {
+            index++;
+            continue;
+        }
+
+        const hostnameEnd = findHostnameEnd(text, hostnameRunStart, index);
+        if (hostnameEnd === undefined) {
+            index++;
+            continue;
+        }
+
+        const candidate = extendUrlCandidateBoundaries(text, hostnameRunStart, hostnameEnd);
+        candidates.push(candidate);
+        index = candidate.end;
+        hostnameRunStart = candidate.end;
+    }
+
+    return candidates;
+}
+
+/** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
+function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
+    if (!text.includes(marker)) {
+        return text;
+    }
+
+    const markers: MarkdownMarker[] = [];
+    const protectedTags: string[] = [];
+    let index = 0;
+
+    while (index < text.length) {
+        if (text[index] === '<') {
+            const nextIndex = updateProtectedTagStack(text, index, protectedTags);
+            if (nextIndex === undefined) {
+                break;
+            }
+            index = nextIndex;
+            continue;
+        }
+
+        // Keep protected markers in order, but remember that they cannot be replaced.
+        if (text[index] === marker) {
+            markers.push({position: index, isProtected: protectedTags.length > 0});
+        }
+        index++;
+    }
+
+    // A Markdown range needs both an opening and closing marker, such as the two * characters in *bold*.
+    if (markers.length < 2) {
+        return text;
+    }
+
+    const output = [];
+    const candidateRegex = regexp;
+    let outputStart = 0;
+    let openingMarker: MarkdownMarker | undefined;
+
+    for (const currentMarker of markers) {
+        const markerPosition = currentMarker.position;
+        if (openingMarker === undefined) {
+            openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
+            continue;
+        }
+        if (currentMarker.isProtected || !canCloseMarkdown(text, markerPosition, marker)) {
+            continue;
+        }
+
+        if (openingMarker.isProtected) {
+            openingMarker = undefined;
+            continue;
+        }
+
+        const openingPosition = openingMarker.position;
+        const prefixLength = openingPosition > 0 ? 1 : 0;
+        const suffixLength = markerPosition + 1 < text.length ? 1 : 0;
+        const candidateStart = openingPosition - prefixLength;
+        const candidateEnd = markerPosition + 1 + suffixLength;
+        const candidate = text.slice(candidateStart, candidateEnd);
+        candidateRegex.lastIndex = 0;
+        const candidateMatch = candidateRegex.exec(candidate);
+        if (!candidateMatch) {
+            openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
+            continue;
+        }
+        candidateRegex.lastIndex = 0;
+        const replacedCandidate = replaceTextWithExtras(candidate, candidateRegex, EXTRAS_DEFAULT, replacement);
+        if (replacedCandidate !== candidate) {
+            const replacedCoreEnd = suffixLength ? replacedCandidate.length - suffixLength : replacedCandidate.length;
+            output.push(text.slice(outputStart, openingPosition));
+            output.push(replacedCandidate.slice(prefixLength, replacedCoreEnd));
+            outputStart = markerPosition + 1;
+            openingMarker = undefined;
+            continue;
+        }
+        openingMarker = undefined;
+    }
+
+    if (output.length === 0) {
+        return text;
+    }
+
+    output.push(text.slice(outputStart));
+    return output.join('');
 }
 
 /**
@@ -688,7 +971,7 @@ export default class ExpensiMark {
 
                 process: (textToProcess, replacement) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
-                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn);
+                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, true);
                 },
 
                 replacement: (_extras, _match, g1, g2) => {
@@ -809,7 +1092,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                regex: /(?<!<[^>]*)(\b_|\B)\*(?!(?:<\/em))(?![^<]*(?:<\/pre>|<\/code>|<\/a>|<\/video>))((?![\s*])[\s\S]*?[^\s*](?<!\s))\*\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
+                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, BOLD_MARKDOWN_REGEX, replacement, '*', canOpenBoldMarkdown),
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -820,7 +1103,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                regex: /(?<!<[^>]*)\B~((?![\s~])[\s\S]*?[^\s~](?<!\s))~\B(?![^<]*>)(?![^<]*(<\/pre>|<\/code>|<\/a>|<\/video>))/g,
+                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement, '~', canOpenStrikethroughMarkdown),
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
@@ -1301,7 +1584,29 @@ export default class ExpensiMark {
     /**
      * Checks matched URLs for validity and replace valid links with html elements
      */
-    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn): string {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false): string {
+        if (shouldScanForUrls) {
+            const candidates = findUrlCandidates(textToCheck);
+            if (candidates.length === 0) {
+                return textToCheck;
+            }
+
+            const output = [];
+            const candidateRegex = regex;
+            let outputStart = 0;
+
+            for (const {start, end} of candidates) {
+                const candidate = textToCheck.slice(start, end);
+                candidateRegex.lastIndex = 0;
+                output.push(textToCheck.slice(outputStart, start));
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
+                outputStart = end;
+            }
+
+            output.push(textToCheck.slice(outputStart));
+            return output.join('');
+        }
+
         let match = regex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;

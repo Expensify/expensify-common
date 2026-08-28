@@ -614,6 +614,106 @@ test('Test wrapped URLs', () => {
     expect(parser.replace(wrappedUrlTestStartString)).toBe(wrappedUrlTestReplacedString);
 });
 
+describe('Test long input candidate parsing', () => {
+    const anchor = (url, label = url) => `<a href="${url.startsWith('http') ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
+
+    test('autolinks a long domain without parsing the full input as a URL', () => {
+        const domain = `${'a'.repeat(70)}.com`;
+        const prefix = 'a'.repeat(14500);
+        expect(parser.replace(`${prefix} ${domain}`)).toBe(`${prefix} ${anchor(domain)}`);
+    });
+
+    test('preserves the ftps protocol when autolinking a candidate', () => {
+        const input = 'ftps://example.com/file';
+        expect(parser.replace(input)).toBe('<a href="ftps://example.com/file" target="_blank" rel="noreferrer noopener">ftps://example.com/file</a>');
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(
+            '<a href="ftps://example.com/file" data-raw-href="ftps://example.com/file" data-link-variant="auto" target="_blank" rel="noreferrer noopener">ftps://example.com/file</a>',
+        );
+    });
+
+    test('autolinks a protocol URL with a dotless host and dotted path', () => {
+        const input = 'http://localhost:3000/foo.app';
+        expect(parser.replace(input)).toBe('<a href="http://localhost:3000/foo.app" target="_blank" rel="noreferrer noopener">http://localhost:3000/foo.app</a>');
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(
+            '<a href="http://localhost:3000/foo.app" data-raw-href="http://localhost:3000/foo.app" data-link-variant="auto" target="_blank" rel="noreferrer noopener">http://localhost:3000/foo.app</a>',
+        );
+    });
+
+    test('does not autolink a URL-looking video label', () => {
+        const input = '![example.com](https://example.com/video.mp4)';
+        expect(parser.replace(input)).toBe('<video data-expensify-source="https://example.com/video.mp4" >example.com</video>');
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(
+            '<video data-expensify-source="https://example.com/video.mp4" data-raw-href="https://example.com/video.mp4" data-link-variant="labeled" >example.com</video>',
+        );
+    });
+
+    test('does not autolink inside nested protected tags', () => {
+        const input = '<code><code>example.com</code>after.com</code> outside.com';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(
+            '<code><code>example.com</code>after.com</code> <a href="https://outside.com" target="_blank" rel="noreferrer noopener">outside.com</a>',
+        );
+    });
+
+    test.each([
+        ['@*example.com*', '@<strong>example.com</strong>'],
+        ['@_example.com_', '@<em>example.com</em>'],
+        ['@~example.com~', '@<del>example.com</del>'],
+        ['test@*example.com*', 'test@<strong>example.com</strong>'],
+    ])('keeps the @ context when checking a formatted URL candidate in %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(expected);
+    });
+
+    test.each([
+        ['`~` ~strike~', '<code>~</code> ~strike~'],
+        ['`x~` ~strike~', '<code>x~</code> <del>strike</del>'],
+        ['[~](https://example.com) ~strike~', `${anchor('https://example.com', '~')} ~strike~`],
+        ['`*` *bold*', '<code>*</code> <strong>bold</strong>'],
+        ['[*](https://example.com) *bold*', `${anchor('https://example.com', '*')} <strong>bold</strong>`],
+    ])('keeps protected markers when selecting Markdown pairs in %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+    });
+
+    test.each([
+        ['*example.com*', `<strong>${anchor('example.com')}</strong>`],
+        ['~example.com~', `<del>${anchor('example.com')}</del>`],
+        ['*[link](https://example.com)*', `<strong>${anchor('https://example.com', 'link')}</strong>`],
+        ['~[link](https://example.com)~', `<del>${anchor('https://example.com', 'link')}</del>`],
+        ['*hello [link](https://example.com) after*', `<strong>hello ${anchor('https://example.com', 'link')} after</strong>`],
+        ['~hello [link](https://example.com) after~', `<del>hello ${anchor('https://example.com', 'link')} after</del>`],
+        ['*hello `world` after*', '<strong>hello <code>world</code> after</strong>'],
+        ['~hello `world` after~', '<del>hello <code>world</code> after</del>'],
+        ['*before example.com after*', `<strong>before ${anchor('example.com')} after</strong>`],
+        ['~before example.com after~', `<del>before ${anchor('example.com')} after</del>`],
+    ])('preserves formatting for %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+    });
+
+    test.each([
+        ['*bold*', '<strong>bold</strong>'],
+        ['~strikethrough~', '<del>strikethrough</del>'],
+    ])('parses %s after long plain text', (input, expected) => {
+        const prefix = 'a'.repeat(14500);
+        expect(parser.replace(`${prefix} ${input}`)).toBe(`${prefix} ${expected}`);
+    });
+
+    test('preserves raw link data used by live markdown', () => {
+        const input = '*hello [link](https://example.com) and example.com after*';
+        const expected =
+            '<strong>hello <a href="https://example.com" data-raw-href="https://example.com" data-link-variant="labeled" target="_blank" rel="noreferrer noopener">link</a> and ' +
+            '<a href="https://example.com" data-raw-href="example.com" data-link-variant="auto" target="_blank" rel="noreferrer noopener">example.com</a> after</strong>';
+        expect(parser.replace(input, {shouldKeepRawInput: true})).toBe(expected);
+    });
+
+    test.each([
+        ['*_*~*_', '*<em>*~*</em>'],
+        ['*~*~*~', '<strong>~</strong>~*~'],
+        ['_~_/_~*~_', '<em>~</em>/<em>~*~</em>'],
+    ])('preserves existing parsing for overlapping markers in %s', (input, expected) => {
+        expect(parser.replace(input)).toBe(expected);
+    });
+});
+
 test('Test Url, where double quote is not allowed', () => {
     const urlTestStartString =
         '"om https://www.she.com/"\n' +
