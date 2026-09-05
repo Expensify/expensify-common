@@ -911,6 +911,7 @@ const CONST = {
         REPORT_CARD_FRAUD: 'report_card_fraud',
         ISSUE_CARD: 'issue_card',
         UPDATE_CARD: 'update_card',
+        UPDATE_PERSONAL_DETAILS: 'update_personal_details',
         ADD_DELEGATE: 'add_delegate',
     },
 
