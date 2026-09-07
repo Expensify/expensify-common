@@ -912,6 +912,8 @@ const CONST = {
         ISSUE_CARD: 'issue_card',
         UPDATE_CARD: 'update_card',
         UPDATE_PERSONAL_DETAILS: 'update_personal_details',
+        ADD_DELEGATE: 'add_delegate',
+        UPDATE_DELEGATE: 'update_delegate',
     },
 
     EXPENSIFY_CARD: {
