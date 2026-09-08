@@ -914,6 +914,7 @@ const CONST = {
         UPDATE_PERSONAL_DETAILS: 'update_personal_details',
         ADD_DELEGATE: 'add_delegate',
         UPDATE_DELEGATE: 'update_delegate',
+        CHANGE_PRIMARY_LOGIN: 'change_primary_login',
     },
 
     EXPENSIFY_CARD: {
