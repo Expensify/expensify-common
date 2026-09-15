@@ -47,12 +47,13 @@ const NON_BREAKING_SPACE_CODE = 160;
 const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
 const URL_CANDIDATE_PREFIX_CHARACTERS = '@_*~';
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
+const MARKDOWN_PROTECTED_CLOSING_TAGS = ['</pre>', '</code>', '</a>', '</video>'] as const;
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
 type UrlCandidate = {start: number; end: number};
-type MarkdownMarker = {position: number; isProtected: boolean};
+type MarkdownMarker = {position: number; isProtected: boolean; isBlockedByFollowingHtml?: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
 type CommonRule = {
@@ -271,6 +272,54 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
     return {start: candidateStart, end: candidateEnd};
 }
 
+/** Returns whether text at the given position starts with the expected value, ignoring letter casing. */
+function startsWithIgnoreCase(text: string, expected: string, position: number): boolean {
+    return text.slice(position, position + expected.length).toLowerCase() === expected;
+}
+
+/**
+ * Removes URL candidates that the original full-text regex would reject because of later raw HTML.
+ * The text is scanned once from right to left so distant HTML does not need to be appended to every candidate.
+ */
+function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: UrlCandidate[]): UrlCandidate[] {
+    if (candidates.length === 0 || (!text.includes('<') && !text.includes('>'))) {
+        return candidates;
+    }
+
+    const validCandidates: UrlCandidate[] = [];
+    let candidateIndex = candidates.length - 1;
+    let nextLessThan = text.length;
+    let nextGreaterThan = text.length;
+    let nextOpeningAnchor = text.length;
+    let nextClosingAnchor = text.length;
+
+    for (let index = text.length; index >= 0 && candidateIndex >= 0; index--) {
+        if (text[index] === '<') {
+            nextLessThan = index;
+            if (text[index + 1]?.toLowerCase() === 'a') {
+                nextOpeningAnchor = index;
+            } else if (startsWithIgnoreCase(text, '</a>', index)) {
+                nextClosingAnchor = index;
+            }
+        } else if (text[index] === '>') {
+            nextGreaterThan = index;
+        }
+
+        while (candidateIndex >= 0 && candidates[candidateIndex].end === index) {
+            const firstHtmlBoundaryIsClosingTag = nextLessThan < nextGreaterThan && text.startsWith('</', nextLessThan) && !startsWithIgnoreCase(text, '</h1>', nextLessThan);
+            const firstTagIsProtectedClosingTag = startsWithIgnoreCase(text, '</pre>', nextLessThan) || startsWithIgnoreCase(text, '</code>', nextLessThan);
+            const isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || firstHtmlBoundaryIsClosingTag || nextClosingAnchor < nextOpeningAnchor || firstTagIsProtectedClosingTag;
+
+            if (!isBlockedByFollowingHtml) {
+                validCandidates.push(candidates[candidateIndex]);
+            }
+            candidateIndex--;
+        }
+    }
+
+    return validCandidates.reverse();
+}
+
 /** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex. */
 function findUrlCandidates(text: string): UrlCandidate[] {
     const candidates: UrlCandidate[] = [];
@@ -282,7 +331,9 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         if (text[index] === '<') {
             const nextIndex = updateProtectedTagStack(text, index, protectedTags);
             if (nextIndex === undefined) {
-                break;
+                index++;
+                hostnameRunStart = index;
+                continue;
             }
             index = nextIndex;
             hostnameRunStart = index;
@@ -325,7 +376,43 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         hostnameRunStart = candidate.end;
     }
 
-    return candidates;
+    return filterUrlCandidatesBlockedByFollowingHtml(text, candidates);
+}
+
+/** Returns whether a protected closing tag starts at the given position. */
+function startsWithMarkdownProtectedClosingTag(text: string, position: number): boolean {
+    return MARKDOWN_PROTECTED_CLOSING_TAGS.some((tag) => text.startsWith(tag, position));
+}
+
+/**
+ * Records when later raw HTML would make the original full-text Markdown regex reject a closing marker.
+ * This keeps candidate validation fast even when the relevant HTML character is far away.
+ */
+function addFollowingHtmlContextToMarkdownMarkers(text: string, markers: MarkdownMarker[]): MarkdownMarker[] {
+    const markersWithHtmlContext: MarkdownMarker[] = [];
+    let markerIndex = markers.length - 1;
+    let nextLessThan = text.length;
+    let nextGreaterThan = text.length;
+
+    for (let index = text.length; index >= 0 && markerIndex >= 0; index--) {
+        if (text[index] === '<') {
+            nextLessThan = index;
+        } else if (text[index] === '>') {
+            nextGreaterThan = index;
+        }
+
+        if (markers[markerIndex].position !== index) {
+            continue;
+        }
+
+        markersWithHtmlContext.push({
+            ...markers[markerIndex],
+            isBlockedByFollowingHtml: nextGreaterThan < nextLessThan || startsWithMarkdownProtectedClosingTag(text, nextLessThan),
+        });
+        markerIndex--;
+    }
+
+    return markersWithHtmlContext.reverse();
 }
 
 /** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
@@ -360,12 +447,14 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         return text;
     }
 
+    const markersWithHtmlContext = text.includes('<') || text.includes('>') ? addFollowingHtmlContextToMarkdownMarkers(text, markers) : markers;
+
     const output = [];
     const candidateRegex = regexp;
     let outputStart = 0;
     let openingMarker: MarkdownMarker | undefined;
 
-    for (const currentMarker of markers) {
+    for (const currentMarker of markersWithHtmlContext) {
         const markerPosition = currentMarker.position;
         if (openingMarker === undefined) {
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
@@ -387,7 +476,7 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         const candidateEnd = markerPosition + 1 + suffixLength;
         const candidate = text.slice(candidateStart, candidateEnd);
         candidateRegex.lastIndex = 0;
-        const candidateMatch = candidateRegex.exec(candidate);
+        const candidateMatch = currentMarker.isBlockedByFollowingHtml ? null : candidateRegex.exec(candidate);
         if (!candidateMatch) {
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;

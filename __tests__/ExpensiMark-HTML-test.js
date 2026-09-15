@@ -655,6 +655,18 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['before.com <unfinished after.com', `${anchor('before.com')} <unfinished ${anchor('after.com')}`],
+        ['<span>example.com</span>', '<span>example.com</span>'],
+        ['example.com >', 'example.com >'],
+        ['example.com text </span>', 'example.com text </span>'],
+        ['example.com <span></span></a>', 'example.com <span></span></a>'],
+        ['<h1>example.com</h1>', `<h1>${anchor('example.com')}</h1>`],
+        ['example.com <abbr></abbr></a>', `${anchor('example.com')} <abbr></abbr></a>`],
+    ])('preserves raw HTML context when autolinking %s', (input, expected) => {
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(expected);
+    });
+
+    test.each([
         ['@*example.com*', '@<strong>example.com</strong>'],
         ['@_example.com_', '@<em>example.com</em>'],
         ['@~example.com~', '@<del>example.com</del>'],
@@ -695,6 +707,21 @@ describe('Test long input candidate parsing', () => {
     ])('parses %s after long plain text', (input, expected) => {
         const prefix = 'a'.repeat(14500);
         expect(parser.replace(`${prefix} ${input}`)).toBe(`${prefix} ${expected}`);
+    });
+
+    test.each([
+        ['*bold* >', '*bold* >'],
+        ['~strike~ >', '~strike~ >'],
+        ['*bold* </span>', '<strong>bold</strong> </span>'],
+        ['~strike~ </span>', '<del>strike</del> </span>'],
+    ])('preserves raw HTML context when parsing Markdown in %s', (input, expected) => {
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(expected);
+    });
+
+    test('preserves distant raw HTML context without passing the long suffix to the Markdown regex', () => {
+        const longText = 'a'.repeat(14500);
+        expect(parser.replace(`*bold* ${longText} >`, {shouldEscapeText: false})).toBe(`*bold* ${longText} >`);
+        expect(parser.replace(`~strike~ ${longText} </code>`, {shouldEscapeText: false})).toBe(`~strike~ ${longText} </code>`);
     });
 
     test('preserves raw link data used by live markdown', () => {
