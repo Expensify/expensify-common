@@ -623,6 +623,18 @@ describe('Test long input candidate parsing', () => {
         expect(parser.replace(`${prefix} ${domain}`)).toBe(`${prefix} ${anchor(domain)}`);
     });
 
+    test('handles long valid and invalid bare-domain candidates without changing their output', () => {
+        const hostname = 'a'.repeat(8496);
+        const validUrl = `${hostname}.com`;
+        const invalidUrl = `${validUrl}x`;
+        const repeatedDots = `${'a.'.repeat(4499)}a`;
+
+        // The generated anchor contains the long URL in both href and label, so its HTML is much longer than the input.
+        expect(parser.replace(validUrl)).toBe(anchor(validUrl));
+        expect(parser.replace(invalidUrl)).toBe(invalidUrl);
+        expect(parser.replace(repeatedDots)).toBe(repeatedDots);
+    });
+
     test('preserves the ftps protocol when autolinking a candidate', () => {
         const input = 'ftps://example.com/file';
         expect(parser.replace(input)).toBe('<a href="ftps://example.com/file" target="_blank" rel="noreferrer noopener">ftps://example.com/file</a>');
@@ -652,6 +664,51 @@ describe('Test long input candidate parsing', () => {
         expect(parser.replace(input, {shouldEscapeText: false})).toBe(
             '<code><code>example.com</code>after.com</code> <a href="https://outside.com" target="_blank" rel="noreferrer noopener">outside.com</a>',
         );
+    });
+
+    test.each([
+        ['<a><span>*bold*</span></a>', '<a><span><strong>bold</strong></span></a>'],
+        ['<code><h1>example.com</h1></code>', `<code><h1>${anchor('example.com')}</h1></code>`],
+    ])('preserves complete-text regex behavior for nested raw HTML in %s', (input, expected) => {
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(expected);
+    });
+
+    test('does not carry raw anchor context across a newline and inline code', () => {
+        const input = 'example.com\n`</a>`';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(`${anchor('example.com')}<br /><code></a></code>`);
+    });
+
+    test.each(['a', 'code', 'pre', 'video'])('does not treat an unclosed <%s> tag as protected', (tagName) => {
+        const input = `<${tagName}>example.com`;
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(`<${tagName}>${anchor('example.com')}`);
+        expect(parser.replace(input)).toBe(`&lt;${tagName}&gt;${anchor('example.com')}`);
+    });
+
+    test('protects a matched nested tag without letting an unclosed outer tag hide later URLs', () => {
+        const input = '<code>before.com<pre>inside.com</pre>after.com';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(`<code>${anchor('before.com')}<pre>inside.com</pre>${anchor('after.com')}`);
+    });
+
+    test('does not match a generated closing anchor with an earlier unclosed anchor', () => {
+        const input = '<a>*bold* ~strike~ <unfinished after.com';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(`<a><strong>bold</strong> <del>strike</del> <unfinished ${anchor('after.com')}`);
+    });
+
+    test.each([
+        ['<unfinished example.com `code`', `<unfinished ${anchor('example.com')} <code>code</code>`],
+        ['<unfinished example.com 😄', `<unfinished ${anchor('example.com')} <emoji>😄</emoji>`],
+        ['<unfinished example.com [label](https://example.com)', `<unfinished ${anchor('example.com')} ${anchor('https://example.com', 'label')}`],
+        ['<unfinished example.com ![alt](https://example.com/image.png)', `<unfinished ${anchor('example.com')} <img src="https://example.com/image.png" alt="alt" />`],
+        ['<unfinished example.com ![video](https://example.com/video.mp4)', `<unfinished ${anchor('example.com')} <video data-expensify-source="https://example.com/video.mp4" >video</video>`],
+        ['# heading <unfinished example.com', `<h1>heading <unfinished ${anchor('example.com')}</h1>`],
+        ['<unfinished example.com @here', `<unfinished ${anchor('example.com')} <mention-here>@here</mention-here>`],
+    ])('keeps URLs between malformed HTML and generated HTML in %s', (input, expected) => {
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(expected);
+    });
+
+    test('keeps a less-than character inside a quoted tag attribute protected', () => {
+        const input = '<code title="a<b">example.com</code>';
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(input);
     });
 
     test.each([
@@ -687,6 +744,15 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['<code>*bold*', '<code><strong>bold</strong>'],
+        ['<pre>~strike~', '<pre><del>strike</del>'],
+        ['<a>*bold*', '<a><strong>bold</strong>'],
+        ['<video>~strike~', '<video><del>strike</del>'],
+    ])('does not protect Markdown after an unclosed HTML tag in %s', (input, expected) => {
+        expect(parser.replace(input, {shouldEscapeText: false})).toBe(expected);
+    });
+
+    test.each([
         ['*example.com*', `<strong>${anchor('example.com')}</strong>`],
         ['~example.com~', `<del>${anchor('example.com')}</del>`],
         ['*[link](https://example.com)*', `<strong>${anchor('https://example.com', 'link')}</strong>`],
@@ -712,6 +778,10 @@ describe('Test long input candidate parsing', () => {
     test.each([
         ['*bold* >', '*bold* >'],
         ['~strike~ >', '~strike~ >'],
+        ['*one* > *two*', '<strong>one* > *two</strong>'],
+        ['~one~ > ~two~', '<del>one~ > ~two</del>'],
+        ['< *bold* </span>', '< *bold* </span>'],
+        ['< ~strike~ </span>', '< ~strike~ </span>'],
         ['*bold* </span>', '<strong>bold</strong> </span>'],
         ['~strike~ </span>', '<del>strike</del> </span>'],
     ])('preserves raw HTML context when parsing Markdown in %s', (input, expected) => {
