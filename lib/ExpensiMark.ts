@@ -4,6 +4,7 @@ import Str from './str';
 import * as Constants from './CONST';
 import * as UrlPatterns from './Url';
 import Logger from './Logger';
+import TLD_REGEX from './tlds';
 import * as Utils from './utils';
 
 type Extras = {
@@ -46,13 +47,17 @@ const ASCII_WHITESPACE_END = ' '.charCodeAt(0);
 const NON_BREAKING_SPACE_CODE = 160;
 const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
 const URL_CANDIDATE_PREFIX_CHARACTERS = '@_*~';
+const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
+const URL_TLDS = new Set(URL_TLD_LIST);
+const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
+const MARKDOWN_PROTECTED_CLOSING_TAGS = ['</pre>', '</code>', '</a>', '</video>'] as const;
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
-type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean) => string;
+type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
 type UrlCandidate = {start: number; end: number};
-type MarkdownMarker = {position: number; isProtected: boolean};
+type MarkdownMarker = {position: number; isProtected: boolean; isBlockedByFollowingHtml?: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
 type CommonRule = {
@@ -146,6 +151,21 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
         return text.replace(regexp, (...args) => replacement(extras, ...args));
     }
     return text.replace(regexp, replacement);
+}
+
+/**
+ * Returns whether `text` can use the faster candidate scanner.
+ *
+ * Raw HTML can change how URLs and Markdown are matched across tag boundaries. When
+ * `shouldEscapeText` is false and the text contains `<` or `>`, we keep the original full-text
+ * matching instead.
+ *
+ * @param text - Text to check.
+ * @param shouldEscapeText - Whether HTML characters are escaped before parsing.
+ * @returns Whether candidate scanning can be used safely.
+ */
+function canUseCandidateScanning(text: string, shouldEscapeText: boolean): boolean {
+    return shouldEscapeText || (!text.includes('<') && !text.includes('>'));
 }
 
 /** Returns whether the character is an ASCII letter or digit. */
@@ -245,16 +265,75 @@ function getProtocolAt(text: string, position: number) {
     return URL_PROTOCOLS.find((protocol) => text.slice(position, position + protocol.length).toLowerCase() === protocol);
 }
 
-/** Reads the text after the dot in example.com and returns where the hostname ends. */
-function findHostnameEnd(text: string, hostnameStart: number, dotPosition: number): number | undefined {
-    let hostnameEnd = dotPosition + 1;
-    while (hostnameEnd < text.length && (isAsciiAlphaNumeric(text[hostnameEnd]) || text[hostnameEnd] === '-')) {
-        hostnameEnd++;
+/** Returns whether the range contains a hostname label accepted by the URL regex. */
+function isValidHostnameLabel(text: string, start: number, end: number): boolean {
+    if (start >= end || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
+        return false;
     }
-    if (hostnameStart === dotPosition || hostnameEnd === dotPosition + 1) {
-        return undefined;
+
+    for (let index = start + 1; index < end - 1; index++) {
+        if (!isAsciiAlphaNumeric(text[index]) && text[index] !== '-') {
+            return false;
+        }
     }
-    return hostnameEnd;
+    return true;
+}
+
+/** Finds the first label in the valid hostname ending immediately before `dotPosition`. */
+function findHostnameStart(text: string, dotPosition: number): number | undefined {
+    let hostnameStart = dotPosition;
+    let labelEnd = dotPosition;
+
+    while (labelEnd > 0) {
+        let rawLabelStart = labelEnd - 1;
+        while (rawLabelStart >= 0 && text[rawLabelStart] !== '.' && isHostnameCharacter(text[rawLabelStart])) {
+            rawLabelStart--;
+        }
+        rawLabelStart++;
+
+        let labelStart = rawLabelStart;
+        while (labelStart < labelEnd && text[labelStart] === '-') {
+            labelStart++;
+        }
+
+        if (!isValidHostnameLabel(text, labelStart, labelEnd)) {
+            break;
+        }
+        hostnameStart = labelStart;
+
+        // A leading hyphen ends the hostname, but the URL regex can still start at the valid suffix after it.
+        if (labelStart !== rawLabelStart) {
+            break;
+        }
+
+        const separatorPosition = labelStart - 1;
+        if (separatorPosition < 0 || text[separatorPosition] !== '.') {
+            break;
+        }
+        labelEnd = separatorPosition;
+    }
+
+    return hostnameStart === dotPosition ? undefined : hostnameStart;
+}
+
+/** Finds a known TLD immediately after a dot without running the full URL regex. */
+function findKnownTldEnd(text: string, dotPosition: number): number | undefined {
+    const maximumEnd = Math.min(text.length, dotPosition + 1 + MAX_URL_TLD_LENGTH);
+
+    for (let end = dotPosition + 2; end <= maximumEnd; end++) {
+        const currentCharacter = text[end - 1];
+        if (!isAsciiAlphaNumeric(currentCharacter) && currentCharacter !== '-') {
+            break;
+        }
+
+        const nextCharacter = text[end];
+        const hasValidBoundary = !nextCharacter || nextCharacter === ':' || nextCharacter === '_' || !isWordCharacter(nextCharacter);
+        if (hasValidBoundary && URL_TLDS.has(text.slice(dotPosition + 1, end).toLowerCase())) {
+            return end;
+        }
+    }
+
+    return undefined;
 }
 
 /** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
@@ -271,26 +350,73 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
     return {start: candidateStart, end: candidateEnd};
 }
 
-/** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves validity to the existing regex. */
+/** Returns whether `expected` starts at `position`, ignoring letter casing. */
+function startsWithIgnoreCase(text: string, expected: string, position: number): boolean {
+    return text.slice(position, position + expected.length).toLowerCase() === expected;
+}
+
+/**
+ * Removes URL candidates that the original full-text regex would reject because of later raw HTML.
+ * The text is scanned once from right to left so distant HTML does not need to be appended to every candidate.
+ */
+function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: UrlCandidate[]): UrlCandidate[] {
+    if (candidates.length === 0 || (!text.includes('<') && !text.includes('>'))) {
+        return candidates;
+    }
+
+    const validCandidates: UrlCandidate[] = [];
+    let candidateIndex = candidates.length - 1;
+    let nextLessThan = text.length;
+    let nextGreaterThan = text.length;
+    let nextOpeningAnchor = text.length;
+    let nextClosingAnchor = text.length;
+
+    for (let index = text.length; index >= 0 && candidateIndex >= 0; index--) {
+        if (text[index] === '<') {
+            nextLessThan = index;
+            if (text[index + 1]?.toLowerCase() === 'a') {
+                nextOpeningAnchor = index;
+            } else if (startsWithIgnoreCase(text, '</a>', index)) {
+                nextClosingAnchor = index;
+            }
+        } else if (text[index] === '>') {
+            nextGreaterThan = index;
+        }
+
+        while (candidateIndex >= 0 && candidates[candidateIndex].end === index) {
+            // These checks reproduce the HTML lookaheads in the original full-text URL regex.
+            const firstHtmlBoundaryIsClosingTag = nextLessThan < nextGreaterThan && text.startsWith('</', nextLessThan) && !startsWithIgnoreCase(text, '</h1>', nextLessThan);
+            const firstTagIsProtectedClosingTag = startsWithIgnoreCase(text, '</pre>', nextLessThan) || startsWithIgnoreCase(text, '</code>', nextLessThan);
+            const isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || firstHtmlBoundaryIsClosingTag || nextClosingAnchor < nextOpeningAnchor || firstTagIsProtectedClosingTag;
+
+            if (!isBlockedByFollowingHtml) {
+                validCandidates.push(candidates[candidateIndex]);
+            }
+            candidateIndex--;
+        }
+    }
+
+    return validCandidates.reverse();
+}
+
+/** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves final validity to the existing regex. */
 function findUrlCandidates(text: string): UrlCandidate[] {
     const candidates: UrlCandidate[] = [];
     const protectedTags: string[] = [];
     let index = 0;
-    let hostnameRunStart = 0;
 
     while (index < text.length) {
         if (text[index] === '<') {
             const nextIndex = updateProtectedTagStack(text, index, protectedTags);
             if (nextIndex === undefined) {
-                break;
+                index++;
+                continue;
             }
             index = nextIndex;
-            hostnameRunStart = index;
             continue;
         }
         if (protectedTags.length > 0) {
             index++;
-            hostnameRunStart = index;
             continue;
         }
 
@@ -299,33 +425,57 @@ function findUrlCandidates(text: string): UrlCandidate[] {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             candidates.push(candidate);
             index = candidate.end;
-            hostnameRunStart = candidate.end;
             continue;
         }
 
-        if (!isHostnameCharacter(text[index])) {
-            hostnameRunStart = index + 1;
-            index++;
-            continue;
-        }
         if (text[index] !== '.') {
             index++;
             continue;
         }
 
-        const hostnameEnd = findHostnameEnd(text, hostnameRunStart, index);
-        if (hostnameEnd === undefined) {
+        const tldEnd = findKnownTldEnd(text, index);
+        const hostnameStart = tldEnd === undefined ? undefined : findHostnameStart(text, index);
+        if (tldEnd === undefined || hostnameStart === undefined) {
             index++;
             continue;
         }
 
-        const candidate = extendUrlCandidateBoundaries(text, hostnameRunStart, hostnameEnd);
+        const candidate = extendUrlCandidateBoundaries(text, hostnameStart, tldEnd);
         candidates.push(candidate);
         index = candidate.end;
-        hostnameRunStart = candidate.end;
     }
 
-    return candidates;
+    return filterUrlCandidatesBlockedByFollowingHtml(text, candidates);
+}
+
+/** Returns whether a closing tag that blocks Markdown matching starts at `position`. */
+function startsWithMarkdownProtectedClosingTag(text: string, position: number): boolean {
+    return MARKDOWN_PROTECTED_CLOSING_TAGS.some((tag) => text.startsWith(tag, position));
+}
+
+/** Records when later generated HTML would make the full-text Markdown regex reject a closing marker. */
+function addFollowingHtmlContextToMarkdownMarkers(text: string, markers: MarkdownMarker[]): MarkdownMarker[] {
+    const markersWithHtmlContext = markers.map((marker) => ({...marker}));
+    let markerIndex = markersWithHtmlContext.length - 1;
+    let nextLessThan = text.length;
+    let nextGreaterThan = text.length;
+
+    for (let index = text.length; index >= 0 && markerIndex >= 0; index--) {
+        if (text[index] === '<') {
+            nextLessThan = index;
+        } else if (text[index] === '>') {
+            nextGreaterThan = index;
+        }
+
+        if (markersWithHtmlContext[markerIndex].position !== index) {
+            continue;
+        }
+
+        markersWithHtmlContext[markerIndex].isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || startsWithMarkdownProtectedClosingTag(text, nextLessThan);
+        markerIndex--;
+    }
+
+    return markersWithHtmlContext;
 }
 
 /** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
@@ -360,12 +510,14 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         return text;
     }
 
+    const markersWithHtmlContext = text.includes('<') || text.includes('>') ? addFollowingHtmlContextToMarkdownMarkers(text, markers) : markers;
+
     const output = [];
     const candidateRegex = regexp;
     let outputStart = 0;
     let openingMarker: MarkdownMarker | undefined;
 
-    for (const currentMarker of markers) {
+    for (const currentMarker of markersWithHtmlContext) {
         const markerPosition = currentMarker.position;
         if (openingMarker === undefined) {
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
@@ -387,8 +539,13 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         const candidateEnd = markerPosition + 1 + suffixLength;
         const candidate = text.slice(candidateStart, candidateEnd);
         candidateRegex.lastIndex = 0;
-        const candidateMatch = candidateRegex.exec(candidate);
+        const candidateMatch = currentMarker.isBlockedByFollowingHtml ? null : candidateRegex.exec(candidate);
         if (!candidateMatch) {
+            if (currentMarker.isBlockedByFollowingHtml) {
+                // The full regex keeps the original opening marker and tries a later closing marker.
+                // For example, `*one* > *two*` is matched from the first `*` to the last `*`.
+                continue;
+            }
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;
         }
@@ -969,9 +1126,10 @@ export default class ExpensiMark {
             {
                 name: 'autolink',
 
-                process: (textToProcess, replacement) => {
+                process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
-                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, true);
+                    // Raw HTML depends on complete-text lookaheads. Text without HTML can safely use the faster candidate scanner.
+                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, canUseCandidateScanning(textToProcess, shouldEscapeText));
                 },
 
                 replacement: (_extras, _match, g1, g2) => {
@@ -1050,6 +1208,7 @@ export default class ExpensiMark {
                 regex: new RegExp(`([^\\w'#%+-]|^)${Constants.CONST.REG_EXP.MARKDOWN_EMAIL}(?!((?:(?!<a).)+)?<\\/a>|[^<>]*<\\/(?!em|h1|blockquote))`, 'gim'),
                 replacement: '$1<a href="mailto:$2">$2</a>',
                 rawInputReplacement: '$1<a href="mailto:$2" data-raw-href="$2" data-link-variant="auto">$2</a>',
+                shouldSkipProcessing: (textToCheck) => !textToCheck.includes('@'),
             },
 
             /**
@@ -1092,7 +1251,12 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, BOLD_MARKDOWN_REGEX, replacement, '*', canOpenBoldMarkdown),
+                process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
+                    if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
+                        return replaceMarkdownCandidates(textToProcess, BOLD_MARKDOWN_REGEX, replacement, '*', canOpenBoldMarkdown);
+                    }
+                    return replaceTextWithExtras(textToProcess, BOLD_MARKDOWN_REGEX, EXTRAS_DEFAULT, replacement);
+                },
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -1103,7 +1267,12 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                process: (textToProcess, replacement) => replaceMarkdownCandidates(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement, '~', canOpenStrikethroughMarkdown),
+                process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
+                    if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
+                        return replaceMarkdownCandidates(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement, '~', canOpenStrikethroughMarkdown);
+                    }
+                    return replaceTextWithExtras(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, EXTRAS_DEFAULT, replacement);
+                },
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
@@ -1557,7 +1726,7 @@ export default class ExpensiMark {
 
             const replacement = shouldKeepRawInput && rule.rawInputReplacement ? rule.rawInputReplacement : rule.replacement;
             if ('process' in rule) {
-                replacedText = rule.process(replacedText, replacement, shouldKeepRawInput);
+                replacedText = rule.process(replacedText, replacement, shouldKeepRawInput, shouldEscapeText);
             } else {
                 replacedText = replaceTextWithExtras(replacedText, rule.regex, extras, replacement);
             }
