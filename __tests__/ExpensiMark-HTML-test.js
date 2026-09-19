@@ -699,7 +699,10 @@ describe('Test long input candidate parsing', () => {
         ['<unfinished example.com 😄', `<unfinished ${anchor('example.com')} <emoji>😄</emoji>`],
         ['<unfinished example.com [label](https://example.com)', `<unfinished ${anchor('example.com')} ${anchor('https://example.com', 'label')}`],
         ['<unfinished example.com ![alt](https://example.com/image.png)', `<unfinished ${anchor('example.com')} <img src="https://example.com/image.png" alt="alt" />`],
-        ['<unfinished example.com ![video](https://example.com/video.mp4)', `<unfinished ${anchor('example.com')} <video data-expensify-source="https://example.com/video.mp4" >video</video>`],
+        [
+            '<unfinished example.com ![video](https://example.com/video.mp4)',
+            `<unfinished ${anchor('example.com')} <video data-expensify-source="https://example.com/video.mp4" >video</video>`,
+        ],
         ['# heading <unfinished example.com', `<h1>heading <unfinished ${anchor('example.com')}</h1>`],
         ['<unfinished example.com @here', `<unfinished ${anchor('example.com')} <mention-here>@here</mention-here>`],
     ])('keeps URLs between malformed HTML and generated HTML in %s', (input, expected) => {

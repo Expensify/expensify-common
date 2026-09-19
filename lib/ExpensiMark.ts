@@ -480,13 +480,7 @@ function addFollowingHtmlContextToMarkdownMarkers(text: string, markers: Markdow
 }
 
 /** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
-function replaceMarkdownCandidates(
-    text: string,
-    regexp: RegExp,
-    replacement: Replacement,
-    marker: '*' | '~',
-    canOpen: CanOpenMarkdown,
-): string {
+function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
     if (!text.includes(marker)) {
         return text;
     }
