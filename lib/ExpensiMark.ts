@@ -51,13 +51,12 @@ const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
 const URL_TLDS = new Set(URL_TLD_LIST);
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
-const MARKDOWN_PROTECTED_CLOSING_TAGS = ['</pre>', '</code>', '</a>', '</video>'] as const;
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
 type UrlCandidate = {start: number; end: number};
-type MarkdownMarker = {position: number; isProtected: boolean; isBlockedByFollowingHtml?: boolean};
+type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
 type CommonRule = {
@@ -448,36 +447,6 @@ function findUrlCandidates(text: string): UrlCandidate[] {
     return filterUrlCandidatesBlockedByFollowingHtml(text, candidates);
 }
 
-/** Returns whether a closing tag that blocks Markdown matching starts at `position`. */
-function startsWithMarkdownProtectedClosingTag(text: string, position: number): boolean {
-    return MARKDOWN_PROTECTED_CLOSING_TAGS.some((tag) => text.startsWith(tag, position));
-}
-
-/** Records when later generated HTML would make the full-text Markdown regex reject a closing marker. */
-function addFollowingHtmlContextToMarkdownMarkers(text: string, markers: MarkdownMarker[]): MarkdownMarker[] {
-    const markersWithHtmlContext = markers.map((marker) => ({...marker}));
-    let markerIndex = markersWithHtmlContext.length - 1;
-    let nextLessThan = text.length;
-    let nextGreaterThan = text.length;
-
-    for (let index = text.length; index >= 0 && markerIndex >= 0; index--) {
-        if (text[index] === '<') {
-            nextLessThan = index;
-        } else if (text[index] === '>') {
-            nextGreaterThan = index;
-        }
-
-        if (markersWithHtmlContext[markerIndex].position !== index) {
-            continue;
-        }
-
-        markersWithHtmlContext[markerIndex].isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || startsWithMarkdownProtectedClosingTag(text, nextLessThan);
-        markerIndex--;
-    }
-
-    return markersWithHtmlContext;
-}
-
 /** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
 function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
     if (!text.includes(marker)) {
@@ -510,14 +479,12 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         return text;
     }
 
-    const markersWithHtmlContext = text.includes('<') || text.includes('>') ? addFollowingHtmlContextToMarkdownMarkers(text, markers) : markers;
-
     const output = [];
     const candidateRegex = regexp;
     let outputStart = 0;
     let openingMarker: MarkdownMarker | undefined;
 
-    for (const currentMarker of markersWithHtmlContext) {
+    for (const currentMarker of markers) {
         const markerPosition = currentMarker.position;
         if (openingMarker === undefined) {
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
@@ -539,13 +506,8 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
         const candidateEnd = markerPosition + 1 + suffixLength;
         const candidate = text.slice(candidateStart, candidateEnd);
         candidateRegex.lastIndex = 0;
-        const candidateMatch = currentMarker.isBlockedByFollowingHtml ? null : candidateRegex.exec(candidate);
+        const candidateMatch = candidateRegex.exec(candidate);
         if (!candidateMatch) {
-            if (currentMarker.isBlockedByFollowingHtml) {
-                // The full regex keeps the original opening marker and tries a later closing marker.
-                // For example, `*one* > *two*` is matched from the first `*` to the last `*`.
-                continue;
-            }
             openingMarker = canOpen(text, markerPosition, currentMarker.isProtected) ? currentMarker : undefined;
             continue;
         }
