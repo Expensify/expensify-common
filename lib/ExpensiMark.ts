@@ -49,6 +49,7 @@ const URL_PROTOCOLS = ['https://', 'http://', 'ftps://', 'ftp://'] as const;
 const URL_CANDIDATE_PREFIX_CHARACTERS = '@_*~';
 const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
 const URL_TLDS = new Set(URL_TLD_LIST);
+// Caps TLD scanning at the longest known TLD so long invalid URL-like text avoids expensive regex work.
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
@@ -153,11 +154,7 @@ function replaceTextWithExtras(text: string, regexp: RegExp, extras: Extras, rep
 }
 
 /**
- * Returns whether `text` can use the faster candidate scanner.
- *
- * Raw HTML can change how URLs and Markdown are matched across tag boundaries. When
- * `shouldEscapeText` is false and the text contains `<` or `>`, we keep the original full-text
- * matching instead.
+ * Returns whether `text` can use optimized candidate scanning instead of full-text parsing.
  *
  * @param text - Text to check.
  * @param shouldEscapeText - Whether HTML characters are escaped before parsing.
@@ -264,7 +261,13 @@ function getProtocolAt(text: string, position: number) {
     return URL_PROTOCOLS.find((protocol) => text.slice(position, position + protocol.length).toLowerCase() === protocol);
 }
 
-/** Returns whether the range contains a hostname label accepted by the URL regex. */
+/**
+ * Returns whether one dot-separated hostname label is valid.
+ *
+ * @param text - Candidate URL text containing the label.
+ * @param start - Index of the label's first character.
+ * @param end - Index immediately after the label's last character.
+ */
 function isValidHostnameLabel(text: string, start: number, end: number): boolean {
     if (start >= end || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
         return false;
@@ -278,7 +281,13 @@ function isValidHostnameLabel(text: string, start: number, end: number): boolean
     return true;
 }
 
-/** Finds the first label in the valid hostname ending immediately before `dotPosition`. */
+/**
+ * Finds the first character of a valid hostname before the dot that starts its top-level domain.
+ *
+ * @param text - Candidate URL text containing the hostname.
+ * @param dotPosition - Index of the dot immediately before the top-level domain.
+ * @returns The hostname's first-character index, or undefined when no valid hostname precedes the dot.
+ */
 function findHostnameStart(text: string, dotPosition: number): number | undefined {
     let hostnameStart = dotPosition;
     let labelEnd = dotPosition;
@@ -300,7 +309,7 @@ function findHostnameStart(text: string, dotPosition: number): number | undefine
         }
         hostnameStart = labelStart;
 
-        // A leading hyphen ends the hostname, but the URL regex can still start at the valid suffix after it.
+        // A leading hyphen ends the hostname, but the existing URL regex can still match the valid suffix after it.
         if (labelStart !== rawLabelStart) {
             break;
         }
@@ -315,7 +324,13 @@ function findHostnameStart(text: string, dotPosition: number): number | undefine
     return hostnameStart === dotPosition ? undefined : hostnameStart;
 }
 
-/** Finds a known TLD immediately after a dot without running the full URL regex. */
+/**
+ * Finds the end of a known top-level domain after `dotPosition`.
+ *
+ * @param text - Candidate URL text.
+ * @param dotPosition - Index of the dot immediately before the top-level domain.
+ * @returns The index immediately after the top-level domain, or undefined when it is not known.
+ */
 function findKnownTldEnd(text: string, dotPosition: number): number | undefined {
     const maximumEnd = Math.min(text.length, dotPosition + 1 + MAX_URL_TLD_LENGTH);
 
@@ -349,14 +364,24 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
     return {start: candidateStart, end: candidateEnd};
 }
 
-/** Returns whether `expected` starts at `position`, ignoring letter casing. */
+/**
+ * Checks whether lowercase `expected` occurs in `text` at `position`, ignoring letter case in `text`.
+ *
+ * @param text - Text to check.
+ * @param expected - Lowercase string expected at `position`.
+ * @param position - Index where the comparison begins.
+ */
 function startsWithIgnoreCase(text: string, expected: string, position: number): boolean {
     return text.slice(position, position + expected.length).toLowerCase() === expected;
 }
 
 /**
- * Removes URL candidates that the original full-text regex would reject because of later raw HTML.
- * The text is scanned once from right to left so distant HTML does not need to be appended to every candidate.
+ * Removes candidates that the original full-text URL regex would reject because of later HTML.
+ * It scans right to left so each candidate can use the nearest later HTML boundary without copying a long suffix.
+ *
+ * @param text - Text containing candidate URLs and later HTML boundaries.
+ * @param candidates - URL candidates ordered by their position in `text`.
+ * @returns Candidates that keep candidate-scanning output compatible with full-text parsing.
  */
 function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: UrlCandidate[]): UrlCandidate[] {
     if (candidates.length === 0 || (!text.includes('<') && !text.includes('>'))) {
@@ -383,7 +408,7 @@ function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: Url
         }
 
         while (candidateIndex >= 0 && candidates[candidateIndex].end === index) {
-            // These checks reproduce the HTML lookaheads in the original full-text URL regex.
+            // Match the original URL regex when later HTML changes whether this candidate is valid.
             const firstHtmlBoundaryIsClosingTag = nextLessThan < nextGreaterThan && text.startsWith('</', nextLessThan) && !startsWithIgnoreCase(text, '</h1>', nextLessThan);
             const firstTagIsProtectedClosingTag = startsWithIgnoreCase(text, '</pre>', nextLessThan) || startsWithIgnoreCase(text, '</code>', nextLessThan);
             const isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || firstHtmlBoundaryIsClosingTag || nextClosingAnchor < nextOpeningAnchor || firstTagIsProtectedClosingTag;
@@ -408,6 +433,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         if (text[index] === '<') {
             const nextIndex = updateProtectedTagStack(text, index, protectedTags);
             if (nextIndex === undefined) {
+                // An incomplete tag is plain text, so skip only `<` and keep scanning for later URLs.
                 index++;
                 continue;
             }
