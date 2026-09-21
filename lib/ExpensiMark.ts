@@ -1116,7 +1116,7 @@ export default class ExpensiMark {
 
                 process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
-                    // Raw HTML depends on complete-text lookaheads. Text without HTML can safely use the faster candidate scanner.
+                    // Raw HTML depends on complete-text lookaheads. Text without user-provided HTML can safely use the faster candidate scanner.
                     return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, canUseCandidateScanning(textToProcess, shouldEscapeText));
                 },
 
