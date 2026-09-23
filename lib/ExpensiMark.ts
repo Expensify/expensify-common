@@ -164,6 +164,15 @@ function canUseCandidateScanning(text: string, shouldEscapeText: boolean): boole
     return shouldEscapeText || (!text.includes('<') && !text.includes('>'));
 }
 
+function processMarkdownRule(regex: RegExp, marker: '*' | '~', canOpen: CanOpenMarkdown): ProcessFn {
+    return (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
+        if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
+            return replaceMarkdownCandidates(textToProcess, regex, replacement, marker, canOpen);
+        }
+        return replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
+    };
+}
+
 /** Returns whether the character is an ASCII letter or digit. */
 function isAsciiAlphaNumeric(character?: string): boolean {
     if (!character) {
@@ -1239,12 +1248,7 @@ export default class ExpensiMark {
                 // \B will match everything that \b doesn't, so it works
                 // for * and ~: https://www.rexegg.com/regex-boundaries.html#notb
                 name: 'bold',
-                process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
-                    if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
-                        return replaceMarkdownCandidates(textToProcess, BOLD_MARKDOWN_REGEX, replacement, '*', canOpenBoldMarkdown);
-                    }
-                    return replaceTextWithExtras(textToProcess, BOLD_MARKDOWN_REGEX, EXTRAS_DEFAULT, replacement);
-                },
+                process: processMarkdownRule(BOLD_MARKDOWN_REGEX, '*', canOpenBoldMarkdown),
                 replacement: (_extras, match, g1, g2) => {
                     if (g1.includes('_')) {
                         return `${g1}<strong>${g2}</strong>`;
@@ -1255,12 +1259,7 @@ export default class ExpensiMark {
             },
             {
                 name: 'strikethrough',
-                process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
-                    if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
-                        return replaceMarkdownCandidates(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, replacement, '~', canOpenStrikethroughMarkdown);
-                    }
-                    return replaceTextWithExtras(textToProcess, STRIKETHROUGH_MARKDOWN_REGEX, EXTRAS_DEFAULT, replacement);
-                },
+                process: processMarkdownRule(STRIKETHROUGH_MARKDOWN_REGEX, '~', canOpenStrikethroughMarkdown),
                 replacement: (_extras, match, g1) => (g1.includes('</pre>') || containsNonPairTag(g1) ? match : `<del>${g1}</del>`),
             },
             {
