@@ -57,6 +57,7 @@ type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
 type UrlCandidate = {start: number; end: number};
+type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
 
@@ -212,7 +213,7 @@ function canOpenStrikethroughMarkdown(text: string, position: number): boolean {
 }
 
 /** Returns whether the marker at this position can close a bold or strikethrough range. */
-function canCloseMarkdown(text: string, position: number, marker: '*' | '~'): boolean {
+function canCloseMarkdown(text: string, position: number, marker: MarkdownMarkerCharacter): boolean {
     const previousCharacter = text[position - 1];
     return !!previousCharacter && !/\s/.test(previousCharacter) && previousCharacter !== marker && !isWordCharacter(text[position + 1]);
 }
@@ -482,7 +483,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
 }
 
 /** Finds possible bold or strikethrough pairs, preserves marker order inside protected tags, and runs the existing regex only on each candidate. */
-function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: '*' | '~', canOpen: CanOpenMarkdown): string {
+function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Replacement, marker: MarkdownMarkerCharacter, canOpen: CanOpenMarkdown): string {
     if (!text.includes(marker)) {
         return text;
     }
@@ -574,7 +575,7 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
  * @param canOpen - Checks whether a marker can start a Markdown range.
  * @returns A processor that uses candidate scanning when safe and the original regex otherwise.
  */
-function processMarkdownRule(regex: RegExp, marker: '*' | '~', canOpen: CanOpenMarkdown): ProcessFn {
+function processMarkdownRule(regex: RegExp, marker: MarkdownMarkerCharacter, canOpen: CanOpenMarkdown): ProcessFn {
     return (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
         if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
             return replaceMarkdownCandidates(textToProcess, regex, replacement, marker, canOpen);
