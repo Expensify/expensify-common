@@ -623,6 +623,24 @@ describe('Test long input candidate parsing', () => {
         expect(parser.replace(`${prefix} ${domain}`)).toBe(`${prefix} ${anchor(domain)}`);
     });
 
+    test('handles long valid and invalid bare-domain candidates without changing their output', () => {
+        // Given long valid and invalid domain-shaped values, because the optimization must not change what users see while typing.
+        const hostname = 'a'.repeat(8496);
+        const validUrl = `${hostname}.com`;
+        const invalidUrl = `${validUrl}x`;
+        const repeatedDots = `${'a.'.repeat(4499)}a`;
+
+        // When ExpensiMark parses each value.
+        const validResult = parser.replace(validUrl);
+        const invalidResult = parser.replace(invalidUrl);
+        const repeatedDotsResult = parser.replace(repeatedDots);
+
+        // Then it links only the valid domain, which protects both the expected output and responsive typing for invalid long input.
+        expect(validResult).toBe(anchor(validUrl));
+        expect(invalidResult).toBe(invalidUrl);
+        expect(repeatedDotsResult).toBe(repeatedDots);
+    });
+
     test('preserves the ftps protocol when autolinking a candidate', () => {
         const input = 'ftps://example.com/file';
         expect(parser.replace(input)).toBe('<a href="ftps://example.com/file" target="_blank" rel="noreferrer noopener">ftps://example.com/file</a>');
@@ -655,6 +673,115 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['<a><span>*bold*</span></a>', '<a><span><strong>bold</strong></span></a>'],
+        ['<code><h1>example.com</h1></code>', `<code><h1>${anchor('example.com')}</h1></code>`],
+    ])('preserves complete-text regex behavior for nested raw HTML in %s', (input, expected) => {
+        // Given valid raw HTML nested around Markdown or a URL, because raw HTML callers rely on the established parser output.
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the old full-text parser behavior, so nested markup does not change the output.
+        expect(result).toBe(expected);
+    });
+
+    test('does not carry raw anchor context across a newline and inline code', () => {
+        // Given a URL followed by inline code with a closing anchor tag on the next line, because tag context must not leak between separate content.
+        const input = 'example.com\n`</a>`';
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it links the URL and preserves the inline code, because anchor context must not cross a newline.
+        expect(result).toBe(`${anchor('example.com')}<br /><code></a></code>`);
+    });
+
+    test.each(['a', 'code', 'pre', 'video'])('does not treat an unclosed <%s> tag as protected', (tagName) => {
+        // Given raw and escaped input with an unclosed tag before a URL, because incomplete markup must not swallow all following content.
+        const input = `<${tagName}>example.com`;
+
+        // When ExpensiMark parses both forms of the input.
+        const rawResult = parser.replace(input, {shouldEscapeText: false});
+        const escapedResult = parser.replace(input);
+
+        // Then it links the URL in both modes, because an unclosed tag cannot protect all following text.
+        expect(rawResult).toBe(`<${tagName}>${anchor('example.com')}`);
+        expect(escapedResult).toBe(`&lt;${tagName}&gt;${anchor('example.com')}`);
+    });
+
+    test('protects a matched nested tag without letting an unclosed outer tag hide later URLs', () => {
+        // Given an unclosed outer code tag with a complete nested pre tag between two URLs, because each HTML boundary must be handled independently.
+        const input = '<code>before.com<pre>inside.com</pre>after.com';
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it preserves the complete nested tag but still links URLs outside it, so an unclosed outer tag does not hide later content.
+        expect(result).toBe(`<code>${anchor('before.com')}<pre>inside.com</pre>${anchor('after.com')}`);
+    });
+
+    test('does not match a generated closing anchor with an earlier unclosed anchor', () => {
+        // Given Markdown that generates an anchor after an unrelated unclosed raw anchor tag, because generated tags must not reclassify earlier raw text.
+        const input = '<a>*bold* ~strike~ <unfinished after.com';
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it formats all later content correctly, because generated closing tags must not close unrelated raw tags.
+        expect(result).toBe(`<a><strong>bold</strong> <del>strike</del> <unfinished ${anchor('after.com')}`);
+    });
+
+    test.each([
+        ['<unfinished example.com `code`', `<unfinished ${anchor('example.com')} <code>code</code>`],
+        ['<unfinished example.com 😄', `<unfinished ${anchor('example.com')} <emoji>😄</emoji>`],
+        ['<unfinished example.com [label](https://example.com)', `<unfinished ${anchor('example.com')} ${anchor('https://example.com', 'label')}`],
+        ['<unfinished example.com ![alt](https://example.com/image.png)', `<unfinished ${anchor('example.com')} <img src="https://example.com/image.png" alt="alt" />`],
+        [
+            '<unfinished example.com ![video](https://example.com/video.mp4)',
+            `<unfinished ${anchor('example.com')} <video data-expensify-source="https://example.com/video.mp4" >video</video>`,
+        ],
+        ['# heading <unfinished example.com', `<h1>heading <unfinished ${anchor('example.com')}</h1>`],
+        ['<unfinished example.com @here', `<unfinished ${anchor('example.com')} <mention-here>@here</mention-here>`],
+    ])('keeps URLs between malformed HTML and generated HTML in %s', (input, expected) => {
+        // Given a URL after malformed HTML and before Markdown that generates more HTML, because malformed content must not stop parsing the remaining text.
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it still links the URL and formats the later Markdown, so malformed HTML does not stop the remaining scan.
+        expect(result).toBe(expected);
+    });
+
+    test('keeps a less-than character inside a quoted tag attribute protected', () => {
+        // Given raw HTML with a less-than character inside a quoted attribute value, because quoted text is content rather than a new tag boundary.
+        const input = '<code title="a<b">example.com</code>';
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it leaves the code content untouched, because a quoted less-than character does not start another tag.
+        expect(result).toBe(input);
+    });
+
+    test.each([
+        ['before.com <unfinished after.com', `${anchor('before.com')} <unfinished ${anchor('after.com')}`],
+        ['<span>example.com</span>', '<span>example.com</span>'],
+        ['example.com >', 'example.com >'],
+        ['example.com text </span>', 'example.com text </span>'],
+        ['example.com <span></span></a>', 'example.com <span></span></a>'],
+        ['<h1>example.com</h1>', `<h1>${anchor('example.com')}</h1>`],
+        ['example.com <abbr></abbr></a>', `${anchor('example.com')} <abbr></abbr></a>`],
+    ])('preserves raw HTML context when autolinking %s', (input, expected) => {
+        // Given raw HTML boundaries that affect whether a nearby URL can be linked, because raw HTML callers need compatible autolink behavior.
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it matches the established parser output, so raw HTML does not change autolink behavior.
+        expect(result).toBe(expected);
+    });
+
+    test.each([
         ['@*example.com*', '@<strong>example.com</strong>'],
         ['@_example.com_', '@<em>example.com</em>'],
         ['@~example.com~', '@<del>example.com</del>'],
@@ -672,6 +799,21 @@ describe('Test long input candidate parsing', () => {
         ['[*](https://example.com) *bold*', `${anchor('https://example.com', '*')} <strong>bold</strong>`],
     ])('keeps protected markers when selecting Markdown pairs in %s', (input, expected) => {
         expect(parser.replace(input)).toBe(expected);
+    });
+
+    test.each([
+        ['<code>*bold*', '<code><strong>bold</strong>'],
+        ['<pre>~strike~', '<pre><del>strike</del>'],
+        ['<a>*bold*', '<a><strong>bold</strong>'],
+        ['<video>~strike~', '<video><del>strike</del>'],
+    ])('does not protect Markdown after an unclosed HTML tag in %s', (input, expected) => {
+        // Given Markdown after an unclosed HTML tag, because incomplete markup must not protect all remaining text.
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it formats the Markdown, because incomplete tags cannot make all following text protected.
+        expect(result).toBe(expected);
     });
 
     test.each([
@@ -695,6 +837,38 @@ describe('Test long input candidate parsing', () => {
     ])('parses %s after long plain text', (input, expected) => {
         const prefix = 'a'.repeat(14500);
         expect(parser.replace(`${prefix} ${input}`)).toBe(`${prefix} ${expected}`);
+    });
+
+    test.each([
+        ['*bold* >', '*bold* >'],
+        ['~strike~ >', '~strike~ >'],
+        ['*one* > *two*', '<strong>one* > *two</strong>'],
+        ['~one~ > ~two~', '<del>one~ > ~two</del>'],
+        ['< *bold* </span>', '< *bold* </span>'],
+        ['< ~strike~ </span>', '< ~strike~ </span>'],
+        ['*bold* </span>', '<strong>bold</strong> </span>'],
+        ['~strike~ </span>', '<del>strike</del> </span>'],
+    ])('preserves raw HTML context when parsing Markdown in %s', (input, expected) => {
+        // Given Markdown next to raw HTML boundary characters, because those boundaries affected the legacy marker-pairing result.
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the established Markdown output, so HTML-like text does not change marker pairing.
+        expect(result).toBe(expected);
+    });
+
+    test('preserves distant raw HTML context without passing the long suffix to the Markdown regex', () => {
+        // Given long raw input whose trailing HTML-like boundary affects an earlier Markdown range, because long inputs must preserve existing formatting behavior.
+        const longText = 'a'.repeat(14500);
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const boldResult = parser.replace(`*bold* ${longText} >`, {shouldEscapeText: false});
+        const strikeResult = parser.replace(`~strike~ ${longText} </code>`, {shouldEscapeText: false});
+
+        // Then it preserves the old output, so a distant boundary does not unexpectedly change the earlier Markdown range.
+        expect(boldResult).toBe(`*bold* ${longText} >`);
+        expect(strikeResult).toBe(`~strike~ ${longText} </code>`);
     });
 
     test('preserves raw link data used by live markdown', () => {
