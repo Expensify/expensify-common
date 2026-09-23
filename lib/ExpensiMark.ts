@@ -164,15 +164,6 @@ function canUseCandidateScanning(text: string, shouldEscapeText: boolean): boole
     return shouldEscapeText || (!text.includes('<') && !text.includes('>'));
 }
 
-function processMarkdownRule(regex: RegExp, marker: '*' | '~', canOpen: CanOpenMarkdown): ProcessFn {
-    return (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
-        if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
-            return replaceMarkdownCandidates(textToProcess, regex, replacement, marker, canOpen);
-        }
-        return replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
-    };
-}
-
 /** Returns whether the character is an ASCII letter or digit. */
 function isAsciiAlphaNumeric(character?: string): boolean {
     if (!character) {
@@ -573,6 +564,15 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
 
     output.push(text.slice(outputStart));
     return output.join('');
+}
+
+function processMarkdownRule(regex: RegExp, marker: '*' | '~', canOpen: CanOpenMarkdown): ProcessFn {
+    return (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
+        if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
+            return replaceMarkdownCandidates(textToProcess, regex, replacement, marker, canOpen);
+        }
+        return replaceTextWithExtras(textToProcess, regex, EXTRAS_DEFAULT, replacement);
+    };
 }
 
 /**
