@@ -566,6 +566,14 @@ function replaceMarkdownCandidates(text: string, regexp: RegExp, replacement: Re
     return output.join('');
 }
 
+/**
+ * Creates the common processor for bold and strikethrough Markdown rules.
+ *
+ * @param regex - Rule regex used to validate a Markdown candidate.
+ * @param marker - Markdown marker used to find candidate ranges.
+ * @param canOpen - Checks whether a marker can start a Markdown range.
+ * @returns A processor that uses candidate scanning when safe and the original regex otherwise.
+ */
 function processMarkdownRule(regex: RegExp, marker: '*' | '~', canOpen: CanOpenMarkdown): ProcessFn {
     return (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
         if (canUseCandidateScanning(textToProcess, shouldEscapeText)) {
