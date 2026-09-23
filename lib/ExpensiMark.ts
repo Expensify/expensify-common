@@ -420,7 +420,15 @@ function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: Url
             // Match the original URL regex when later HTML changes whether this candidate is valid.
             const firstHtmlBoundaryIsClosingTag = nextLessThan < nextGreaterThan && text.startsWith('</', nextLessThan) && !startsWithIgnoreCase(text, '</h1>', nextLessThan);
             const firstTagIsProtectedClosingTag = startsWithIgnoreCase(text, '</pre>', nextLessThan) || startsWithIgnoreCase(text, '</code>', nextLessThan);
-            const isBlockedByFollowingHtml = nextGreaterThan < nextLessThan || firstHtmlBoundaryIsClosingTag || nextClosingAnchor < nextOpeningAnchor || firstTagIsProtectedClosingTag;
+            const isBlockedByFollowingHtml =
+                // Mirrors `(?![^<]*>)`: reject when `>` appears before the next `<`.
+                nextGreaterThan < nextLessThan ||
+                // Mirrors `[^<>]*<\/(?!h1>)`: reject a later closing tag other than `</h1>`.
+                firstHtmlBoundaryIsClosingTag ||
+                // Mirrors `((?:(?!<a).)+)?<\/a>`: reject `</a>` unless another `<a>` appears first.
+                nextClosingAnchor < nextOpeningAnchor ||
+                // Mirrors `[^<]*(<\/pre>|<\/code>)`: reject a later protected closing tag.
+                firstTagIsProtectedClosingTag;
 
             if (!isBlockedByFollowingHtml) {
                 validCandidates.push(candidates[candidateIndex]);
