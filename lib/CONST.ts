@@ -909,6 +909,7 @@ const CONST = {
         REPLACE_CARD: 'replace_card',
         SHIP_CARD: 'ship_card',
         REPORT_CARD_FRAUD: 'report_card_fraud',
+        APPROVE_DIGITAL_WALLET: 'approve_digital_wallet',
         ISSUE_CARD: 'issue_card',
         UPDATE_CARD: 'update_card',
         UPDATE_PERSONAL_DETAILS: 'update_personal_details',
