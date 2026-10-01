@@ -617,28 +617,74 @@ test('Test wrapped URLs', () => {
 describe('Test long input candidate parsing', () => {
     const anchor = (url, label = url) => `<a href="${url.startsWith('http') ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
 
-    test('autolinks a long domain without parsing the full input as a URL', () => {
-        const domain = `${'a'.repeat(70)}.com`;
+    test('autolinks a domain with the maximum hostname label length without parsing the full input as a URL', () => {
+        // Given a valid 63-character hostname label after a long plain-text prefix.
+        const domain = `${'a'.repeat(63)}.com`;
         const prefix = 'a'.repeat(14500);
-        expect(parser.replace(`${prefix} ${domain}`)).toBe(`${prefix} ${anchor(domain)}`);
+
+        // When ExpensiMark parses the complete message.
+        const result = parser.replace(`${prefix} ${domain}`);
+
+        // Then it autolinks the valid domain without treating the long prefix as part of the URL.
+        expect(result).toBe(`${prefix} ${anchor(domain)}`);
     });
 
-    test('handles long valid and invalid bare-domain candidates without changing their output', () => {
-        // Given long valid and invalid domain-shaped values, because the optimization must not change what users see while typing.
-        const hostname = 'a'.repeat(8496);
-        const validUrl = `${hostname}.com`;
-        const invalidUrl = `${validUrl}x`;
+    test('does not autolink bare domains whose hostname label exceeds 63 characters', () => {
+        // Given domains at and above the DNS hostname-label limit, including the long value from the reported composer issue.
+        const validUrl = `${'a'.repeat(63)}.com`;
+        const invalidUrl = `${'a'.repeat(64)}.com`;
+        const reportedInvalidUrl = `${'a'.repeat(8496)}.com`;
+        const invalidTld = `${reportedInvalidUrl}x`;
         const repeatedDots = `${'a.'.repeat(4499)}a`;
 
         // When ExpensiMark parses each value.
         const validResult = parser.replace(validUrl);
         const invalidResult = parser.replace(invalidUrl);
+        const reportedInvalidResult = parser.replace(reportedInvalidUrl);
+        const invalidTldResult = parser.replace(invalidTld);
         const repeatedDotsResult = parser.replace(repeatedDots);
 
-        // Then it links only the valid domain, which protects both the expected output and responsive typing for invalid long input.
+        // Then it links only the domain whose labels are valid and leaves oversized or unknown domains as plain text.
         expect(validResult).toBe(anchor(validUrl));
         expect(invalidResult).toBe(invalidUrl);
+        expect(reportedInvalidResult).toBe(reportedInvalidUrl);
+        expect(invalidTldResult).toBe(invalidTld);
         expect(repeatedDotsResult).toBe(repeatedDots);
+    });
+
+    test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {
+        // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
+        const validHostname = `${'a.'.repeat(125)}com`;
+        const invalidHostname = `aa.${'a.'.repeat(124)}com`;
+        const invalidProtocolUrl = `https://${invalidHostname}/path`;
+
+        // When ExpensiMark parses bare and protocol URLs at those boundaries.
+        const validResult = parser.replace(validHostname);
+        const validWithPunctuationResult = parser.replace(`${validHostname}.`);
+        const invalidResult = parser.replace(invalidHostname);
+        const invalidProtocolResult = parser.replace(invalidProtocolUrl);
+
+        // Then it links the valid hostname without counting punctuation and leaves oversized hostnames plain.
+        expect(validResult).toBe(anchor(validHostname));
+        expect(validWithPunctuationResult).toBe(`${anchor(validHostname)}.`);
+        expect(invalidResult).toBe(invalidHostname);
+        expect(invalidProtocolResult).toBe(invalidProtocolUrl);
+    });
+
+    test.each([
+        ['labeled link', (url) => `[label](${url}/path)`],
+        ['image', (url) => `![alt](${url}/image.png)`],
+        ['video', (url) => `![video](${url}/video.mp4)`],
+    ])('does not parse a %s whose complete hostname exceeds 253 characters', (_name, createInput) => {
+        // Given URL-based Markdown whose hostname exceeds the DNS limit without exceeding any individual label limit.
+        const hostname = `aa.${'a.'.repeat(124)}com`;
+        const input = createInput(`https://${hostname}`);
+
+        // When ExpensiMark parses the Markdown.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid URL-based Markdown unchanged instead of generating HTML with that hostname.
+        expect(result).toBe(input);
     });
 
     test('preserves the ftps protocol when autolinking a candidate', () => {

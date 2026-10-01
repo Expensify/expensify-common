@@ -263,14 +263,14 @@ function getProtocolAt(text: string, position: number) {
 }
 
 /**
- * Returns whether one dot-separated hostname label is valid.
+ * Returns whether one dot-separated hostname label follows the supported ASCII syntax and length limit.
  *
  * @param text - Candidate URL text containing the label.
  * @param start - Index of the label's first character.
  * @param end - Index immediately after the label's last character.
  */
 function isValidHostnameLabel(text: string, start: number, end: number): boolean {
-    if (start >= end || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
+    if (start >= end || end - start > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
         return false;
     }
 
@@ -287,9 +287,10 @@ function isValidHostnameLabel(text: string, start: number, end: number): boolean
  *
  * @param text - Candidate URL text containing the hostname.
  * @param dotPosition - Index of the dot immediately before the top-level domain.
+ * @param hostnameEnd - Index immediately after the top-level domain.
  * @returns The hostname's first-character index, or undefined when no valid hostname precedes the dot.
  */
-function findHostnameStart(text: string, dotPosition: number): number | undefined {
+function findHostnameStart(text: string, dotPosition: number, hostnameEnd: number): number | undefined {
     let hostnameStart = dotPosition;
     let labelEnd = dotPosition;
 
@@ -310,7 +311,11 @@ function findHostnameStart(text: string, dotPosition: number): number | undefine
         }
         hostnameStart = labelStart;
 
-        // A leading hyphen ends the hostname, but the existing URL regex can still match the valid suffix after it.
+        if (hostnameEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
+            return undefined;
+        }
+
+        // Keep matching a valid hostname suffix after leading hyphens, as the URL regex does.
         if (labelStart !== rawLabelStart) {
             break;
         }
@@ -468,7 +473,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         }
 
         const tldEnd = findKnownTldEnd(text, index);
-        const hostnameStart = tldEnd === undefined ? undefined : findHostnameStart(text, index);
+        const hostnameStart = tldEnd === undefined ? undefined : findHostnameStart(text, index, tldEnd);
         if (tldEnd === undefined || hostnameStart === undefined) {
             index++;
             continue;
