@@ -1773,3 +1773,26 @@ div.WordSection1
 
     expect(parser.htmlToMarkdown(testStringDoc, {}, 500)).toBe(resultString);
 });
+
+describe('Autolinked URL inside an incomplete markdown link', () => {
+    test('keeps the URL bare instead of nesting another link', () => {
+        const markdown = '[file.csv](https://www.expensify.com/chat-attachments/1/w_abc.csv';
+        const html = parser.replace(markdown);
+        expect(html).toContain('<a href=');
+        expect(parser.htmlToMarkdown(html)).toBe(markdown);
+    });
+
+    test('keeps www and email addresses bare', () => {
+        const markdown = '[a](www.google.com [b](concierge@expensify.com';
+        expect(parser.htmlToMarkdown(parser.replace(markdown))).toBe(markdown);
+    });
+
+    test('keeps the URL bare when text follows the incomplete link', () => {
+        const markdown = '[Google](https://www.google.com/searc. z';
+        expect(parser.htmlToMarkdown(parser.replace(markdown))).toBe(markdown);
+    });
+
+    test('still converts a labeled link after an incomplete link', () => {
+        expect(parser.htmlToMarkdown('[a](<a href="https://c.com" target="_blank" rel="noreferrer noopener">b</a>')).toBe('[a]([b](https://c.com)');
+    });
+});

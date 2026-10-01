@@ -1441,13 +1441,19 @@ export default class ExpensiMark {
             },
             {
                 name: 'anchor',
-                regex: /<(a)[^><]*href\s*=\s*(['"])(.*?)\2(?:".*?"|'.*?'|[^'"><])*>([\s\S]*?)<\/\1>(?![^<]*(<\/pre>|<\/code>))/gi,
-                replacement: (_extras, _match, _g1, _g2, g3, g4) => {
-                    const email = g3.startsWith('mailto:') ? g3.slice(7) : '';
-                    if (email === g4) {
-                        return email;
+                regex: /(\]\()?<(a)[^><]*href\s*=\s*(['"])(.*?)\3(?:".*?"|'.*?'|[^'"><])*>([\s\S]*?)<\/\2>(?![^<]*(<\/pre>|<\/code>))/gi,
+                replacement: (_extras, _match, g1, _g2, _g3, g4, g5) => {
+                    const incompleteLinkStart = g1 ?? '';
+                    const email = g4.startsWith('mailto:') ? g4.slice(7) : '';
+                    if (email === g5) {
+                        return `${incompleteLinkStart}${email}`;
                     }
-                    return `[${g4}](${email || g3})`;
+
+                    // An autolinked URL right after an incomplete link's `](` has to stay bare, or the link nests a copy of it
+                    if (incompleteLinkStart && (g4 === g5 || g4 === `https://${g5}`)) {
+                        return `${incompleteLinkStart}${g5}`;
+                    }
+                    return `${incompleteLinkStart}[${g5}](${email || g4})`;
                 },
             },
 
