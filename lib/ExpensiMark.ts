@@ -283,6 +283,43 @@ function isValidHostnameLabel(text: string, start: number, end: number): boolean
 }
 
 /**
+ * Returns whether a protocol URL's hostname stays within the supported DNS length limits.
+ *
+ * @param text - Text containing the protocol URL candidate.
+ * @param hostnameStart - Index immediately after the URL protocol.
+ * @param candidateEnd - Index immediately after the URL candidate.
+ */
+function isProtocolHostnameWithinLengthLimits(text: string, hostnameStart: number, candidateEnd: number): boolean {
+    let hostnameEnd = hostnameStart;
+    while (hostnameEnd < candidateEnd && isHostnameCharacter(text[hostnameEnd])) {
+        hostnameEnd++;
+    }
+    while (hostnameEnd > hostnameStart && (text[hostnameEnd - 1] === '.' || text[hostnameEnd - 1] === '-')) {
+        hostnameEnd--;
+    }
+
+    let labelLength = 0;
+
+    for (let index = hostnameStart; index < hostnameEnd; index++) {
+        if (index - hostnameStart >= Constants.MAX_URL_HOSTNAME_LENGTH) {
+            return false;
+        }
+
+        if (text[index] === '.') {
+            labelLength = 0;
+            continue;
+        }
+
+        labelLength++;
+        if (labelLength > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Finds the first character of a valid hostname before the dot that starts its top-level domain.
  *
  * @param text - Candidate URL text containing the hostname.
@@ -480,6 +517,10 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length, true);
+            if (!isProtocolHostnameWithinLengthLimits(text, index + matchedProtocol.length, candidate.end)) {
+                index = candidate.end;
+                continue;
+            }
             candidates.push(candidate);
             index = candidate.end;
             continue;

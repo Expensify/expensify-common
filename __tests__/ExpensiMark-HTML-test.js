@@ -652,6 +652,17 @@ describe('Test long input candidate parsing', () => {
         expect(repeatedDotsResult).toBe(repeatedDots);
     });
 
+    test('does not autolink a long protocol hostname whose label exceeds the limit', () => {
+        // Given a protocol URL whose single hostname label is close to the App parser limit.
+        const input = `https://${'a'.repeat(9960)}.com`;
+
+        // When ExpensiMark parses the invalid URL candidate.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete candidate plain without sending the oversized hostname to URL matching.
+        expect(result).toBe(input);
+    });
+
     test.each([
         ['bare domain', (hostname) => `${hostname}.example.com`],
         ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
@@ -697,17 +708,23 @@ describe('Test long input candidate parsing', () => {
         // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
         const validHostname = `${'a.'.repeat(125)}com`;
         const invalidHostname = `aa.${'a.'.repeat(124)}com`;
+        const validProtocolUrl = `https://${validHostname}`;
+        const trailingHyphens = '-'.repeat(300);
         const invalidProtocolUrl = `https://${invalidHostname}/path`;
 
         // When ExpensiMark parses bare and protocol URLs at those boundaries.
         const validResult = parser.replace(validHostname);
         const validWithPunctuationResult = parser.replace(`${validHostname}.`);
+        const validProtocolWithPunctuationResult = parser.replace(`${validProtocolUrl}.`);
+        const validProtocolWithTrailingHyphensResult = parser.replace(`${validProtocolUrl}${trailingHyphens}`);
         const invalidResult = parser.replace(invalidHostname);
         const invalidProtocolResult = parser.replace(invalidProtocolUrl);
 
         // Then it links the valid hostname without counting punctuation and leaves oversized hostnames plain.
         expect(validResult).toBe(anchor(validHostname));
         expect(validWithPunctuationResult).toBe(`${anchor(validHostname)}.`);
+        expect(validProtocolWithPunctuationResult).toBe(`${anchor(validProtocolUrl)}.`);
+        expect(validProtocolWithTrailingHyphensResult).toBe(`${anchor(validProtocolUrl)}${trailingHyphens}`);
         expect(invalidResult).toBe(invalidHostname);
         expect(invalidProtocolResult).toBe(invalidProtocolUrl);
     });
