@@ -663,6 +663,20 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(input);
     });
 
+    test('skips URL matching for a long protocol hostname whose label exceeds the limit', () => {
+        // Given an oversized protocol hostname and a URL matcher that records when it runs.
+        const input = `https://${'a'.repeat(9960)}.com`;
+        const urlRegex = /example/g;
+        const urlRegexExecSpy = jest.spyOn(urlRegex, 'exec');
+
+        // When the candidate scanner processes the invalid URL.
+        const result = parser.modifyTextForUrlLinks(urlRegex, input, jest.fn(), true);
+
+        // Then it leaves the input unchanged and rejects it before running the URL matcher.
+        expect(result).toBe(input);
+        expect(urlRegexExecSpy).not.toHaveBeenCalled();
+    });
+
     test.each([
         ['bare domain', (hostname) => `${hostname}.example.com`],
         ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
