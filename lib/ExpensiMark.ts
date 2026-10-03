@@ -1233,7 +1233,7 @@ export default class ExpensiMark {
                 process: (textToProcess, replacement, _shouldKeepRawInput, shouldEscapeText) => {
                     const regex = new RegExp(`(?![^<]*>|[^<>]*<\\/(?!h1>))([_*~]*?)${UrlPatterns.MARKDOWN_URL_REGEX}\\1(?!((?:(?!<a).)+)?<\\/a>|[^<]*(<\\/pre>|<\\/code>))`, 'gi');
                     // Raw HTML depends on complete-text lookaheads. Text without user-provided HTML can safely use the faster candidate scanner.
-                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, canUseCandidateScanning(textToProcess, shouldEscapeText));
+                    return this.modifyTextForUrlLinks(regex, textToProcess, replacement as ReplacementFn, canUseCandidateScanning(textToProcess, shouldEscapeText), true);
                 },
 
                 replacement: (_extras, _match, g1, g2) => {
@@ -1845,9 +1845,23 @@ export default class ExpensiMark {
     }
 
     /**
-     * Checks matched URLs for validity and replace valid links with html elements
+     * Replaces valid URL matches and optionally narrows parsing to URL candidates.
+     *
+     * @param regex - The URL pattern used for the final match.
+     * @param textToCheck - The text containing possible URLs.
+     * @param replacement - The replacement applied to each accepted URL.
+     * @param shouldScanForUrls - Whether to scan URL candidates before running the regex.
+     * @param shouldRejectPartialHostnameMatches - Whether matches that end inside a hostname should stay plain.
+     * @param expectedUrlOffset - The URL start expected by the candidate scanner.
      */
-    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, expectedUrlOffset?: number): string {
+    modifyTextForUrlLinks(
+        regex: RegExp,
+        textToCheck: string,
+        replacement: ReplacementFn,
+        shouldScanForUrls = false,
+        shouldRejectPartialHostnameMatches = false,
+        expectedUrlOffset?: number,
+    ): string {
         if (shouldScanForUrls) {
             const candidates = findUrlCandidates(textToCheck);
             if (candidates.length === 0) {
@@ -1862,7 +1876,16 @@ export default class ExpensiMark {
                 const candidate = textToCheck.slice(start, end);
                 candidateRegex.lastIndex = 0;
                 output.push(textToCheck.slice(outputStart, start));
-                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement, false, requiredUrlStart === undefined ? undefined : requiredUrlStart - start));
+                output.push(
+                    this.modifyTextForUrlLinks(
+                        candidateRegex,
+                        candidate,
+                        replacement,
+                        false,
+                        shouldRejectPartialHostnameMatches,
+                        requiredUrlStart === undefined ? undefined : requiredUrlStart - start,
+                    ),
+                );
                 outputStart = end;
             }
 
@@ -1883,6 +1906,15 @@ export default class ExpensiMark {
         let startIndex = 0;
 
         while (match !== null) {
+            if (shouldRejectPartialHostnameMatches) {
+                const matchedUrlOffset = match.index + match[1].length;
+                const matchedUrlEnd = matchedUrlOffset + match[2].length;
+                if (hasHostnameContinuation(textToCheck, matchedUrlEnd)) {
+                    match = regex.exec(textToCheck);
+                    continue;
+                }
+            }
+
             // We end the link at the last closing parenthesis that matches an opening parenthesis because unmatched closing parentheses are unlikely to be in the url
             // and can be part of markdown for example
             let unmatchedOpenParentheses = 0;

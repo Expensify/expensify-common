@@ -718,6 +718,22 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`${invalidHostname} ${anchor(validDomain)}`);
     });
 
+    test.each([
+        ['an oversized dot-separated label', `https://valid.${'a'.repeat(64)}.com`],
+        ['an oversized hyphenated label', `https://valid-${'a'.repeat(64)}.com`],
+        ['an oversized complete hostname', `https://valid.${'a.'.repeat(123)}com`],
+    ])('does not autolink a valid prefix inside a raw-HTML URL with %s', (_name, invalidUrl) => {
+        // Given raw HTML followed by an invalid URL and a separate valid domain.
+        const validDomain = 'example.org';
+        const input = `<span>x</span> ${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it leaves the invalid URL plain and autolinks only the separate valid domain.
+        expect(result).toBe(`<span>x</span> ${invalidUrl} ${anchor(validDomain)}`);
+    });
+
     test('still autolinks a valid domain after an invalid protocol URL without whitespace', () => {
         // Given an invalid protocol URL followed by a comma and a separate valid domain.
         const invalidUrl = `https://${'a'.repeat(64)}.com`;
