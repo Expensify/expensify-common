@@ -1,4 +1,4 @@
-import {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX} from '../lib/Url';
+import {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX, MARKDOWN_URL_REGEX} from '../lib/Url';
 
 describe('Strict URL validation', () => {
     describe('Mandatory protocol for URL', () => {
@@ -105,6 +105,34 @@ describe('Hostname label length validation', () => {
         // Then only the URL whose complete hostname is within the limit matches.
         expect(validMatch && validMatch[0]).toBe(validUrl);
         expect(invalidMatch).toBeNull();
+    });
+
+    it.each([
+        ['an invalid dot-separated label', `${'a'.repeat(64)}.example.com`],
+        ['an invalid hyphenated label after a protocol', `https://${'a'.repeat(64)}-valid.com`],
+        ['a leading hyphen attached to another hostname label', 'foo.-valid.com'],
+        ['multiple leading hyphens', '--valid.com'],
+    ])('does not match a valid hostname suffix inside %s', (_name, invalidUrl) => {
+        // Given an invalid hostname that contains a shorter valid-looking domain suffix.
+        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'i');
+
+        // When the URL pattern searches the complete invalid value.
+        const match = regexToTest.exec(invalidUrl);
+
+        // Then it rejects the whole value instead of matching only the valid suffix.
+        expect(match).toBeNull();
+    });
+
+    it('keeps matching a domain after a standalone boundary hyphen', () => {
+        // Given a valid domain preceded by one standalone hyphen used as punctuation.
+        const input = '-example.com';
+        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'i');
+
+        // When the URL pattern searches the complete text.
+        const match = regexToTest.exec(input);
+
+        // Then it links the valid domain after the boundary without including the hyphen.
+        expect(match && match[0]).toBe('example.com');
     });
 
     it('does not count a URL path toward the hostname limit', () => {

@@ -56,7 +56,7 @@ const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
-type UrlCandidate = {start: number; end: number};
+type UrlCandidate = {start: number; end: number; requiredUrlStart?: number};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -307,7 +307,8 @@ function findHostnameStart(text: string, dotPosition: number, hostnameEnd: numbe
         }
 
         if (!isValidHostnameLabel(text, labelStart, labelEnd)) {
-            break;
+            // Do not fall back to a valid suffix when an earlier label makes the contiguous hostname invalid.
+            return undefined;
         }
         hostnameStart = labelStart;
 
@@ -317,6 +318,10 @@ function findHostnameStart(text: string, dotPosition: number, hostnameEnd: numbe
 
         // Keep matching a valid hostname suffix after leading hyphens, as the URL regex does.
         if (labelStart !== rawLabelStart) {
+            const hasSingleBoundaryHyphen = labelStart === rawLabelStart + 1 && !isHostnameCharacter(text[rawLabelStart - 1]);
+            if (!hasSingleBoundaryHyphen) {
+                return undefined;
+            }
             break;
         }
 
@@ -328,6 +333,19 @@ function findHostnameStart(text: string, dotPosition: number, hostnameEnd: numbe
     }
 
     return hostnameStart === dotPosition ? undefined : hostnameStart;
+}
+
+/** Returns whether a regex match stopped before another label in the same hostname-like token. */
+function hasHostnameContinuation(text: string, position: number): boolean {
+    let index = position;
+    if (text[index] !== '.' && text[index] !== '-') {
+        return false;
+    }
+
+    while (text[index] === '.' || text[index] === '-') {
+        index++;
+    }
+    return isAsciiAlphaNumeric(text[index]);
 }
 
 /**
@@ -357,7 +375,7 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 }
 
 /** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
-function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
+function extendUrlCandidateBoundaries(text: string, start: number, end: number, requireUrlStart = false): UrlCandidate {
     let candidateStart = start;
     while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
         candidateStart--;
@@ -367,7 +385,7 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
     while (candidateEnd < text.length && !isUrlBoundarySpace(text[candidateEnd]) && text[candidateEnd] !== '<') {
         candidateEnd++;
     }
-    return {start: candidateStart, end: candidateEnd};
+    return {start: candidateStart, end: candidateEnd, requiredUrlStart: requireUrlStart ? start : undefined};
 }
 
 /**
@@ -461,7 +479,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
 
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
-            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
+            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length, true);
             candidates.push(candidate);
             index = candidate.end;
             continue;
@@ -1762,7 +1780,7 @@ export default class ExpensiMark {
     /**
      * Checks matched URLs for validity and replace valid links with html elements
      */
-    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false): string {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, expectedUrlOffset?: number): string {
         if (shouldScanForUrls) {
             const candidates = findUrlCandidates(textToCheck);
             if (candidates.length === 0) {
@@ -1773,11 +1791,11 @@ export default class ExpensiMark {
             const candidateRegex = regex;
             let outputStart = 0;
 
-            for (const {start, end} of candidates) {
+            for (const {start, end, requiredUrlStart} of candidates) {
                 const candidate = textToCheck.slice(start, end);
                 candidateRegex.lastIndex = 0;
                 output.push(textToCheck.slice(outputStart, start));
-                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement));
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement, false, requiredUrlStart === undefined ? undefined : requiredUrlStart - start));
                 outputStart = end;
             }
 
@@ -1786,6 +1804,14 @@ export default class ExpensiMark {
         }
 
         let match = regex.exec(textToCheck);
+        if (match !== null && expectedUrlOffset !== undefined) {
+            const matchedUrlOffset = match.index + match[1].length;
+            const matchedUrlEnd = matchedUrlOffset + match[2].length;
+            // A candidate must match the URL the scanner found, not a valid prefix or suffix inside an invalid hostname.
+            if (matchedUrlOffset !== expectedUrlOffset || hasHostnameContinuation(textToCheck, matchedUrlEnd)) {
+                return textToCheck;
+            }
+        }
         let replacedText = '';
         let startIndex = 0;
 

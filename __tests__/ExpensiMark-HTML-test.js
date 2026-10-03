@@ -652,6 +652,47 @@ describe('Test long input candidate parsing', () => {
         expect(repeatedDotsResult).toBe(repeatedDots);
     });
 
+    test.each([
+        ['bare domain', (hostname) => `${hostname}.example.com`],
+        ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
+        ['protocol URL with a valid prefix', (hostname) => `https://valid-${hostname}.com`],
+        ['labeled link', (hostname) => `[label](https://${hostname}-valid.com)`],
+        ['image', (hostname) => `![alt](https://${hostname}-valid.com/image.png)`],
+        ['video', (hostname) => `![video](https://${hostname}-valid.com/video.mp4)`],
+    ])('does not autolink a valid suffix inside an invalid %s', (_name, createInput) => {
+        // Given URL-based text containing an oversized hostname label before a valid-looking suffix.
+        const input = createInput('a'.repeat(64));
+
+        // When ExpensiMark parses the complete input.
+        const result = parser.replace(input);
+
+        // Then it leaves the whole invalid value unchanged instead of linking only its valid suffix.
+        expect(result).toBe(input);
+    });
+
+    test.each(['foo.-valid.com', 'foo.--valid.com', '--valid.com'])('does not autolink a suffix after invalid leading hyphens in %s', (input) => {
+        // Given a hostname whose later valid-looking label starts after invalid leading hyphens.
+
+        // When ExpensiMark parses the complete hostname.
+        const result = parser.replace(input);
+
+        // Then it leaves the whole invalid hostname plain instead of linking the suffix.
+        expect(result).toBe(input);
+    });
+
+    test('still autolinks a separate valid domain after an invalid hostname', () => {
+        // Given an invalid hostname followed by a separate valid domain.
+        const invalidHostname = `${'a'.repeat(64)}.example.com`;
+        const validDomain = 'valid.com';
+        const input = `${invalidHostname} ${validDomain}`;
+
+        // When ExpensiMark parses both values.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid hostname plain and autolinks only the separate valid domain.
+        expect(result).toBe(`${invalidHostname} ${anchor(validDomain)}`);
+    });
+
     test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {
         // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
         const validHostname = `${'a.'.repeat(125)}com`;
