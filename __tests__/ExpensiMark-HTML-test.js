@@ -704,6 +704,30 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`${invalidHostname} ${anchor(validDomain)}`);
     });
 
+    test('still autolinks a valid domain after an invalid protocol URL without whitespace', () => {
+        // Given an invalid protocol URL followed by a comma and a separate valid domain.
+        const invalidUrl = `https://${'a'.repeat(64)}.com`;
+        const validDomain = 'example.org';
+        const input = `${invalidUrl},${validDomain}`;
+
+        // When ExpensiMark parses both values as one non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid URL plain and autolinks the valid domain after the comma.
+        expect(result).toBe(`${invalidUrl},${anchor(validDomain)}`);
+    });
+
+    test.each(['/path/example.org', '?next=example.org', '#example.org'])('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
+        // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain.
+        const input = `https://${'a'.repeat(64)}.com${suffix}`;
+
+        // When ExpensiMark parses the complete invalid URL.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
+        expect(result).toBe(input);
+    });
+
     test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {
         // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
         const validHostname = `${'a.'.repeat(125)}com`;

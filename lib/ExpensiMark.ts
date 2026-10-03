@@ -283,24 +283,39 @@ function isValidHostnameLabel(text: string, start: number, end: number): boolean
 }
 
 /**
- * Returns whether a protocol URL's hostname stays within the supported DNS length limits.
+ * Finds the first character after a protocol URL's hostname.
  *
  * @param text - Text containing the protocol URL candidate.
  * @param hostnameStart - Index immediately after the URL protocol.
  * @param candidateEnd - Index immediately after the URL candidate.
+ * @returns The index immediately after the hostname.
  */
-function isProtocolHostnameWithinLengthLimits(text: string, hostnameStart: number, candidateEnd: number): boolean {
+function findProtocolHostnameEnd(text: string, hostnameStart: number, candidateEnd: number): number {
     let hostnameEnd = hostnameStart;
     while (hostnameEnd < candidateEnd && isHostnameCharacter(text[hostnameEnd])) {
         hostnameEnd++;
     }
-    while (hostnameEnd > hostnameStart && (text[hostnameEnd - 1] === '.' || text[hostnameEnd - 1] === '-')) {
-        hostnameEnd--;
+
+    return hostnameEnd;
+}
+
+/**
+ * Returns whether a protocol URL's hostname stays within the supported DNS length limits.
+ *
+ * @param text - Text containing the protocol URL candidate.
+ * @param hostnameStart - Index immediately after the URL protocol.
+ * @param hostnameEnd - Index immediately after the hostname.
+ * @returns Whether the hostname stays within the supported DNS length limits.
+ */
+function isProtocolHostnameWithinLengthLimits(text: string, hostnameStart: number, hostnameEnd: number): boolean {
+    let hostnameContentEnd = hostnameEnd;
+    while (hostnameContentEnd > hostnameStart && (text[hostnameContentEnd - 1] === '.' || text[hostnameContentEnd - 1] === '-')) {
+        hostnameContentEnd--;
     }
 
     let labelLength = 0;
 
-    for (let index = hostnameStart; index < hostnameEnd; index++) {
+    for (let index = hostnameStart; index < hostnameContentEnd; index++) {
         if (index - hostnameStart >= Constants.MAX_URL_HOSTNAME_LENGTH) {
             return false;
         }
@@ -317,6 +332,16 @@ function isProtocolHostnameWithinLengthLimits(text: string, hostnameStart: numbe
     }
 
     return true;
+}
+
+/**
+ * Returns whether the character after a hostname starts another part of the same protocol URL.
+ *
+ * @param character - Character immediately after the hostname.
+ * @returns Whether the character starts a port, path, query, or fragment.
+ */
+function isProtocolUrlContinuation(character?: string): boolean {
+    return character === ':' || character === '/' || character === '?' || character === '#';
 }
 
 /**
@@ -517,8 +542,9 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length, true);
-            if (!isProtocolHostnameWithinLengthLimits(text, index + matchedProtocol.length, candidate.end)) {
-                index = candidate.end;
+            const hostnameEnd = findProtocolHostnameEnd(text, index + matchedProtocol.length, candidate.end);
+            if (!isProtocolHostnameWithinLengthLimits(text, index + matchedProtocol.length, hostnameEnd)) {
+                index = hostnameEnd < candidate.end && !isProtocolUrlContinuation(text[hostnameEnd]) ? hostnameEnd + 1 : candidate.end;
                 continue;
             }
             candidates.push(candidate);
