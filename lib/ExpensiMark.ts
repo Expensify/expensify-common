@@ -56,7 +56,8 @@ const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
-type UrlCandidate = {start: number; end: number; requiredUrlStart?: number};
+type TextRange = {start: number; end: number};
+type UrlCandidate = TextRange & {requiredUrlStart?: number};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -448,6 +449,39 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number, 
         candidateEnd++;
     }
     return {start: candidateStart, end: candidateEnd, requiredUrlStart: requireUrlStart ? start : undefined};
+}
+
+/**
+ * Finds protocol URL ranges whose hostname exceeds the supported DNS length limits.
+ *
+ * @param text - Text containing possible protocol URLs.
+ * @returns Ranges where later URL matches must remain plain text.
+ */
+function findOversizedProtocolUrlRanges(text: string): TextRange[] {
+    const ranges: TextRange[] = [];
+    let index = 0;
+
+    while (index < text.length) {
+        const matchedProtocol = getProtocolAt(text, index);
+        if (!matchedProtocol) {
+            index++;
+            continue;
+        }
+
+        const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length, true);
+        const hostnameStart = index + matchedProtocol.length;
+        const hostnameEnd = findProtocolHostnameEnd(text, hostnameStart, candidate.end);
+        if (isProtocolHostnameWithinLengthLimits(text, hostnameStart, hostnameEnd)) {
+            index = hostnameEnd;
+            continue;
+        }
+
+        const rangeEnd = hostnameEnd < candidate.end && isProtocolUrlContinuation(text[hostnameEnd]) ? candidate.end : hostnameEnd;
+        ranges.push({start: index, end: rangeEnd});
+        index = rangeEnd === candidate.end ? rangeEnd : rangeEnd + 1;
+    }
+
+    return ranges;
 }
 
 /**
@@ -1904,12 +1938,25 @@ export default class ExpensiMark {
         }
         let replacedText = '';
         let startIndex = 0;
+        const oversizedProtocolUrlRanges = shouldRejectPartialHostnameMatches ? findOversizedProtocolUrlRanges(textToCheck) : [];
+        let oversizedProtocolUrlRangeIndex = 0;
 
         while (match !== null) {
             if (shouldRejectPartialHostnameMatches) {
                 const matchedUrlOffset = match.index + match[1].length;
                 const matchedUrlEnd = matchedUrlOffset + match[2].length;
-                if (hasHostnameContinuation(textToCheck, matchedUrlEnd)) {
+                while (
+                    oversizedProtocolUrlRangeIndex < oversizedProtocolUrlRanges.length &&
+                    oversizedProtocolUrlRanges[oversizedProtocolUrlRangeIndex].end <= matchedUrlOffset
+                ) {
+                    oversizedProtocolUrlRangeIndex++;
+                }
+                const oversizedProtocolUrlRange = oversizedProtocolUrlRanges[oversizedProtocolUrlRangeIndex];
+                const isInsideOversizedProtocolUrl =
+                    oversizedProtocolUrlRange !== undefined &&
+                    oversizedProtocolUrlRange.start <= matchedUrlOffset &&
+                    matchedUrlOffset < oversizedProtocolUrlRange.end;
+                if (hasHostnameContinuation(textToCheck, matchedUrlEnd) || isInsideOversizedProtocolUrl) {
                     match = regex.exec(textToCheck);
                     continue;
                 }

@@ -734,6 +734,36 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`<span>x</span> ${invalidUrl} ${anchor(validDomain)}`);
     });
 
+    test.each([
+        ['a path', `https://${'a'.repeat(64)}.com/path/example.org`],
+        ['a query', `https://${'a'.repeat(64)}.com?next=example.org`],
+        ['a fragment', `https://${'a'.repeat(64)}.com#example.org`],
+        ['an oversized complete hostname', `https://aa.${'a.'.repeat(124)}com/path/example.org`],
+    ])('does not autolink a domain in %s of an oversized raw-HTML URL', (_name, invalidUrl) => {
+        // Given an invitation heading that generates HTML, followed by an oversized URL and a separate valid domain.
+        const validDomain = 'valid.net';
+        const input = `# Invitation\n\n${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the invitation without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then the oversized URL stays plain while the separate valid domain is still autolinked.
+        expect(result).toBe(`<h1>Invitation</h1><br />${invalidUrl} ${anchor(validDomain)}`);
+    });
+
+    test('does not autolink inside an oversized raw-HTML URL after a separate URL without whitespace', () => {
+        // Given a valid URL followed by an oversized URL in the same non-whitespace token.
+        const validUrl = 'https://valid.com';
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path/example.org`;
+        const input = `# Invitation\n\n${validUrl},${invalidUrl}`;
+
+        // When ExpensiMark parses the invitation without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it autolinks the first URL without linking any part of the oversized URL.
+        expect(result).toBe(`<h1>Invitation</h1><br />${anchor(validUrl)},${invalidUrl}`);
+    });
+
     test('still autolinks a valid domain after an invalid protocol URL without whitespace', () => {
         // Given an invalid protocol URL followed by a comma and a separate valid domain.
         const invalidUrl = `https://${'a'.repeat(64)}.com`;
