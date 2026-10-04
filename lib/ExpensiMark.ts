@@ -1945,17 +1945,12 @@ export default class ExpensiMark {
             if (shouldRejectPartialHostnameMatches) {
                 const matchedUrlOffset = match.index + match[1].length;
                 const matchedUrlEnd = matchedUrlOffset + match[2].length;
-                while (
-                    oversizedProtocolUrlRangeIndex < oversizedProtocolUrlRanges.length &&
-                    oversizedProtocolUrlRanges[oversizedProtocolUrlRangeIndex].end <= matchedUrlOffset
-                ) {
+                while (oversizedProtocolUrlRangeIndex < oversizedProtocolUrlRanges.length && oversizedProtocolUrlRanges[oversizedProtocolUrlRangeIndex].end <= matchedUrlOffset) {
                     oversizedProtocolUrlRangeIndex++;
                 }
                 const oversizedProtocolUrlRange = oversizedProtocolUrlRanges[oversizedProtocolUrlRangeIndex];
                 const isInsideOversizedProtocolUrl =
-                    oversizedProtocolUrlRange !== undefined &&
-                    oversizedProtocolUrlRange.start <= matchedUrlOffset &&
-                    matchedUrlOffset < oversizedProtocolUrlRange.end;
+                    oversizedProtocolUrlRange !== undefined && oversizedProtocolUrlRange.start <= matchedUrlOffset && matchedUrlOffset < oversizedProtocolUrlRange.end;
                 if (hasHostnameContinuation(textToCheck, matchedUrlEnd) || isInsideOversizedProtocolUrl) {
                     match = regex.exec(textToCheck);
                     continue;
