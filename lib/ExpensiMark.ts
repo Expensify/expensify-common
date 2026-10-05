@@ -615,9 +615,8 @@ function findUrlCandidates(text: string): UrlCandidate[] {
             continue;
         }
 
-        const candidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
-        candidates.push(candidate);
-        index = candidate.end;
+        candidates.push(broadCandidate);
+        index = broadCandidate.end;
     }
 
     return filterUrlCandidatesBlockedByFollowingHtml(text, candidates);
