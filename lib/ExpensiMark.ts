@@ -60,7 +60,7 @@ type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
 type TextRange = {start: number; end: number};
 type UrlCandidate = TextRange & {requiredUrlStart?: number};
-type UrlRangeAnalysis = {hostname: TextRange; oversizedRange?: TextRange};
+type UrlRangeAnalysis = {hostnameEnd: number; oversizedRange?: TextRange};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -267,14 +267,14 @@ function getProtocolAt(text: string, position: number) {
 }
 
 /**
- * Returns whether one dot-separated hostname label follows the supported ASCII syntax and length limit.
+ * Returns whether one dot-separated hostname label follows the supported ASCII syntax.
  *
  * @param text - Candidate URL text containing the label.
  * @param start - Index of the label's first character.
  * @param end - Index immediately after the label's last character.
  */
 function isValidHostnameLabel(text: string, start: number, end: number): boolean {
-    if (start >= end || end - start > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
+    if (start >= end || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
         return false;
     }
 
@@ -343,10 +343,9 @@ function isHostnameWithinLengthLimits(text: string, hostnameStart: number, hostn
  *
  * @param text - Candidate URL text containing the hostname.
  * @param dotPosition - Index of the dot immediately before the top-level domain.
- * @param hostnameEnd - Index immediately after the top-level domain.
  * @returns The hostname's first-character index, or undefined when no valid hostname precedes the dot.
  */
-function findHostnameStart(text: string, dotPosition: number, hostnameEnd: number): number | undefined {
+function findHostnameStart(text: string, dotPosition: number): number | undefined {
     let hostnameStart = dotPosition;
     let labelEnd = dotPosition;
 
@@ -367,10 +366,6 @@ function findHostnameStart(text: string, dotPosition: number, hostnameEnd: numbe
             return undefined;
         }
         hostnameStart = labelStart;
-
-        if (hostnameEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
-            return undefined;
-        }
 
         // Keep matching a valid hostname suffix after leading hyphens, as the URL regex does.
         if (labelStart !== rawLabelStart) {
@@ -466,17 +461,16 @@ function findUrlEnd(text: string, hostnameEnd: number, candidateEnd: number): nu
  * @param urlStart - Index where the URL starts, excluding Markdown punctuation.
  * @param hostnameStart - Index where the hostname starts.
  * @param candidate - Broad candidate range found by the scanner.
- * @returns The hostname range and its connected URL range when the hostname is oversized.
+ * @returns The hostname end and its connected URL range when the hostname is oversized.
  */
 function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, candidate: UrlCandidate): UrlRangeAnalysis {
     const hostnameEnd = findHostnameEnd(text, hostnameStart, candidate.end);
-    const hostname = {start: hostnameStart, end: hostnameEnd};
     if (isHostnameWithinLengthLimits(text, hostnameStart, hostnameEnd)) {
-        return {hostname};
+        return {hostnameEnd};
     }
 
     return {
-        hostname,
+        hostnameEnd,
         oversizedRange: {start: urlStart, end: findUrlEnd(text, hostnameEnd, candidate.end)},
     };
 }
@@ -520,7 +514,7 @@ function findOversizedUrlRanges(text: string): TextRange[] {
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
-            nextIndex = Math.max(index + matchedProtocol.length, analysis.hostname.end);
+            nextIndex = Math.max(index + matchedProtocol.length, analysis.hostnameEnd);
         } else {
             if (text[index] !== '.') {
                 index++;
@@ -671,7 +665,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
             continue;
         }
 
-        const hostnameStart = findHostnameStart(text, index, tldEnd);
+        const hostnameStart = findHostnameStart(text, index);
         if (hostnameStart === undefined) {
             index++;
             continue;
