@@ -336,54 +336,6 @@ function isValidHostname(text: string, hostnameStart: number, hostnameEnd: numbe
     return true;
 }
 
-/**
- * Finds the first character of a valid hostname before the dot that starts its top-level domain.
- *
- * @param text - Candidate URL text containing the hostname.
- * @param dotPosition - Index of the dot immediately before the top-level domain.
- * @returns The hostname's first-character index, or undefined when no valid hostname precedes the dot.
- */
-function findHostnameStart(text: string, dotPosition: number): number | undefined {
-    let hostnameStart = dotPosition;
-    let labelEnd = dotPosition;
-
-    while (labelEnd > 0) {
-        let rawLabelStart = labelEnd - 1;
-        while (rawLabelStart >= 0 && text[rawLabelStart] !== '.' && isHostnameCharacter(text[rawLabelStart])) {
-            rawLabelStart--;
-        }
-        rawLabelStart++;
-
-        let labelStart = rawLabelStart;
-        while (labelStart < labelEnd && text[labelStart] === '-') {
-            labelStart++;
-        }
-
-        if (!isValidHostnameLabel(text, labelStart, labelEnd)) {
-            // Do not fall back to a valid suffix when an earlier label makes the contiguous hostname invalid.
-            return undefined;
-        }
-        hostnameStart = labelStart;
-
-        // Keep matching a valid hostname suffix after leading hyphens, as the URL regex does.
-        if (labelStart !== rawLabelStart) {
-            const hasSingleBoundaryHyphen = labelStart === rawLabelStart + 1 && !isHostnameCharacter(text[rawLabelStart - 1]);
-            if (!hasSingleBoundaryHyphen) {
-                return undefined;
-            }
-            break;
-        }
-
-        const separatorPosition = labelStart - 1;
-        if (separatorPosition < 0 || text[separatorPosition] !== '.') {
-            break;
-        }
-        labelEnd = separatorPosition;
-    }
-
-    return hostnameStart === dotPosition ? undefined : hostnameStart;
-}
-
 /** Returns whether a regex match stopped before another label in the same hostname-like token. */
 function hasHostnameContinuation(text: string, position: number): boolean {
     let index = position;
@@ -663,13 +615,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
             continue;
         }
 
-        const hostnameStart = findHostnameStart(text, index);
-        if (hostnameStart === undefined) {
-            index++;
-            continue;
-        }
-
-        const candidate = extendUrlCandidateBoundaries(text, hostnameStart, tldEnd);
+        const candidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
         candidates.push(candidate);
         index = candidate.end;
     }
