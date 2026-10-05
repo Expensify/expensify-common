@@ -705,6 +705,18 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(input);
     });
 
+    test('keeps a standalone boundary hyphen outside a maximum-length hostname label', () => {
+        // Given a valid 63-character hostname label preceded by a standalone punctuation hyphen.
+        const domain = `${'a'.repeat(63)}.com`;
+        const input = `-${domain}`;
+
+        // When ExpensiMark parses the domain.
+        const result = parser.replace(input);
+
+        // Then it preserves the hyphen and autolinks the valid hostname after it.
+        expect(result).toBe(`-${anchor(domain)}`);
+    });
+
     test('still autolinks a separate valid domain after an invalid hostname', () => {
         // Given an invalid hostname followed by a separate valid domain.
         const invalidHostname = `${'a'.repeat(64)}.example.com`;
@@ -786,6 +798,74 @@ describe('Test long input candidate parsing', () => {
 
         // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
         expect(result).toBe(input);
+    });
+
+    test.each(['/path/example.org', '?next=example.org', '#example.org'])('does not autolink a domain inside an invalid bare URL suffix in %s', (suffix) => {
+        // Given an invalid bare hostname followed by a path, query, or fragment containing another domain.
+        const input = `${'a'.repeat(64)}.com${suffix}`;
+
+        // When ExpensiMark parses the complete invalid URL.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
+        expect(result).toBe(input);
+    });
+
+    test.each([
+        ['labeled link', (url) => `[label](${url})`],
+        ['image', (url) => `![alt](${url}/image.png)`],
+        ['video', (url) => `![video](${url}/video.mp4)`],
+    ])('does not autolink a domain inside an invalid bare URL used by a %s', (_name, createInput) => {
+        // Given URL-based Markdown containing a domain in the path of an oversized bare hostname.
+        const invalidUrl = `${'a'.repeat(64)}.com/path/example.org`;
+        const input = createInput(invalidUrl);
+
+        // When ExpensiMark parses the complete Markdown input.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete value unchanged instead of linking the domain inside the invalid URL.
+        expect(result).toBe(input);
+    });
+
+    test('does not autolink a domain inside an invalid bare URL when raw HTML disables candidate scanning', () => {
+        // Given raw HTML followed by an oversized bare URL whose path contains another domain.
+        const invalidUrl = `${'a'.repeat(64)}.com/path/example.org`;
+        const validDomain = 'valid.net';
+        const input = `<span>x</span> ${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the invalid URL plain while still autolinking the separate valid domain.
+        expect(result).toBe(`<span>x</span> ${invalidUrl} ${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['bare URL', `${'a'.repeat(64)}.com`],
+        ['protocol URL', `https://${'a'.repeat(64)}.com`],
+    ])('still autolinks a valid domain after an invalid %s path', (_name, invalidUrl) => {
+        // Given an oversized URL followed by a path boundary and a separate valid domain without whitespace.
+        const validDomain = 'valid.org';
+        const input = `${invalidUrl}/path;${validDomain}`;
+
+        // When ExpensiMark parses the complete non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it keeps the invalid URL path plain and autolinks the domain after the URL boundary.
+        expect(result).toBe(`${invalidUrl}/path;${anchor(validDomain)}`);
+    });
+
+    test('still autolinks a valid domain after an invalid raw-HTML URL path', () => {
+        // Given raw HTML followed by an oversized URL path and a separate valid domain without whitespace.
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path`;
+        const validDomain = 'valid.org';
+        const input = `<span>x</span> ${invalidUrl};${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the invalid URL path plain and autolinks the domain after the URL boundary.
+        expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
     });
 
     test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {
