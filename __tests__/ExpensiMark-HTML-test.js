@@ -789,6 +789,64 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`${invalidUrl},${anchor(validDomain)}`);
     });
 
+    test.each([
+        ['https://', ','],
+        ['https://', ';'],
+        ['https://', '|'],
+        ['https://', ')'],
+        ['https://', ']'],
+        ['https://', '}'],
+        ['https://', '_'],
+        ['http://', ','],
+        ['ftp://', ','],
+        ['ftps://', ','],
+    ])('still autolinks a valid domain after malformed %s followed by "%s"', (protocol, separator) => {
+        // Given a protocol without a hostname, followed by a URL boundary and a separate valid domain.
+        const validDomain = 'valid.org';
+        const input = `${protocol}${separator}${validDomain}`;
+
+        // When ExpensiMark parses the complete non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it leaves the malformed protocol plain and autolinks the separate valid domain.
+        expect(result).toBe(`${protocol}${separator}${anchor(validDomain)}`);
+    });
+
+    test.each(['https://foo..bar.com', 'https://foo.-bar.com', 'https://-bar.com'])('still autolinks a valid domain after malformed URL %s', (invalidUrl) => {
+        // Given a malformed hostname followed by a URL boundary and a separate valid domain.
+        const validDomain = 'valid.org';
+        const input = `${invalidUrl},${validDomain}`;
+
+        // When ExpensiMark parses both values as one non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it keeps the malformed URL plain and autolinks only the separate valid domain.
+        expect(result).toBe(`${invalidUrl},${anchor(validDomain)}`);
+    });
+
+    test.each(['https:///path/example.org', 'https://?next=example.org', 'https://#example.org'])('does not autolink a domain inside malformed URL %s', (invalidUrl) => {
+        // Given a protocol without a hostname whose connected path, query, or fragment contains a domain.
+
+        // When ExpensiMark parses the complete malformed URL.
+        const result = parser.replace(invalidUrl);
+
+        // Then it keeps the complete connected URL text plain instead of linking the nested domain.
+        expect(result).toBe(invalidUrl);
+    });
+
+    test('uses the same malformed URL ranges when raw HTML disables candidate scanning', () => {
+        // Given raw HTML followed by a malformed URL and a separate valid domain.
+        const invalidUrl = 'https://foo..bar.com/path/example.org';
+        const validDomain = 'valid.net';
+        const input = `<span>x</span> ${invalidUrl};${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the malformed URL plain and autolinks only the separate valid domain.
+        expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
+    });
+
     test.each(['/path/example.org', '?next=example.org', '#example.org'])('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
         // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain.
         const input = `https://${'a'.repeat(64)}.com${suffix}`;

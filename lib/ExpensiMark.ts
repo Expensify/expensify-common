@@ -59,8 +59,8 @@ type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
 type Replacement = ReplacementFn | string;
 type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRawInput: boolean, shouldEscapeText: boolean) => string;
 type TextRange = {start: number; end: number};
-type UrlCandidate = TextRange & {requiredUrlStart?: number};
-type UrlRangeAnalysis = {hostnameEnd: number; oversizedRange?: TextRange};
+type UrlCandidate = TextRange;
+type UrlRangeAnalysis = {hostnameEnd: number; invalidRange?: TextRange};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -304,35 +304,33 @@ function findHostnameEnd(text: string, hostnameStart: number, candidateEnd: numb
 }
 
 /**
- * Returns whether a URL's hostname stays within the supported DNS length limits.
+ * Returns whether a hostname follows the supported ASCII syntax and DNS length limits.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
  * @param hostnameEnd - Index immediately after the hostname.
- * @returns Whether the hostname stays within the supported DNS length limits.
+ * @returns Whether the complete hostname is valid.
  */
-function isHostnameWithinLengthLimits(text: string, hostnameStart: number, hostnameEnd: number): boolean {
+function isValidHostname(text: string, hostnameStart: number, hostnameEnd: number): boolean {
     let hostnameContentEnd = hostnameEnd;
     while (hostnameContentEnd > hostnameStart && (text[hostnameContentEnd - 1] === '.' || text[hostnameContentEnd - 1] === '-')) {
         hostnameContentEnd--;
     }
 
-    let labelLength = 0;
+    if (hostnameContentEnd === hostnameStart || hostnameContentEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
+        return false;
+    }
 
-    for (let index = hostnameStart; index < hostnameContentEnd; index++) {
-        if (index - hostnameStart >= Constants.MAX_URL_HOSTNAME_LENGTH) {
-            return false;
-        }
-
-        if (text[index] === '.') {
-            labelLength = 0;
+    let labelStart = hostnameStart;
+    for (let index = hostnameStart; index <= hostnameContentEnd; index++) {
+        if (index !== hostnameContentEnd && text[index] !== '.') {
             continue;
         }
 
-        labelLength++;
-        if (labelLength > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH) {
+        if (index - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || !isValidHostnameLabel(text, labelStart, index)) {
             return false;
         }
+        labelStart = index + 1;
     }
 
     return true;
@@ -426,7 +424,7 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 }
 
 /** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
-function extendUrlCandidateBoundaries(text: string, start: number, end: number, requireUrlStart = false): UrlCandidate {
+function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
     let candidateStart = start;
     while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
         candidateStart--;
@@ -436,7 +434,7 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number, 
     while (candidateEnd < text.length && !isUrlBoundarySpace(text[candidateEnd]) && text[candidateEnd] !== '<') {
         candidateEnd++;
     }
-    return {start: candidateStart, end: candidateEnd, requiredUrlStart: requireUrlStart ? start : undefined};
+    return {start: candidateStart, end: candidateEnd};
 }
 
 /**
@@ -455,23 +453,23 @@ function findUrlEnd(text: string, hostnameEnd: number, candidateEnd: number): nu
 }
 
 /**
- * Analyzes a URL candidate and returns the connected range when its hostname exceeds DNS length limits.
+ * Analyzes a URL candidate and returns the connected range when its hostname is invalid.
  *
  * @param text - Text containing the URL candidate.
  * @param urlStart - Index where the URL starts, excluding Markdown punctuation.
  * @param hostnameStart - Index where the hostname starts.
  * @param candidate - Broad candidate range found by the scanner.
- * @returns The hostname end and its connected URL range when the hostname is oversized.
+ * @returns The hostname end and its connected URL range when the hostname is invalid.
  */
 function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, candidate: UrlCandidate): UrlRangeAnalysis {
     const hostnameEnd = findHostnameEnd(text, hostnameStart, candidate.end);
-    if (isHostnameWithinLengthLimits(text, hostnameStart, hostnameEnd)) {
+    if (isValidHostname(text, hostnameStart, hostnameEnd)) {
         return {hostnameEnd};
     }
 
     return {
         hostnameEnd,
-        oversizedRange: {start: urlStart, end: findUrlEnd(text, hostnameEnd, candidate.end)},
+        invalidRange: {start: urlStart, end: findUrlEnd(text, hostnameEnd, candidate.end)},
     };
 }
 
@@ -496,13 +494,13 @@ function findRawHostnameStart(text: string, dotPosition: number): number {
 }
 
 /**
- * Finds URL ranges whose hostname exceeds the supported DNS length limits.
+ * Finds URL ranges whose hostname is malformed or exceeds the supported DNS length limits.
  * These ranges keep both URL parsing paths from matching another domain inside the same invalid URL.
  *
  * @param text - Text containing possible protocol and bare URLs.
  * @returns Connected invalid URL ranges that must remain plain text.
  */
-function findOversizedUrlRanges(text: string): TextRange[] {
+function findInvalidUrlRanges(text: string): TextRange[] {
     const ranges: TextRange[] = [];
     let index = 0;
 
@@ -533,9 +531,9 @@ function findOversizedUrlRanges(text: string): TextRange[] {
             nextIndex = tldEnd;
         }
 
-        if (analysis.oversizedRange) {
-            ranges.push(analysis.oversizedRange);
-            index = analysis.oversizedRange.end;
+        if (analysis.invalidRange) {
+            ranges.push(analysis.invalidRange);
+            index = analysis.invalidRange.end;
         } else {
             index = nextIndex;
         }
@@ -635,10 +633,10 @@ function findUrlCandidates(text: string): UrlCandidate[] {
 
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
-            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length, true);
+            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
-            if (analysis.oversizedRange) {
-                index = analysis.oversizedRange.end;
+            if (analysis.invalidRange) {
+                index = analysis.invalidRange.end;
                 continue;
             }
             candidates.push(candidate);
@@ -660,8 +658,8 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         const rawHostnameStart = findRawHostnameStart(text, index);
         const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
         const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart, broadCandidate);
-        if (analysis.oversizedRange) {
-            index = analysis.oversizedRange.end;
+        if (analysis.invalidRange) {
+            index = analysis.invalidRange.end;
             continue;
         }
 
@@ -1959,16 +1957,8 @@ export default class ExpensiMark {
      * @param replacement - The replacement applied to each accepted URL.
      * @param shouldScanForUrls - Whether to scan URL candidates before running the regex.
      * @param shouldRejectPartialHostnameMatches - Whether matches that end inside a hostname should stay plain.
-     * @param expectedUrlOffset - The URL start expected by the candidate scanner.
      */
-    modifyTextForUrlLinks(
-        regex: RegExp,
-        textToCheck: string,
-        replacement: ReplacementFn,
-        shouldScanForUrls = false,
-        shouldRejectPartialHostnameMatches = false,
-        expectedUrlOffset?: number,
-    ): string {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, shouldRejectPartialHostnameMatches = false): string {
         if (shouldScanForUrls) {
             const candidates = findUrlCandidates(textToCheck);
             if (candidates.length === 0) {
@@ -1979,20 +1969,11 @@ export default class ExpensiMark {
             const candidateRegex = regex;
             let outputStart = 0;
 
-            for (const {start, end, requiredUrlStart} of candidates) {
+            for (const {start, end} of candidates) {
                 const candidate = textToCheck.slice(start, end);
                 candidateRegex.lastIndex = 0;
                 output.push(textToCheck.slice(outputStart, start));
-                output.push(
-                    this.modifyTextForUrlLinks(
-                        candidateRegex,
-                        candidate,
-                        replacement,
-                        false,
-                        shouldRejectPartialHostnameMatches,
-                        requiredUrlStart === undefined ? undefined : requiredUrlStart - start,
-                    ),
-                );
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement, false, shouldRejectPartialHostnameMatches));
                 outputStart = end;
             }
 
@@ -2001,29 +1982,21 @@ export default class ExpensiMark {
         }
 
         let match = regex.exec(textToCheck);
-        if (match !== null && expectedUrlOffset !== undefined) {
-            const matchedUrlOffset = match.index + match[1].length;
-            const matchedUrlEnd = matchedUrlOffset + match[2].length;
-            // A candidate must match the URL the scanner found, not a valid prefix or suffix inside an invalid hostname.
-            if (matchedUrlOffset !== expectedUrlOffset || hasHostnameContinuation(textToCheck, matchedUrlEnd)) {
-                return textToCheck;
-            }
-        }
         let replacedText = '';
         let startIndex = 0;
-        const oversizedUrlRanges = shouldRejectPartialHostnameMatches ? findOversizedUrlRanges(textToCheck) : [];
-        let oversizedUrlRangeIndex = 0;
+        const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textToCheck) : [];
+        let invalidUrlRangeIndex = 0;
 
         while (match !== null) {
             if (shouldRejectPartialHostnameMatches) {
                 const matchedUrlOffset = match.index + match[1].length;
                 const matchedUrlEnd = matchedUrlOffset + match[2].length;
-                while (oversizedUrlRangeIndex < oversizedUrlRanges.length && oversizedUrlRanges[oversizedUrlRangeIndex].end <= matchedUrlOffset) {
-                    oversizedUrlRangeIndex++;
+                while (invalidUrlRangeIndex < invalidUrlRanges.length && invalidUrlRanges[invalidUrlRangeIndex].end <= matchedUrlOffset) {
+                    invalidUrlRangeIndex++;
                 }
-                const oversizedUrlRange = oversizedUrlRanges[oversizedUrlRangeIndex];
-                const isInsideOversizedUrl = oversizedUrlRange !== undefined && oversizedUrlRange.start <= matchedUrlOffset && matchedUrlOffset < oversizedUrlRange.end;
-                if (hasHostnameContinuation(textToCheck, matchedUrlEnd) || isInsideOversizedUrl) {
+                const invalidUrlRange = invalidUrlRanges[invalidUrlRangeIndex];
+                const isInsideInvalidUrl = invalidUrlRange !== undefined && invalidUrlRange.start <= matchedUrlOffset && matchedUrlOffset < invalidUrlRange.end;
+                if (hasHostnameContinuation(textToCheck, matchedUrlEnd) || isInsideInvalidUrl) {
                     match = regex.exec(textToCheck);
                     continue;
                 }
