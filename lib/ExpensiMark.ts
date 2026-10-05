@@ -561,7 +561,7 @@ function filterUrlCandidatesBlockedByFollowingHtml(text: string, candidates: Url
     return validCandidates.reverse();
 }
 
-/** Finds possible URL ranges, skips URL-looking text inside protected tags, and leaves final validity to the existing regex. */
+/** Finds possible URL ranges, skips URL-looking text inside protected tags, rejects malformed or oversized hostnames, and leaves remaining validation to the existing regex. */
 function findUrlCandidates(text: string): UrlCandidate[] {
     const candidates: UrlCandidate[] = [];
     const protectedTags: string[] = [];
@@ -1901,7 +1901,7 @@ export default class ExpensiMark {
      * @param textToCheck - The text containing possible URLs.
      * @param replacement - The replacement applied to each accepted URL.
      * @param shouldScanForUrls - Whether to scan URL candidates before running the regex.
-     * @param shouldRejectPartialHostnameMatches - Whether matches that end inside a hostname should stay plain.
+     * @param shouldRejectPartialHostnameMatches - Whether to reject matches inside invalid URL ranges or that end inside a hostname.
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, shouldRejectPartialHostnameMatches = false): string {
         if (shouldScanForUrls) {
