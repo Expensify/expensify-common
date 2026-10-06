@@ -27,6 +27,148 @@ function resultFn<R, A extends unknown[]>(parameter: string | ((...a: A) => R), 
     return parameter;
 }
 
+// Str methods that other Str methods call are plain module-level functions instead of being reached through
+// `this`: react-native-worklets 0.13 no longer keeps an object literal together on a Worklet Runtime, so `this`
+// inside a workletized method does not point to Str there.
+function compare(strA: string, strB: string): 1 | 0 | -1 {
+    if (strA < strB) {
+        return -1;
+    }
+    if (strA > strB) {
+        return 1;
+    }
+    return 0;
+}
+
+function caseInsensitiveCompare(strA: string, strB: string): 1 | 0 | -1 {
+    const lowerCaseStrA = strA.toLocaleLowerCase();
+    const lowerCaseStrB = strB.toLocaleLowerCase();
+
+    return compare(lowerCaseStrA, lowerCaseStrB);
+}
+
+function contains(haystack: string, needle: string): boolean {
+    return haystack.indexOf(needle) !== -1;
+}
+
+function cutAfter(str: string, substr: string): string {
+    const index = str.indexOf(substr);
+    if (index !== -1) {
+        return str.substring(0, index);
+    }
+    return str;
+}
+
+function cutBefore(str: string, substr: string): string {
+    const index = str.indexOf(substr);
+    if (index !== -1) {
+        return str.substring(index + substr.length);
+    }
+    return str;
+}
+
+function extractEmailDomain(email: string): string {
+    return cutBefore(email, '@');
+}
+
+function getExtension(url: string): string | undefined {
+    if (typeof url !== 'string') {
+        Log.warn('Str.getExtension: url is not a string', {url});
+        return undefined;
+    }
+    return url.split('.').pop()?.split('?')[0]?.toLowerCase();
+}
+
+function getRawByteSize(inputChar: string): number {
+    const onlyChar = String(inputChar);
+    const c = onlyChar.charCodeAt(0);
+
+    // If we are grabbing the byte size, we need to temporarily diable no-bitwise for linting
+    /* eslint-disable no-bitwise */
+    if (c < 1 << 7) {
+        return 1;
+    }
+    if (c < 1 << 11) {
+        return 2;
+    }
+    if (c < 1 << 16) {
+        return 3;
+    }
+    if (c < 1 << 21) {
+        return 4;
+    }
+    if (c < 1 << 26) {
+        return 5;
+    }
+    if (c < 1 << 31) {
+        return 6;
+    }
+    /* eslint-enable no-bitwise */
+    return Number.NaN;
+}
+
+function htmlDecode(s: string) {
+    return HtmlEntities.decode(s);
+}
+
+function htmlEncode(s: string) {
+    return HtmlEntities.encode(s);
+}
+
+function isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean {
+    return Object.prototype.toString.call(obj) === `[object ${type}]`;
+}
+
+function isNumber(obj: unknown): obj is number {
+    return isTypeOf(obj, 'Number');
+}
+
+function isString(obj: unknown): obj is string {
+    return isTypeOf(obj, 'String');
+}
+
+function isUndefined(obj: unknown): boolean {
+    // eslint-disable-next-line no-void
+    return obj === void 0;
+}
+
+function isValidE164Phone(phone: string): boolean {
+    return Constants.CONST.SMS.E164_REGEX.test(phone);
+}
+
+function isValidEmail(str: string): boolean {
+    if (!str || typeof str !== 'string') {
+        return false;
+    }
+    const unicodeVersion = Punycode.toUnicode(str);
+    if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
+        return false;
+    }
+    return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
+}
+
+function maskFirstNCharacters(str: string, num: number, mask: string): string {
+    // if str is empty, str or mask aren't strings,
+    // or n is not a number, do nothing
+    if (!isString(str) || !isString(mask) || str.length === 0 || !isNumber(num)) {
+        return str;
+    }
+
+    return str.substring(0, num).replaceAll(/./g, mask) + str.substring(num);
+}
+
+function removeSMSDomain(text: string): string {
+    return text.replaceAll(REMOVE_SMS_DOMAIN_PATTERN, '');
+}
+
+function removeTrailingComma(str: string): string {
+    return str.trim().replaceAll(/(,$)/g, '');
+}
+
+function startsWith(haystack: string, needle: string): boolean {
+    return isString(haystack) && isString(needle) && haystack.substring(0, needle.length) === needle;
+}
+
 const Str = {
     /**
      * Return true if the string is ending with the provided suffix
@@ -91,9 +233,7 @@ const Str = {
      * @param s The string to decode.
      * @returns The decoded string.
      */
-    htmlDecode(s: string) {
-        return HtmlEntities.decode(s);
-    },
+    htmlDecode,
 
     /**
      * HTML encodes the given string.
@@ -101,9 +241,7 @@ const Str = {
      * @param s The string to encode.
      * @return string @p s HTML encoded.
      */
-    htmlEncode(s: string) {
-        return HtmlEntities.encode(s);
-    },
+    htmlEncode,
 
     /**
      * Decodes the given HTML encoded string.
@@ -153,7 +291,7 @@ const Str = {
      * @returns True when first === second, ignoring HTML encoding
      */
     htmlEncodingInsensitiveEquals(first: string, second: string): boolean {
-        return first === second || this.htmlDecode(first) === second || this.htmlEncode(first) === second;
+        return first === second || htmlDecode(first) === second || htmlEncode(first) === second;
     },
 
     /**
@@ -250,33 +388,7 @@ const Str = {
      * one.
      * @returns Byte size of the character
      */
-    getRawByteSize(inputChar: string): number {
-        const onlyChar = String(inputChar);
-        const c = onlyChar.charCodeAt(0);
-
-        // If we are grabbing the byte size, we need to temporarily diable no-bitwise for linting
-        /* eslint-disable no-bitwise */
-        if (c < 1 << 7) {
-            return 1;
-        }
-        if (c < 1 << 11) {
-            return 2;
-        }
-        if (c < 1 << 16) {
-            return 3;
-        }
-        if (c < 1 << 21) {
-            return 4;
-        }
-        if (c < 1 << 26) {
-            return 5;
-        }
-        if (c < 1 << 31) {
-            return 6;
-        }
-        /* eslint-enable no-bitwise */
-        return Number.NaN;
-    },
+    getRawByteSize,
 
     /**
      * Gets the length of a string in bytes, including non-ASCII characters
@@ -285,7 +397,7 @@ const Str = {
     getByteLength(input: string): number {
         // Force string type
         const stringInput = String(input);
-        const byteLength = Array.from(stringInput).reduce((acc, char) => acc + this.getRawByteSize(char), 0);
+        const byteLength = Array.from(stringInput).reduce((acc, char) => acc + getRawByteSize(char), 0);
         return byteLength;
     },
 
@@ -298,7 +410,7 @@ const Str = {
         const stringInput = String(input);
         let totalByteLength = 0;
         for (let i = 0; i < stringInput.length; i++) {
-            const charByteSize = this.getRawByteSize(stringInput[i]);
+            const charByteSize = getRawByteSize(stringInput[i]);
             if (charByteSize + totalByteLength > maxSize) {
                 // If the next character exceeds the limit, stop and return the truncated string.
                 return `${stringInput.substr(0, i - 3)}...`;
@@ -315,9 +427,7 @@ const Str = {
      * @param needle  The case-sensitive string to search for
      * @returns True if the haystack starts with the needle.
      */
-    startsWith(haystack: string, needle: string): boolean {
-        return this.isString(haystack) && this.isString(needle) && haystack.substring(0, needle.length) === needle;
-    },
+    startsWith,
 
     /**
      * Gets the textual value of the given string.
@@ -326,7 +436,7 @@ const Str = {
      * @returns The text from within the HTML string.
      */
     stripHTML(str: string): string {
-        if (!this.isString(str)) {
+        if (!isString(str)) {
             return '';
         }
 
@@ -352,13 +462,7 @@ const Str = {
      * @param substr The substring to search for.
      * @returns The cut/trimmed string.
      */
-    cutAfter(str: string, substr: string): string {
-        const index = str.indexOf(substr);
-        if (index !== -1) {
-            return str.substring(0, index);
-        }
-        return str;
-    },
+    cutAfter,
 
     /**
      * Returns a string containing all the characters str from after the first
@@ -369,13 +473,7 @@ const Str = {
      * @param substr The substring to search for.
      * @returns The cut/trimmed string.
      */
-    cutBefore(str: string, substr: string): string {
-        const index = str.indexOf(substr);
-        if (index !== -1) {
-            return str.substring(index + substr.length);
-        }
-        return str;
-    },
+    cutBefore,
 
     /**
      * Checks that the string is a domain name (e.g. example.com)
@@ -405,16 +503,7 @@ const Str = {
      *
      * @returns True if the string is an email
      */
-    isValidEmail(str: string): boolean {
-        if (!str || typeof str !== 'string') {
-            return false;
-        }
-        const unicodeVersion = Punycode.toUnicode(str);
-        if (String(unicodeVersion).match(Constants.CONST.REG_EXP.EMOJI_RULE)) {
-            return false;
-        }
-        return !!String(str).match(Constants.CONST.REG_EXP.EMAIL);
-    },
+    isValidEmail,
 
     /**
      * Checks if the string is an valid email address formed during comment markdown formation.
@@ -434,9 +523,7 @@ const Str = {
      *
      * @returns string with the trailing comma removed
      */
-    removeTrailingComma(str: string): string {
-        return str.trim().replaceAll(/(,$)/g, '');
-    },
+    removeTrailingComma,
 
     /**
      * Checks that the string is a list of coma separated email addresss.
@@ -446,13 +533,13 @@ const Str = {
      * @returns True if all emails are valid or if input is empty
      */
     areValidEmails(str: string): boolean {
-        const string = this.removeTrailingComma(str);
+        const string = removeTrailingComma(str);
         if (string === '') {
             return true;
         }
 
         const emails = string.split(',');
-        const result = emails.every((email) => this.isValidEmail(email.trim()));
+        const result = emails.every((email) => isValidEmail(email.trim()));
         return result;
     },
 
@@ -471,9 +558,7 @@ const Str = {
      *
      * @returns The domain name in the email address.
      */
-    extractEmailDomain(email: string): string {
-        return this.cutBefore(email, '@');
-    },
+    extractEmailDomain,
 
     /**
      * Tries to extract the company name from the given email address
@@ -484,7 +569,7 @@ const Str = {
      * @returns The company name in the email address or null.
      */
     extractCompanyNameFromEmailDomain(email: string): string | null {
-        const domain = this.extractEmailDomain(email);
+        const domain = extractEmailDomain(email);
         if (!domain) {
             return null;
         }
@@ -506,7 +591,7 @@ const Str = {
      * @returns The local part in the email address.
      */
     extractEmailLocalPart(email: string): string {
-        return this.cutAfter(email, '@');
+        return cutAfter(email, '@');
     },
 
     /**
@@ -571,13 +656,13 @@ const Str = {
      * @returns true if the length is in the range, false otherwise
      */
     isOfLength(str: string, minimumLength: number, maximumLength: number): boolean {
-        if (!this.isString(str)) {
+        if (!isString(str)) {
             return false;
         }
         if (str.length < minimumLength) {
             return false;
         }
-        if (!this.isUndefined(maximumLength) && str.length > maximumLength) {
+        if (!isUndefined(maximumLength) && str.length > maximumLength) {
             return false;
         }
         return true;
@@ -638,9 +723,7 @@ const Str = {
      *
      * @returns Returns true if the haystack contains the needle
      */
-    contains(haystack: string, needle: string): boolean {
-        return haystack.indexOf(needle) !== -1;
-    },
+    contains,
 
     /**
      * Returns true if the haystack contains the needle, ignoring case
@@ -651,7 +734,7 @@ const Str = {
      * @returns Returns true if the haystack contains the needle, ignoring case
      */
     caseInsensitiveContains(haystack: string, needle: string): boolean {
-        return this.contains(haystack.toLowerCase(), needle.toLowerCase());
+        return contains(haystack.toLowerCase(), needle.toLowerCase());
     },
 
     /**
@@ -664,12 +747,7 @@ const Str = {
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
-    caseInsensitiveCompare(strA: string, strB: string): 1 | 0 | -1 {
-        const lowerCaseStrA = strA.toLocaleLowerCase();
-        const lowerCaseStrB = strB.toLocaleLowerCase();
-
-        return this.compare(lowerCaseStrA, lowerCaseStrB);
-    },
+    caseInsensitiveCompare,
 
     /**
      * Case insensitive equals
@@ -679,7 +757,7 @@ const Str = {
      * @returns true when first == second except for case
      */
     caseInsensitiveEquals(strA: string, strB: string): boolean {
-        return this.caseInsensitiveCompare(strA, strB) === 0;
+        return caseInsensitiveCompare(strA, strB) === 0;
     },
 
     /**
@@ -692,15 +770,7 @@ const Str = {
      *                   1 if first string > second string
      *                   0 if first string = second string
      */
-    compare(strA: string, strB: string): 1 | 0 | -1 {
-        if (strA < strB) {
-            return -1;
-        }
-        if (strA > strB) {
-            return 1;
-        }
-        return 0;
-    },
+    compare,
 
     /**
      * Check if a file extension is supported by SmartReports
@@ -726,18 +796,18 @@ const Str = {
         // Hide these numbers completely
         // We should not be getting account numbers this small or large
         if (len < 6 || len > 20) {
-            return this.maskFirstNCharacters(accountNumber, len, 'X');
+            return maskFirstNCharacters(accountNumber, len, 'X');
         }
 
         // Can show last 4
         if (len < 14) {
-            return this.maskFirstNCharacters(accountNumber, len - 4, 'X');
+            return maskFirstNCharacters(accountNumber, len - 4, 'X');
         }
 
         // Can show first 6 and last 4
         const first = accountNumber.substr(0, 6);
         const last = accountNumber.substr(7);
-        const masked = this.maskFirstNCharacters(last, len - 11, 'X');
+        const masked = maskFirstNCharacters(last, len - 11, 'X');
         return `${first}${masked}`;
     },
 
@@ -745,35 +815,26 @@ const Str = {
      * Checks if something is a string
      * Stolen from underscore
      */
-    isString(obj: unknown): obj is string {
-        return this.isTypeOf(obj, 'String');
-    },
+    isString,
 
     /**
      * Checks if something is a number
      * Stolen from underscore
      * @param obj
      */
-    isNumber(obj: unknown): obj is number {
-        return this.isTypeOf(obj, 'Number');
-    },
+    isNumber,
 
     /**
      * Checks if something is a certain type
      * Stolen from underscore
      */
-    isTypeOf(obj: unknown, type: 'Arguments' | 'Function' | 'String' | 'Number' | 'Date' | 'RegExp' | 'Error' | 'Symbol' | 'Map' | 'WeakMap' | 'Set' | 'WeakSet'): boolean {
-        return Object.prototype.toString.call(obj) === `[object ${type}]`;
-    },
+    isTypeOf,
 
     /**
      * Checks to see if something is undefined
      * Stolen from underscore
      */
-    isUndefined(obj: unknown): boolean {
-        // eslint-disable-next-line no-void
-        return obj === void 0;
-    },
+    isUndefined,
 
     /**
      * Replace first N characters of the string with maskChar
@@ -783,15 +844,7 @@ const Str = {
      * @param mask String we want replace the first N chars with
      * @returns Masked string
      */
-    maskFirstNCharacters(str: string, num: number, mask: string): string {
-        // if str is empty, str or mask aren't strings,
-        // or n is not a number, do nothing
-        if (!this.isString(str) || !this.isString(mask) || str.length === 0 || !this.isNumber(num)) {
-            return str;
-        }
-
-        return str.substring(0, num).replaceAll(/./g, mask) + str.substring(num);
-    },
+    maskFirstNCharacters,
 
     /**
      * Trim a string
@@ -805,7 +858,7 @@ const Str = {
      * @param percentageString The percentage as a string
      */
     percentageStringToNumber(percentageString: string): number {
-        return Number(this.cutAfter(percentageString, '%'));
+        return Number(cutAfter(percentageString, '%'));
     },
 
     /**
@@ -857,7 +910,7 @@ const Str = {
      * Converts a value to boolean, case-insensitive.
      */
     toBool(value: unknown): boolean {
-        if (this.isString(value)) {
+        if (isString(value)) {
             return value.toLowerCase() === 'true';
         }
         return !!value;
@@ -914,9 +967,7 @@ const Str = {
     /**
      * Check for whether a phone number is valid according to E.164 standard.
      */
-    isValidE164Phone(phone: string): boolean {
-        return Constants.CONST.SMS.E164_REGEX.test(phone);
-    },
+    isValidE164Phone,
 
     /**
      * Check for whether a phone number is valid in different formats/standards. For example:
@@ -949,15 +1000,13 @@ const Str = {
     /**
      * Returns text without our SMS domain
      */
-    removeSMSDomain(text: string): string {
-        return text.replaceAll(REMOVE_SMS_DOMAIN_PATTERN, '');
-    },
+    removeSMSDomain,
 
     /**
      * Returns true if the text is a valid E.164 phone number with our SMS domain removed
      */
     isSMSLogin(text: string): boolean {
-        return this.isValidE164Phone(this.removeSMSDomain(text));
+        return isValidE164Phone(removeSMSDomain(text));
     },
 
     /**
@@ -1020,7 +1069,7 @@ const Str = {
             return url;
         }
         const website = match[3] ? match[2] : `${defaultScheme}://${match[2]}`;
-        return website.toLowerCase() + this.cutBefore(match[1], match[2]);
+        return website.toLowerCase() + cutBefore(match[1], match[2]);
     },
 
     /**
@@ -1034,13 +1083,7 @@ const Str = {
      * Get file extension for a given url with or
      * without query parameters
      */
-    getExtension(url: string): string | undefined {
-        if (typeof url !== 'string') {
-            Log.warn('Str.getExtension: url is not a string', {url});
-            return undefined;
-        }
-        return url.split('.').pop()?.split('?')[0]?.toLowerCase();
-    },
+    getExtension,
 
     /**
      * Takes in a URL and checks if the file extension is PDF
@@ -1049,7 +1092,7 @@ const Str = {
      * @returns Whether file path is PDF or not
      */
     isPDF(url: string): boolean {
-        return this.getExtension(url) === 'pdf';
+        return getExtension(url) === 'pdf';
     },
 
     /**
@@ -1061,7 +1104,7 @@ const Str = {
      * https://reactnative.dev/docs/image#source
      */
     isImage(url: string): boolean {
-        const extension = this.getExtension(url);
+        const extension = getExtension(url);
 
         if (!extension) {
             return false;
@@ -1080,7 +1123,7 @@ const Str = {
      * https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs
      */
     isVideo(url: string): boolean {
-        const extension = this.getExtension(url);
+        const extension = getExtension(url);
 
         if (!extension) {
             return false;
@@ -1096,7 +1139,7 @@ const Str = {
      * @returns True if is a domain account email, otherwise false.
      */
     isDomainEmail(email: string): boolean {
-        return this.startsWith(email, '+@');
+        return startsWith(email, '+@');
     },
 
     /**
