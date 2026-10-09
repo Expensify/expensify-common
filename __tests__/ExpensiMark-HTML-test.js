@@ -616,6 +616,7 @@ test('Test wrapped URLs', () => {
 
 describe('Test long input candidate parsing', () => {
     const anchor = (url, label = url) => `<a href="${url.startsWith('http') ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
+    const invalidUrlSuffixesWithNestedDomain = ['/path/example.org', '?next=example.org', '#example.org', ':1/path/example.org', ':8080?next=example.org', ':65535#example.org'];
 
     test('autolinks a domain with the maximum hostname label length without parsing the full input as a URL', () => {
         // Given a valid 63-character hostname label after a long plain-text prefix.
@@ -915,8 +916,8 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
     });
 
-    test.each(['/path/example.org', '?next=example.org', '#example.org'])('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
-        // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain.
+    test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
+        // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
         const input = `https://${'a'.repeat(64)}.com${suffix}`;
 
         // When ExpensiMark parses the complete invalid URL.
@@ -926,8 +927,8 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(input);
     });
 
-    test.each(['/path/example.org', '?next=example.org', '#example.org'])('does not autolink a domain inside an invalid bare URL suffix in %s', (suffix) => {
-        // Given an invalid bare hostname followed by a path, query, or fragment containing another domain.
+    test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid bare URL suffix in %s', (suffix) => {
+        // Given an invalid bare hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
         const input = `${'a'.repeat(64)}.com${suffix}`;
 
         // When ExpensiMark parses the complete invalid URL.

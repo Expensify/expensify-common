@@ -51,7 +51,10 @@ const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
 const URL_TLDS = new Set(URL_TLD_LIST);
 // Caps TLD scanning at the longest known TLD so long invalid URL-like text avoids expensive regex work.
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
-const URL_SUFFIX_AT_POSITION_REGEX = new RegExp(`${UrlPatterns.URL_PATH_REGEX}(?:${UrlPatterns.URL_PARAM_REGEX}|${UrlPatterns.URL_FRAGMENT_REGEX})*`, 'iy');
+const URL_SUFFIX_AT_POSITION_REGEX = new RegExp(
+    `(?:\\:${UrlPatterns.URL_PORT_REGEX}(?![0-9]))?${UrlPatterns.URL_PATH_REGEX}(?:${UrlPatterns.URL_PARAM_REGEX}|${UrlPatterns.URL_FRAGMENT_REGEX})*`,
+    'iy',
+);
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
@@ -389,7 +392,7 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
 }
 
 /**
- * Finds where a URL ends by matching only its path, query, and fragment after an already-validated hostname.
+ * Finds where a URL ends by matching its optional port, path, query, and fragment after an already-validated hostname.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameEnd - Index immediately after the hostname.
