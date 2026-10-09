@@ -681,6 +681,8 @@ describe('Test long input candidate parsing', () => {
         ['bare domain', (hostname) => `${hostname}.example.com`],
         ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
         ['protocol URL with a valid prefix', (hostname) => `https://valid-${hostname}.com`],
+        ['bare URL with a known-TLD prefix', (hostname) => `example.com.${hostname}`],
+        ['protocol URL with a known-TLD prefix', (hostname) => `https://example.com.${hostname}`],
         ['labeled link', (hostname) => `[label](https://${hostname}-valid.com)`],
         ['image', (hostname) => `![alt](https://${hostname}-valid.com/image.png)`],
         ['video', (hostname) => `![video](https://${hostname}-valid.com/video.mp4)`],
@@ -728,6 +730,72 @@ describe('Test long input candidate parsing', () => {
 
         // Then it leaves the invalid hostname plain and autolinks only the separate valid domain.
         expect(result).toBe(`${invalidHostname} ${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['protocol URL followed by repeated dots', 'https://example.com', '..nonsense'],
+        ['protocol URL followed by several dots', 'https://example.com', '...next'],
+        ['protocol URL followed by a dot and hyphen', 'https://example.com', '.-nonsense'],
+        ['protocol URL followed by a hyphen and dot', 'https://example.com', '-.nonsense'],
+        ['bare URL followed by repeated dots', 'example.com', '..nonsense'],
+        ['bare URL followed by several dots', 'example.com', '...next'],
+        ['bare URL followed by a dot and hyphen', 'example.com', '.-nonsense'],
+        ['bare URL followed by a hyphen and dot', 'example.com', '-.nonsense'],
+    ])('still autolinks a valid %s', (_name, validUrl, continuation) => {
+        // Given a valid URL followed without whitespace by punctuation that cannot form another hostname label.
+        const input = `${validUrl}${continuation}`;
+
+        // When ExpensiMark parses the complete hostname-shaped run.
+        const result = parser.replace(input);
+
+        // Then it links the valid URL and leaves only the malformed continuation as plain text.
+        expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+    });
+
+    test.each([
+        ['sentence-like text', '.Thanks!'],
+        ['hyphenated text', '-thanks'],
+        ['text after repeated hyphens', '--next'],
+    ])('preserves a bare URL before adjacent %s', (_name, continuation) => {
+        // Given a bare URL followed without whitespace by text that is not part of its known TLD.
+        const validUrl = 'example.com';
+        const input = `${validUrl}${continuation}`;
+
+        // When ExpensiMark parses the complete hostname-shaped run.
+        const result = parser.replace(input);
+
+        // Then it preserves the existing link for the known-TLD URL and leaves the adjacent text plain.
+        expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+    });
+
+    test.each([
+        ['a sentence-like label', 'example.com.Thanks!'],
+        ['a hyphenated label', 'example.com-thanks'],
+        ['a label with repeated hyphens', 'example.com--next'],
+    ])('preserves protocol URL parsing with %s', (_name, hostname) => {
+        // Given a protocol URL whose complete hostname remains valid under the loose URL rules.
+        const input = `https://${hostname}`;
+        const trailingPunctuation = input.endsWith('!') ? '!' : '';
+        const linkedUrl = trailingPunctuation ? input.slice(0, -1) : input;
+
+        // When ExpensiMark parses the complete URL.
+        const result = parser.replace(input);
+
+        // Then it keeps linking the complete valid hostname rather than stopping at the earlier known TLD.
+        expect(result).toBe(`${anchor(linkedUrl)}${trailingPunctuation}`);
+    });
+
+    test.each(['https://example.com', 'example.com'])('preserves a valid %s before a malformed raw-HTML URL continuation', (validUrl) => {
+        // Given raw HTML followed by a valid URL, malformed hostname punctuation, a nested domain, and a separate valid domain.
+        const continuation = '..nonsense/path/example.org';
+        const separateDomain = 'valid.net';
+        const input = `<span>x</span> ${validUrl}${continuation} ${separateDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it links the valid prefix and separate domain without linking the domain inside the malformed continuation.
+        expect(result).toBe(`<span>x</span> ${anchor(validUrl)}${continuation} ${anchor(separateDomain)}`);
     });
 
     test.each([
