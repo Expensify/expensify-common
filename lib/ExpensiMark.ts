@@ -51,8 +51,7 @@ const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
 const URL_TLDS = new Set(URL_TLD_LIST);
 // Caps TLD scanning at the longest known TLD so long invalid URL-like text avoids expensive regex work.
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
-const NORMALIZED_URL_PREFIX = 'https://example.com';
-const URL_WITH_REQUIRED_PROTOCOL_AT_START_REGEX = new RegExp(`^${UrlPatterns.URL_REGEX_WITH_REQUIRED_PROTOCOL}`, 'i');
+const URL_SUFFIX_AT_POSITION_REGEX = new RegExp(`${UrlPatterns.URL_PATH_REGEX}(?:${UrlPatterns.URL_PARAM_REGEX}|${UrlPatterns.URL_FRAGMENT_REGEX})*`, 'iy');
 const PROTECTED_TAG_NAMES = new Set(['a', 'code', 'pre', 'video']);
 
 type ReplacementFn = (extras: Extras, ...matches: string[]) => string;
@@ -390,18 +389,16 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
 }
 
 /**
- * Finds where a URL ends after its hostname using the same path, query, and fragment rules as URL matching.
+ * Finds where a URL ends by matching only its path, query, and fragment after an already-validated hostname.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameEnd - Index immediately after the hostname.
- * @param candidateEnd - Broad candidate boundary used by the scanner.
  * @returns The first index after the URL recognized by ExpensiMark.
  */
-function findUrlEnd(text: string, hostnameEnd: number, candidateEnd: number): number {
-    // A known valid hostname lets the existing URL regex measure the suffix without duplicating its path and query rules here.
-    const normalizedUrl = `${NORMALIZED_URL_PREFIX}${text.slice(hostnameEnd, candidateEnd)}`;
-    const match = URL_WITH_REQUIRED_PROTOCOL_AT_START_REGEX.exec(normalizedUrl);
-    return hostnameEnd + Math.max(0, (match?.[0].length ?? NORMALIZED_URL_PREFIX.length) - NORMALIZED_URL_PREFIX.length);
+function findUrlEnd(text: string, hostnameEnd: number): number {
+    URL_SUFFIX_AT_POSITION_REGEX.lastIndex = hostnameEnd;
+    const match = URL_SUFFIX_AT_POSITION_REGEX.exec(text);
+    return hostnameEnd + (match?.[0].length ?? 0);
 }
 
 /**
@@ -423,7 +420,7 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, 
     return {
         hostnameEnd,
         validHostnamePrefixEnd: hostnameAnalysis.validHostnamePrefixEnd,
-        invalidRange: {start: hostnameAnalysis.validHostnamePrefixEnd ?? urlStart, end: findUrlEnd(text, hostnameEnd, candidate.end)},
+        invalidRange: {start: hostnameAnalysis.validHostnamePrefixEnd ?? urlStart, end: findUrlEnd(text, hostnameEnd)},
     };
 }
 
