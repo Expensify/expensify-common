@@ -51,6 +51,7 @@ const URL_TLD_LIST = TLD_REGEX.toLowerCase().split('|');
 const URL_TLDS = new Set(URL_TLD_LIST);
 // Caps TLD scanning at the longest known TLD so long invalid URL-like text avoids expensive regex work.
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
+const URL_HOSTNAME_LABEL_AT_POSITION_REGEX = new RegExp(UrlPatterns.URL_HOSTNAME_LABEL_REGEX, 'iy');
 const URL_SUFFIX_AT_POSITION_REGEX = new RegExp(
     `(?:\\:${UrlPatterns.URL_PORT_REGEX}(?![0-9]))?${UrlPatterns.URL_PATH_REGEX}(?:${UrlPatterns.URL_PARAM_REGEX}|${UrlPatterns.URL_FRAGMENT_REGEX})*`,
     'iy',
@@ -277,16 +278,9 @@ function getProtocolAt(text: string, position: number) {
  * @param end - Index immediately after the label's last character.
  */
 function isValidHostnameLabel(text: string, start: number, end: number): boolean {
-    if (start >= end || !isAsciiAlphaNumeric(text[start]) || !isAsciiAlphaNumeric(text[end - 1])) {
-        return false;
-    }
-
-    for (let index = start + 1; index < end - 1; index++) {
-        if (!isAsciiAlphaNumeric(text[index]) && text[index] !== '-') {
-            return false;
-        }
-    }
-    return true;
+    URL_HOSTNAME_LABEL_AT_POSITION_REGEX.lastIndex = start;
+    const match = URL_HOSTNAME_LABEL_AT_POSITION_REGEX.exec(text);
+    return match !== null && URL_HOSTNAME_LABEL_AT_POSITION_REGEX.lastIndex === end;
 }
 
 /**

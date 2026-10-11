@@ -1,4 +1,7 @@
-import {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX, MARKDOWN_URL_REGEX} from '../lib/Url';
+import fs from 'node:fs';
+import * as UrlPatterns from '../lib/Url';
+
+const {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX, MARKDOWN_URL_REGEX} = UrlPatterns;
 
 describe('Strict URL validation', () => {
     describe('Mandatory protocol for URL', () => {
@@ -157,5 +160,55 @@ describe('Hostname label length validation', () => {
 
         // Then its numeric labels remain valid because none exceeds the new limit.
         expect(isValid).toBeTruthy();
+    });
+});
+
+describe('URL pattern consistency', () => {
+    it.each([
+        ['a one-character label', 'a', true],
+        ['a hyphen inside a label', 'valid-label', true],
+        ['a 63-character label', 'a'.repeat(63), true],
+        ['a leading hyphen', '-invalid', false],
+        ['a trailing hyphen', 'invalid-', false],
+        ['an underscore', 'invalid_label', false],
+        ['a 64-character label', 'a'.repeat(64), false],
+    ])('keeps strict and loose URL patterns aligned for %s', (_name, label, shouldMatch) => {
+        // Given the same hostname label used by strict and loose URL patterns.
+        const labelRegex = new RegExp(`^${UrlPatterns.URL_HOSTNAME_LABEL_REGEX}$`, 'i');
+        const strictUrlRegex = new RegExp(`^${URL_REGEX}$`, 'i');
+        const looseUrlRegex = new RegExp(`^${LOOSE_URL_REGEX}$`, 'i');
+
+        // When each URL pattern validates the label.
+        const results = [labelRegex.test(label), strictUrlRegex.test(`${label}.com`), looseUrlRegex.test(`https://${label}.local`)];
+
+        // Then every pattern applies the same label syntax and length limits.
+        expect(results).toEqual([shouldMatch, shouldMatch, shouldMatch]);
+    });
+
+    it('keeps published URL pattern declarations aligned with their runtime values', () => {
+        // Given the URL patterns exported at runtime and their published literal declarations.
+        const declaration = fs.readFileSync('lib/Url.d.ts', 'utf8');
+        const literalPatternNames = [
+            'URL_PROTOCOL_REGEX',
+            'URL_PORT_REGEX',
+            'URL_HOSTNAME_LABEL_REGEX',
+            'URL_WEBSITE_REGEX',
+            'URL_PATH_REGEX',
+            'URL_PARAM_REGEX',
+            'URL_FRAGMENT_REGEX',
+            'URL_REGEX',
+            'LOOSE_URL_WEBSITE_REGEX',
+            'LOOSE_URL_REGEX',
+            'MARKDOWN_URL_REGEX',
+        ];
+
+        // When each runtime value is escaped as the matching TypeScript string literal.
+        const staleDeclarations = literalPatternNames.filter((name) => {
+            const escapedPattern = UrlPatterns[name].replaceAll('\\', '\\\\').replaceAll("'", "\\'");
+            return !declaration.includes(`declare const ${name}: '${escapedPattern}';`);
+        });
+
+        // Then Url.d.ts describes the exact patterns exported by Url.js.
+        expect(staleDeclarations).toEqual([]);
     });
 });

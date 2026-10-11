@@ -679,6 +679,26 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['a valid hyphenated label', 'valid-label', true],
+        ['a leading hyphen', '-invalid', false],
+        ['a trailing hyphen', 'invalid-', false],
+        ['an oversized label', 'a'.repeat(64), false],
+    ])('keeps URL parsing paths aligned for %s', (_name, label, shouldLink) => {
+        // Given the same hostname label in escaped text and alongside raw HTML.
+        const url = `https://${label}.local`;
+        const rawHtmlPrefix = '<span>x</span> ';
+        const expectedUrl = shouldLink ? anchor(url) : url;
+
+        // When ExpensiMark parses it through candidate scanning and full-text URL matching.
+        const candidateScanningResult = parser.replace(url);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${url}`, {shouldEscapeText: false});
+
+        // Then both parsing paths apply the same hostname-label rules.
+        expect(candidateScanningResult).toBe(expectedUrl);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expectedUrl}`);
+    });
+
+    test.each([
         ['bare domain', (hostname) => `${hostname}.example.com`],
         ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
         ['protocol URL with a valid prefix', (hostname) => `https://valid-${hostname}.com`],
