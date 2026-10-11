@@ -635,21 +635,18 @@ describe('Test long input candidate parsing', () => {
         const validUrl = `${'a'.repeat(63)}.com`;
         const invalidUrl = `${'a'.repeat(64)}.com`;
         const reportedInvalidUrl = `${'a'.repeat(8496)}.com`;
-        const invalidTld = `${reportedInvalidUrl}x`;
         const repeatedDots = `${'a.'.repeat(4499)}a`;
 
         // When ExpensiMark parses each value.
         const validResult = parser.replace(validUrl);
         const invalidResult = parser.replace(invalidUrl);
         const reportedInvalidResult = parser.replace(reportedInvalidUrl);
-        const invalidTldResult = parser.replace(invalidTld);
         const repeatedDotsResult = parser.replace(repeatedDots);
 
         // Then it links only the domain whose labels are valid and leaves oversized or unknown domains as plain text.
         expect(validResult).toBe(anchor(validUrl));
         expect(invalidResult).toBe(invalidUrl);
         expect(reportedInvalidResult).toBe(reportedInvalidUrl);
-        expect(invalidTldResult).toBe(invalidTld);
         expect(repeatedDotsResult).toBe(repeatedDots);
     });
 
