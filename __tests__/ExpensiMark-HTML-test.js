@@ -758,15 +758,25 @@ describe('Test long input candidate parsing', () => {
         ['bare URL followed by several dots', 'example.com', '...next'],
         ['bare URL followed by a dot and hyphen', 'example.com', '.-nonsense'],
         ['bare URL followed by a hyphen and dot', 'example.com', '-.nonsense'],
+        ['protocol URL followed by long text after repeated dots', 'https://example.com', `..${'a'.repeat(300)}`],
+        ['bare URL followed by long text after repeated dots', 'example.com', `..${'a'.repeat(300)}`],
+        ['protocol URL followed by an oversized malformed label', 'https://example.com', `.-${'a'.repeat(63)}`],
+        ['bare URL followed by an oversized malformed label', 'example.com', `.-${'a'.repeat(63)}`],
+        ['protocol URL followed by long text after a trailing hyphen', 'https://example.com', `-.${'a'.repeat(300)}`],
+        ['bare URL followed by long text after a trailing hyphen', 'example.com', `-.${'a'.repeat(300)}`],
+        ['maximum-length protocol hostname followed by repeated dots', `https://${'a.'.repeat(125)}com`, '..nonsense'],
+        ['maximum-length bare hostname followed by repeated dots', `${'a.'.repeat(125)}com`, '..nonsense'],
     ])('still autolinks a valid %s', (_name, validUrl, continuation) => {
         // Given a valid URL followed without whitespace by punctuation that cannot form another hostname label.
         const input = `${validUrl}${continuation}`;
 
-        // When ExpensiMark parses the complete hostname-shaped run.
+        // When ExpensiMark parses the complete hostname-shaped run through candidate scanning and full-text matching.
         const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
         // Then it links the valid URL and leaves only the malformed continuation as plain text.
         expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
     });
 
     test.each([

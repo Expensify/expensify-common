@@ -71,6 +71,41 @@ describe('Loose URL validation', () => {
 
 describe('Hostname label length validation', () => {
     it.each([
+        ['URL_REGEX', URL_REGEX, ''],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],
+    ])('%s preserves valid prefixes before long malformed hostname continuations', (_name, pattern, protocol) => {
+        // Given valid hostnames followed by malformed punctuation whose text would exceed a DNS length limit.
+        const regexToTest = new RegExp(pattern, 'i');
+        const validUrl = `${protocol}example.com`;
+        const maximumLengthUrl = `${protocol}${'a.'.repeat(125)}com`;
+        const inputs = [`${validUrl}..${'a'.repeat(300)}`, `${validUrl}.-${'a'.repeat(63)}`, `${validUrl}-.${'a'.repeat(300)}`, `${maximumLengthUrl}..nonsense`];
+
+        // When URL matching reaches malformed punctuation after the valid hostname.
+        const matches = inputs.map((input) => {
+            const match = regexToTest.exec(input);
+            return match && match[0];
+        });
+
+        // Then only the actual hostname counts toward the limits, so each valid prefix still matches.
+        expect(matches).toEqual([validUrl, validUrl, validUrl, maximumLengthUrl]);
+    });
+
+    it.each([
+        ['URL_REGEX', URL_REGEX, ''],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],
+    ])('%s rejects oversized hostnames even before malformed continuations', (_name, pattern, protocol) => {
+        // Given an oversized hostname containing a known-TLD prefix, followed by malformed punctuation.
+        const input = `${protocol}example.com${'.a'.repeat(122)}..nonsense`;
+        const regexToTest = new RegExp(pattern, 'i');
+
+        // When URL matching checks the hostname before the malformed continuation.
+        const match = regexToTest.exec(input);
+
+        // Then the whole oversized hostname remains rejected rather than matching its earlier valid-looking prefix.
+        expect(match).toBeNull();
+    });
+
+    it.each([
         ['URL_REGEX', URL_REGEX, `${'a'.repeat(63)}.com`, `${'a'.repeat(64)}.com`],
         ['URL_REGEX_WITH_REQUIRED_PROTOCOL', URL_REGEX_WITH_REQUIRED_PROTOCOL, `https://${'a'.repeat(63)}.com`, `https://${'a'.repeat(64)}.com`],
         ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, `https://${'a'.repeat(63)}.local`, `https://${'a'.repeat(64)}.local`],

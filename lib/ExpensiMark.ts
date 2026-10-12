@@ -328,7 +328,7 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 
 /**
  * Validates a hostname and records a linkable prefix before a later malformed label.
- * Length-limit failures stay atomic so an oversized hostname cannot produce a partial link.
+ * Counts only the hostname before malformed punctuation; oversized hostname labels still cannot produce a partial link.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
@@ -342,7 +342,7 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
         hostnameContentEnd--;
     }
 
-    if (hostnameContentEnd === hostnameStart || hostnameContentEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
+    if (hostnameContentEnd === hostnameStart) {
         return {isValid: false};
     }
 
@@ -353,12 +353,21 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
             continue;
         }
 
-        if (index - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH) {
+        const validLabelEnd = findValidHostnameLabelEnd(text, labelStart);
+        if (validLabelEnd === undefined) {
+            return {isValid: false, validHostnamePrefixEnd};
+        }
+
+        // Measure the valid label prefix before any trailing hyphens that end it.
+        let labelContentEnd = index;
+        while (labelContentEnd > labelStart && text[labelContentEnd - 1] === '-') {
+            labelContentEnd--;
+        }
+        if (labelContentEnd - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || labelContentEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
             return {isValid: false};
         }
-        const validLabelEnd = findValidHostnameLabelEnd(text, labelStart);
         // Protocol URLs can end at any valid label; bare URLs still need a known TLD.
-        if (hasProtocol && validLabelEnd !== undefined) {
+        if (hasProtocol) {
             validHostnamePrefixEnd = validLabelEnd;
         }
         if (validLabelEnd !== index) {
