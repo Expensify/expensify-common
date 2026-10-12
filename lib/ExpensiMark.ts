@@ -271,16 +271,16 @@ function getProtocolAt(text: string, position: number) {
 }
 
 /**
- * Returns whether one dot-separated hostname label follows the supported ASCII syntax.
+ * Finds the valid prefix of a hostname label using the shared URL label pattern.
  *
  * @param text - Candidate URL text containing the label.
  * @param start - Index of the label's first character.
- * @param end - Index immediately after the label's last character.
+ * @returns The index after the valid label prefix, or undefined when the label starts with invalid syntax.
  */
-function isValidHostnameLabel(text: string, start: number, end: number): boolean {
+function findValidHostnameLabelEnd(text: string, start: number): number | undefined {
     URL_HOSTNAME_LABEL_AT_POSITION_REGEX.lastIndex = start;
     const match = URL_HOSTNAME_LABEL_AT_POSITION_REGEX.exec(text);
-    return match !== null && URL_HOSTNAME_LABEL_AT_POSITION_REGEX.lastIndex === end;
+    return match === null ? undefined : URL_HOSTNAME_LABEL_AT_POSITION_REGEX.lastIndex;
 }
 
 /**
@@ -327,15 +327,16 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 }
 
 /**
- * Validates a hostname and records a known-TLD prefix before a later malformed label.
+ * Validates a hostname and records a linkable prefix before a later malformed label.
  * Length-limit failures stay atomic so an oversized hostname cannot produce a partial link.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
  * @param hostnameEnd - Index immediately after the hostname.
+ * @param hasProtocol - Whether the URL allows hostnames without a known TLD, including single-label hosts.
  * @returns The hostname validity and any prefix that can be linked before malformed punctuation.
  */
-function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: number): HostnameAnalysis {
+function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: number, hasProtocol: boolean): HostnameAnalysis {
     let hostnameContentEnd = hostnameEnd;
     while (hostnameContentEnd > hostnameStart && (text[hostnameContentEnd - 1] === '.' || text[hostnameContentEnd - 1] === '-')) {
         hostnameContentEnd--;
@@ -355,11 +356,16 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
         if (index - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH) {
             return {isValid: false};
         }
-        if (!isValidHostnameLabel(text, labelStart, index)) {
+        const validLabelEnd = findValidHostnameLabelEnd(text, labelStart);
+        // Protocol URLs can end at any valid label; bare URLs still need a known TLD.
+        if (hasProtocol && validLabelEnd !== undefined) {
+            validHostnamePrefixEnd = validLabelEnd;
+        }
+        if (validLabelEnd !== index) {
             return {isValid: false, validHostnamePrefixEnd};
         }
 
-        if (index !== hostnameContentEnd) {
+        if (!hasProtocol && index !== hostnameContentEnd) {
             const tldEnd = findKnownTldEnd(text, index);
             if (tldEnd !== undefined && tldEnd <= hostnameContentEnd) {
                 validHostnamePrefixEnd = tldEnd;
@@ -409,7 +415,7 @@ function findUrlEnd(text: string, hostnameEnd: number): number {
  */
 function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, candidate: UrlCandidate): UrlRangeAnalysis {
     const hostnameEnd = findHostnameEnd(text, hostnameStart, candidate.end);
-    const hostnameAnalysis = analyzeHostname(text, hostnameStart, hostnameEnd);
+    const hostnameAnalysis = analyzeHostname(text, hostnameStart, hostnameEnd, hostnameStart !== urlStart);
     if (hostnameAnalysis.isValid) {
         return {hostnameEnd};
     }

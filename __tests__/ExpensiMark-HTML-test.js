@@ -678,7 +678,6 @@ describe('Test long input candidate parsing', () => {
     test.each([
         ['a valid hyphenated label', 'valid-label', true],
         ['a leading hyphen', '-invalid', false],
-        ['a trailing hyphen', 'invalid-', false],
         ['an oversized label', 'a'.repeat(64), false],
     ])('keeps URL parsing paths aligned for %s', (_name, label, shouldLink) => {
         // Given the same hostname label in escaped text and alongside raw HTML.
@@ -898,16 +897,31 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(`${protocol}${separator}${anchor(validDomain)}`);
     });
 
-    test.each(['https://foo..bar.com', 'https://foo.-bar.com', 'https://-bar.com'])('still autolinks a valid domain after malformed URL %s', (invalidUrl) => {
-        // Given a malformed hostname followed by a URL boundary and a separate valid domain.
+    test.each([
+        ['https://foo..bar.com', 'https://foo'],
+        ['https://foo.-bar.com', 'https://foo'],
+        ['https://-bar.com', undefined],
+        ['https://invalid-.local', 'https://invalid'],
+        ['https://local.url..nonsense', 'https://local.url'],
+        ['http://localhost..nonsense', 'http://localhost'],
+        ['https://example.internal.-nonsense', 'https://example.internal'],
+        ['https://example.internal-.nonsense', 'https://example.internal'],
+    ])('preserves valid prefixes and separate URLs when parsing %s', (invalidUrl, validPrefix) => {
+        // Given malformed hostname punctuation before a path containing another domain and a separate URL after a semicolon.
         const validDomain = 'valid.org';
-        const input = `${invalidUrl},${validDomain}`;
+        const suffix = '/path/example.org';
+        const input = `${invalidUrl}${suffix};${validDomain}`;
+        const rawHtmlPrefix = '<span>x</span> ';
 
-        // When ExpensiMark parses both values as one non-whitespace token.
-        const result = parser.replace(input);
+        // When ExpensiMark uses candidate scanning or full-text matching alongside unescaped HTML.
+        const candidateScanningResult = parser.replace(input);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${input}`, {shouldEscapeText: false});
 
-        // Then it keeps the malformed URL plain and autolinks only the separate valid domain.
-        expect(result).toBe(`${invalidUrl},${anchor(validDomain)}`);
+        // Then supported prefixes remain linked, connected invalid text stays plain, and the separate domain still links.
+        const expectedUrl = validPrefix ? `${anchor(validPrefix)}${invalidUrl.slice(validPrefix.length)}` : invalidUrl;
+        const expected = `${expectedUrl}${suffix};${anchor(validDomain)}`;
+        expect(candidateScanningResult).toBe(expected);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expected}`);
     });
 
     test.each(['https:///path/example.org', 'https://?next=example.org', 'https://#example.org'])('does not autolink a domain inside malformed URL %s', (invalidUrl) => {
@@ -918,19 +932,6 @@ describe('Test long input candidate parsing', () => {
 
         // Then it keeps the complete connected URL text plain instead of linking the nested domain.
         expect(result).toBe(invalidUrl);
-    });
-
-    test('uses the same malformed URL ranges when raw HTML disables candidate scanning', () => {
-        // Given raw HTML followed by a malformed URL and a separate valid domain.
-        const invalidUrl = 'https://foo..bar.com/path/example.org';
-        const validDomain = 'valid.net';
-        const input = `<span>x</span> ${invalidUrl};${validDomain}`;
-
-        // When ExpensiMark parses the input without escaping HTML.
-        const result = parser.replace(input, {shouldEscapeText: false});
-
-        // Then it keeps the malformed URL plain and autolinks only the separate valid domain.
-        expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
     });
 
     test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
