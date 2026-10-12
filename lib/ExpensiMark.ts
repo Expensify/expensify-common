@@ -401,7 +401,41 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
 }
 
 /**
- * Finds where a URL ends by matching its optional port, path, query, and fragment after an already-validated hostname.
+ * Checks whether lowercase `expected` occurs in `text` at `position`, ignoring letter case in `text`.
+ *
+ * @param text - Text to check.
+ * @param expected - Lowercase string expected at `position`.
+ * @param position - Index where the comparison begins.
+ */
+function startsWithIgnoreCase(text: string, expected: string, position: number): boolean {
+    return text.slice(position, position + expected.length).toLowerCase() === expected;
+}
+
+/**
+ * Finds the first unmatched closing parenthesis, which ends a URL rather than belonging to its path.
+ *
+ * @param text - Text containing the URL or its suffix.
+ * @param start - First index to inspect, inclusive.
+ * @param end - Last index to inspect, exclusive.
+ * @returns The unmatched parenthesis index, or end when all closing parentheses are paired.
+ */
+function findUrlEndBeforeUnmatchedParenthesis(text: string, start: number, end: number): number {
+    let unmatchedOpenParentheses = 0;
+    for (let index = start; index < end; index++) {
+        if (text[index] === '(') {
+            unmatchedOpenParentheses++;
+        } else if (text[index] === ')') {
+            if (unmatchedOpenParentheses === 0) {
+                return index;
+            }
+            unmatchedOpenParentheses--;
+        }
+    }
+    return end;
+}
+
+/**
+ * Finds where a URL ends by matching its optional port, path, query, and fragment after the hostname.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameEnd - Index immediately after the hostname.
@@ -410,7 +444,7 @@ function extendUrlCandidateBoundaries(text: string, start: number, end: number):
 function findUrlEnd(text: string, hostnameEnd: number): number {
     URL_SUFFIX_AT_POSITION_REGEX.lastIndex = hostnameEnd;
     const match = URL_SUFFIX_AT_POSITION_REGEX.exec(text);
-    return hostnameEnd + (match?.[0].length ?? 0);
+    return findUrlEndBeforeUnmatchedParenthesis(text, hostnameEnd, hostnameEnd + (match?.[0].length ?? 0));
 }
 
 /**
@@ -429,10 +463,22 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, 
         return {hostnameEnd};
     }
 
+    let invalidRangeEnd = findUrlEnd(text, hostnameEnd);
+    if (text[hostnameEnd] === ':') {
+        // The broad hostname scan can include the letters of the next protocol, as in example.com..http://valid.org.
+        for (const protocol of URL_PROTOCOLS) {
+            const protocolStart = hostnameEnd - protocol.indexOf(':');
+            if (protocolStart >= hostnameStart && startsWithIgnoreCase(text, protocol, protocolStart)) {
+                invalidRangeEnd = protocolStart;
+                break;
+            }
+        }
+    }
+
     return {
         hostnameEnd,
         validHostnamePrefixEnd: hostnameAnalysis.validHostnamePrefixEnd,
-        invalidRange: {start: hostnameAnalysis.validHostnamePrefixEnd ?? urlStart, end: findUrlEnd(text, hostnameEnd)},
+        invalidRange: {start: hostnameAnalysis.validHostnamePrefixEnd ?? urlStart, end: invalidRangeEnd},
     };
 }
 
@@ -503,17 +549,6 @@ function findInvalidUrlRanges(text: string): TextRange[] {
     }
 
     return ranges;
-}
-
-/**
- * Checks whether lowercase `expected` occurs in `text` at `position`, ignoring letter case in `text`.
- *
- * @param text - Text to check.
- * @param expected - Lowercase string expected at `position`.
- * @param position - Index where the comparison begins.
- */
-function startsWithIgnoreCase(text: string, expected: string, position: number): boolean {
-    return text.slice(position, position + expected.length).toLowerCase() === expected;
 }
 
 /**
@@ -1943,7 +1978,8 @@ export default class ExpensiMark {
             return output.join('');
         }
 
-        let match = regex.exec(textToCheck);
+        const matchingRegex = regex;
+        let match = matchingRegex.exec(textToCheck);
         let replacedText = '';
         let startIndex = 0;
         const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textToCheck) : [];
@@ -1958,28 +1994,18 @@ export default class ExpensiMark {
                 const invalidUrlRange = invalidUrlRanges[invalidUrlRangeIndex];
                 const isInsideInvalidUrl = invalidUrlRange !== undefined && invalidUrlRange.start <= matchedUrlOffset && matchedUrlOffset < invalidUrlRange.end;
                 if (isInsideInvalidUrl) {
-                    match = regex.exec(textToCheck);
+                    // The rejected match may extend beyond the invalid range and include a separate URL.
+                    matchingRegex.lastIndex = invalidUrlRange.end;
+                    match = matchingRegex.exec(textToCheck);
                     continue;
                 }
             }
 
-            // We end the link at the last closing parenthesis that matches an opening parenthesis because unmatched closing parentheses are unlikely to be in the url
-            // and can be part of markdown for example
-            let unmatchedOpenParentheses = 0;
             let url = match[2];
-            for (let i = 0; i < url.length; i++) {
-                if (url[i] === '(') {
-                    unmatchedOpenParentheses++;
-                } else if (url[i] === ')') {
-                    // Unmatched closing parenthesis
-                    if (unmatchedOpenParentheses <= 0) {
-                        const numberOfCharsToRemove = url.length - i;
-                        match[0] = match[0].substr(0, match[0].length - numberOfCharsToRemove);
-                        url = url.substr(0, url.length - numberOfCharsToRemove);
-                        break;
-                    }
-                    unmatchedOpenParentheses--;
-                }
+            const urlEnd = findUrlEndBeforeUnmatchedParenthesis(url, 0, url.length);
+            if (urlEnd < url.length) {
+                match[0] = match[0].slice(0, match[0].length - (url.length - urlEnd));
+                url = url.slice(0, urlEnd);
             }
 
             // Because we are removing ) parenthesis, some special characters that shouldn't be in the href are in the href
@@ -2048,7 +2074,7 @@ export default class ExpensiMark {
             startIndex = match.index + match[0].length;
 
             // Now we move to the next match that the js regex found in the text
-            match = regex.exec(textToCheck);
+            match = matchingRegex.exec(textToCheck);
         }
         if (startIndex < textToCheck.length) {
             replacedText = replacedText.concat(textToCheck.substr(startIndex));

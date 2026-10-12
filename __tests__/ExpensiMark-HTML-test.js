@@ -615,8 +615,18 @@ test('Test wrapped URLs', () => {
 });
 
 describe('Test long input candidate parsing', () => {
-    const anchor = (url, label = url) => `<a href="${url.startsWith('http') ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
-    const invalidUrlSuffixesWithNestedDomain = ['/path/example.org', '?next=example.org', '#example.org', ':1/path/example.org', ':8080?next=example.org', ':65535#example.org'];
+    const anchor = (url, label = url) => `<a href="${/^(?:https?|ftps?):\/\//i.test(url) ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
+    const invalidUrlSuffixesWithNestedDomain = [
+        '/path/example.org',
+        '?next=example.org',
+        '#example.org',
+        ':1/path/example.org',
+        ':8080?next=example.org',
+        ':65535#example.org',
+        '/path(a)example.org',
+        '/path/(example.org)',
+        '/path/http://example.org',
+    ];
 
     test('autolinks a domain with the maximum hostname label length without parsing the full input as a URL', () => {
         // Given a valid 63-character hostname label after a long plain-text prefix.
@@ -777,6 +787,53 @@ describe('Test long input candidate parsing', () => {
         // Then it links the valid URL and leaves only the malformed continuation as plain text.
         expect(result).toBe(`${anchor(validUrl)}${continuation}`);
         expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
+    });
+
+    test.each([
+        ['https://example.com', '..', 'http://', true],
+        ['example.com', '..', 'https://', true],
+        ['https://example.com', '.-', 'ftp://', true],
+        ['example.com', '-.', 'ftps://', true],
+        ['https://example.com', '..nonsense-', 'HTTP://', true],
+        ['https://example.com', '..nonsense', 'http://', true],
+        [`https://${'a'.repeat(64)}.com`, '..', 'http://', false],
+    ])('preserves a separate URL after %s%s with protocol %s', (firstUrl, continuation, protocol, shouldLinkFirstUrl) => {
+        // Given a malformed hostname continuation followed immediately by a separate protocol URL.
+        const validUrl = `${protocol}valid.org/path`;
+        const input = `${firstUrl}${continuation}${validUrl}`;
+        const firstResult = shouldLinkFirstUrl ? anchor(firstUrl) : firstUrl;
+
+        // When ExpensiMark parses both URLs through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then the next URL keeps its complete protocol instead of being skipped or linked as a bare domain.
+        const expected = `${firstResult}${continuation}${anchor(`${protocol.toLowerCase()}valid.org/path`, validUrl)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['https://example.com..nonsense', 'https://example.com', '/path'],
+        ['example.com.-nonsense', 'example.com', '/path/example.org'],
+        ['https://example.com-.nonsense', 'https://example.com', '?next=example.org'],
+        ['example.com..nonsense', 'example.com', '#example.org'],
+        [`https://${'a'.repeat(64)}.com`, undefined, '/path/example.org'],
+        [`${'a'.repeat(64)}.com`, undefined, '/path(a)'],
+    ])('links a separate domain after an unmatched parenthesis following %s', (invalidUrl, validPrefix, suffix) => {
+        // Given an invalid URL range followed by an unmatched closing parenthesis and a separate valid domain.
+        const validDomain = 'valid.org';
+        const input = `${invalidUrl}${suffix})${validDomain}`;
+
+        // When ExpensiMark parses the boundary through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then the unmatched parenthesis ends the invalid range, so the separate domain remains linkable.
+        const firstResult = validPrefix ? `${anchor(validPrefix)}${invalidUrl.slice(validPrefix.length)}` : invalidUrl;
+        const expected = `${firstResult}${suffix})${anchor(validDomain)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
     });
 
     test.each([
@@ -948,22 +1005,26 @@ describe('Test long input candidate parsing', () => {
         // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
         const input = `https://${'a'.repeat(64)}.com${suffix}`;
 
-        // When ExpensiMark parses the complete invalid URL.
+        // When ExpensiMark parses the complete invalid URL through candidate scanning and full-text matching.
         const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
         // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
         expect(result).toBe(input);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${input}`);
     });
 
     test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid bare URL suffix in %s', (suffix) => {
         // Given an invalid bare hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
         const input = `${'a'.repeat(64)}.com${suffix}`;
 
-        // When ExpensiMark parses the complete invalid URL.
+        // When ExpensiMark parses the complete invalid URL through candidate scanning and full-text matching.
         const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
         // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
         expect(result).toBe(input);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${input}`);
     });
 
     test.each([
