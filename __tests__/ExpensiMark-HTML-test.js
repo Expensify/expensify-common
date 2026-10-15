@@ -686,6 +686,52 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['path', '/'],
+        ['query', '?next='],
+        ['fragment', '#'],
+    ])('keeps scanning work linear for URLs with repeated domains in the %s', (_name, suffixStart) => {
+        // Given valid bare and protocol URLs with domain-looking text throughout their suffixes.
+        for (const baseUrl of ['example.com', 'https://example.com']) {
+            const parseAndCountCharacterReads = (repetitions) => {
+                const input = `${baseUrl}${suffixStart}${'a.com/'.repeat(repetitions)}`;
+                const characterReadSpy = jest.spyOn(String.prototype, 'charCodeAt');
+                try {
+                    const result = parser.replace(input, {shouldKeepRawInput: true});
+                    return {input, result, characterReads: characterReadSpy.mock.calls.length};
+                } finally {
+                    characterReadSpy.mockRestore();
+                }
+            };
+
+            // When the composer parser receives twice as many domain-looking suffix segments.
+            const shorter = parseAndCountCharacterReads(50);
+            const longer = parseAndCountCharacterReads(100);
+
+            // Then the complete URL remains linked and scanning grows below the roughly fourfold increase caused by repeated suffix scans.
+            const href = baseUrl.startsWith('https://') ? longer.input : `https://${longer.input}`;
+            expect(longer.result).toBe(`<a href="${href}" data-raw-href="${longer.input}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${longer.input}</a>`);
+            expect(longer.characterReads).toBeLessThan(shorter.characterReads * 3);
+        }
+    });
+
+    test.each([';', '|', ')'])('still rejects an invalid URL after a valid URL path ending at "%s"', (separator) => {
+        // Given a valid dotted path followed by a separate oversized URL without intervening whitespace.
+        const validUrl = 'https://example.com/a.com/a.co/';
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path/example.org`;
+        const input = `${validUrl}${separator}${invalidUrl}`;
+        const rawHtmlPrefix = '<span>x</span> ';
+
+        // When candidate scanning and raw-HTML parsing inspect the same neighboring URLs.
+        const candidateScanningResult = parser.replace(input);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${input}`, {shouldEscapeText: false});
+
+        // Then skipping the valid suffix still leaves the next invalid URL completely plain.
+        const expected = `${anchor(validUrl)}${separator}${invalidUrl}`;
+        expect(candidateScanningResult).toBe(expected);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expected}`);
+    });
+
+    test.each([
         ['a valid hyphenated label', 'valid-label', true],
         ['a leading hyphen', '-invalid', false],
         ['an oversized label', 'a'.repeat(64), false],

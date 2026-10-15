@@ -516,12 +516,10 @@ function findInvalidUrlRanges(text: string): TextRange[] {
     while (index < text.length) {
         const matchedProtocol = getProtocolAt(text, index);
         let analysis: UrlRangeAnalysis;
-        let nextIndex: number;
 
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
-            nextIndex = Math.max(index + matchedProtocol.length, analysis.hostnameEnd);
         } else {
             if (text[index] !== '.') {
                 index++;
@@ -537,14 +535,14 @@ function findInvalidUrlRanges(text: string): TextRange[] {
             const hostnameStart = findRawHostnameStart(text, index);
             const candidate = extendUrlCandidateBoundaries(text, hostnameStart, tldEnd);
             analysis = analyzeUrlRange(text, hostnameStart, hostnameStart, candidate);
-            nextIndex = tldEnd;
         }
 
         if (analysis.invalidRange) {
             ranges.push(analysis.invalidRange);
             index = analysis.invalidRange.end;
         } else {
-            index = nextIndex;
+            // Skip the valid URL's suffix so domains in its path, query, or fragment are not scanned again.
+            index = findUrlEnd(text, analysis.hostnameEnd);
         }
     }
 
