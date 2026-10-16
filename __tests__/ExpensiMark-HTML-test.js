@@ -836,6 +836,69 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['I checked..google.com', `I checked..${anchor('google.com')}`],
+        ['I checked...google.com', `I checked...${anchor('google.com')}`],
+        ['wait..google.com', `wait..${anchor('google.com')}`],
+        ['a..b.com', `a..${anchor('b.com')}`],
+        ['example.com..google.com', `${anchor('example.com')}..${anchor('google.com')}`],
+        ['https://foo..bar.com/path/example.org;valid.org', `${anchor('https://foo')}..${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+        ['google.com..nonsense..valid.org', `${anchor('google.com')}..nonsense..${anchor('valid.org')}`],
+        ['wait..google.com..nonsense/path/example.org', `wait..${anchor('google.com')}..nonsense/path/example.org`],
+    ])('autolinks valid domains after repeated dots in %s', (input, expected) => {
+        // Given prose or another URL separated from a valid domain by repeated dots.
+
+        // When ExpensiMark parses the text through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then each separate domain links without including the dots or linking inside a malformed URL suffix.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['a 63-character label', `${'a'.repeat(63)}.com`, true],
+        ['a 64-character label', `${'a'.repeat(64)}.com`, false],
+        ['a 253-character hostname', `${'a.'.repeat(125)}com`, true],
+        ['a 254-character hostname', `aa.${'a.'.repeat(124)}com`, false],
+    ])('applies hostname limits to %s after repeated dots', (_name, hostname, shouldLink) => {
+        // Given a hostname at a DNS length boundary after repeated dots, with another domain in its path.
+        const url = `${hostname}/path/example.org`;
+        const input = `wait..${url}`;
+        const expected = `wait..${shouldLink ? anchor(url) : url}`;
+
+        // When ExpensiMark parses it through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then only a valid hostname links, and an invalid hostname's path cannot create a partial link.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test('keeps scanning work linear for domains separated by repeated dots', () => {
+        // Given many valid domains in one token, separated by repeated dots.
+        const parseAndCountCharacterReads = (repetitions) => {
+            const input = `${'a.com..'.repeat(repetitions)}b.com`;
+            const characterReadSpy = jest.spyOn(String.prototype, 'charCodeAt');
+            try {
+                const result = parser.replace(input);
+                return {result, characterReads: characterReadSpy.mock.calls.length};
+            } finally {
+                characterReadSpy.mockRestore();
+            }
+        };
+
+        // When the input contains twice as many separate domains.
+        const shorter = parseAndCountCharacterReads(50);
+        const longer = parseAndCountCharacterReads(100);
+
+        // Then every domain links without repeatedly scanning the remaining token for each new domain.
+        expect(longer.result).toBe(`${`${anchor('a.com')}..`.repeat(100)}${anchor('b.com')}`);
+        expect(longer.characterReads).toBeLessThan(shorter.characterReads * 3);
+    });
+
+    test.each([
         ['https://example.com', '..', 'http://', true],
         ['example.com', '..', 'https://', true],
         ['https://example.com', '.-', 'ftp://', true],
@@ -1011,7 +1074,6 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
-        ['https://foo..bar.com', 'https://foo'],
         ['https://foo.-bar.com', 'https://foo'],
         ['https://-bar.com', undefined],
         ['https://invalid-.local', 'https://invalid'],

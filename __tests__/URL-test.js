@@ -70,6 +70,18 @@ describe('Loose URL validation', () => {
 });
 
 describe('Hostname label length validation', () => {
+    it('finds separate domains after repeated dots without restarting inside oversized labels', () => {
+        // Given domains separated by repeated dots and an oversized hostname containing a valid-looking suffix.
+        const input = `wait..google.com example.com...valid.org ${'a'.repeat(64)}.example.com`;
+        const regexToTest = new RegExp(URL_REGEX, 'gi');
+
+        // When the URL pattern searches for every domain in the text.
+        const matches = [...input.matchAll(regexToTest)].map((match) => match[0]);
+
+        // Then repeated dots separate valid domains while a single dot cannot expose an invalid hostname's suffix.
+        expect(matches).toEqual(['google.com', 'example.com', 'valid.org']);
+    });
+
     it.each([
         ['URL_REGEX', URL_REGEX, ''],
         ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],

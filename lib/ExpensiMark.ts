@@ -64,7 +64,7 @@ type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRaw
 type TextRange = {start: number; end: number};
 type UrlCandidate = TextRange;
 type HostnameAnalysis = {isValid: boolean; validHostnamePrefixEnd?: number};
-type UrlRangeAnalysis = {hostnameEnd: number; validHostnamePrefixEnd?: number; invalidRange?: TextRange};
+type UrlRangeAnalysis = {hostnameEnd: number; invalidRanges?: undefined} | {hostnameEnd: number; invalidRanges: TextRange[]; urlEnd: number; linkableCandidateEnd?: number};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -383,7 +383,7 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
         labelStart = index + 1;
     }
 
-    return {isValid: true};
+    return {isValid: true, validHostnamePrefixEnd};
 }
 
 /** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
@@ -448,13 +448,13 @@ function findUrlEnd(text: string, hostnameEnd: number): number {
 }
 
 /**
- * Analyzes a URL candidate and returns the connected range when its hostname is invalid.
+ * Analyzes a URL candidate and protects invalid ranges while allowing separate domains after repeated dots.
  *
  * @param text - Text containing the URL candidate.
  * @param urlStart - Index where the URL starts, excluding Markdown punctuation.
  * @param hostnameStart - Index where the hostname starts.
  * @param candidate - Broad candidate range found by the scanner.
- * @returns The hostname end and its connected URL range when the hostname is invalid.
+ * @returns The hostname end and any invalid ranges, plus the candidate end needed to match valid domains.
  */
 function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, candidate: UrlCandidate): UrlRangeAnalysis {
     const hostnameEnd = findHostnameEnd(text, hostnameStart, candidate.end);
@@ -475,11 +475,42 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, 
         }
     }
 
-    return {
-        hostnameEnd,
-        validHostnamePrefixEnd: hostnameAnalysis.validHostnamePrefixEnd,
-        invalidRange: {start: hostnameAnalysis.validHostnamePrefixEnd ?? urlStart, end: invalidRangeEnd},
-    };
+    const invalidRanges: TextRange[] = [];
+    let invalidRangeStart = hostnameAnalysis.validHostnamePrefixEnd ?? urlStart;
+    let linkableCandidateEnd = hostnameAnalysis.validHostnamePrefixEnd;
+
+    // Repeated dots can separate prose or another URL from a valid domain. Check each following hostname once.
+    let index = hostnameStart;
+    while (index < hostnameEnd) {
+        if (text[index] !== '.' || text[index + 1] !== '.') {
+            index++;
+            continue;
+        }
+        while (index < hostnameEnd && text[index] === '.') {
+            index++;
+        }
+        const followingHostnameStart = index;
+        while (index < hostnameEnd && (text[index] !== '.' || text[index + 1] !== '.')) {
+            index++;
+        }
+        const followingHostnameAnalysis = analyzeHostname(text, followingHostnameStart, index, false);
+        if (followingHostnameAnalysis.validHostnamePrefixEnd === undefined) {
+            continue;
+        }
+
+        invalidRanges.push({start: invalidRangeStart, end: followingHostnameStart});
+        // Only a valid final hostname owns the path/query; malformed continuations keep their nested domains plain.
+        invalidRangeStart = followingHostnameAnalysis.validHostnamePrefixEnd;
+        if (followingHostnameAnalysis.isValid) {
+            invalidRangeStart = index === hostnameEnd ? invalidRangeEnd : index;
+        }
+        linkableCandidateEnd = invalidRangeEnd;
+    }
+    if (invalidRangeStart < invalidRangeEnd) {
+        invalidRanges.push({start: invalidRangeStart, end: invalidRangeEnd});
+    }
+
+    return {hostnameEnd, invalidRanges, urlEnd: invalidRangeEnd, linkableCandidateEnd};
 }
 
 /**
@@ -504,7 +535,7 @@ function findRawHostnameStart(text: string, dotPosition: number): number {
 
 /**
  * Finds URL ranges whose hostname is malformed or exceeds the supported DNS length limits.
- * These ranges keep both URL parsing paths from matching another domain inside the same invalid URL.
+ * These ranges keep both URL parsing paths from matching domains inside invalid hostname labels or connected URL suffixes.
  *
  * @param text - Text containing possible protocol and bare URLs.
  * @returns Connected invalid URL ranges that must remain plain text.
@@ -537,9 +568,11 @@ function findInvalidUrlRanges(text: string): TextRange[] {
             analysis = analyzeUrlRange(text, hostnameStart, hostnameStart, candidate);
         }
 
-        if (analysis.invalidRange) {
-            ranges.push(analysis.invalidRange);
-            index = analysis.invalidRange.end;
+        if (analysis.invalidRanges) {
+            for (const range of analysis.invalidRanges) {
+                ranges.push(range);
+            }
+            index = analysis.urlEnd;
         } else {
             // Skip the valid URL's suffix so domains in its path, query, or fragment are not scanned again.
             index = findUrlEnd(text, analysis.hostnameEnd);
@@ -631,11 +664,11 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
-            if (analysis.invalidRange) {
-                if (analysis.validHostnamePrefixEnd !== undefined) {
-                    candidates.push({start: candidate.start, end: analysis.validHostnamePrefixEnd});
+            if (analysis.invalidRanges) {
+                if (analysis.linkableCandidateEnd !== undefined) {
+                    candidates.push({start: candidate.start, end: analysis.linkableCandidateEnd});
                 }
-                index = analysis.invalidRange.end;
+                index = analysis.urlEnd;
                 continue;
             }
             candidates.push(candidate);
@@ -657,11 +690,11 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         const rawHostnameStart = findRawHostnameStart(text, index);
         const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
         const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart, broadCandidate);
-        if (analysis.invalidRange) {
-            if (analysis.validHostnamePrefixEnd !== undefined) {
-                candidates.push({start: broadCandidate.start, end: analysis.validHostnamePrefixEnd});
+        if (analysis.invalidRanges) {
+            if (analysis.linkableCandidateEnd !== undefined) {
+                candidates.push({start: broadCandidate.start, end: analysis.linkableCandidateEnd});
             }
-            index = analysis.invalidRange.end;
+            index = analysis.urlEnd;
             continue;
         }
 
