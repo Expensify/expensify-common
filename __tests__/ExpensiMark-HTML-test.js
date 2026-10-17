@@ -754,8 +754,6 @@ describe('Test long input candidate parsing', () => {
         ['bare domain', (hostname) => `${hostname}.example.com`],
         ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
         ['protocol URL with a valid prefix', (hostname) => `https://valid-${hostname}.com`],
-        ['bare URL with a known-TLD prefix', (hostname) => `example.com.${hostname}`],
-        ['protocol URL with a known-TLD prefix', (hostname) => `https://example.com.${hostname}`],
         ['labeled link', (hostname) => `[label](https://${hostname}-valid.com)`],
         ['image', (hostname) => `![alt](https://${hostname}-valid.com/image.png)`],
         ['video', (hostname) => `![video](https://${hostname}-valid.com/video.mp4)`],
@@ -1190,6 +1188,55 @@ describe('Test long input candidate parsing', () => {
 
         // Then it keeps the invalid URL path plain and autolinks the domain after the URL boundary.
         expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['an oversized label after a dot', 'google.com', `.${'b'.repeat(64)}`],
+        ['an oversized label after a hyphen', 'example.com', `-${'b'.repeat(70)}`],
+        ['an oversized hostname', `${'a.'.repeat(125)}com`, '.Thanks!'],
+    ])('preserves a known-TLD URL before %s', (_name, hostname, continuation) => {
+        // Given a valid URL whose adjacent text pushes a label or the complete hostname beyond a DNS limit.
+        for (const protocol of ['', 'https://']) {
+            const validUrl = `${protocol}${hostname}`;
+            const input = `${validUrl}${continuation}`;
+
+            // When candidate scanning and raw-HTML parsing inspect the same continuation.
+            const result = parser.replace(input);
+            const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+            // Then the valid URL stays linked without accepting the oversized continuation as part of its hostname.
+            expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+            expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
+        }
+    });
+
+    test('keeps domains in an oversized continuation plain while linking a separate URL', () => {
+        // Given a valid maximum-length URL followed by an oversized continuation with a path and a separate domain.
+        const validUrl = `https://${'a.'.repeat(125)}com`;
+        const continuation = '.Thanks/path/example.org;';
+        const separateDomain = 'valid.net';
+        const input = `${validUrl}${continuation}${separateDomain}`;
+
+        // When both URL parsing paths recover the valid hostname prefix.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then only the valid prefix and separate domain link, so recovery cannot expose domains inside the invalid URL's path.
+        const expected = `${anchor(validUrl)}${continuation}${anchor(separateDomain)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test('does not recover URL prefixes inside raw HTML attributes or protected elements', () => {
+        // Given an oversized continuation inside an anchor attribute, protected code, and a span rejected by the HTML lookaheads.
+        const inputUrl = `https://${'a.'.repeat(125)}com.Thanks!`;
+        const input = `<a href="${inputUrl}">label</a> <code>${inputUrl}</code> <span>${inputUrl}</span>`;
+
+        // When autolinking inspects the original raw-HTML context.
+        const result = parser.replace(input, {filterRules: ['autolink'], shouldEscapeText: false});
+
+        // Then prefix recovery preserves the HTML and never inserts an anchor where the existing HTML rules forbid one.
+        expect(result).toBe(input);
     });
 
     test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {

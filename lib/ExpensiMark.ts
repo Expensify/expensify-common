@@ -328,13 +328,13 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 
 /**
  * Validates a hostname and records a linkable prefix before a later malformed label.
- * Counts only the hostname before malformed punctuation; oversized hostname labels still cannot produce a partial link.
+ * Preserves known-TLD prefixes before oversized continuations without recovering text inside an invalid leading label.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
  * @param hostnameEnd - Index immediately after the hostname.
  * @param hasProtocol - Whether the URL allows hostnames without a known TLD, including single-label hosts.
- * @returns The hostname validity and any prefix that can be linked before malformed punctuation.
+ * @returns The hostname validity and any prefix that can be linked before a malformed or oversized continuation.
  */
 function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: number, hasProtocol: boolean): HostnameAnalysis {
     let hostnameContentEnd = hostnameEnd;
@@ -348,6 +348,7 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
 
     let labelStart = hostnameStart;
     let validHostnamePrefixEnd: number | undefined;
+    let validKnownTldPrefixEnd: number | undefined;
     for (let index = hostnameStart; index <= hostnameContentEnd; index++) {
         if (index !== hostnameContentEnd && text[index] !== '.') {
             continue;
@@ -364,7 +365,7 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
             labelContentEnd--;
         }
         if (labelContentEnd - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || labelContentEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
-            return {isValid: false};
+            return {isValid: false, validHostnamePrefixEnd: validKnownTldPrefixEnd};
         }
         // Protocol URLs can end at any valid label; bare URLs still need a known TLD.
         if (hasProtocol) {
@@ -374,10 +375,13 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
             return {isValid: false, validHostnamePrefixEnd};
         }
 
-        if (!hasProtocol && index !== hostnameContentEnd) {
+        if (index !== hostnameContentEnd) {
             const tldEnd = findKnownTldEnd(text, index);
-            if (tldEnd !== undefined && tldEnd <= hostnameContentEnd) {
-                validHostnamePrefixEnd = tldEnd;
+            if (tldEnd !== undefined && tldEnd <= hostnameContentEnd && tldEnd - hostnameStart <= Constants.MAX_URL_HOSTNAME_LENGTH) {
+                validKnownTldPrefixEnd = tldEnd;
+                if (!hasProtocol) {
+                    validHostnamePrefixEnd = tldEnd;
+                }
             }
         }
         labelStart = index + 1;
@@ -580,6 +584,19 @@ function findInvalidUrlRanges(text: string): TextRange[] {
     }
 
     return ranges;
+}
+
+/** Hides invalid URL text from regex matching while preserving character offsets and surrounding HTML boundaries. */
+function maskInvalidUrlRanges(text: string, invalidRanges: TextRange[]): string {
+    const parts: string[] = [];
+    let start = 0;
+    for (const range of invalidRanges) {
+        // Output still comes from the original text; spaces only stop regexes from crossing invalid ranges.
+        parts.push(text.slice(start, range.start), ' '.repeat(range.end - range.start));
+        start = range.end;
+    }
+    parts.push(text.slice(start));
+    return parts.join('');
 }
 
 /**
@@ -1984,7 +2001,7 @@ export default class ExpensiMark {
      * @param textToCheck - The text containing possible URLs.
      * @param replacement - The replacement applied to each accepted URL.
      * @param shouldScanForUrls - Whether to scan URL candidates before running the regex.
-     * @param shouldRejectPartialHostnameMatches - Whether to reject matches inside invalid URL ranges.
+     * @param shouldRejectPartialHostnameMatches - Whether to mask invalid URL ranges before matching.
      */
     modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, shouldRejectPartialHostnameMatches = false): string {
         if (shouldScanForUrls) {
@@ -2010,28 +2027,12 @@ export default class ExpensiMark {
         }
 
         const matchingRegex = regex;
-        let match = matchingRegex.exec(textToCheck);
+        const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textToCheck) : [];
+        const textToMatch = invalidUrlRanges.length > 0 ? maskInvalidUrlRanges(textToCheck, invalidUrlRanges) : textToCheck;
+        let match = matchingRegex.exec(textToMatch);
         let replacedText = '';
         let startIndex = 0;
-        const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textToCheck) : [];
-        let invalidUrlRangeIndex = 0;
-
         while (match !== null) {
-            if (shouldRejectPartialHostnameMatches) {
-                const matchedUrlOffset = match.index + match[1].length;
-                while (invalidUrlRangeIndex < invalidUrlRanges.length && invalidUrlRanges[invalidUrlRangeIndex].end <= matchedUrlOffset) {
-                    invalidUrlRangeIndex++;
-                }
-                const invalidUrlRange = invalidUrlRanges[invalidUrlRangeIndex];
-                const isInsideInvalidUrl = invalidUrlRange !== undefined && invalidUrlRange.start <= matchedUrlOffset && matchedUrlOffset < invalidUrlRange.end;
-                if (isInsideInvalidUrl) {
-                    // The rejected match may extend beyond the invalid range and include a separate URL.
-                    matchingRegex.lastIndex = invalidUrlRange.end;
-                    match = matchingRegex.exec(textToCheck);
-                    continue;
-                }
-            }
-
             let url = match[2];
             const urlEnd = findUrlEndBeforeUnmatchedParenthesis(url, 0, url.length);
             if (urlEnd < url.length) {
@@ -2105,7 +2106,7 @@ export default class ExpensiMark {
             startIndex = match.index + match[0].length;
 
             // Now we move to the next match that the js regex found in the text
-            match = matchingRegex.exec(textToCheck);
+            match = matchingRegex.exec(textToMatch);
         }
         if (startIndex < textToCheck.length) {
             replacedText = replacedText.concat(textToCheck.substr(startIndex));
