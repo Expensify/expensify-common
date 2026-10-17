@@ -586,7 +586,15 @@ function findInvalidUrlRanges(text: string): TextRange[] {
     return ranges;
 }
 
-/** Hides invalid URL text from regex matching while preserving character offsets and surrounding HTML boundaries. */
+/**
+ * Creates the text searched by the URL regex. It replaces rejected URL ranges with spaces
+ * so the regex can find other URLs. The result keeps the original length because the parser
+ * uses the match indexes to build output from the original text.
+ *
+ * @param text - Original text being parsed for URLs.
+ * @param invalidRanges - Ordered, non-overlapping ranges rejected by URL validation.
+ * @returns A copy of `text` with those ranges replaced by spaces.
+ */
 function maskInvalidUrlRanges(text: string, invalidRanges: TextRange[]): string {
     const parts: string[] = [];
     let start = 0;
