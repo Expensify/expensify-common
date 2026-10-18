@@ -389,18 +389,22 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
     return {isValid: true, validHostnamePrefixEnd};
 }
 
-/** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
-function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
+/** Finds the candidate start, including any adjacent @, *, _, or ~ before the URL. */
+function findUrlCandidateStart(text: string, start: number): number {
     let candidateStart = start;
     while (candidateStart > 0 && URL_CANDIDATE_PREFIX_CHARACTERS.includes(text[candidateStart - 1])) {
         candidateStart--;
     }
+    return candidateStart;
+}
 
+/** Expands example.com to include nearby @, *, _, or ~ in any order, plus its path, until whitespace or HTML. */
+function extendUrlCandidateBoundaries(text: string, start: number, end: number): UrlCandidate {
     let candidateEnd = end;
     while (candidateEnd < text.length && !isUrlBoundarySpace(text[candidateEnd]) && text[candidateEnd] !== '<') {
         candidateEnd++;
     }
-    return {start: candidateStart, end: candidateEnd};
+    return {start: findUrlCandidateStart(text, start), end: candidateEnd};
 }
 
 /**
@@ -683,15 +687,15 @@ function findUrlCandidates(text: string): UrlCandidate[] {
 
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
-            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length);
             if (analysis.invalidRanges) {
                 if (analysis.linkableCandidateEnd !== undefined) {
-                    candidates.push({start: candidate.start, end: analysis.linkableCandidateEnd});
+                    candidates.push({start: findUrlCandidateStart(text, index), end: analysis.linkableCandidateEnd});
                 }
                 index = analysis.urlEnd;
                 continue;
             }
+            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
             candidates.push(candidate);
             index = candidate.end;
             continue;
@@ -709,16 +713,16 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         }
 
         const rawHostnameStart = findRawHostnameStart(text, index);
-        const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
         const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart);
         if (analysis.invalidRanges) {
             if (analysis.linkableCandidateEnd !== undefined) {
-                candidates.push({start: broadCandidate.start, end: analysis.linkableCandidateEnd});
+                candidates.push({start: findUrlCandidateStart(text, rawHostnameStart), end: analysis.linkableCandidateEnd});
             }
             index = analysis.urlEnd;
             continue;
         }
 
+        const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
         candidates.push(broadCandidate);
         index = broadCandidate.end;
     }
