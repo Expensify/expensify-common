@@ -874,25 +874,40 @@ describe('Test long input candidate parsing', () => {
         expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
     });
 
-    test('keeps scanning work linear for domains separated by repeated dots', () => {
-        // Given many valid domains in one token, separated by repeated dots.
+    test.each([
+        ['..', ''],
+        [',', ''],
+        [';', ''],
+        ['|', ''],
+        [')', ''],
+        [',', 'https://'],
+        [';', 'https://'],
+        ['|', 'https://'],
+        [')', 'https://'],
+    ])('keeps scanning work linear for URLs separated by "%s" with protocol "%s"', (separator, protocol) => {
+        // Given many URLs separated by punctuation without whitespace.
+        const firstUrl = `${protocol}a.com`;
+        const lastUrl = `${protocol}b.com`;
         const parseAndCountCharacterReads = (repetitions) => {
-            const input = `${'a.com..'.repeat(repetitions)}b.com`;
+            const input = `${`${firstUrl}${separator}`.repeat(repetitions)}${lastUrl}`;
             const characterReadSpy = jest.spyOn(String.prototype, 'charCodeAt');
             try {
                 const result = parser.replace(input);
-                return {result, characterReads: characterReadSpy.mock.calls.length};
+                return {input, result, characterReads: characterReadSpy.mock.calls.length};
             } finally {
                 characterReadSpy.mockRestore();
             }
         };
 
-        // When the input contains twice as many separate domains.
+        // When the input contains twice as many separate URLs.
         const shorter = parseAndCountCharacterReads(50);
         const longer = parseAndCountCharacterReads(100);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${longer.input}`, {shouldEscapeText: false});
 
-        // Then every domain links without repeatedly scanning the remaining token for each new domain.
-        expect(longer.result).toBe(`${`${anchor('a.com')}..`.repeat(100)}${anchor('b.com')}`);
+        // Then both parsing paths link every URL, and scanning grows below the roughly fourfold increase caused by rescanning the remaining text.
+        const expected = `${`${anchor(firstUrl)}${separator}`.repeat(100)}${anchor(lastUrl)}`;
+        expect(longer.result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
         expect(longer.characterReads).toBeLessThan(shorter.characterReads * 3);
     });
 

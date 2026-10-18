@@ -288,12 +288,11 @@ function findValidHostnameLabelEnd(text: string, start: number): number | undefi
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
- * @param candidateEnd - Index immediately after the URL candidate.
  * @returns The index immediately after the hostname.
  */
-function findHostnameEnd(text: string, hostnameStart: number, candidateEnd: number): number {
+function findHostnameEnd(text: string, hostnameStart: number): number {
     let hostnameEnd = hostnameStart;
-    while (hostnameEnd < candidateEnd && isHostnameCharacter(text[hostnameEnd])) {
+    while (hostnameEnd < text.length && isHostnameCharacter(text[hostnameEnd])) {
         hostnameEnd++;
     }
 
@@ -457,11 +456,10 @@ function findUrlEnd(text: string, hostnameEnd: number): number {
  * @param text - Text containing the URL candidate.
  * @param urlStart - Index where the URL starts, excluding Markdown punctuation.
  * @param hostnameStart - Index where the hostname starts.
- * @param candidate - Broad candidate range found by the scanner.
  * @returns The hostname end and any invalid ranges, plus the candidate end needed to match valid domains.
  */
-function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number, candidate: UrlCandidate): UrlRangeAnalysis {
-    const hostnameEnd = findHostnameEnd(text, hostnameStart, candidate.end);
+function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number): UrlRangeAnalysis {
+    const hostnameEnd = findHostnameEnd(text, hostnameStart);
     const hostnameAnalysis = analyzeHostname(text, hostnameStart, hostnameEnd, hostnameStart !== urlStart);
     if (hostnameAnalysis.isValid) {
         return {hostnameEnd};
@@ -553,8 +551,7 @@ function findInvalidUrlRanges(text: string): TextRange[] {
         let analysis: UrlRangeAnalysis;
 
         if (matchedProtocol) {
-            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
-            analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
+            analysis = analyzeUrlRange(text, index, index + matchedProtocol.length);
         } else {
             if (text[index] !== '.') {
                 index++;
@@ -568,8 +565,7 @@ function findInvalidUrlRanges(text: string): TextRange[] {
             }
 
             const hostnameStart = findRawHostnameStart(text, index);
-            const candidate = extendUrlCandidateBoundaries(text, hostnameStart, tldEnd);
-            analysis = analyzeUrlRange(text, hostnameStart, hostnameStart, candidate);
+            analysis = analyzeUrlRange(text, hostnameStart, hostnameStart);
         }
 
         if (analysis.invalidRanges) {
@@ -688,7 +684,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         const matchedProtocol = getProtocolAt(text, index);
         if (matchedProtocol) {
             const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
-            const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length, candidate);
+            const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length);
             if (analysis.invalidRanges) {
                 if (analysis.linkableCandidateEnd !== undefined) {
                     candidates.push({start: candidate.start, end: analysis.linkableCandidateEnd});
@@ -714,7 +710,7 @@ function findUrlCandidates(text: string): UrlCandidate[] {
 
         const rawHostnameStart = findRawHostnameStart(text, index);
         const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
-        const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart, broadCandidate);
+        const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart);
         if (analysis.invalidRanges) {
             if (analysis.linkableCandidateEnd !== undefined) {
                 candidates.push({start: broadCandidate.start, end: analysis.linkableCandidateEnd});
