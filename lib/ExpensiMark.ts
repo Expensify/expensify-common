@@ -532,7 +532,7 @@ function findRawHostnameStart(text: string, dotPosition: number): number {
         hostnameStart--;
     }
 
-    const hasStandaloneBoundaryHyphen = text[hostnameStart] === '-' && text[hostnameStart + 1] !== '-' && !isHostnameCharacter(text[hostnameStart - 1]);
+    const hasStandaloneBoundaryHyphen = text[hostnameStart] === '-' && text[hostnameStart + 1] !== '-';
     if (hasStandaloneBoundaryHyphen) {
         hostnameStart++;
     }
