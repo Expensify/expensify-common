@@ -2006,8 +2006,9 @@ export default class ExpensiMark {
      * @param replacement - The replacement applied to each accepted URL.
      * @param shouldScanForUrls - Whether to scan URL candidates before running the regex.
      * @param shouldRejectPartialHostnameMatches - Whether to mask invalid URL ranges before matching.
+     * @param followingText - Text after the candidate that the regex needs to distinguish URLs from emails.
      */
-    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, shouldRejectPartialHostnameMatches = false): string {
+    modifyTextForUrlLinks(regex: RegExp, textToCheck: string, replacement: ReplacementFn, shouldScanForUrls = false, shouldRejectPartialHostnameMatches = false, followingText = ''): string {
         if (shouldScanForUrls) {
             const candidates = findUrlCandidates(textToCheck);
             if (candidates.length === 0) {
@@ -2020,9 +2021,11 @@ export default class ExpensiMark {
 
             for (const {start, end} of candidates) {
                 const candidate = textToCheck.slice(start, end);
+                // A shortened candidate can end at an email's local part, so keep its domain visible to the regex.
+                const contextEnd = textToCheck[end] === '@' ? findHostnameEnd(textToCheck, end + 1) : end;
                 candidateRegex.lastIndex = 0;
                 output.push(textToCheck.slice(outputStart, start));
-                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement, false, shouldRejectPartialHostnameMatches));
+                output.push(this.modifyTextForUrlLinks(candidateRegex, candidate, replacement, false, shouldRejectPartialHostnameMatches, textToCheck.slice(end, contextEnd)));
                 outputStart = end;
             }
 
@@ -2031,12 +2034,27 @@ export default class ExpensiMark {
         }
 
         const matchingRegex = regex;
-        const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textToCheck) : [];
-        const textToMatch = invalidUrlRanges.length > 0 ? maskInvalidUrlRanges(textToCheck, invalidUrlRanges) : textToCheck;
+        const textWithContext = textToCheck + followingText;
+        const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textWithContext) : [];
+        const maskedText = invalidUrlRanges.length > 0 ? maskInvalidUrlRanges(textWithContext, invalidUrlRanges) : textWithContext;
+        const textToMatch = maskedText.slice(0, textToCheck.length);
+        const contextRegex = followingText ? new RegExp(regex.source, regex.flags.replace('g', 'y')) : undefined;
         let match = matchingRegex.exec(textToMatch);
         let replacedText = '';
         let startIndex = 0;
         while (match !== null) {
+            if (contextRegex && match.index + match[0].length === textToCheck.length) {
+                // Recheck only this match with its following text, without searching outside the candidate.
+                contextRegex.lastIndex = match.index;
+                const contextMatch = contextRegex.exec(maskedText);
+                if (contextMatch === null) {
+                    match = matchingRegex.exec(textToMatch);
+                    continue;
+                }
+                match = contextMatch;
+                matchingRegex.lastIndex = contextRegex.lastIndex;
+            }
+
             let url = match[2];
             const urlEnd = findUrlEndBeforeUnmatchedParenthesis(url, 0, url.length);
             if (urlEnd < url.length) {

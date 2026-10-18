@@ -855,6 +855,27 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
+        ['My email...john.dev@example.com', 'john.dev@example.com', 'My email...'],
+        ['wait..name.co@example.org', 'name.co@example.org', 'wait..'],
+        ['example.com..b.com@valid.net', 'b.com@valid.net', `${anchor('example.com')}..`],
+        ['https://example.com..valid.org@user.net', 'valid.org@user.net', `${anchor('https://example.com')}..`],
+    ])('keeps the complete email linked after repeated dots in %s', (input, email, expectedPrefix) => {
+        // Given an email whose local part looks like a domain after prose or another URL.
+        const suffix = '/path/example.org';
+
+        // When candidate scanning, live Markdown, and raw-HTML parsing inspect the email and a later URL.
+        const result = parser.replace(`${input}${suffix}`);
+        const rawInputResult = parser.replace(`${input}${suffix}`, {shouldKeepRawInput: true});
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}${suffix}`, {shouldEscapeText: false});
+
+        // Then the whole email stays in one mailto link and the separate URL still links.
+        const expected = `${expectedPrefix}<a href="mailto:${email}">${email}</a>/path/${anchor('example.org')}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+        expect(rawInputResult).toContain(`<a href="mailto:${email}" data-raw-href="${email}" data-link-variant="auto">${email}</a>`);
+    });
+
+    test.each([
         ['a 63-character label', `${'a'.repeat(63)}.com`, true],
         ['a 64-character label', `${'a'.repeat(64)}.com`, false],
         ['a 253-character hostname', `${'a.'.repeat(125)}com`, true],
