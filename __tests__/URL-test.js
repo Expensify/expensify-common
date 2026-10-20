@@ -78,7 +78,7 @@ describe('Hostname label length validation', () => {
         // When the URL pattern searches for every domain in the text.
         const matches = [...input.matchAll(regexToTest)].map((match) => match[0]);
 
-        // Then repeated dots separate valid domains while a single dot cannot expose an invalid hostname's suffix.
+        // Then punctuation separates valid domains while an oversized label still keeps its connected suffix plain.
         expect(matches).toEqual(['google.com', 'example.com', 'valid.org']);
     });
 
@@ -160,8 +160,7 @@ describe('Hostname label length validation', () => {
     it.each([
         ['an invalid dot-separated label', `${'a'.repeat(64)}.example.com`],
         ['an invalid hyphenated label after a protocol', `https://${'a'.repeat(64)}-valid.com`],
-        ['a leading hyphen attached to another hostname label', 'foo.-valid.com'],
-        ['multiple leading hyphens', '--valid.com'],
+        ['multiple hyphens attached to an oversized label', `${'a'.repeat(64)}--valid.com`],
     ])('does not match a valid hostname suffix inside %s', (_name, invalidUrl) => {
         // Given an invalid hostname that contains a shorter valid-looking domain suffix.
         const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'i');
@@ -173,16 +172,16 @@ describe('Hostname label length validation', () => {
         expect(match).toBeNull();
     });
 
-    it('keeps matching a domain after a standalone boundary hyphen', () => {
-        // Given a valid domain preceded by one standalone hyphen used as punctuation.
-        const input = '-example.com';
-        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'i');
+    it('matches valid domains after leading dots and hyphens', () => {
+        // Given domains preceded by punctuation that cannot be part of their hostname labels.
+        const input = '-example.com --example.com .example.com *.example.com foo-.example.com foo.-valid.com foo.--valid.com';
+        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'gi');
 
-        // When the URL pattern searches the complete text.
-        const match = regexToTest.exec(input);
+        // When the URL pattern searches each punctuation boundary in the complete text.
+        const matches = [...input.matchAll(regexToTest)].map((match) => match[0]);
 
-        // Then it links the valid domain after the boundary without including the hyphen.
-        expect(match && match[0]).toBe('example.com');
+        // Then only the domains match, leaving the leading punctuation outside every link.
+        expect(matches).toEqual(['example.com', 'example.com', 'example.com', 'example.com', 'example.com', 'valid.com', 'valid.com']);
     });
 
     it('does not count a URL path toward the hostname limit', () => {
@@ -236,6 +235,7 @@ describe('URL pattern consistency', () => {
         const literalPatternNames = [
             'URL_PROTOCOL_REGEX',
             'URL_PORT_REGEX',
+            'URL_HOSTNAME_BOUNDARY_REGEX',
             'URL_HOSTNAME_LABEL_REGEX',
             'URL_WEBSITE_REGEX',
             'URL_PATH_REGEX',

@@ -768,14 +768,30 @@ describe('Test long input candidate parsing', () => {
         expect(result).toBe(input);
     });
 
-    test.each(['foo.-valid.com', 'foo.--valid.com', '--valid.com'])('does not autolink a suffix after invalid leading hyphens in %s', (input) => {
-        // Given a hostname whose later valid-looking label starts after invalid leading hyphens.
+    test.each([
+        ['see --example.com', `see --${anchor('example.com')}`],
+        ['see .example.com', `see .${anchor('example.com')}`],
+        ['use *.example.com', `use *.${anchor('example.com')}`],
+        ['foo-.example.com', `foo-.${anchor('example.com')}`],
+        ['foo.-valid.com', `foo.-${anchor('valid.com')}`],
+        ['foo.--valid.com', `foo.--${anchor('valid.com')}`],
+        ['--valid.com', `--${anchor('valid.com')}`],
+        ['(.example.com)', `(.${anchor('example.com')})`],
+        ['日本.example.com', `日本.${anchor('example.com')}`],
+        ['example.com.-valid.org', `${anchor('example.com')}.-${anchor('valid.org')}`],
+        ['https://example.com-.valid.org', `${anchor('https://example.com')}-.${anchor('valid.org')}`],
+        ['https://foo.-bar.com/path/example.org;valid.org', `${anchor('https://foo')}.-${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+        ['https://-bar.com/path/example.org;valid.org', `https://-${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+    ])('autolinks a valid domain after leading punctuation in %s', (input, expected) => {
+        // Given a valid domain after punctuation, prose, or another URL.
 
-        // When ExpensiMark parses the complete hostname.
+        // When candidate scanning and raw-HTML parsing inspect the same domain boundary.
         const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
-        // Then it leaves the whole invalid hostname plain instead of linking the suffix.
-        expect(result).toBe(input);
+        // Then both paths link the valid domain and leave its leading punctuation plain.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
     });
 
     test('keeps a standalone boundary hyphen outside a maximum-length hostname label', () => {
@@ -788,6 +804,21 @@ describe('Test long input candidate parsing', () => {
 
         // Then it preserves the hyphen and autolinks the valid hostname after it.
         expect(result).toBe(`-${anchor(domain)}`);
+    });
+
+    test('keeps long punctuation before and between domains out of URL matching', () => {
+        // Given long punctuation runs around valid domains and a URL matcher that records its input.
+        const punctuation = '-'.repeat(4500);
+        const input = `${punctuation}example.com.${punctuation}valid.org`;
+        const urlRegex = /not-matched/g;
+        const urlRegexExecSpy = jest.spyOn(urlRegex, 'exec');
+
+        // When the candidate scanner passes recovered domains to the URL matcher.
+        const result = parser.modifyTextForUrlLinks(urlRegex, input, jest.fn(), true);
+
+        // Then only the domains reach URL matching, avoiding repeated regex searches across the long gaps.
+        expect(result).toBe(input);
+        expect(urlRegexExecSpy.mock.calls.map(([candidate]) => candidate)).toEqual(['example.com', 'valid.org']);
     });
 
     test('still autolinks a separate valid domain after an invalid hostname', () => {
@@ -1108,8 +1139,6 @@ describe('Test long input candidate parsing', () => {
     });
 
     test.each([
-        ['https://foo.-bar.com', 'https://foo'],
-        ['https://-bar.com', undefined],
         ['https://invalid-.local', 'https://invalid'],
         ['https://local.url..nonsense', 'https://local.url'],
         ['http://localhost..nonsense', 'http://localhost'],

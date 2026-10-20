@@ -52,6 +52,7 @@ const URL_TLDS = new Set(URL_TLD_LIST);
 // Caps TLD scanning at the longest known TLD so long invalid URL-like text avoids expensive regex work.
 const MAX_URL_TLD_LENGTH = Math.max(...URL_TLD_LIST.map((tld) => tld.length));
 const URL_HOSTNAME_LABEL_AT_POSITION_REGEX = new RegExp(UrlPatterns.URL_HOSTNAME_LABEL_REGEX, 'iy');
+const URL_HOSTNAME_BOUNDARY_AT_POSITION_REGEX = new RegExp(UrlPatterns.URL_HOSTNAME_BOUNDARY_REGEX, 'iy');
 const URL_SUFFIX_AT_POSITION_REGEX = new RegExp(
     `(?:\\:${UrlPatterns.URL_PORT_REGEX}(?![0-9]))?${UrlPatterns.URL_PATH_REGEX}(?:${UrlPatterns.URL_PARAM_REGEX}|${UrlPatterns.URL_FRAGMENT_REGEX})*`,
     'iy',
@@ -64,7 +65,7 @@ type ProcessFn = (textToProcess: string, replacement: Replacement, shouldKeepRaw
 type TextRange = {start: number; end: number};
 type UrlCandidate = TextRange;
 type HostnameAnalysis = {isValid: boolean; validHostnamePrefixEnd?: number};
-type UrlRangeAnalysis = {hostnameEnd: number; invalidRanges?: undefined} | {hostnameEnd: number; invalidRanges: TextRange[]; urlEnd: number; linkableCandidateEnd?: number};
+type UrlRangeAnalysis = {hostnameEnd: number; invalidRanges?: undefined} | {hostnameEnd: number; invalidRanges: TextRange[]; urlEnd: number};
 type MarkdownMarkerCharacter = '*' | '~';
 type MarkdownMarker = {position: number; isProtected: boolean};
 type CanOpenMarkdown = (text: string, position: number, isProtected: boolean) => boolean;
@@ -300,6 +301,27 @@ function findHostnameEnd(text: string, hostnameStart: number): number {
 }
 
 /**
+ * Finds where a separate hostname can start after punctuation inside the current hostname run.
+ *
+ * @param text - Text containing the hostname run.
+ * @param start - First index to check.
+ * @param end - Index immediately after the hostname run.
+ * @returns The next hostname start allowed by the URL pattern, or `end` when none exists.
+ */
+function findNextHostnameStart(text: string, start: number, end: number): number {
+    for (let index = start; index < end; index++) {
+        if (text[index - 1] !== '.' && text[index - 1] !== '-') {
+            continue;
+        }
+        URL_HOSTNAME_BOUNDARY_AT_POSITION_REGEX.lastIndex = index;
+        if (URL_HOSTNAME_BOUNDARY_AT_POSITION_REGEX.test(text)) {
+            return index;
+        }
+    }
+    return end;
+}
+
+/**
  * Finds the end of a known top-level domain after `dotPosition`.
  *
  * @param text - Candidate URL text.
@@ -455,12 +477,12 @@ function findUrlEnd(text: string, hostnameEnd: number): number {
 }
 
 /**
- * Analyzes a URL candidate and protects invalid ranges while allowing separate domains after repeated dots.
+ * Analyzes a URL candidate and protects invalid ranges while allowing separate domains after punctuation.
  *
  * @param text - Text containing the URL candidate.
  * @param urlStart - Index where the URL starts, excluding Markdown punctuation.
  * @param hostnameStart - Index where the hostname starts.
- * @returns The hostname end and any invalid ranges, plus the candidate end needed to match valid domains.
+ * @returns The hostname end and any invalid ranges, plus the end of the connected URL text.
  */
 function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number): UrlRangeAnalysis {
     const hostnameEnd = findHostnameEnd(text, hostnameStart);
@@ -483,22 +505,12 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number):
 
     const invalidRanges: TextRange[] = [];
     let invalidRangeStart = hostnameAnalysis.validHostnamePrefixEnd ?? urlStart;
-    let linkableCandidateEnd = hostnameAnalysis.validHostnamePrefixEnd;
 
-    // Repeated dots can separate prose or another URL from a valid domain. Check each following hostname once.
-    let index = hostnameStart;
+    // Use the URL pattern's boundary rule to check each separate hostname after punctuation once.
+    let index = findNextHostnameStart(text, hostnameStart + 1, hostnameEnd);
     while (index < hostnameEnd) {
-        if (text[index] !== '.' || text[index + 1] !== '.') {
-            index++;
-            continue;
-        }
-        while (index < hostnameEnd && text[index] === '.') {
-            index++;
-        }
         const followingHostnameStart = index;
-        while (index < hostnameEnd && (text[index] !== '.' || text[index + 1] !== '.')) {
-            index++;
-        }
+        index = findNextHostnameStart(text, index + 1, hostnameEnd);
         const followingHostnameAnalysis = analyzeHostname(text, followingHostnameStart, index, false);
         if (followingHostnameAnalysis.validHostnamePrefixEnd === undefined) {
             continue;
@@ -507,16 +519,15 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number):
         invalidRanges.push({start: invalidRangeStart, end: followingHostnameStart});
         // Only a valid final hostname owns the path/query; malformed continuations keep their nested domains plain.
         invalidRangeStart = followingHostnameAnalysis.validHostnamePrefixEnd;
-        if (followingHostnameAnalysis.isValid) {
-            invalidRangeStart = index === hostnameEnd ? invalidRangeEnd : index;
+        if (followingHostnameAnalysis.isValid && index === hostnameEnd) {
+            invalidRangeStart = invalidRangeEnd;
         }
-        linkableCandidateEnd = invalidRangeEnd;
     }
     if (invalidRangeStart < invalidRangeEnd) {
         invalidRanges.push({start: invalidRangeStart, end: invalidRangeEnd});
     }
 
-    return {hostnameEnd, invalidRanges, urlEnd: invalidRangeEnd, linkableCandidateEnd};
+    return {hostnameEnd, invalidRanges, urlEnd: invalidRangeEnd};
 }
 
 /**
@@ -524,7 +535,7 @@ function analyzeUrlRange(text: string, urlStart: number, hostnameStart: number):
  *
  * @param text - Text containing the bare hostname.
  * @param dotPosition - Index of the dot immediately before the known top-level domain.
- * @returns The hostname start, excluding a standalone punctuation hyphen.
+ * @returns The start of the hostname run, including leading dots and hyphens.
  */
 function findRawHostnameStart(text: string, dotPosition: number): number {
     let hostnameStart = dotPosition;
@@ -532,10 +543,6 @@ function findRawHostnameStart(text: string, dotPosition: number): number {
         hostnameStart--;
     }
 
-    const hasStandaloneBoundaryHyphen = text[hostnameStart] === '-' && text[hostnameStart + 1] !== '-';
-    if (hasStandaloneBoundaryHyphen) {
-        hostnameStart++;
-    }
     return hostnameStart;
 }
 
@@ -686,43 +693,43 @@ function findUrlCandidates(text: string): UrlCandidate[] {
         }
 
         const matchedProtocol = getProtocolAt(text, index);
+        let urlStart = index;
+        let candidateEnd: number;
         if (matchedProtocol) {
-            const analysis = analyzeUrlRange(text, index, index + matchedProtocol.length);
-            if (analysis.invalidRanges) {
-                if (analysis.linkableCandidateEnd !== undefined) {
-                    candidates.push({start: findUrlCandidateStart(text, index), end: analysis.linkableCandidateEnd});
-                }
-                index = analysis.urlEnd;
+            candidateEnd = index + matchedProtocol.length;
+        } else {
+            if (text[index] !== '.') {
+                index++;
                 continue;
             }
-            const candidate = extendUrlCandidateBoundaries(text, index, index + matchedProtocol.length);
-            candidates.push(candidate);
-            index = candidate.end;
-            continue;
+
+            const tldEnd = findKnownTldEnd(text, index);
+            if (tldEnd === undefined) {
+                index++;
+                continue;
+            }
+            urlStart = findRawHostnameStart(text, index);
+            candidateEnd = tldEnd;
         }
 
-        if (text[index] !== '.') {
-            index++;
-            continue;
-        }
-
-        const tldEnd = findKnownTldEnd(text, index);
-        if (tldEnd === undefined) {
-            index++;
-            continue;
-        }
-
-        const rawHostnameStart = findRawHostnameStart(text, index);
-        const analysis = analyzeUrlRange(text, rawHostnameStart, rawHostnameStart);
+        const analysis = analyzeUrlRange(text, urlStart, matchedProtocol ? candidateEnd : urlStart);
         if (analysis.invalidRanges) {
-            if (analysis.linkableCandidateEnd !== undefined) {
-                candidates.push({start: findUrlCandidateStart(text, rawHostnameStart), end: analysis.linkableCandidateEnd});
+            // Match valid portions separately so long rejected gaps never reach the full URL regex.
+            let candidateStart = urlStart;
+            for (const range of analysis.invalidRanges) {
+                if (candidateStart < range.start) {
+                    candidates.push({start: findUrlCandidateStart(text, candidateStart), end: range.start});
+                }
+                candidateStart = range.end;
+            }
+            if (candidateStart < analysis.urlEnd) {
+                candidates.push({start: findUrlCandidateStart(text, candidateStart), end: analysis.urlEnd});
             }
             index = analysis.urlEnd;
             continue;
         }
 
-        const broadCandidate = extendUrlCandidateBoundaries(text, rawHostnameStart, tldEnd);
+        const broadCandidate = extendUrlCandidateBoundaries(text, urlStart, candidateEnd);
         candidates.push(broadCandidate);
         index = broadCandidate.end;
     }
