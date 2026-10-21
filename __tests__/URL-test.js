@@ -1,4 +1,7 @@
-import {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX} from '../lib/Url';
+import fs from 'node:fs';
+import * as UrlPatterns from '../lib/Url';
+
+const {URL_REGEX_WITH_REQUIRED_PROTOCOL, URL_REGEX, LOOSE_URL_REGEX, MARKDOWN_URL_REGEX} = UrlPatterns;
 
 describe('Strict URL validation', () => {
     describe('Mandatory protocol for URL', () => {
@@ -63,5 +66,194 @@ describe('Loose URL validation', () => {
         expect(regexToTest.test('http://-77.com')).toBeFalsy();
         expect(regexToTest.test('http://77-.com')).toBeFalsy();
         expect(regexToTest.test('http://my.localhost....local-domain:8080')).toBeFalsy();
+    });
+});
+
+describe('Hostname label length validation', () => {
+    it('finds separate domains after repeated dots without restarting inside oversized labels', () => {
+        // Given domains separated by repeated dots and an oversized hostname containing a valid-looking suffix.
+        const input = `wait..google.com example.com...valid.org ${'a'.repeat(64)}.example.com`;
+        const regexToTest = new RegExp(URL_REGEX, 'gi');
+
+        // When the URL pattern searches for every domain in the text.
+        const matches = [...input.matchAll(regexToTest)].map((match) => match[0]);
+
+        // Then punctuation separates valid domains while an oversized label still keeps its connected suffix plain.
+        expect(matches).toEqual(['google.com', 'example.com', 'valid.org']);
+    });
+
+    it.each([
+        ['URL_REGEX', URL_REGEX, ''],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],
+    ])('%s preserves valid prefixes before long malformed hostname continuations', (_name, pattern, protocol) => {
+        // Given valid hostnames followed by malformed punctuation whose text would exceed a DNS length limit.
+        const regexToTest = new RegExp(pattern, 'i');
+        const validUrl = `${protocol}example.com`;
+        const maximumLengthUrl = `${protocol}${'a.'.repeat(125)}com`;
+        const inputs = [`${validUrl}..${'a'.repeat(300)}`, `${validUrl}.-${'a'.repeat(63)}`, `${validUrl}-.${'a'.repeat(300)}`, `${maximumLengthUrl}..nonsense`];
+
+        // When URL matching reaches malformed punctuation after the valid hostname.
+        const matches = inputs.map((input) => {
+            const match = regexToTest.exec(input);
+            return match && match[0];
+        });
+
+        // Then only the actual hostname counts toward the limits, so each valid prefix still matches.
+        expect(matches).toEqual([validUrl, validUrl, validUrl, maximumLengthUrl]);
+    });
+
+    it.each([
+        ['URL_REGEX', URL_REGEX, ''],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],
+    ])('%s rejects oversized hostnames even before malformed continuations', (_name, pattern, protocol) => {
+        // Given an oversized hostname containing a known-TLD prefix, followed by malformed punctuation.
+        const input = `${protocol}example.com${'.a'.repeat(122)}..nonsense`;
+        const regexToTest = new RegExp(pattern, 'i');
+
+        // When URL matching checks the hostname before the malformed continuation.
+        const match = regexToTest.exec(input);
+
+        // Then the whole oversized hostname remains rejected rather than matching its earlier valid-looking prefix.
+        expect(match).toBeNull();
+    });
+
+    it.each([
+        ['URL_REGEX', URL_REGEX, `${'a'.repeat(63)}.com`, `${'a'.repeat(64)}.com`],
+        ['URL_REGEX_WITH_REQUIRED_PROTOCOL', URL_REGEX_WITH_REQUIRED_PROTOCOL, `https://${'a'.repeat(63)}.com`, `https://${'a'.repeat(64)}.com`],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, `https://${'a'.repeat(63)}.local`, `https://${'a'.repeat(64)}.local`],
+    ])('%s accepts 63-character labels and rejects longer labels', (_name, pattern, validUrl, invalidUrl) => {
+        // Given a URL whose hostname label is at the DNS limit and one whose label exceeds it.
+        const regexToTest = new RegExp(pattern, 'i');
+
+        // When each complete URL is checked by the corresponding URL pattern.
+        const validMatch = regexToTest.exec(validUrl);
+        regexToTest.lastIndex = 0;
+        const invalidMatch = regexToTest.exec(invalidUrl);
+
+        // Then the valid URL matches fully and the invalid URL cannot be partially matched from inside its hostname label.
+        expect(validMatch && validMatch[0]).toBe(validUrl);
+        expect(invalidMatch).toBeNull();
+    });
+
+    it.each([
+        ['URL_REGEX', URL_REGEX, ''],
+        ['URL_REGEX_WITH_REQUIRED_PROTOCOL', URL_REGEX_WITH_REQUIRED_PROTOCOL, 'https://'],
+        ['LOOSE_URL_REGEX', LOOSE_URL_REGEX, 'https://'],
+    ])('%s accepts 253-character hostnames and rejects longer hostnames', (_name, pattern, prefix) => {
+        // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
+        const validHostname = `${'a.'.repeat(125)}com`;
+        const invalidHostname = `aa.${'a.'.repeat(124)}com`;
+        const regexToTest = new RegExp(pattern, 'i');
+
+        // When each complete URL is checked by the corresponding URL pattern.
+        const validUrl = `${prefix}${validHostname}`;
+        const invalidUrl = `${prefix}${invalidHostname}`;
+        const validMatch = regexToTest.exec(validUrl);
+        regexToTest.lastIndex = 0;
+        const invalidMatch = regexToTest.exec(invalidUrl);
+
+        // Then only the URL whose complete hostname is within the limit matches.
+        expect(validMatch && validMatch[0]).toBe(validUrl);
+        expect(invalidMatch).toBeNull();
+    });
+
+    it.each([
+        ['an invalid dot-separated label', `${'a'.repeat(64)}.example.com`],
+        ['an invalid hyphenated label after a protocol', `https://${'a'.repeat(64)}-valid.com`],
+        ['multiple hyphens attached to an oversized label', `${'a'.repeat(64)}--valid.com`],
+    ])('does not match a valid hostname suffix inside %s', (_name, invalidUrl) => {
+        // Given an invalid hostname that contains a shorter valid-looking domain suffix.
+        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'i');
+
+        // When the URL pattern searches the complete invalid value.
+        const match = regexToTest.exec(invalidUrl);
+
+        // Then it rejects the whole value instead of matching only the valid suffix.
+        expect(match).toBeNull();
+    });
+
+    it('matches valid domains after leading dots and hyphens', () => {
+        // Given domains preceded by punctuation that cannot be part of their hostname labels.
+        const input = '-example.com --example.com .example.com *.example.com foo-.example.com foo.-valid.com foo.--valid.com';
+        const regexToTest = new RegExp(MARKDOWN_URL_REGEX, 'gi');
+
+        // When the URL pattern searches each punctuation boundary in the complete text.
+        const matches = [...input.matchAll(regexToTest)].map((match) => match[0]);
+
+        // Then only the domains match, leaving the leading punctuation outside every link.
+        expect(matches).toEqual(['example.com', 'example.com', 'example.com', 'example.com', 'example.com', 'valid.com', 'valid.com']);
+    });
+
+    it('does not count a URL path toward the hostname limit', () => {
+        // Given a URL with a valid hostname and a path that makes the complete URL longer than 253 characters.
+        const url = `https://example.com/${'a'.repeat(1000)}`;
+        const regexToTest = new RegExp(`^${URL_REGEX_WITH_REQUIRED_PROTOCOL}$`, 'i');
+
+        // When the complete URL is checked.
+        const isValid = regexToTest.test(url);
+
+        // Then it remains valid because only the hostname is subject to the 253-character limit.
+        expect(isValid).toBeTruthy();
+    });
+
+    it('keeps protocol IPv4 URLs valid', () => {
+        // Given an IPv4 URL that is supported by the loose URL pattern.
+        const ipv4Url = 'http://127.0.0.1/path';
+        const regexToTest = new RegExp(`^${LOOSE_URL_REGEX}$`, 'i');
+
+        // When the URL is checked after applying hostname-label limits.
+        const isValid = regexToTest.test(ipv4Url);
+
+        // Then its numeric labels remain valid because none exceeds the new limit.
+        expect(isValid).toBeTruthy();
+    });
+});
+
+describe('URL pattern consistency', () => {
+    it.each([
+        ['a one-character label', 'a', true],
+        ['a hyphen inside a label', 'valid-label', true],
+        ['a leading hyphen', '-invalid', false],
+        ['a trailing hyphen', 'invalid-', false],
+        ['an underscore', 'invalid_label', false],
+    ])('keeps strict and loose URL patterns aligned for %s', (_name, label, shouldMatch) => {
+        // Given the same hostname label used by strict and loose URL patterns.
+        const labelRegex = new RegExp(`^${UrlPatterns.URL_HOSTNAME_LABEL_REGEX}$`, 'i');
+        const strictUrlRegex = new RegExp(`^${URL_REGEX}$`, 'i');
+        const looseUrlRegex = new RegExp(`^${LOOSE_URL_REGEX}$`, 'i');
+
+        // When each URL pattern validates the label.
+        const results = [labelRegex.test(label), strictUrlRegex.test(`${label}.com`), looseUrlRegex.test(`https://${label}.local`)];
+
+        // Then every pattern applies the same label syntax and length limits.
+        expect(results).toEqual([shouldMatch, shouldMatch, shouldMatch]);
+    });
+
+    it('keeps published URL pattern declarations aligned with their runtime values', () => {
+        // Given the URL patterns exported at runtime and their published literal declarations.
+        const declaration = fs.readFileSync('lib/Url.d.ts', 'utf8');
+        const literalPatternNames = [
+            'URL_PROTOCOL_REGEX',
+            'URL_PORT_REGEX',
+            'URL_HOSTNAME_BOUNDARY_REGEX',
+            'URL_HOSTNAME_LABEL_REGEX',
+            'URL_WEBSITE_REGEX',
+            'URL_PATH_REGEX',
+            'URL_PARAM_REGEX',
+            'URL_FRAGMENT_REGEX',
+            'URL_REGEX',
+            'LOOSE_URL_WEBSITE_REGEX',
+            'LOOSE_URL_REGEX',
+            'MARKDOWN_URL_REGEX',
+        ];
+
+        // When each runtime value is escaped as the matching TypeScript string literal.
+        const staleDeclarations = literalPatternNames.filter((name) => {
+            const escapedPattern = UrlPatterns[name].replaceAll('\\', '\\\\').replaceAll("'", "\\'");
+            return !declaration.includes(`declare const ${name}: '${escapedPattern}';`);
+        });
+
+        // Then Url.d.ts describes the exact patterns exported by Url.js.
+        expect(staleDeclarations).toEqual([]);
     });
 });

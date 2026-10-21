@@ -615,30 +615,734 @@ test('Test wrapped URLs', () => {
 });
 
 describe('Test long input candidate parsing', () => {
-    const anchor = (url, label = url) => `<a href="${url.startsWith('http') ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
+    const anchor = (url, label = url) => `<a href="${/^(?:https?|ftps?):\/\//i.test(url) ? url : `https://${url}`}" target="_blank" rel="noreferrer noopener">${label}</a>`;
+    const invalidUrlSuffixesWithNestedDomain = [
+        '/path/example.org',
+        '?next=example.org',
+        '#example.org',
+        ':1/path/example.org',
+        ':8080?next=example.org',
+        ':65535#example.org',
+        '/path(a)example.org',
+        '/path/(example.org)',
+        '/path/http://example.org',
+    ];
 
-    test('autolinks a long domain without parsing the full input as a URL', () => {
-        const domain = `${'a'.repeat(70)}.com`;
+    test('autolinks a domain with the maximum hostname label length without parsing the full input as a URL', () => {
+        // Given a valid 63-character hostname label after a long plain-text prefix.
+        const domain = `${'a'.repeat(63)}.com`;
         const prefix = 'a'.repeat(14500);
-        expect(parser.replace(`${prefix} ${domain}`)).toBe(`${prefix} ${anchor(domain)}`);
+
+        // When ExpensiMark parses the complete message.
+        const result = parser.replace(`${prefix} ${domain}`);
+
+        // Then it autolinks the valid domain without treating the long prefix as part of the URL.
+        expect(result).toBe(`${prefix} ${anchor(domain)}`);
     });
 
-    test('handles long valid and invalid bare-domain candidates without changing their output', () => {
-        // Given long valid and invalid domain-shaped values, because the optimization must not change what users see while typing.
-        const hostname = 'a'.repeat(8496);
-        const validUrl = `${hostname}.com`;
-        const invalidUrl = `${validUrl}x`;
+    test('does not autolink bare domains whose hostname label exceeds 63 characters', () => {
+        // Given domains at and above the DNS hostname-label limit, including the long value from the reported composer issue.
+        const validUrl = `${'a'.repeat(63)}.com`;
+        const invalidUrl = `${'a'.repeat(64)}.com`;
+        const reportedInvalidUrl = `${'a'.repeat(8496)}.com`;
         const repeatedDots = `${'a.'.repeat(4499)}a`;
 
         // When ExpensiMark parses each value.
         const validResult = parser.replace(validUrl);
         const invalidResult = parser.replace(invalidUrl);
+        const reportedInvalidResult = parser.replace(reportedInvalidUrl);
         const repeatedDotsResult = parser.replace(repeatedDots);
 
-        // Then it links only the valid domain, which protects both the expected output and responsive typing for invalid long input.
+        // Then it links only the domain whose labels are valid and leaves oversized or unknown domains as plain text.
         expect(validResult).toBe(anchor(validUrl));
         expect(invalidResult).toBe(invalidUrl);
+        expect(reportedInvalidResult).toBe(reportedInvalidUrl);
         expect(repeatedDotsResult).toBe(repeatedDots);
+    });
+
+    test('does not autolink a long protocol hostname whose label exceeds the limit', () => {
+        // Given a protocol URL whose single hostname label is close to the App parser limit.
+        const input = `https://${'a'.repeat(9960)}.com`;
+
+        // When ExpensiMark parses the invalid URL candidate.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete candidate plain without sending the oversized hostname to URL matching.
+        expect(result).toBe(input);
+    });
+
+    test('skips URL matching for a long protocol hostname whose label exceeds the limit', () => {
+        // Given an oversized protocol hostname and a URL matcher that records when it runs.
+        const input = `https://${'a'.repeat(9960)}.com`;
+        const urlRegex = /example/g;
+        const urlRegexExecSpy = jest.spyOn(urlRegex, 'exec');
+
+        // When the candidate scanner processes the invalid URL.
+        const result = parser.modifyTextForUrlLinks(urlRegex, input, jest.fn(), true);
+
+        // Then it leaves the input unchanged and rejects it before running the URL matcher.
+        expect(result).toBe(input);
+        expect(urlRegexExecSpy).not.toHaveBeenCalled();
+    });
+
+    test.each([
+        ['path', '/'],
+        ['query', '?next='],
+        ['fragment', '#'],
+    ])('keeps scanning work linear for URLs with repeated domains in the %s', (_name, suffixStart) => {
+        // Given valid bare and protocol URLs with domain-looking text throughout their suffixes.
+        for (const baseUrl of ['example.com', 'https://example.com']) {
+            const parseAndCountCharacterReads = (repetitions) => {
+                const input = `${baseUrl}${suffixStart}${'a.com/'.repeat(repetitions)}`;
+                const characterReadSpy = jest.spyOn(String.prototype, 'charCodeAt');
+                try {
+                    const result = parser.replace(input, {shouldKeepRawInput: true});
+                    return {input, result, characterReads: characterReadSpy.mock.calls.length};
+                } finally {
+                    characterReadSpy.mockRestore();
+                }
+            };
+
+            // When the composer parser receives twice as many domain-looking suffix segments.
+            const shorter = parseAndCountCharacterReads(50);
+            const longer = parseAndCountCharacterReads(100);
+
+            // Then the complete URL remains linked and scanning grows below the roughly fourfold increase caused by repeated suffix scans.
+            const href = baseUrl.startsWith('https://') ? longer.input : `https://${longer.input}`;
+            expect(longer.result).toBe(`<a href="${href}" data-raw-href="${longer.input}" data-link-variant="auto" target="_blank" rel="noreferrer noopener">${longer.input}</a>`);
+            expect(longer.characterReads).toBeLessThan(shorter.characterReads * 3);
+        }
+    });
+
+    test.each([';', '|', ')'])('still rejects an invalid URL after a valid URL path ending at "%s"', (separator) => {
+        // Given a valid dotted path followed by a separate oversized URL without intervening whitespace.
+        const validUrl = 'https://example.com/a.com/a.co/';
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path/example.org`;
+        const input = `${validUrl}${separator}${invalidUrl}`;
+        const rawHtmlPrefix = '<span>x</span> ';
+
+        // When candidate scanning and raw-HTML parsing inspect the same neighboring URLs.
+        const candidateScanningResult = parser.replace(input);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${input}`, {shouldEscapeText: false});
+
+        // Then skipping the valid suffix still leaves the next invalid URL completely plain.
+        const expected = `${anchor(validUrl)}${separator}${invalidUrl}`;
+        expect(candidateScanningResult).toBe(expected);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expected}`);
+    });
+
+    test.each([
+        ['a valid hyphenated label', 'valid-label', true],
+        ['a leading hyphen', '-invalid', false],
+        ['an oversized label', 'a'.repeat(64), false],
+    ])('keeps URL parsing paths aligned for %s', (_name, label, shouldLink) => {
+        // Given the same hostname label in escaped text and alongside raw HTML.
+        const url = `https://${label}.local`;
+        const rawHtmlPrefix = '<span>x</span> ';
+        const expectedUrl = shouldLink ? anchor(url) : url;
+
+        // When ExpensiMark parses it through candidate scanning and full-text URL matching.
+        const candidateScanningResult = parser.replace(url);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${url}`, {shouldEscapeText: false});
+
+        // Then both parsing paths apply the same hostname-label rules.
+        expect(candidateScanningResult).toBe(expectedUrl);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expectedUrl}`);
+    });
+
+    test.each([
+        ['bare domain', (hostname) => `${hostname}.example.com`],
+        ['protocol URL', (hostname) => `https://${hostname}-valid.com`],
+        ['protocol URL with a valid prefix', (hostname) => `https://valid-${hostname}.com`],
+        ['labeled link', (hostname) => `[label](https://${hostname}-valid.com)`],
+        ['image', (hostname) => `![alt](https://${hostname}-valid.com/image.png)`],
+        ['video', (hostname) => `![video](https://${hostname}-valid.com/video.mp4)`],
+    ])('does not autolink a valid suffix inside an invalid %s', (_name, createInput) => {
+        // Given URL-based text containing an oversized hostname label before a valid-looking suffix.
+        const input = createInput('a'.repeat(64));
+
+        // When ExpensiMark parses the complete input.
+        const result = parser.replace(input);
+
+        // Then it leaves the whole invalid value unchanged instead of linking only its valid suffix.
+        expect(result).toBe(input);
+    });
+
+    test.each([
+        ['see --example.com', `see --${anchor('example.com')}`],
+        ['see .example.com', `see .${anchor('example.com')}`],
+        ['use *.example.com', `use *.${anchor('example.com')}`],
+        ['foo-.example.com', `foo-.${anchor('example.com')}`],
+        ['foo.-valid.com', `foo.-${anchor('valid.com')}`],
+        ['foo.--valid.com', `foo.--${anchor('valid.com')}`],
+        ['--valid.com', `--${anchor('valid.com')}`],
+        ['(.example.com)', `(.${anchor('example.com')})`],
+        ['日本.example.com', `日本.${anchor('example.com')}`],
+        ['example.com.-valid.org', `${anchor('example.com')}.-${anchor('valid.org')}`],
+        ['https://example.com-.valid.org', `${anchor('https://example.com')}-.${anchor('valid.org')}`],
+        ['https://foo.-bar.com/path/example.org;valid.org', `${anchor('https://foo')}.-${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+        ['https://-bar.com/path/example.org;valid.org', `https://-${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+    ])('autolinks a valid domain after leading punctuation in %s', (input, expected) => {
+        // Given a valid domain after punctuation, prose, or another URL.
+
+        // When candidate scanning and raw-HTML parsing inspect the same domain boundary.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then both paths link the valid domain and leave its leading punctuation plain.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test('keeps a standalone boundary hyphen outside a maximum-length hostname label', () => {
+        // Given a valid 63-character hostname label preceded by a standalone punctuation hyphen.
+        const domain = `${'a'.repeat(63)}.com`;
+        const input = `-${domain}`;
+
+        // When ExpensiMark parses the domain.
+        const result = parser.replace(input);
+
+        // Then it preserves the hyphen and autolinks the valid hostname after it.
+        expect(result).toBe(`-${anchor(domain)}`);
+    });
+
+    test('keeps long punctuation before and between domains out of URL matching', () => {
+        // Given long punctuation runs around valid domains and a URL matcher that records its input.
+        const punctuation = '-'.repeat(4500);
+        const input = `${punctuation}example.com.${punctuation}valid.org`;
+        const urlRegex = /not-matched/g;
+        const urlRegexExecSpy = jest.spyOn(urlRegex, 'exec');
+
+        // When the candidate scanner passes recovered domains to the URL matcher.
+        const result = parser.modifyTextForUrlLinks(urlRegex, input, jest.fn(), true);
+
+        // Then only the domains reach URL matching, avoiding repeated regex searches across the long gaps.
+        expect(result).toBe(input);
+        expect(urlRegexExecSpy.mock.calls.map(([candidate]) => candidate)).toEqual(['example.com', 'valid.org']);
+    });
+
+    test('still autolinks a separate valid domain after an invalid hostname', () => {
+        // Given an invalid hostname followed by a separate valid domain.
+        const invalidHostname = `${'a'.repeat(64)}.example.com`;
+        const validDomain = 'valid.com';
+        const input = `${invalidHostname} ${validDomain}`;
+
+        // When ExpensiMark parses both values.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid hostname plain and autolinks only the separate valid domain.
+        expect(result).toBe(`${invalidHostname} ${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['protocol URL followed by repeated dots', 'https://example.com', '..nonsense'],
+        ['protocol URL followed by several dots', 'https://example.com', '...next'],
+        ['protocol URL followed by a dot and hyphen', 'https://example.com', '.-nonsense'],
+        ['protocol URL followed by a hyphen and dot', 'https://example.com', '-.nonsense'],
+        ['bare URL followed by repeated dots', 'example.com', '..nonsense'],
+        ['bare URL followed by several dots', 'example.com', '...next'],
+        ['bare URL followed by a dot and hyphen', 'example.com', '.-nonsense'],
+        ['bare URL followed by a hyphen and dot', 'example.com', '-.nonsense'],
+        ['protocol URL followed by long text after repeated dots', 'https://example.com', `..${'a'.repeat(300)}`],
+        ['bare URL followed by long text after repeated dots', 'example.com', `..${'a'.repeat(300)}`],
+        ['protocol URL followed by an oversized malformed label', 'https://example.com', `.-${'a'.repeat(63)}`],
+        ['bare URL followed by an oversized malformed label', 'example.com', `.-${'a'.repeat(63)}`],
+        ['protocol URL followed by long text after a trailing hyphen', 'https://example.com', `-.${'a'.repeat(300)}`],
+        ['bare URL followed by long text after a trailing hyphen', 'example.com', `-.${'a'.repeat(300)}`],
+        ['maximum-length protocol hostname followed by repeated dots', `https://${'a.'.repeat(125)}com`, '..nonsense'],
+        ['maximum-length bare hostname followed by repeated dots', `${'a.'.repeat(125)}com`, '..nonsense'],
+    ])('still autolinks a valid %s', (_name, validUrl, continuation) => {
+        // Given a valid URL followed without whitespace by punctuation that cannot form another hostname label.
+        const input = `${validUrl}${continuation}`;
+
+        // When ExpensiMark parses the complete hostname-shaped run through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then it links the valid URL and leaves only the malformed continuation as plain text.
+        expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
+    });
+
+    test.each([
+        ['I checked..google.com', `I checked..${anchor('google.com')}`],
+        ['I checked...google.com', `I checked...${anchor('google.com')}`],
+        ['wait..google.com', `wait..${anchor('google.com')}`],
+        ['a..b.com', `a..${anchor('b.com')}`],
+        ['example.com..google.com', `${anchor('example.com')}..${anchor('google.com')}`],
+        ['https://foo..bar.com/path/example.org;valid.org', `${anchor('https://foo')}..${anchor('bar.com/path/example.org')};${anchor('valid.org')}`],
+        ['google.com..nonsense..valid.org', `${anchor('google.com')}..nonsense..${anchor('valid.org')}`],
+        ['wait..google.com..nonsense/path/example.org', `wait..${anchor('google.com')}..nonsense/path/example.org`],
+    ])('autolinks valid domains after repeated dots in %s', (input, expected) => {
+        // Given prose or another URL separated from a valid domain by repeated dots.
+
+        // When ExpensiMark parses the text through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then each separate domain links without including the dots or linking inside a malformed URL suffix.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['My email...john.dev@example.com', 'john.dev@example.com', 'My email...'],
+        ['wait..name.co@example.org', 'name.co@example.org', 'wait..'],
+        ['example.com..b.com@valid.net', 'b.com@valid.net', `${anchor('example.com')}..`],
+        ['https://example.com..valid.org@user.net', 'valid.org@user.net', `${anchor('https://example.com')}..`],
+    ])('keeps the complete email linked after repeated dots in %s', (input, email, expectedPrefix) => {
+        // Given an email whose local part looks like a domain after prose or another URL.
+        const suffix = '/path/example.org';
+
+        // When candidate scanning, live Markdown, and raw-HTML parsing inspect the email and a later URL.
+        const result = parser.replace(`${input}${suffix}`);
+        const rawInputResult = parser.replace(`${input}${suffix}`, {shouldKeepRawInput: true});
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}${suffix}`, {shouldEscapeText: false});
+
+        // Then the whole email stays in one mailto link and the separate URL still links.
+        const expected = `${expectedPrefix}<a href="mailto:${email}">${email}</a>/path/${anchor('example.org')}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+        expect(rawInputResult).toContain(`<a href="mailto:${email}" data-raw-href="${email}" data-link-variant="auto">${email}</a>`);
+    });
+
+    test.each([
+        ['a 63-character label', `${'a'.repeat(63)}.com`, true],
+        ['a 64-character label', `${'a'.repeat(64)}.com`, false],
+        ['a 253-character hostname', `${'a.'.repeat(125)}com`, true],
+        ['a 254-character hostname', `aa.${'a.'.repeat(124)}com`, false],
+    ])('applies hostname limits to %s after repeated dots', (_name, hostname, shouldLink) => {
+        // Given a hostname at a DNS length boundary after repeated dots, with another domain in its path.
+        const url = `${hostname}/path/example.org`;
+        const input = `wait..${url}`;
+        const expected = `wait..${shouldLink ? anchor(url) : url}`;
+
+        // When ExpensiMark parses it through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then only a valid hostname links, and an invalid hostname's path cannot create a partial link.
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['..', ''],
+        [',', ''],
+        [';', ''],
+        ['|', ''],
+        [')', ''],
+        [',', 'https://'],
+        [';', 'https://'],
+        ['|', 'https://'],
+        [')', 'https://'],
+    ])('keeps scanning work linear for URLs separated by "%s" with protocol "%s"', (separator, protocol) => {
+        // Given many URLs separated by punctuation without whitespace.
+        const firstUrl = `${protocol}a.com`;
+        const lastUrl = `${protocol}b.com`;
+        const parseAndCountCharacterReads = (repetitions) => {
+            const input = `${`${firstUrl}${separator}`.repeat(repetitions)}${lastUrl}`;
+            const characterReadSpy = jest.spyOn(String.prototype, 'charCodeAt');
+            try {
+                const result = parser.replace(input);
+                return {input, result, characterReads: characterReadSpy.mock.calls.length};
+            } finally {
+                characterReadSpy.mockRestore();
+            }
+        };
+
+        // When the input contains twice as many separate URLs.
+        const shorter = parseAndCountCharacterReads(50);
+        const longer = parseAndCountCharacterReads(100);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${longer.input}`, {shouldEscapeText: false});
+
+        // Then both parsing paths link every URL, and scanning grows below the roughly fourfold increase caused by rescanning the remaining text.
+        const expected = `${`${anchor(firstUrl)}${separator}`.repeat(100)}${anchor(lastUrl)}`;
+        expect(longer.result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+        expect(longer.characterReads).toBeLessThan(shorter.characterReads * 3);
+    });
+
+    test.each([
+        ['https://example.com', '..', 'http://', true],
+        ['example.com', '..', 'https://', true],
+        ['https://example.com', '.-', 'ftp://', true],
+        ['example.com', '-.', 'ftps://', true],
+        ['https://example.com', '..nonsense-', 'HTTP://', true],
+        ['https://example.com', '..nonsense', 'http://', true],
+        [`https://${'a'.repeat(64)}.com`, '..', 'http://', false],
+    ])('preserves a separate URL after %s%s with protocol %s', (firstUrl, continuation, protocol, shouldLinkFirstUrl) => {
+        // Given a malformed hostname continuation followed immediately by a separate protocol URL.
+        const validUrl = `${protocol}valid.org/path`;
+        const input = `${firstUrl}${continuation}${validUrl}`;
+        const firstResult = shouldLinkFirstUrl ? anchor(firstUrl) : firstUrl;
+
+        // When ExpensiMark parses both URLs through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then the next URL keeps its complete protocol instead of being skipped or linked as a bare domain.
+        const expected = `${firstResult}${continuation}${anchor(`${protocol.toLowerCase()}valid.org/path`, validUrl)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['https://example.com..nonsense', 'https://example.com', '/path'],
+        ['example.com.-nonsense', 'example.com', '/path/example.org'],
+        ['https://example.com-.nonsense', 'https://example.com', '?next=example.org'],
+        ['example.com..nonsense', 'example.com', '#example.org'],
+        [`https://${'a'.repeat(64)}.com`, undefined, '/path/example.org'],
+        [`${'a'.repeat(64)}.com`, undefined, '/path(a)'],
+    ])('links a separate domain after an unmatched parenthesis following %s', (invalidUrl, validPrefix, suffix) => {
+        // Given an invalid URL range followed by an unmatched closing parenthesis and a separate valid domain.
+        const validDomain = 'valid.org';
+        const input = `${invalidUrl}${suffix})${validDomain}`;
+
+        // When ExpensiMark parses the boundary through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then the unmatched parenthesis ends the invalid range, so the separate domain remains linkable.
+        const firstResult = validPrefix ? `${anchor(validPrefix)}${invalidUrl.slice(validPrefix.length)}` : invalidUrl;
+        const expected = `${firstResult}${suffix})${anchor(validDomain)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['sentence-like text', '.Thanks!'],
+        ['hyphenated text', '-thanks'],
+        ['text after repeated hyphens', '--next'],
+    ])('preserves a bare URL before adjacent %s', (_name, continuation) => {
+        // Given a bare URL followed without whitespace by text that is not part of its known TLD.
+        const validUrl = 'example.com';
+        const input = `${validUrl}${continuation}`;
+
+        // When ExpensiMark parses the complete hostname-shaped run.
+        const result = parser.replace(input);
+
+        // Then it preserves the existing link for the known-TLD URL and leaves the adjacent text plain.
+        expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+    });
+
+    test.each([
+        ['a sentence-like label', 'example.com.Thanks!'],
+        ['a hyphenated label', 'example.com-thanks'],
+        ['a label with repeated hyphens', 'example.com--next'],
+    ])('preserves protocol URL parsing with %s', (_name, hostname) => {
+        // Given a protocol URL whose complete hostname remains valid under the loose URL rules.
+        const input = `https://${hostname}`;
+        const trailingPunctuation = input.endsWith('!') ? '!' : '';
+        const linkedUrl = trailingPunctuation ? input.slice(0, -1) : input;
+
+        // When ExpensiMark parses the complete URL.
+        const result = parser.replace(input);
+
+        // Then it keeps linking the complete valid hostname rather than stopping at the earlier known TLD.
+        expect(result).toBe(`${anchor(linkedUrl)}${trailingPunctuation}`);
+    });
+
+    test.each(['https://example.com', 'example.com'])('preserves a valid %s before a malformed raw-HTML URL continuation', (validUrl) => {
+        // Given raw HTML followed by a valid URL, malformed hostname punctuation, a nested domain, and a separate valid domain.
+        const continuation = '..nonsense/path/example.org';
+        const separateDomain = 'valid.net';
+        const input = `<span>x</span> ${validUrl}${continuation} ${separateDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it links the valid prefix and separate domain without linking the domain inside the malformed continuation.
+        expect(result).toBe(`<span>x</span> ${anchor(validUrl)}${continuation} ${anchor(separateDomain)}`);
+    });
+
+    test.each([
+        ['an oversized dot-separated label', `https://valid.${'a'.repeat(64)}.com`],
+        ['an oversized hyphenated label', `https://valid-${'a'.repeat(64)}.com`],
+        ['an oversized complete hostname', `https://valid.${'a.'.repeat(123)}com`],
+    ])('does not autolink a valid prefix inside a raw-HTML URL with %s', (_name, invalidUrl) => {
+        // Given raw HTML followed by an invalid URL and a separate valid domain.
+        const validDomain = 'example.org';
+        const input = `<span>x</span> ${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it leaves the invalid URL plain and autolinks only the separate valid domain.
+        expect(result).toBe(`<span>x</span> ${invalidUrl} ${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['a path', `https://${'a'.repeat(64)}.com/path/example.org`],
+        ['a query', `https://${'a'.repeat(64)}.com?next=example.org`],
+        ['a fragment', `https://${'a'.repeat(64)}.com#example.org`],
+        ['an oversized complete hostname', `https://aa.${'a.'.repeat(124)}com/path/example.org`],
+    ])('does not autolink a domain in %s of an oversized raw-HTML URL', (_name, invalidUrl) => {
+        // Given an invitation heading that generates HTML, followed by an oversized URL and a separate valid domain.
+        const validDomain = 'valid.net';
+        const input = `# Invitation\n\n${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the invitation without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then the oversized URL stays plain while the separate valid domain is still autolinked.
+        expect(result).toBe(`<h1>Invitation</h1><br />${invalidUrl} ${anchor(validDomain)}`);
+    });
+
+    test('does not autolink inside an oversized raw-HTML URL after a separate URL without whitespace', () => {
+        // Given a valid URL followed by an oversized URL in the same non-whitespace token.
+        const validUrl = 'https://valid.com';
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path/example.org`;
+        const input = `# Invitation\n\n${validUrl},${invalidUrl}`;
+
+        // When ExpensiMark parses the invitation without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it autolinks the first URL without linking any part of the oversized URL.
+        expect(result).toBe(`<h1>Invitation</h1><br />${anchor(validUrl)},${invalidUrl}`);
+    });
+
+    test('still autolinks a valid domain after an invalid protocol URL without whitespace', () => {
+        // Given an invalid protocol URL followed by a comma and a separate valid domain.
+        const invalidUrl = `https://${'a'.repeat(64)}.com`;
+        const validDomain = 'example.org';
+        const input = `${invalidUrl},${validDomain}`;
+
+        // When ExpensiMark parses both values as one non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid URL plain and autolinks the valid domain after the comma.
+        expect(result).toBe(`${invalidUrl},${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['https://', ','],
+        ['https://', ';'],
+        ['https://', '|'],
+        ['https://', ')'],
+        ['https://', ']'],
+        ['https://', '}'],
+        ['https://', '_'],
+        ['http://', ','],
+        ['ftp://', ','],
+        ['ftps://', ','],
+    ])('still autolinks a valid domain after malformed %s followed by "%s"', (protocol, separator) => {
+        // Given a protocol without a hostname, followed by a URL boundary and a separate valid domain.
+        const validDomain = 'valid.org';
+        const input = `${protocol}${separator}${validDomain}`;
+
+        // When ExpensiMark parses the complete non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it leaves the malformed protocol plain and autolinks the separate valid domain.
+        expect(result).toBe(`${protocol}${separator}${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['https://invalid-.local', 'https://invalid'],
+        ['https://local.url..nonsense', 'https://local.url'],
+        ['http://localhost..nonsense', 'http://localhost'],
+        ['https://example.internal.-nonsense', 'https://example.internal'],
+        ['https://example.internal-.nonsense', 'https://example.internal'],
+    ])('preserves valid prefixes and separate URLs when parsing %s', (invalidUrl, validPrefix) => {
+        // Given malformed hostname punctuation before a path containing another domain and a separate URL after a semicolon.
+        const validDomain = 'valid.org';
+        const suffix = '/path/example.org';
+        const input = `${invalidUrl}${suffix};${validDomain}`;
+        const rawHtmlPrefix = '<span>x</span> ';
+
+        // When ExpensiMark uses candidate scanning or full-text matching alongside unescaped HTML.
+        const candidateScanningResult = parser.replace(input);
+        const fullTextResult = parser.replace(`${rawHtmlPrefix}${input}`, {shouldEscapeText: false});
+
+        // Then supported prefixes remain linked, connected invalid text stays plain, and the separate domain still links.
+        const expectedUrl = validPrefix ? `${anchor(validPrefix)}${invalidUrl.slice(validPrefix.length)}` : invalidUrl;
+        const expected = `${expectedUrl}${suffix};${anchor(validDomain)}`;
+        expect(candidateScanningResult).toBe(expected);
+        expect(fullTextResult).toBe(`${rawHtmlPrefix}${expected}`);
+    });
+
+    test.each(['https:///path/example.org', 'https://?next=example.org', 'https://#example.org'])('does not autolink a domain inside malformed URL %s', (invalidUrl) => {
+        // Given a protocol without a hostname whose connected path, query, or fragment contains a domain.
+
+        // When ExpensiMark parses the complete malformed URL.
+        const result = parser.replace(invalidUrl);
+
+        // Then it keeps the complete connected URL text plain instead of linking the nested domain.
+        expect(result).toBe(invalidUrl);
+    });
+
+    test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid protocol URL suffix in %s', (suffix) => {
+        // Given an invalid protocol hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
+        const input = `https://${'a'.repeat(64)}.com${suffix}`;
+
+        // When ExpensiMark parses the complete invalid URL through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
+        expect(result).toBe(input);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${input}`);
+    });
+
+    test.each(invalidUrlSuffixesWithNestedDomain)('does not autolink a domain inside an invalid bare URL suffix in %s', (suffix) => {
+        // Given an invalid bare hostname followed by a path, query, or fragment containing another domain, optionally after a valid port.
+        const input = `${'a'.repeat(64)}.com${suffix}`;
+
+        // When ExpensiMark parses the complete invalid URL through candidate scanning and full-text matching.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then it leaves the complete URL plain instead of linking a domain that still belongs to that URL.
+        expect(result).toBe(input);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${input}`);
+    });
+
+    test.each([
+        ['labeled link', (url) => `[label](${url})`],
+        ['image', (url) => `![alt](${url}/image.png)`],
+        ['video', (url) => `![video](${url}/video.mp4)`],
+    ])('does not autolink a domain inside an invalid bare URL used by a %s', (_name, createInput) => {
+        // Given URL-based Markdown containing a domain in the path of an oversized bare hostname.
+        const invalidUrl = `${'a'.repeat(64)}.com/path/example.org`;
+        const input = createInput(invalidUrl);
+
+        // When ExpensiMark parses the complete Markdown input.
+        const result = parser.replace(input);
+
+        // Then it leaves the complete value unchanged instead of linking the domain inside the invalid URL.
+        expect(result).toBe(input);
+    });
+
+    test('does not autolink a domain inside an invalid bare URL when raw HTML disables candidate scanning', () => {
+        // Given raw HTML followed by an oversized bare URL whose path contains another domain.
+        const invalidUrl = `${'a'.repeat(64)}.com/path/example.org`;
+        const validDomain = 'valid.net';
+        const input = `<span>x</span> ${invalidUrl} ${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the invalid URL plain while still autolinking the separate valid domain.
+        expect(result).toBe(`<span>x</span> ${invalidUrl} ${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['bare URL', `${'a'.repeat(64)}.com`],
+        ['protocol URL', `https://${'a'.repeat(64)}.com`],
+    ])('still autolinks a valid domain after an invalid %s path', (_name, invalidUrl) => {
+        // Given an oversized URL followed by a path boundary and a separate valid domain without whitespace.
+        const validDomain = 'valid.org';
+        const input = `${invalidUrl}/path;${validDomain}`;
+
+        // When ExpensiMark parses the complete non-whitespace token.
+        const result = parser.replace(input);
+
+        // Then it keeps the invalid URL path plain and autolinks the domain after the URL boundary.
+        expect(result).toBe(`${invalidUrl}/path;${anchor(validDomain)}`);
+    });
+
+    test('still autolinks a valid domain after an invalid raw-HTML URL path', () => {
+        // Given raw HTML followed by an oversized URL path and a separate valid domain without whitespace.
+        const invalidUrl = `https://${'a'.repeat(64)}.com/path`;
+        const validDomain = 'valid.org';
+        const input = `<span>x</span> ${invalidUrl};${validDomain}`;
+
+        // When ExpensiMark parses the input without escaping HTML.
+        const result = parser.replace(input, {shouldEscapeText: false});
+
+        // Then it keeps the invalid URL path plain and autolinks the domain after the URL boundary.
+        expect(result).toBe(`<span>x</span> ${invalidUrl};${anchor(validDomain)}`);
+    });
+
+    test.each([
+        ['an oversized label after a dot', 'google.com', `.${'b'.repeat(64)}`],
+        ['an oversized label after a hyphen', 'example.com', `-${'b'.repeat(70)}`],
+        ['an oversized hostname', `${'a.'.repeat(125)}com`, '.Thanks!'],
+    ])('preserves a known-TLD URL before %s', (_name, hostname, continuation) => {
+        // Given a valid URL whose adjacent text pushes a label or the complete hostname beyond a DNS limit.
+        for (const protocol of ['', 'https://']) {
+            const validUrl = `${protocol}${hostname}`;
+            const input = `${validUrl}${continuation}`;
+
+            // When candidate scanning and raw-HTML parsing inspect the same continuation.
+            const result = parser.replace(input);
+            const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+            // Then the valid URL stays linked without accepting the oversized continuation as part of its hostname.
+            expect(result).toBe(`${anchor(validUrl)}${continuation}`);
+            expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
+        }
+    });
+
+    test('keeps domains in an oversized continuation plain while linking a separate URL', () => {
+        // Given a valid maximum-length URL followed by an oversized continuation with a path and a separate domain.
+        const validUrl = `https://${'a.'.repeat(125)}com`;
+        const continuation = '.Thanks/path/example.org;';
+        const separateDomain = 'valid.net';
+        const input = `${validUrl}${continuation}${separateDomain}`;
+
+        // When both URL parsing paths recover the valid hostname prefix.
+        const result = parser.replace(input);
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then only the valid prefix and separate domain link, so recovery cannot expose domains inside the invalid URL's path.
+        const expected = `${anchor(validUrl)}${continuation}${anchor(separateDomain)}`;
+        expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test('does not recover URL prefixes inside raw HTML attributes or protected elements', () => {
+        // Given an oversized continuation inside an anchor attribute, protected code, and a span rejected by the HTML lookaheads.
+        const inputUrl = `https://${'a.'.repeat(125)}com.Thanks!`;
+        const input = `<a href="${inputUrl}">label</a> <code>${inputUrl}</code> <span>${inputUrl}</span>`;
+
+        // When autolinking inspects the original raw-HTML context.
+        const result = parser.replace(input, {filterRules: ['autolink'], shouldEscapeText: false});
+
+        // Then prefix recovery preserves the HTML and never inserts an anchor where the existing HTML rules forbid one.
+        expect(result).toBe(input);
+    });
+
+    test('does not autolink URLs whose complete hostname exceeds 253 characters', () => {
+        // Given hostnames at and above the DNS length limit, with every individual label remaining valid.
+        const validHostname = `${'a.'.repeat(125)}com`;
+        const invalidHostname = `aa.${'a.'.repeat(124)}com`;
+        const validProtocolUrl = `https://${validHostname}`;
+        const trailingHyphens = '-'.repeat(300);
+        const invalidProtocolUrl = `https://${invalidHostname}/path`;
+
+        // When ExpensiMark parses bare and protocol URLs at those boundaries.
+        const validResult = parser.replace(validHostname);
+        const validWithPunctuationResult = parser.replace(`${validHostname}.`);
+        const validProtocolWithPunctuationResult = parser.replace(`${validProtocolUrl}.`);
+        const validProtocolWithTrailingHyphensResult = parser.replace(`${validProtocolUrl}${trailingHyphens}`);
+        const invalidResult = parser.replace(invalidHostname);
+        const invalidProtocolResult = parser.replace(invalidProtocolUrl);
+
+        // Then it links the valid hostname without counting punctuation and leaves oversized hostnames plain.
+        expect(validResult).toBe(anchor(validHostname));
+        expect(validWithPunctuationResult).toBe(`${anchor(validHostname)}.`);
+        expect(validProtocolWithPunctuationResult).toBe(`${anchor(validProtocolUrl)}.`);
+        expect(validProtocolWithTrailingHyphensResult).toBe(`${anchor(validProtocolUrl)}${trailingHyphens}`);
+        expect(invalidResult).toBe(invalidHostname);
+        expect(invalidProtocolResult).toBe(invalidProtocolUrl);
+    });
+
+    test.each([
+        ['labeled link', (url) => `[label](${url}/path)`],
+        ['image', (url) => `![alt](${url}/image.png)`],
+        ['video', (url) => `![video](${url}/video.mp4)`],
+    ])('does not parse a %s whose complete hostname exceeds 253 characters', (_name, createInput) => {
+        // Given URL-based Markdown whose hostname exceeds the DNS limit without exceeding any individual label limit.
+        const hostname = `aa.${'a.'.repeat(124)}com`;
+        const input = createInput(`https://${hostname}`);
+
+        // When ExpensiMark parses the Markdown.
+        const result = parser.replace(input);
+
+        // Then it leaves the invalid URL-based Markdown unchanged instead of generating HTML with that hostname.
+        expect(result).toBe(input);
     });
 
     test('preserves the ftps protocol when autolinking a candidate', () => {

@@ -3,6 +3,12 @@
 const EMAIL_BASE_REGEX =
     "(?=((?=[\\w'#%+-]+(?:\\.[\\w'#%+-]+)*@)[\\w\\.'#%+-]{1,64}@(?:(?=[a-z\\d]+(?:-+[a-z\\d]+)*\\.)(?:[a-z\\d-]{1,63}\\.)+[a-z]{2,63})(?= |_|\\b))(?<end>.*))\\S{3,254}(?=\\k<end>$)";
 
+// DNS hostname labels are limited to 63 octets. URL hostnames are ASCII here, so characters and octets are equivalent.
+const MAX_URL_HOSTNAME_LABEL_LENGTH = 63;
+
+// DNS names can use 255 wire octets, which allows at most 253 visible ASCII characters without a trailing root dot.
+const MAX_URL_HOSTNAME_LENGTH = 253;
+
 const MOMENT_FORMAT_STRING = 'YYYY-MM-DD';
 
 /**
@@ -1940,4 +1946,4 @@ const PUBLIC_DOMAINS_SET = new Set<string>([
     'ymail.com',
 ]);
 
-export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET};
+export {g_cloudFront, g_cloudFrontImg, CONST, UI, PUBLIC_DOMAINS_SET, MAX_URL_HOSTNAME_LABEL_LENGTH, MAX_URL_HOSTNAME_LENGTH};
