@@ -416,35 +416,6 @@ export default function API(network, args) {
         },
 
         /**
-         * Resets the password for an account
-         * @param {Object} parameters
-         * @param {String} parameters.email
-         * @returns {ExpensifyAPIDeferred}
-         */
-        resetPassword(parameters) {
-            const commandName = 'ResetPassword';
-            requireParameters(['email'], parameters, commandName);
-
-            const newParameters = {...parameters, api_setCookie: false};
-            return performPOSTRequest(commandName, newParameters);
-        },
-
-        /**
-         * Sets the password for an account
-         *
-         * @param {Object} parameters
-         * @param {String} parameters.email
-         * @param {String} parameters.password
-         * @param {String} parameters.validateCode
-         * @returns {ExpensifyAPIDeferred}
-         */
-        setPassword(parameters) {
-            const commandName = 'SetPassword';
-            requireParameters(['email', 'password', 'validateCode'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters);
-        },
-
-        /**
          * Validate a user
          *
          * @param {Object} parameters Must contain validateCode and accountID
