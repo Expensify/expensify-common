@@ -348,7 +348,7 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 }
 
 /**
- * Validates a hostname and records a linkable prefix before a later malformed label.
+ * Validates a hostname and records a linkable prefix before malformed punctuation in a later label.
  * Rejects the whole hostname when a label or its complete length exceeds a DNS limit.
  *
  * @param text - Text containing the URL candidate.
