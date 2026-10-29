@@ -348,14 +348,14 @@ function findKnownTldEnd(text: string, dotPosition: number): number | undefined 
 }
 
 /**
- * Validates a hostname and records a linkable prefix before a later malformed label.
- * Preserves known-TLD prefixes before oversized continuations without recovering text inside an invalid leading label.
+ * Validates a hostname and records a linkable prefix before malformed punctuation in a later label.
+ * Rejects the whole hostname when a label or its complete length exceeds a DNS limit.
  *
  * @param text - Text containing the URL candidate.
  * @param hostnameStart - Index of the hostname's first character.
  * @param hostnameEnd - Index immediately after the hostname.
  * @param hasProtocol - Whether the URL allows hostnames without a known TLD, including single-label hosts.
- * @returns The hostname validity and any prefix that can be linked before a malformed or oversized continuation.
+ * @returns The hostname validity and any prefix that can be linked before malformed punctuation.
  */
 function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: number, hasProtocol: boolean): HostnameAnalysis {
     let hostnameContentEnd = hostnameEnd;
@@ -369,7 +369,6 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
 
     let labelStart = hostnameStart;
     let validHostnamePrefixEnd: number | undefined;
-    let validKnownTldPrefixEnd: number | undefined;
     for (let index = hostnameStart; index <= hostnameContentEnd; index++) {
         if (index !== hostnameContentEnd && text[index] !== '.') {
             continue;
@@ -386,7 +385,7 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
             labelContentEnd--;
         }
         if (labelContentEnd - labelStart > Constants.MAX_URL_HOSTNAME_LABEL_LENGTH || labelContentEnd - hostnameStart > Constants.MAX_URL_HOSTNAME_LENGTH) {
-            return {isValid: false, validHostnamePrefixEnd: validKnownTldPrefixEnd};
+            return {isValid: false};
         }
         // Protocol URLs can end at any valid label; bare URLs still need a known TLD.
         if (hasProtocol) {
@@ -396,13 +395,10 @@ function analyzeHostname(text: string, hostnameStart: number, hostnameEnd: numbe
             return {isValid: false, validHostnamePrefixEnd};
         }
 
-        if (index !== hostnameContentEnd) {
+        if (!hasProtocol && index !== hostnameContentEnd) {
             const tldEnd = findKnownTldEnd(text, index);
             if (tldEnd !== undefined && tldEnd <= hostnameContentEnd && tldEnd - hostnameStart <= Constants.MAX_URL_HOSTNAME_LENGTH) {
-                validKnownTldPrefixEnd = tldEnd;
-                if (!hasProtocol) {
-                    validHostnamePrefixEnd = tldEnd;
-                }
+                validHostnamePrefixEnd = tldEnd;
             }
         }
         labelStart = index + 1;
@@ -2055,21 +2051,20 @@ export default class ExpensiMark {
         const invalidUrlRanges = shouldRejectPartialHostnameMatches ? findInvalidUrlRanges(textWithContext) : [];
         const maskedText = invalidUrlRanges.length > 0 ? maskInvalidUrlRanges(textWithContext, invalidUrlRanges) : textWithContext;
         const textToMatch = maskedText.slice(0, textToCheck.length);
-        const contextRegex = followingText ? new RegExp(regex.source, regex.flags.replace('g', 'y')) : undefined;
+        const contextRegex = followingText || invalidUrlRanges.length > 0 ? new RegExp(regex.source, regex.flags.replace('g', 'y')) : undefined;
         let match = matchingRegex.exec(textToMatch);
         let replacedText = '';
         let startIndex = 0;
         while (match !== null) {
-            if (contextRegex && match.index + match[0].length === textToCheck.length) {
-                // Recheck only this match with its following text, without searching outside the candidate.
+            const matchEnd = match.index + match[0].length;
+            if (contextRegex && (textWithContext[matchEnd] === '@' || (followingText.length > 0 && matchEnd === textToCheck.length))) {
+                // Check the original context so masking cannot turn an email's local part into a URL.
                 contextRegex.lastIndex = match.index;
-                const contextMatch = contextRegex.exec(maskedText);
-                if (contextMatch === null) {
+                const contextMatch = contextRegex.exec(textWithContext);
+                if (contextMatch === null || contextMatch[0].length < match[0].length) {
                     match = matchingRegex.exec(textToMatch);
                     continue;
                 }
-                match = contextMatch;
-                matchingRegex.lastIndex = contextRegex.lastIndex;
             }
 
             let url = match[2];
