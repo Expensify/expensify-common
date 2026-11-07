@@ -20,6 +20,7 @@ const defaultProps = {
 
 /**
  * Simple render prop component that encapsulates the Clipboard feature and exposes a function that can be tied to any event
+ * @augments {React.Component<any, any, any>}
  *
  * @example
  *

@@ -81,6 +81,7 @@ const defaultProps = {
     tooltipText: '',
 };
 
+/** @augments {Component<any, any, any>} */
 class OnOffSwitch extends Component {
     constructor(props) {
         super(props);
