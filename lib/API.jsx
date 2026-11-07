@@ -272,17 +272,6 @@ export default function API(network, args) {
         },
 
         /**
-         * @param  {Object} parameters
-         * @param  {String} parameters.email
-         * @returns {ExpensifyAPIDeferred}
-         */
-        Domain_RequestAccess(parameters) {
-            const commandName = 'Domain_RequestAccess';
-            requireParameters(['email'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters);
-        },
-
-        /**
          * @param {Object} parameters
          * @param {String[]} parameters.emailList
          *
