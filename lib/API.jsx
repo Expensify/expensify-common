@@ -13,7 +13,7 @@ import * as Utils from './utils';
 /**
  * @param {Network} network
  * @param {Object} [args]
- * @param {Function} [args.enhanceParameters] A function that takes the existing command parameters and returns a
+ * @param {Function|undefined} [args.enhanceParameters] A function that takes the existing command parameters and returns a
  *                      modified version of them (for things like adding CSRF tokens)
  *
  * @returns {Object}
