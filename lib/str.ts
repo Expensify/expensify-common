@@ -250,9 +250,11 @@ const Str = {
      * @returns The decoded string.
      */
     htmlDecodeWithJQueryOrNative(s: string) {
-        // Use jQuery if it exists or else use html-entities
-        if (typeof $ !== 'undefined') {
-            return $('<textarea/>').html(s).text();
+        // A textarea parses markup as text without creating live elements.
+        if (typeof document !== 'undefined') {
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = s;
+            return textarea.value;
         }
 
         return HtmlEntities.decode(s);
