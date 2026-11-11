@@ -10,6 +10,10 @@ function isMergeableObject(value: unknown): value is Record<string, unknown> {
     return nonNullObject && Object.prototype.toString.call(value) !== '[object RegExp]' && Object.prototype.toString.call(value) !== '[object Date]' && !Array.isArray(value);
 }
 
+function isUnsafeKey(key: string): boolean {
+    return key === '__proto__';
+}
+
 /**
  * Merges two objects and removes null values if "shouldRemoveNullObjectValues" is set to true
  *
@@ -40,7 +44,7 @@ function fastMerge<TObject extends Record<string, unknown>>(target: TObject, sou
             const isSourceOrTargetNull = targetValue === null || sourceValue === null;
             const shouldOmitSourceKey = shouldRemoveNullObjectValues && isSourceOrTargetNull;
 
-            if (!shouldOmitSourceKey) {
+            if (!shouldOmitSourceKey && !isUnsafeKey(key)) {
                 destination[key] = targetValue;
             }
         }
@@ -59,7 +63,7 @@ function fastMerge<TObject extends Record<string, unknown>>(target: TObject, sou
         // If we pass undefined as the updated value for a key, we want to generally ignore it
         const isSourceKeyUndefined = sourceValue === undefined;
 
-        if (!isSourceKeyUndefined && !shouldOmitSourceKey) {
+        if (!isSourceKeyUndefined && !shouldOmitSourceKey && !isUnsafeKey(key)) {
             const isSourceKeyMergable = isMergeableObject(sourceValue);
 
             if (isSourceKeyMergable && targetValue) {
