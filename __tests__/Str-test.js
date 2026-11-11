@@ -2,6 +2,35 @@ import Str from '../lib/str';
 
 const buildTestURLForType = (type) => `https://chat.expensify.com/chat-attachments/5/w_eadf5d35cfce6a98e2dd3607cf8463b1e46219e4.${type}?authToken=12345`;
 
+describe('Str.htmlDecodeWithJQueryOrNative', () => {
+    it.each([
+        ['Tom &amp; Jerry &lt;3', 'Tom & Jerry <3'],
+        ['it&#39;s &copy 2024', "it's © 2024"],
+        ['&quot;x&quot; &#x41; &amp;amp;', '"x" A &amp;'],
+        ['a&nbsp;b', 'a\u00a0b'],
+        ['', ''],
+    ])('decodes HTML entities in %s', (input, expected) => {
+        expect(Str.htmlDecodeWithJQueryOrNative(input)).toBe(expected);
+    });
+
+    it.each(['<style></style>', '<script></script>', '<link>', '<td></td>', '<tr></tr>', '<thead></thead>', '<caption></caption>', '<col>', '<StYlE></sTyLe>', '</textarea>', ''])(
+        'keeps markup inert after %s',
+        (prefix) => {
+            const image = '<img src=x onerror="window.__xss=1">';
+            const appendSpy = jest.spyOn(Node.prototype, 'appendChild');
+
+            try {
+                const result = Str.htmlDecodeWithJQueryOrNative(`${prefix}${image}`);
+                const appendedImage = appendSpy.mock.calls.some(([child]) => child.tagName === 'IMG' || (child.querySelector && child.querySelector('img')));
+                expect(appendedImage).toBe(false);
+                expect(result).toBe(`${prefix}${image}`);
+            } finally {
+                appendSpy.mockRestore();
+            }
+        },
+    );
+});
+
 describe('Str.isImage', () => {
     it('Correctly identifies all valid image types', () => {
         expect(Str.isImage(buildTestURLForType('gif'))).toBeTruthy();
