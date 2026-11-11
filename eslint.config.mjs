@@ -77,4 +77,10 @@ export default defineConfig([
             },
         },
     },
+    {
+        files: ['__tests__/**/*.js'],
+        rules: {
+            'jsdoc/check-tag-names': ['error', {definedTags: ['jest-environment', 'jest-environment-options']}],
+        },
+    },
 ]);
