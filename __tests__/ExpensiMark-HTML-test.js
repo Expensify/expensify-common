@@ -1259,8 +1259,8 @@ describe('Test long input candidate parsing', () => {
         ['an oversized label after a dot', 'google.com', `.${'b'.repeat(64)}`],
         ['an oversized label after a hyphen', 'example.com', `-${'b'.repeat(70)}`],
         ['an oversized hostname', `${'a.'.repeat(125)}com`, '.Thanks!'],
-    ])('preserves a known-TLD URL before %s', (_name, hostname, continuation) => {
-        // Given a valid URL whose adjacent text pushes a label or the complete hostname beyond a DNS limit.
+    ])('keeps the whole hostname plain with %s', (_name, hostname, continuation) => {
+        // Given a known TLD inside a hostname whose label or complete length exceeds a DNS limit.
         for (const protocol of ['', 'https://']) {
             const validUrl = `${protocol}${hostname}`;
             const input = `${validUrl}${continuation}`;
@@ -1269,26 +1269,70 @@ describe('Test long input candidate parsing', () => {
             const result = parser.replace(input);
             const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
-            // Then the valid URL stays linked without accepting the oversized continuation as part of its hostname.
-            expect(result).toBe(`${anchor(validUrl)}${continuation}`);
-            expect(rawHtmlResult).toBe(`<span>x</span> ${anchor(validUrl)}${continuation}`);
+            // Then neither path links a shorter hostname inside the invalid input.
+            expect(result).toBe(input);
+            expect(rawHtmlResult).toBe(`<span>x</span> ${input}`);
         }
     });
 
-    test('keeps domains in an oversized continuation plain while linking a separate URL', () => {
-        // Given a valid maximum-length URL followed by an oversized continuation with a path and a separate domain.
+    test('keeps the entire oversized URL plain while linking a separate URL', () => {
+        // Given an oversized hostname with an internal known TLD, a domain in its path, and a separate URL.
         const validUrl = `https://${'a.'.repeat(125)}com`;
         const continuation = '.Thanks/path/example.org;';
         const separateDomain = 'valid.net';
         const input = `${validUrl}${continuation}${separateDomain}`;
 
-        // When both URL parsing paths recover the valid hostname prefix.
+        // When both URL parsing paths inspect the hostname and its connected path.
         const result = parser.replace(input);
         const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
 
-        // Then only the valid prefix and separate domain link, so recovery cannot expose domains inside the invalid URL's path.
-        const expected = `${anchor(validUrl)}${continuation}${anchor(separateDomain)}`;
+        // Then only the separate domain links, leaving the invalid hostname and its path plain.
+        const expected = `${validUrl}${continuation}${anchor(separateDomain)}`;
         expect(result).toBe(expected);
+        expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
+    });
+
+    test.each([
+        ['an oversized label', `foo.com.${'a'.repeat(64)}.net`],
+        ['an oversized hostname', `foo.com.${'a.'.repeat(122)}net`],
+    ])('does not recover an internal TLD from %s', (_name, hostname) => {
+        // Given a hostname with valid-looking domains on both sides of a DNS length violation.
+        for (const protocol of ['', 'https://', 'ftp://']) {
+            const input = `${protocol}${hostname}/path/example.org;valid.net`;
+
+            // When candidate scanning, composer output, and raw HTML parse the invalid hostname.
+            const result = parser.replace(input);
+            const rawInputResult = parser.replace(input, {shouldKeepRawInput: true});
+            const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+            // Then only the separate URL links, without recovering a prefix or a domain from the connected path.
+            expect(result).toBe(`${protocol}${hostname}/path/example.org;${anchor('valid.net')}`);
+            expect(rawInputResult).toBe(
+                `${protocol}${hostname}/path/example.org;<a href="https://valid.net" data-raw-href="valid.net" data-link-variant="auto" target="_blank" rel="noreferrer noopener">valid.net</a>`,
+            );
+            expect(rawHtmlResult).toBe(`<span>x</span> ${result}`);
+        }
+    });
+
+    test.each([
+        ['an oversized domain label', 'foo.bar', `${'a'.repeat(64)}.com`],
+        ['an oversized domain', 'foo.bar', `aa.${'a.'.repeat(124)}com`],
+        ['another known TLD in the local part', 'www.foo.bar', `${'a'.repeat(64)}.com`],
+    ])('keeps email context visible with %s', (_name, localPart, domain) => {
+        // Given an invalid email whose local part looks like a URL, with separate valid URLs on both sides.
+        const input = `valid.net ${localPart}@${domain} valid.org`;
+        const expected = `${anchor('valid.net')} ${localPart}@${domain} ${anchor('valid.org')}`;
+
+        // When the complete parser applies URL and mention rules in the composer and alongside raw HTML.
+        const result = parser.replace(input);
+        const rawInputResult = parser.replace(input, {shouldKeepRawInput: true});
+        const rawHtmlResult = parser.replace(`<span>x</span> ${input}`, {shouldEscapeText: false});
+
+        // Then the whole invalid email stays plain, without turning its local part into a URL or its domain into a mention.
+        expect(result).toBe(expected);
+        expect(rawInputResult).toBe(
+            `<a href="https://valid.net" data-raw-href="valid.net" data-link-variant="auto" target="_blank" rel="noreferrer noopener">valid.net</a> ${localPart}@${domain} <a href="https://valid.org" data-raw-href="valid.org" data-link-variant="auto" target="_blank" rel="noreferrer noopener">valid.org</a>`,
+        );
         expect(rawHtmlResult).toBe(`<span>x</span> ${expected}`);
     });
 

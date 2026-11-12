@@ -272,17 +272,6 @@ export default function API(network, args) {
         },
 
         /**
-         * @param  {Object} parameters
-         * @param  {String} parameters.email
-         * @returns {ExpensifyAPIDeferred}
-         */
-        Domain_RequestAccess(parameters) {
-            const commandName = 'Domain_RequestAccess';
-            requireParameters(['email'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters);
-        },
-
-        /**
          * @param {Object} parameters
          * @param {String[]} parameters.emailList
          *
@@ -412,35 +401,6 @@ export default function API(network, args) {
         reopenAccount(parameters) {
             const commandName = 'User_ReopenAccount';
             requireParameters(['email'], parameters, commandName);
-            return performPOSTRequest(commandName, parameters);
-        },
-
-        /**
-         * Resets the password for an account
-         * @param {Object} parameters
-         * @param {String} parameters.email
-         * @returns {ExpensifyAPIDeferred}
-         */
-        resetPassword(parameters) {
-            const commandName = 'ResetPassword';
-            requireParameters(['email'], parameters, commandName);
-
-            const newParameters = {...parameters, api_setCookie: false};
-            return performPOSTRequest(commandName, newParameters);
-        },
-
-        /**
-         * Sets the password for an account
-         *
-         * @param {Object} parameters
-         * @param {String} parameters.email
-         * @param {String} parameters.password
-         * @param {String} parameters.validateCode
-         * @returns {ExpensifyAPIDeferred}
-         */
-        setPassword(parameters) {
-            const commandName = 'SetPassword';
-            requireParameters(['email', 'password', 'validateCode'], parameters, commandName);
             return performPOSTRequest(commandName, parameters);
         },
 
