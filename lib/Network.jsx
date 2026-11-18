@@ -46,6 +46,24 @@ export default function Network(endpoint) {
         };
     }
 
+    /**
+     * Builds the request URL. With the /api/{command} format, the command moves from the parameters into the URL path.
+     *
+     * @param {Object} parameters
+     * @returns {String}
+     */
+    function getRequestURL(parameters) {
+        if (isNewURLFormat) {
+            const command = parameters.command;
+            // eslint-disable-next-line no-param-reassign
+            delete parameters.command;
+            return `${endpoint}${command}`;
+        }
+
+        // Add the API command to our URL (for console debugging purposes)
+        return addCommandToUrl(parameters.command, endpoint);
+    }
+
     return {
         /**
          * @param {String} url to fetch
@@ -62,26 +80,13 @@ export default function Network(endpoint) {
          */
         post(parameters) {
             // Build request
-            let newURL = endpoint;
-            if (isNewURLFormat) {
-                // Remove command from parameters and use it in the URL
-                const command = parameters.command;
-                // eslint-disable-next-line no-param-reassign
-                delete parameters.command;
-                newURL = `${endpoint}${command}`;
-            }
-
             const settings = {
-                url: newURL,
+                url: getRequestURL(parameters),
                 type: 'POST',
                 data: parameters,
             };
             const formData = new FormData();
             let shouldUseFormData = false;
-
-            // Add the API command to our URL (for console debugging purposes)
-            // Note that parameters.command is empty if we're using the new API format and this will do nothing.
-            settings.url = addCommandToUrl(parameters.command, settings.url);
 
             // Check to see if parameters contains a File or Blob object
             // If it does, we should use formData instead of parameters and update
