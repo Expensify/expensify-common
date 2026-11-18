@@ -130,10 +130,7 @@ export default function Network(endpoint) {
                 keepalive: true,
                 credentials: 'same-origin',
             };
-            let url = endpoint;
-
-            // Add the API command to our URL (for console debugging purposes)
-            url = addCommandToUrl(parameters.command, url);
+            const url = getRequestURL(parameters);
 
             // Add our data as form data
             const formData = new FormData();
