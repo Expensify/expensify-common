@@ -2,28 +2,6 @@ import $ from 'jquery';
 import * as Utils from './utils';
 
 /**
- * Adds our API command to the URL so the API call is more easily identified in the
- * network tab of the JS console
- *
- * @param {string} command
- * @param {string} url
- * @returns {string}
- */
-function addCommandToUrl(command, url) {
-    let newUrl = url;
-
-    if (command) {
-        // Add a ? to the end of the URL if there isn't one already
-        if (newUrl.indexOf('?') === -1) {
-            newUrl = `${newUrl}?`;
-        }
-        newUrl = `${newUrl}&command=${command}`;
-    }
-
-    return newUrl;
-}
-
-/**
  * @param {String} endpoint
  *
  * @returns {Object}
@@ -32,12 +10,10 @@ export default function Network(endpoint) {
     // A flag that turns true when the user navigates away
     let isNavigatingAway = false;
 
-    // If URL ends in `/` we're using /api/{command} format.
-    const isNewURLFormat = endpoint[endpoint.length - 1] === '/';
-
     if (!endpoint) {
         throw new Error('Cannot instantiate Network without an url endpoint');
     }
+    const baseURL = endpoint.endsWith('/') ? endpoint : `${endpoint}/`;
 
     // Attach a listener to the event indicating that we're leaving a page
     if (Utils.isWindowAvailable()) {
@@ -47,21 +23,16 @@ export default function Network(endpoint) {
     }
 
     /**
-     * Builds the request URL. With the /api/{command} format, the command moves from the parameters into the URL path.
+     * Builds the /api/{command} request URL. The command moves from the parameters into the URL path.
      *
      * @param {Object} parameters
      * @returns {String}
      */
     function getRequestURL(parameters) {
-        if (isNewURLFormat) {
-            const command = parameters.command;
-            // eslint-disable-next-line no-param-reassign
-            delete parameters.command;
-            return `${endpoint}${command}`;
-        }
-
-        // Add the API command to our URL (for console debugging purposes)
-        return addCommandToUrl(parameters.command, endpoint);
+        const command = parameters.command;
+        // eslint-disable-next-line no-param-reassign
+        delete parameters.command;
+        return command ? `${baseURL}${command}` : baseURL;
     }
 
     return {

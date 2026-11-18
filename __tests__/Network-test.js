@@ -9,7 +9,7 @@ describe('Network.keepalive', () => {
         delete window.fetch;
     });
 
-    it('puts the command in the URL path and not in the body when the endpoint ends in /', () => {
+    it('puts the command in the URL path and not in the body', () => {
         Network('/api/').keepalive({command: 'ChatBot_ExitChats', chatIDs: [1, 2]});
 
         const [url, settings] = window.fetch.mock.calls[0];
@@ -19,11 +19,11 @@ describe('Network.keepalive', () => {
         expect(settings.keepalive).toBe(true);
     });
 
-    it('puts the command in the query string and the body when the endpoint does not end in /', () => {
-        Network('/api.php').keepalive({command: 'ChatBot_ExitChats'});
+    it('adds the missing / to the endpoint and never sends the command in the body', () => {
+        Network('/api').keepalive({command: 'ChatBot_ExitChats'});
 
         const [url, settings] = window.fetch.mock.calls[0];
-        expect(url).toBe('/api.php?&command=ChatBot_ExitChats');
-        expect(settings.body.get('command')).toBe('ChatBot_ExitChats');
+        expect(url).toBe('/api/ChatBot_ExitChats');
+        expect(settings.body.has('command')).toBe(false);
     });
 });
