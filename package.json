@@ -313,10 +313,12 @@
     "jit-grunt": "^0.10.0",
     "prettier": "^3.3.3",
     "type-fest": "5.7.0",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.61.0"
+    "typescript": "7.1.0-beta"
   },
   "overrides": {
+    "eslint-config-expensify": {
+      "typescript": "5.7.2"
+    },
     "lodash": "$lodash",
     "minimatch@3": {
       "brace-expansion": "1.1.21"

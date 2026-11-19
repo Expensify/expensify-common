@@ -3,7 +3,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "./dist/esm",
     "rootDir": "./lib"
   },

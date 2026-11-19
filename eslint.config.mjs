@@ -7,10 +7,12 @@ import tsExpensifyConfig from 'eslint-config-expensify/typescript';
 import jestConfig from 'eslint-config-expensify/jest';
 import {defineConfig, globalIgnores} from 'eslint/config';
 import globals from 'globals';
+import {createRequire} from 'node:module';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const configRequire = createRequire(import.meta.resolve('eslint-config-expensify/typescript'));
 
 const compat = new FlatCompat({
     baseDirectory: __dirname,
@@ -68,6 +70,12 @@ export default defineConfig([
     ...compat.extends('plugin:import/typescript').map((config) => ({
         ...config,
         files: ['**/*.ts', '**/*.tsx'],
+        settings: {
+            ...config.settings,
+            'import/parsers': {
+                [configRequire.resolve('@typescript-eslint/parser')]: ['.ts', '.tsx'],
+            },
+        },
     })),
     {
         files: ['__tests__/CLI-test.js'],

@@ -182,7 +182,7 @@ const Templates = {
     /**
      * Replace the DOM HTML with the template value
      *
-     * @param {jQuery} $target Element(s) that will be updated
+     * @param {JQueryStatic} $target Element(s) that will be updated
      * @param {Array} templatePath
      * @param {Object} [data] Information that need to be injected into the template
      */
@@ -193,7 +193,7 @@ const Templates = {
     /**
      * Append the template value into a DOM elements
      *
-     * @param {jQuery} $target Element(s) that will be updated
+     * @param {JQueryStatic} $target Element(s) that will be updated
      * @param {Array} templatePath
      * @param {Object} data Information that need to be injected into the template
      */
@@ -204,7 +204,7 @@ const Templates = {
     /**
      * Prepend the template value into a DOM elements
      *
-     * @param {jQuery} $target Element(s) that will be updated
+     * @param {JQueryStatic} $target Element(s) that will be updated
      * @param {array} templatePath
      * @param {object} [data] Information that need to be injected into the template
      */

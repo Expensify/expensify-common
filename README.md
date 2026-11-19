@@ -12,6 +12,11 @@ npm install expensify-common
 * Write all code as ES6.
 * Always lint your code with `npm run lint`
 
+Type checks and both builds use TypeScript 7.1.0-beta. ESLint's `eslint-config-expensify`
+dependency still uses the legacy compiler API through `typescript-eslint` and
+`eslint-plugin-jest`. Its dependency tree is explicitly pinned to TypeScript 5.7.2
+until those tools support the new API; it is not used to build this package.
+
 ## Testing your code while you are developing
 The best way to test your code while you are developing changes is via `npm link`.
 
