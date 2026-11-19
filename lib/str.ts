@@ -251,8 +251,10 @@ const Str = {
      */
     htmlDecodeWithJQueryOrNative(s: string) {
         // A textarea parses markup as text without creating live elements.
-        if (typeof document !== 'undefined') {
-            const textarea = document.createElement('textarea');
+        // This is a worklet file, so read document through globalThis. The worklets plugin captures a bare
+        // document when the module loads, and that throws on native, where document does not exist.
+        if (typeof globalThis.document !== 'undefined') {
+            const textarea = globalThis.document.createElement('textarea');
             textarea.innerHTML = s;
             return textarea.value;
         }
